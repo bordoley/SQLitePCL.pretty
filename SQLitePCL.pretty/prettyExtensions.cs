@@ -76,6 +76,7 @@ namespace SQLitePCL.pretty
         {
             Preconditions.CheckNotNull(stmt);
             Preconditions.CheckNotNull(a);
+            Preconditions.CheckArgument(stmt.BindParameterCount == a.Length);
 
             var count = a.Length;
             for (int i = 0; i < count; i++)
