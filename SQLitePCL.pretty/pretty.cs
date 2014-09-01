@@ -318,15 +318,28 @@ namespace SQLitePCL.pretty
             db.Dispose();
         }
 
-        private class CtxState<T>
+        private sealed class CtxState<T>
         {
-            public T value;
+            private readonly T value;
+
+            internal CtxState(T value)
+            {
+                this.value = value;
+            }
+
+            internal T Value
+            {
+                get
+                {
+                    return value;
+                }
+            }
         }
 
         public void RegisterFunction<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>,T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Preconditions.CheckNotNull(name);
-            Preconditions.CheckNotNull(seed);
+            Preconditions.CheckNotNull(func);
             Preconditions.CheckNotNull(resultSelector);
             Preconditions.CheckArgument(nArg >= -1);
 
@@ -335,8 +348,7 @@ namespace SQLitePCL.pretty
                 CtxState<T> state;
                 if (ctx.state == null)
                 {
-                    state = new CtxState<T>();
-                    state.value = seed;
+                    state = new CtxState<T>(seed);
                     ctx.state = state;
                 }
                 else
@@ -346,8 +358,8 @@ namespace SQLitePCL.pretty
 
                 IReadOnlyList<ISQLiteValue> iArgs = args.Select(value => SQLiteValue.Of(value)).ToList();
 
-                T next = func(state.value, iArgs);
-                state.value = next;
+                T next = func(state.Value, iArgs);
+                ctx.state = new CtxState<T>(next);
             };
 
             delegate_function_aggregate_final funcFinal = (ctx, user_data) =>
@@ -355,8 +367,7 @@ namespace SQLitePCL.pretty
                 CtxState<T> state;
                 if (ctx.state == null)
                 {
-                    state = new CtxState<T>();
-                    state.value = seed;
+                    state = new CtxState<T>(seed);
                     ctx.state = state;
                 }
                 else
@@ -367,7 +378,7 @@ namespace SQLitePCL.pretty
                 // FIXME: Is catching the exception really the right thing to do?
                 try
                 {
-                    ISQLiteValue result = resultSelector(state.value);
+                    ISQLiteValue result = resultSelector(state.Value);
                     switch (result.SQLiteType)
                     {
                         case SQLiteType.Blob:
