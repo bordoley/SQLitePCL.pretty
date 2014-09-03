@@ -142,6 +142,7 @@ namespace SQLitePCL.pretty
 
         public static bool CompileOptionUsed(string option)
         {
+            Preconditions.CheckNotNull(option);
             return raw.sqlite3_compileoption_used(option) == 0 ? false : true;
         }
 
@@ -296,16 +297,7 @@ namespace SQLitePCL.pretty
 
             raw.sqlite3_commit_hook(db, v => onCommit() ? 1 : 0, null);
         }
-
-        // FIXME: The Raw db.Dispose method is calling sqlite3_close not close_v2.
-        // Should probably open a bug.
-        // From the docs:
-        // If the database connection is associated with unfinalized prepared statements
-        // or unfinished sqlite3_backup objects then sqlite3_close() will leave the
-        // database connection open and return SQLITE_BUSY. If sqlite3_close_v2() is called
-        // with unfinalized prepared statements and/or unfinished sqlite3_backups, then the
-        // database connection becomes an unusable "zombie" which will automatically be deallocated
-        // when the last prepared statement is finalized or the last sqlite3_backup is finished.
+            
         public void Dispose()
         {
             db.Dispose();
