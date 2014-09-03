@@ -39,7 +39,7 @@ namespace SQLitePCL.pretty
 
         string GetFileName(string database);
 
-        IStatement PrepareStatement(string sql);
+        IStatement PrepareStatement(string sql, out string tail);
 
         void RegisterCollation(string name, Comparison<string> comparison);
 

@@ -161,11 +161,12 @@ namespace SQLitePCL.pretty.tests
         {
             using (var db = SQLite3.Open(":memory:"))
             {
-                db.Execute("CREATE TABLE foo (x text);");
-                db.Execute("INSERT INTO foo (x) VALUES ('b')");
-                db.Execute("INSERT INTO foo (x) VALUES ('c')");
-                db.Execute("INSERT INTO foo (x) VALUES ('d')");
-                db.Execute("INSERT INTO foo (x) VALUES ('e')");
+                db.ExecuteAll(
+                    @"CREATE TABLE foo (x text);
+                      INSERT INTO foo (x) VALUES ('b');
+                      INSERT INTO foo (x) VALUES ('c');
+                      INSERT INTO foo (x) VALUES ('d');
+                      INSERT INTO foo (x) VALUES ('e');");
                 db.Execute("INSERT INTO foo (x) VALUES ('f')");
 
                 using (var db2 = SQLite3.Open(":memory:"))
@@ -179,7 +180,6 @@ namespace SQLitePCL.pretty.tests
                 }
             }
         }
-
 
         [TestMethod]
         public void test_compileoption()

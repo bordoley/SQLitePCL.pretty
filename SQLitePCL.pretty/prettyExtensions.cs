@@ -42,6 +42,18 @@ namespace SQLitePCL.pretty
             }
         }
 
+        public static void ExecuteAll(this IDatabaseConnection db, String sql)
+        {
+            var statements = db.PrepareAll(sql);
+            foreach (var stmt in statements)
+            {
+                using (stmt)
+                {
+                    stmt.MoveNext();
+                }
+            }
+        }
+
         public static void Backup(this DatabaseConnection db, string dbName, DatabaseConnection destConn, string destDbName)
         {
             using (var backup = db.BackupInit(dbName, destConn, destDbName))
@@ -63,6 +75,30 @@ namespace SQLitePCL.pretty
             Preconditions.CheckNotNull(a);
 
             return new EnumerableQuery(db, sql, a);
+        }
+
+        public static IEnumerable<IStatement> PrepareAll(this IDatabaseConnection db, string sql)
+        {
+            Preconditions.CheckNotNull(sql);
+
+            for (var next = sql; next != null;)
+            {
+                string tail = null;
+                IStatement stmt = db.PrepareStatement(next, out tail);
+                next = tail;
+                yield return stmt;
+            }
+        }
+
+        public static IStatement PrepareStatement(this IDatabaseConnection db, string sql)
+        {
+            string tail = null;
+            IStatement retval = db.PrepareStatement(sql, out tail);
+            if (tail != null)
+            {
+                throw new ArgumentException("SQL contains more than one statment");
+            }
+            return retval;
         }
 
         public static IStatement PrepareStatement(this IDatabaseConnection db, string sql, params object[] a)

@@ -270,19 +270,12 @@ namespace SQLitePCL.pretty
             return filename;
         }
 
-        public IStatement PrepareStatement(string sql)
+        public IStatement PrepareStatement(string sql, out string tail)
         {
             Preconditions.CheckNotNull(sql);
 
             sqlite3_stmt stmt;
-            string tail = null;
             int rc = raw.sqlite3_prepare_v2(db, sql, out stmt, out tail);
-
-            if (tail != null)
-            {
-                throw new ArgumentException("SQL contains more than one statment");
-            }
-
             SQLiteException.CheckOk(db, rc);
 
             return new Statement(stmt);
