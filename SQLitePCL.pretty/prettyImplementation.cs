@@ -19,6 +19,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace SQLitePCL.pretty
 {
@@ -411,6 +412,7 @@ namespace SQLitePCL.pretty
     // Basic argument checking functions. Could use .Net contracts but can't compile them in mono
     internal static class Preconditions
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         internal static object CheckNotNull(object obj, string param = "", string msg = "")
         {
             if (obj == null)
@@ -420,6 +422,7 @@ namespace SQLitePCL.pretty
             return obj;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         internal static void CheckArgument(bool predicate, string param = "", string msg = "")
         {
             if (!predicate)
@@ -428,6 +431,7 @@ namespace SQLitePCL.pretty
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         internal static void CheckRange(int test, int min, int max, string param = "", string msg = "")
         {
             if (test < min || test >= max)
