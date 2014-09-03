@@ -570,7 +570,7 @@ namespace SQLitePCL.pretty.tests
 
             using (var db = SQLite3.Open(":memory:"))
             {
-                db.RegisterFunction("cube", (ISQLiteValue x) => (x.ToInt64() * x.ToInt64() * x.ToInt64()).ToSQLiteValue());
+                db.RegisterScalarFunc("cube", (ISQLiteValue x) => (x.ToInt64() * x.ToInt64() * x.ToInt64()).ToSQLiteValue());
                 var c = db.Query("SELECT cube(?);", val).Select(rs => rs[0].ToInt64()).First();
                 Assert.AreEqual(c, val * val * val);
             }
@@ -582,7 +582,7 @@ namespace SQLitePCL.pretty.tests
             int val = 5;
             using (var db = SQLite3.Open(":memory:"))
             {
-                db.RegisterFunction("makeblob", (ISQLiteValue v) =>
+                db.RegisterScalarFunc("makeblob", (ISQLiteValue v) =>
                     {
                         byte[] b = new byte[v.ToInt()];
                         for (int i = 0; i < b.Length; i++)
@@ -602,7 +602,7 @@ namespace SQLitePCL.pretty.tests
         {
             using (var db = SQLite3.Open(":memory:"))
             {
-                db.RegisterFunction("my_mean", (IReadOnlyList<ISQLiteValue> values) =>
+                db.RegisterScalarFunc("my_mean", (IReadOnlyList<ISQLiteValue> values) =>
                     (values.Aggregate(0d, (acc, v) => acc + v.ToDouble()) / values.Count).ToSQLiteValue());
 
 
@@ -617,7 +617,7 @@ namespace SQLitePCL.pretty.tests
         {
             using (var db = SQLite3.Open(":memory:"))
             {
-                db.RegisterFunction("count_args", (IReadOnlyList<ISQLiteValue> values) => values.Count.ToSQLiteValue());
+                db.RegisterScalarFunc("count_args", (IReadOnlyList<ISQLiteValue> values) => values.Count.ToSQLiteValue());
                 Assert.AreEqual(8, db.Query("SELECT count_args(1,2,3,4,5,6,7,8);").Select(v => v[0].ToInt()).First());
                 Assert.AreEqual(0, db.Query("SELECT count_args();").Select(v => v[0].ToInt()).First());
                 Assert.AreEqual(1, db.Query("SELECT count_args(null);").Select(v => v[0].ToInt()).First());
@@ -629,7 +629,7 @@ namespace SQLitePCL.pretty.tests
         {
             using (var db = SQLite3.Open(":memory:"))
             {
-                db.RegisterFunction("count_nulls", (IReadOnlyList<ISQLiteValue> vals) =>
+                db.RegisterScalarFunc("count_nulls", (IReadOnlyList<ISQLiteValue> vals) =>
                     vals.Where(val => val.SQLiteType == SQLiteType.Null).Count().ToSQLiteValue());
 
                 Assert.AreEqual(0, db.Query("SELECT count_nulls(1,2,3,4,5,6,7,8);").Select(v => v[0].ToInt()).First());
@@ -644,7 +644,7 @@ namespace SQLitePCL.pretty.tests
         {
             using (var db = SQLite3.Open(":memory:"))
             {
-                db.RegisterFunction("len_as_blobs", (IReadOnlyList<ISQLiteValue> values) => 
+                db.RegisterScalarFunc("len_as_blobs", (IReadOnlyList<ISQLiteValue> values) => 
                     values.Where(v => v.SQLiteType != SQLiteType.Null).Aggregate(0, (acc, val) => acc + val.Length).ToSQLiteValue());
                 Assert.AreEqual(0, db.Query("SELECT len_as_blobs();").Select(v => v[0].ToInt()).First());
                 Assert.AreEqual(0, db.Query("SELECT len_as_blobs(null);").Select(v => v[0].ToInt()).First());
@@ -657,7 +657,7 @@ namespace SQLitePCL.pretty.tests
         {
             using (var db = SQLite3.Open(":memory:"))
             {
-                db.RegisterFunction("my_concat", (IReadOnlyList<ISQLiteValue> values) =>
+                db.RegisterScalarFunc("my_concat", (IReadOnlyList<ISQLiteValue> values) =>
                     string.Join("", values.Select(v => v.ToString())).ToSQLiteValue());
                 Assert.AreEqual("foobar", db.Query("SELECT my_concat('foo', 'bar');").Select(v => v[0].ToString()).First());
                 Assert.AreEqual("abc", db.Query("SELECT my_concat('a', 'b', 'c');").Select(v => v[0].ToString()).First());
@@ -669,7 +669,7 @@ namespace SQLitePCL.pretty.tests
         {
             using (var db = SQLite3.Open(":memory:"))
             {
-                db.RegisterFunction<Tuple<long,long>>("sum_plus_count", Tuple.Create(0L, 0L), 
+                db.RegisterAggregateFunc<Tuple<long,long>>("sum_plus_count", Tuple.Create(0L, 0L), 
                     (Tuple<long,long> acc, ISQLiteValue arg) => Tuple.Create(acc.Item1 + arg.ToInt64(), acc.Item2 + 1L),
                     (Tuple<long,long> acc) => (acc.Item1 + acc.Item2).ToSQLiteValue());
                 db.Execute("CREATE TABLE foo (x int);");

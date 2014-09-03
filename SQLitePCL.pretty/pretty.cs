@@ -329,7 +329,7 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public void RegisterFunction<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>,T> func, Func<T, ISQLiteValue> resultSelector)
+        public void RegisterAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>,T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Preconditions.CheckNotNull(name);
             Preconditions.CheckNotNull(func);
@@ -401,7 +401,7 @@ namespace SQLitePCL.pretty
             SQLiteException.CheckOk(rc);
         }
 
-        public void RegisterFunction(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
+        public void RegisterScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
         {
             Preconditions.CheckNotNull(name);
             Preconditions.CheckNotNull(reduce);

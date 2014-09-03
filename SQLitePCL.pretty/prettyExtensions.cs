@@ -176,104 +176,104 @@ namespace SQLitePCL.pretty
             return value.ToStream(false);
         }
 
-        public static void RegisterFunction<T>(this IDatabaseConnection db, String name, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            db.RegisterFunction(name, -1, seed, func, resultSelector);
+            db.RegisterAggregateFunc(name, -1, seed, func, resultSelector);
         }
 
-        public static void RegisterFunction<T>(this IDatabaseConnection db, String name, T seed, Func<T, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunction<T>(this IDatabaseConnection db, String name, T seed, Func<T, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            db.RegisterFunction(name, 0, seed, (t, _) => func(t), resultSelector);
+            db.RegisterAggregateFunc(name, 0, seed, (t, _) => func(t), resultSelector);
         }
 
-        public static void RegisterFunction<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            db.RegisterFunction(name, 1, seed, (t, val) => func(t, val[0]), resultSelector);
+            db.RegisterAggregateFunc(name, 1, seed, (t, val) => func(t, val[0]), resultSelector);
         }
 
-        public static void RegisterFunction<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            db.RegisterFunction(name, 2, seed, (t, val) => func(t, val[0], val[1]), resultSelector);
+            db.RegisterAggregateFunc(name, 2, seed, (t, val) => func(t, val[0], val[1]), resultSelector);
         }
 
-        public static void RegisterFunction<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            db.RegisterFunction(name, 3, seed, (t, val) => func(t, val[0], val[1], val[2]), resultSelector);
+            db.RegisterAggregateFunc(name, 3, seed, (t, val) => func(t, val[0], val[1], val[2]), resultSelector);
         }
 
-        public static void RegisterFunction<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            db.RegisterFunction(name, 4, seed, (t, val) => func(t, val[0], val[1], val[2], val[3]), resultSelector);
+            db.RegisterAggregateFunc(name, 4, seed, (t, val) => func(t, val[0], val[1], val[2], val[3]), resultSelector);
         }
 
-        public static void RegisterFunction<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            db.RegisterFunction(name, 5, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4]), resultSelector);
+            db.RegisterAggregateFunc(name, 5, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4]), resultSelector);
         }
 
-        public static void RegisterFunction<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            db.RegisterFunction(name, 6, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5]), resultSelector);
+            db.RegisterAggregateFunc(name, 6, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5]), resultSelector);
         }
 
-        public static void RegisterFunction<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            db.RegisterFunction(name, 7, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5], val[6]), resultSelector);
+            db.RegisterAggregateFunc(name, 7, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5], val[6]), resultSelector);
         }
 
-        public static void RegisterFunction<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            db.RegisterFunction(name, 8, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]), resultSelector);
+            db.RegisterAggregateFunc(name, 8, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]), resultSelector);
         }
 
-        public static void RegisterFunction(this IDatabaseConnection db, string name, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
         {
-            db.RegisterFunction(name, -1, val => reduce(val));
+            db.RegisterScalarFunc(name, -1, val => reduce(val));
         }
 
-        public static void RegisterFunction(this IDatabaseConnection db, string name, Func<ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue> reduce)
         {
-            db.RegisterFunction(name, 0, _ => reduce());
+            db.RegisterScalarFunc(name, 0, _ => reduce());
         }
 
-        public static void RegisterFunction(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue> reduce)
         {
-            db.RegisterFunction(name, 1, val => reduce(val[0]));
+            db.RegisterScalarFunc(name, 1, val => reduce(val[0]));
         }
 
-        public static void RegisterFunction(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
-            db.RegisterFunction(name, 2, val => reduce(val[0], val[1]));
+            db.RegisterScalarFunc(name, 2, val => reduce(val[0], val[1]));
         }
 
-        public static void RegisterFunction(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
-            db.RegisterFunction(name, 3, val => reduce(val[0], val[1], val[2]));
+            db.RegisterScalarFunc(name, 3, val => reduce(val[0], val[1], val[2]));
         }
 
-        public static void RegisterFunction(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
-            db.RegisterFunction(name, 4, val => reduce(val[0], val[1], val[2], val[3]));
+            db.RegisterScalarFunc(name, 4, val => reduce(val[0], val[1], val[2], val[3]));
         }
 
-        public static void RegisterFunction(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
-            db.RegisterFunction(name, 5, val => reduce(val[0], val[1], val[2], val[3], val[4]));
+            db.RegisterScalarFunc(name, 5, val => reduce(val[0], val[1], val[2], val[3], val[4]));
         }
 
-        public static void RegisterFunction(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
-            db.RegisterFunction(name, 6, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5]));
+            db.RegisterScalarFunc(name, 6, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5]));
         }
 
-        public static void RegisterFunction(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
-            db.RegisterFunction(name, 7, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6]));
+            db.RegisterScalarFunc(name, 7, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6]));
         }
 
-        public static void RegisterFunction(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
-            db.RegisterFunction(name, 8, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]));
+            db.RegisterScalarFunc(name, 8, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]));
         }
 
         public static ISQLiteValue ToSQLiteValue(this int value) 

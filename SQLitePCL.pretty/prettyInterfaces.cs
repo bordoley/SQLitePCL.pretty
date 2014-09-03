@@ -45,9 +45,9 @@ namespace SQLitePCL.pretty
 
         void RegisterCommitHook(Func<bool> onCommit);
 
-        void RegisterFunction<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector);
+        void RegisterAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector);
     
-        void RegisterFunction(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce);
+        void RegisterScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce);
     }
 
     public interface IStatement : IEnumerator<IReadOnlyList<IResultSetValue>>
