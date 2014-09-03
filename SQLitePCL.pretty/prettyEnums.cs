@@ -22,7 +22,7 @@ namespace SQLitePCL.pretty
     {
         Integer = raw.SQLITE_INTEGER,
         Float = raw.SQLITE_FLOAT,
-        String = raw.SQLITE_TEXT,
+        Text = raw.SQLITE_TEXT,
         Blob = raw.SQLITE_BLOB,
         Null = raw.SQLITE_NULL
     }

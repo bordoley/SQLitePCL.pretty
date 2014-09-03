@@ -312,7 +312,7 @@ namespace SQLitePCL.pretty
         { 
             get
             {
-                return SQLiteType.String;
+                return SQLiteType.Text;
             }
         }
 

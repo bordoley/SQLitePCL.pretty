@@ -380,7 +380,7 @@ namespace SQLitePCL.pretty
                         case SQLiteType.Null:
                             raw.sqlite3_result_null(ctx);
                             return;
-                        case SQLiteType.String:
+                        case SQLiteType.Text:
                             raw.sqlite3_result_text(ctx, result.ToString());
                             return;
                         case SQLiteType.Float:
@@ -423,7 +423,7 @@ namespace SQLitePCL.pretty
                             case SQLiteType.Null:
                                 raw.sqlite3_result_null(ctx);
                                 return;
-                            case SQLiteType.String:
+                            case SQLiteType.Text:
                                 raw.sqlite3_result_text(ctx, result.ToString());
                                 return;
                             case SQLiteType.Float:
