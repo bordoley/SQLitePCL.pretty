@@ -440,4 +440,24 @@ namespace SQLitePCL.pretty
             }
         }
     }
+
+    internal sealed class DelegatingEnumerable<T> : IEnumerable<T>
+    {
+        private readonly Func<IEnumerator<T>> deleg;
+
+        internal DelegatingEnumerable(Func<IEnumerator<T>> deleg)
+        {
+            this.deleg = deleg;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return deleg();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+    }
 }

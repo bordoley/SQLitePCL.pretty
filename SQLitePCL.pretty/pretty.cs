@@ -87,22 +87,30 @@ namespace SQLitePCL.pretty
 
     public static class SQLite3
     {
+        private static IEnumerator<String> compilerOptionsEnumerator()
+        {
+            for (int i = 0;; i++)
+            {
+                var option = raw.sqlite3_compileoption_get(i);
+                if (option != null)
+                {
+                    yield return option;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        private static readonly IEnumerable<String> compilerOptions = 
+            new DelegatingEnumerable<String>(() => compilerOptionsEnumerator());
+
         public static IEnumerable<String> CompilerOptions
         {
             get
             {
-                for (int i = 0;; i++)
-                {
-                    var option = raw.sqlite3_compileoption_get(i);
-                    if (option != null)
-                    {
-                        yield return option;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
+                return compilerOptions;
             }
         }
 

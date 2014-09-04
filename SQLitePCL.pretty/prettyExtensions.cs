@@ -74,13 +74,11 @@ namespace SQLitePCL.pretty
             Preconditions.CheckNotNull(sql);
             Preconditions.CheckNotNull(a);
 
-            return new EnumerableQuery(db, sql, a);
+            return new DelegatingEnumerable<IReadOnlyList<IResultSetValue>>(() => db.PrepareStatement(sql, a));
         }
 
-        public static IEnumerable<IStatement> PrepareAll(this IDatabaseConnection db, string sql)
+        private static IEnumerator<IStatement> PrepareAllEnumerator(this IDatabaseConnection db, string sql)
         {
-            Preconditions.CheckNotNull(sql);
-
             for (var next = sql; next != null;)
             {
                 string tail = null;
@@ -88,6 +86,13 @@ namespace SQLitePCL.pretty
                 next = tail;
                 yield return stmt;
             }
+        }
+
+        public static IEnumerable<IStatement> PrepareAll(this IDatabaseConnection db, string sql)
+        {
+            Preconditions.CheckNotNull(sql);
+
+            return new DelegatingEnumerable<IStatement>(() => db.PrepareAllEnumerator(sql));
         }
 
         public static IStatement PrepareStatement(this IDatabaseConnection db, string sql)
@@ -324,30 +329,6 @@ namespace SQLitePCL.pretty
         public static ISQLiteValue ToSQLiteValue(this byte[] blob)
         {
             return SQLiteValue.Of(blob);
-        }
-    }
-
-    internal sealed class EnumerableQuery : IEnumerable<IReadOnlyList<IResultSetValue>> 
-    {
-        private readonly IDatabaseConnection  db;
-        private readonly string sql; 
-        private readonly object[] bindArgs;
-
-        internal EnumerableQuery(IDatabaseConnection  db, string sql, object[] bindArgs)
-        {
-            this.db = db;
-            this.sql = sql;
-            this.bindArgs = bindArgs;
-        }
-
-        public IEnumerator<IReadOnlyList<IResultSetValue>> GetEnumerator()
-        {
-            return db.PrepareStatement(sql, bindArgs);
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
         }
     }
 }
