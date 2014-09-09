@@ -177,13 +177,10 @@ namespace SQLitePCL.pretty
 
         WarningAutoIndex= raw.SQLITE_WARNING_AUTOINDEX
     }
-}
 
-namespace SQLitePCL 
-{
     // FIXME: These should be defined in raw.sqlite. Submit a PR.
     // http://www.sqlite.org/capi3ref.html#sqlite3_set_authorizer
-    public static class rawExt
+    internal static class rawExt
     {
         public const int SQLITE_CREATE_INDEX          = 1;    /* Index Name      Table Name      */
         public const int SQLITE_CREATE_TABLE          = 2;    /* Table Name      NULL            */

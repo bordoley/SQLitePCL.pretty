@@ -18,6 +18,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.IO;
 using System.Text;
@@ -150,13 +151,13 @@ namespace SQLitePCL.pretty
 
         public static bool CompileOptionUsed(string option)
         {
-            Preconditions.CheckNotNull(option);
+            Contract.Requires(option != null);
             return raw.sqlite3_compileoption_used(option) == 0 ? false : true;
         }
 
         public static DatabaseConnection Open(string filename)
         {
-            Preconditions.CheckNotNull(filename);
+            Contract.Requires(filename != null);
 
             sqlite3 db;
             int rc = raw.sqlite3_open(filename, out db);
@@ -167,7 +168,7 @@ namespace SQLitePCL.pretty
 
         public static DatabaseConnection Open(string filename, ConnectionFlags flags, string vfs)
         {
-            Preconditions.CheckNotNull(filename);
+            Contract.Requires(filename != null);
 
             sqlite3 db;
             int rc = raw.sqlite3_open_v2(filename, out db, (int)flags, vfs);
@@ -183,7 +184,7 @@ namespace SQLitePCL.pretty
 
         public static bool IsCompleteStatement(string sql)
         {
-            Preconditions.CheckNotNull(sql);
+            Contract.Requires(sql != null);
             return raw.sqlite3_complete(sql) == 0 ? false : true;
         }
     }
@@ -241,9 +242,9 @@ namespace SQLitePCL.pretty
 
         public IDatabaseBackup BackupInit(string dbName, DatabaseConnection destConn, string destDbName)
         {
-            Preconditions.CheckNotNull(dbName);
-            Preconditions.CheckNotNull(destConn);
-            Preconditions.CheckNotNull(destDbName);
+            Contract.Requires(dbName != null);
+            Contract.Requires(destConn != null);
+            Contract.Requires(destDbName != null);
 
             sqlite3_backup backup = raw.sqlite3_backup_init(destConn.db, destDbName, db, dbName);
             return new DatabaseBackup(backup);
@@ -265,7 +266,7 @@ namespace SQLitePCL.pretty
 
         public string GetFileName(string database)
         {
-            Preconditions.CheckNotNull(database);
+            Contract.Requires(database != null);
 
             var filename = raw.sqlite3_db_filename(db, database);
 
@@ -281,7 +282,7 @@ namespace SQLitePCL.pretty
 
         public IStatement PrepareStatement(string sql, out string tail)
         {
-            Preconditions.CheckNotNull(sql);
+            Contract.Requires(sql != null);
 
             sqlite3_stmt stmt;
             int rc = raw.sqlite3_prepare_v2(db, sql, out stmt, out tail);
@@ -292,8 +293,8 @@ namespace SQLitePCL.pretty
 
         public void RegisterCollation(string name, Comparison<string> comparison)
         {
-            Preconditions.CheckNotNull(name);
-            Preconditions.CheckNotNull(comparison);
+            Contract.Requires(name != null);
+            Contract.Requires(comparison != null);
 
             int rc = raw.sqlite3_create_collation(db, name, null, (v, s1, s2) => comparison(s1, s2));
             SQLiteException.CheckOk(db, rc);
@@ -301,7 +302,7 @@ namespace SQLitePCL.pretty
 
         public void RegisterCommitHook(Func<bool> onCommit)
         {
-            Preconditions.CheckNotNull(onCommit);
+            Contract.Requires(onCommit != null);
 
             raw.sqlite3_commit_hook(db, v => onCommit() ? 1 : 0, null);
         }
@@ -331,10 +332,10 @@ namespace SQLitePCL.pretty
 
         public void RegisterAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>,T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            Preconditions.CheckNotNull(name);
-            Preconditions.CheckNotNull(func);
-            Preconditions.CheckNotNull(resultSelector);
-            Preconditions.CheckArgument(nArg >= -1);
+            Contract.Requires(name != null);
+            Contract.Requires(func != null);
+            Contract.Requires(resultSelector != null);
+            Contract.Requires(nArg >= -1);
 
             delegate_function_aggregate_step funcStep = (ctx, user_data, args) =>
             {
@@ -403,9 +404,9 @@ namespace SQLitePCL.pretty
 
         public void RegisterScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
         {
-            Preconditions.CheckNotNull(name);
-            Preconditions.CheckNotNull(reduce);
-            Preconditions.CheckArgument(nArg >= -1);
+            Contract.Requires(name != null);
+            Contract.Requires(reduce != null);
+            Contract.Requires(nArg >= -1);
 
             int rc = raw.sqlite3_create_function(db, name, nArg, null, (ctx, ud, args) =>
                 {

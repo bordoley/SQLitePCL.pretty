@@ -18,6 +18,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.IO;
 
@@ -27,6 +28,9 @@ namespace SQLitePCL.pretty
     {
         public static void Execute(this IDatabaseConnection  db, string sql)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(sql != null);
+
             using (var stmt = db.PrepareStatement(sql))
             {
                 stmt.MoveNext();
@@ -36,6 +40,10 @@ namespace SQLitePCL.pretty
         // allows only one statement in the sql string
         public static void Execute(this IDatabaseConnection  db, string sql, params object[] a)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(sql != null);
+            Contract.Requires(a != null);
+
             using (var stmt = db.PrepareStatement(sql, a))
             {
                 stmt.MoveNext();
@@ -44,6 +52,9 @@ namespace SQLitePCL.pretty
 
         public static void ExecuteAll(this IDatabaseConnection db, String sql)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(sql != null);
+
             var statements = db.PrepareAll(sql);
             foreach (var stmt in statements)
             {
@@ -56,6 +67,11 @@ namespace SQLitePCL.pretty
 
         public static void Backup(this DatabaseConnection db, string dbName, DatabaseConnection destConn, string destDbName)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(dbName != null);
+            Contract.Requires(destConn != null);
+            Contract.Requires(destDbName != null);
+
             using (var backup = db.BackupInit(dbName, destConn, destDbName))
             {
                 backup.Step(-1);
@@ -64,21 +80,27 @@ namespace SQLitePCL.pretty
 
         public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(this IDatabaseConnection  db, string sql)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(sql != null);
+
             object[] empty = new object[0];
             return db.Query(sql, empty);
         }
 
         public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(this IDatabaseConnection  db, string sql, params object[] a)
         {
-            Preconditions.CheckNotNull(db);
-            Preconditions.CheckNotNull(sql);
-            Preconditions.CheckNotNull(a);
+            Contract.Requires(db != null);
+            Contract.Requires(sql != null);
+            Contract.Requires(a != null);
 
             return new DelegatingEnumerable<IReadOnlyList<IResultSetValue>>(() => db.PrepareStatement(sql, a));
         }
 
         private static IEnumerator<IStatement> PrepareAllEnumerator(this IDatabaseConnection db, string sql)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(sql != null);
+
             for (var next = sql; next != null;)
             {
                 string tail = null;
@@ -90,13 +112,17 @@ namespace SQLitePCL.pretty
 
         public static IEnumerable<IStatement> PrepareAll(this IDatabaseConnection db, string sql)
         {
-            Preconditions.CheckNotNull(sql);
+            Contract.Requires(db != null);
+            Contract.Requires(sql != null);
 
             return new DelegatingEnumerable<IStatement>(() => db.PrepareAllEnumerator(sql));
         }
 
         public static IStatement PrepareStatement(this IDatabaseConnection db, string sql)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(sql != null);
+
             string tail = null;
             IStatement retval = db.PrepareStatement(sql, out tail);
             if (tail != null)
@@ -108,6 +134,10 @@ namespace SQLitePCL.pretty
 
         public static IStatement PrepareStatement(this IDatabaseConnection db, string sql, params object[] a)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(sql != null);
+            Contract.Requires(a != null);
+
             var stmt = db.PrepareStatement(sql);
             stmt.Bind(a);
             return stmt;
@@ -115,9 +145,9 @@ namespace SQLitePCL.pretty
 
         public static void Bind(this IStatement stmt, params object[] a)
         {
-            Preconditions.CheckNotNull(stmt);
-            Preconditions.CheckNotNull(a);
-            Preconditions.CheckArgument(stmt.BindParameterCount == a.Length);
+            Contract.Requires(stmt != null);
+            Contract.Requires(a != null);
+            Contract.Requires(stmt.BindParameterCount == a.Length);
 
             var count = a.Length;
             for (int i = 0; i < count; i++)
@@ -168,116 +198,212 @@ namespace SQLitePCL.pretty
 
         public static IEnumerable<string> Columns(this IReadOnlyList<IResultSetValue> rs)
         { 
+            Contract.Requires(rs != null);
+
             return rs.Select(value => value.ColumnName);
         }
 
         public static Stream ToReadWriteStream(this IResultSetValue value)
         {
+            Contract.Requires(value != null);
+
             return value.ToStream(true);
         }
 
         public static Stream ToReadOnlyStream(this IResultSetValue value)
         {
+            Contract.Requires(value != null);
+
             return value.ToStream(false);
         }
 
         public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(func != null);
+            Contract.Requires(resultSelector != null);
+
             db.RegisterAggregateFunc(name, -1, seed, func, resultSelector);
         }
 
         public static void RegisterAggregateFunction<T>(this IDatabaseConnection db, String name, T seed, Func<T, T> func, Func<T, ISQLiteValue> resultSelector)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(func != null);
+            Contract.Requires(resultSelector != null);
+
             db.RegisterAggregateFunc(name, 0, seed, (t, _) => func(t), resultSelector);
         }
 
         public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(func != null);
+            Contract.Requires(resultSelector != null);
+
             db.RegisterAggregateFunc(name, 1, seed, (t, val) => func(t, val[0]), resultSelector);
         }
 
         public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(func != null);
+            Contract.Requires(resultSelector != null);
+
             db.RegisterAggregateFunc(name, 2, seed, (t, val) => func(t, val[0], val[1]), resultSelector);
         }
 
         public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(func != null);
+            Contract.Requires(resultSelector != null);
+
             db.RegisterAggregateFunc(name, 3, seed, (t, val) => func(t, val[0], val[1], val[2]), resultSelector);
         }
 
         public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(func != null);
+            Contract.Requires(resultSelector != null);
+
             db.RegisterAggregateFunc(name, 4, seed, (t, val) => func(t, val[0], val[1], val[2], val[3]), resultSelector);
         }
 
         public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(func != null);
+            Contract.Requires(resultSelector != null);
+
             db.RegisterAggregateFunc(name, 5, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4]), resultSelector);
         }
 
         public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(func != null);
+            Contract.Requires(resultSelector != null);
+
             db.RegisterAggregateFunc(name, 6, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5]), resultSelector);
         }
 
         public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(func != null);
+            Contract.Requires(resultSelector != null);
+
             db.RegisterAggregateFunc(name, 7, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5], val[6]), resultSelector);
         }
 
         public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(func != null);
+            Contract.Requires(resultSelector != null);
+
             db.RegisterAggregateFunc(name, 8, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]), resultSelector);
         }
 
         public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
-        {
+        {            
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(reduce != null);
+
             db.RegisterScalarFunc(name, -1, val => reduce(val));
         }
 
         public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue> reduce)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(reduce != null);
+
             db.RegisterScalarFunc(name, 0, _ => reduce());
         }
 
         public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue> reduce)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(reduce != null);
+
             db.RegisterScalarFunc(name, 1, val => reduce(val[0]));
         }
 
         public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(reduce != null);
+
             db.RegisterScalarFunc(name, 2, val => reduce(val[0], val[1]));
         }
 
         public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(reduce != null);
+
             db.RegisterScalarFunc(name, 3, val => reduce(val[0], val[1], val[2]));
         }
 
         public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(reduce != null);
+
             db.RegisterScalarFunc(name, 4, val => reduce(val[0], val[1], val[2], val[3]));
         }
 
         public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(reduce != null);
+
             db.RegisterScalarFunc(name, 5, val => reduce(val[0], val[1], val[2], val[3], val[4]));
         }
 
         public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(reduce != null);
+
             db.RegisterScalarFunc(name, 6, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5]));
         }
 
         public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(reduce != null);
+
             db.RegisterScalarFunc(name, 7, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6]));
         }
 
         public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
+            Contract.Requires(db != null);
+            Contract.Requires(name != null);
+            Contract.Requires(reduce != null);
+
             db.RegisterScalarFunc(name, 8, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]));
         }
 
@@ -323,11 +449,15 @@ namespace SQLitePCL.pretty
 
         public static ISQLiteValue ToSQLiteValue(this string value)
         {
+            Contract.Requires(value != null);
+
             return SQLiteValue.Of(value);
         }
 
         public static ISQLiteValue ToSQLiteValue(this byte[] blob)
         {
+            Contract.Requires(blob != null);
+
             return SQLiteValue.Of(blob);
         }
     }

@@ -16,6 +16,7 @@
 */
 
 using System;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Text;
 
@@ -75,13 +76,13 @@ namespace SQLitePCL.pretty
 
         public static ISQLiteValue Of(string value)
         {
-            Preconditions.CheckNotNull(value);
+            Contract.Requires(value != null);
             return new StringValue(value);
         }
 
         public static ISQLiteValue Of(byte[] blob)
         {
-            Preconditions.CheckNotNull(blob);
+            Contract.Requires(blob != null);
             return new BlobValue(blob);
         }
 

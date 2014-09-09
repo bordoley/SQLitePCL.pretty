@@ -18,6 +18,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -120,8 +121,9 @@ namespace SQLitePCL.pretty
 
         public void Bind(int index, byte[] blob)
         {
-            Preconditions.CheckNotNull(blob);
-            Preconditions.CheckRange(index, 0, this.BindParameterCount);
+            Contract.Requires(blob != null);
+            Contract.Requires(index >= 0);
+            Contract.Requires(index < this.BindParameterCount);
 
             int rc = raw.sqlite3_bind_blob(stmt, index+1, blob);
             SQLiteException.CheckOk(stmt, rc);
@@ -129,8 +131,8 @@ namespace SQLitePCL.pretty
 
         public void Bind(int index, double val)
         {
-            Preconditions.CheckNotNull(val);
-            Preconditions.CheckRange(index, 0, this.BindParameterCount);
+            Contract.Requires(index >= 0);
+            Contract.Requires(index < this.BindParameterCount);
 
             int rc = raw.sqlite3_bind_double(stmt, index+1, val);
             SQLiteException.CheckOk(stmt, rc);
@@ -138,8 +140,8 @@ namespace SQLitePCL.pretty
 
         public void Bind(int index, int val)
         {
-            Preconditions.CheckNotNull(val);
-            Preconditions.CheckRange(index, 0, this.BindParameterCount);
+            Contract.Requires(index >= 0);
+            Contract.Requires(index < this.BindParameterCount);
 
             int rc = raw.sqlite3_bind_int(stmt, index+1, val);
             SQLiteException.CheckOk(stmt, rc);
@@ -147,8 +149,8 @@ namespace SQLitePCL.pretty
 
         public void Bind(int index, long val)
         {
-            Preconditions.CheckNotNull(val);
-            Preconditions.CheckRange(index, 0, this.BindParameterCount);
+            Contract.Requires(index >= 0);
+            Contract.Requires(index < this.BindParameterCount);
 
             int rc = raw.sqlite3_bind_int64(stmt, index+1, val);
             SQLiteException.CheckOk(stmt, rc);
@@ -156,8 +158,9 @@ namespace SQLitePCL.pretty
 
         public void Bind(int index, string text)
         {
-            Preconditions.CheckNotNull(text);
-            Preconditions.CheckRange(index, 0, this.BindParameterCount);
+            Contract.Requires(text != null);
+            Contract.Requires(index >= 0);
+            Contract.Requires(index < this.BindParameterCount);
 
             int rc = raw.sqlite3_bind_text(stmt, index+1, text);
             SQLiteException.CheckOk(stmt, rc);
@@ -165,7 +168,8 @@ namespace SQLitePCL.pretty
 
         public void BindNull(int index)
         {
-            Preconditions.CheckRange(index, 0, this.BindParameterCount);
+            Contract.Requires(index >= 0);
+            Contract.Requires(index < this.BindParameterCount);
 
             int rc = raw.sqlite3_bind_null(stmt, index+1);
             SQLiteException.CheckOk(stmt, rc);
@@ -173,8 +177,9 @@ namespace SQLitePCL.pretty
 
         public void BindZeroBlob(int index, int size)
         {
-            Preconditions.CheckRange(index, 0, this.BindParameterCount);
-            Preconditions.CheckArgument(size >= 0);
+            Contract.Requires(index >= 0);
+            Contract.Requires(index < this.BindParameterCount);
+            Contract.Requires(size >= 0);
 
             int rc = raw.sqlite3_bind_zeroblob(stmt, index+1, size);
             SQLiteException.CheckOk(stmt, rc);
@@ -188,14 +193,15 @@ namespace SQLitePCL.pretty
 
         public int GetBindParameterIndex(string parameter)
         {
-            Preconditions.CheckNotNull(parameter);
+            Contract.Requires(parameter != null);
 
             return raw.sqlite3_bind_parameter_index(stmt, parameter) - 1;
         }
 
         public string GetBindParameterName(int index)
         {
-            Preconditions.CheckRange(index, 0, this.BindParameterCount);
+            Contract.Requires(index >= 0);
+            Contract.Requires(index < this.BindParameterCount);
 
             return raw.sqlite3_bind_parameter_name(stmt, index + 1);
         }
@@ -281,7 +287,8 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                Preconditions.CheckRange(index, 0, this.Count);
+                Contract.Requires(index >= 0);
+                Contract.Requires(index < this.Count);
                 return SQLiteValue.Of(stmt, index);
             }
         }
@@ -337,9 +344,9 @@ namespace SQLitePCL.pretty
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            Preconditions.CheckNotNull(buffer);
-            Preconditions.CheckArgument(offset >= 0);
-            Preconditions.CheckArgument(count >= 0);
+            Contract.Requires(buffer != null);
+            Contract.Requires(offset >= 0);
+            Contract.Requires(count >= 0);
 
             if (offset == 0)
             {
@@ -382,9 +389,9 @@ namespace SQLitePCL.pretty
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            Preconditions.CheckNotNull(buffer);
-            Preconditions.CheckArgument(offset >= 0);
-            Preconditions.CheckArgument(count >= 0);
+            Contract.Requires(buffer != null);
+            Contract.Requires(offset >= 0);
+            Contract.Requires(count >= 0);
 
             if (this.Length - this.Position < count)
             {
@@ -405,38 +412,6 @@ namespace SQLitePCL.pretty
                 System.Array.Copy(buffer, offset, newBuffer, 0, count);
                 int rc = raw.sqlite3_blob_write(blob, newBuffer, count, (int)this.Position);
                 SQLiteException.CheckOk(rc);
-            }
-        }
-    }
-
-    // Basic argument checking functions. Could use .Net contracts but can't compile them in mono
-    internal static class Preconditions
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        internal static object CheckNotNull(object obj, string param = "", string msg = "")
-        {
-            if (obj == null)
-            {
-                throw new ArgumentNullException(param, msg);
-            }
-            return obj;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        internal static void CheckArgument(bool predicate, string param = "", string msg = "")
-        {
-            if (!predicate)
-            {
-                throw new ArgumentException(param, msg);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        internal static void CheckRange(int test, int min, int max, string param = "", string msg = "")
-        {
-            if (test < min || test >= max)
-            {
-                throw new ArgumentOutOfRangeException(param, msg);
             }
         }
     }
