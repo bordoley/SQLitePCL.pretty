@@ -16,7 +16,9 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.IO;
 using System.Text;
 
@@ -90,10 +92,27 @@ namespace SQLitePCL.pretty
         {
             return new NativeValue(value);
         }
+    }
 
+    public static class ResultSetValue
+    {
         internal static IResultSetValue ResultSetValueAt(this sqlite3_stmt stmt, int index)
         {
-            return new ResultSetValue(stmt, index);
+            return new ResultSetValueImpl(stmt, index);
+        }
+
+        public static Stream ToReadWriteStream(this IResultSetValue value)
+        {
+            Contract.Requires(value != null);
+
+            return value.ToStream(true);
+        }
+
+        public static Stream ToReadOnlyStream(this IResultSetValue value)
+        {
+            Contract.Requires(value != null);
+
+            return value.ToStream(false);
         }
     }
 
@@ -147,8 +166,7 @@ namespace SQLitePCL.pretty
             return raw.sqlite3_value_text(value);
         }
     }
-
-
+        
     // Type coercion rules
     // http://www.sqlite.org/capi3ref.html#sqlite3_column_blob
     internal struct NullValue : ISQLiteValue 
@@ -418,12 +436,12 @@ namespace SQLitePCL.pretty
         }
     }
 
-    internal sealed class ResultSetValue : IResultSetValue
+    internal sealed class ResultSetValueImpl : IResultSetValue
     {
         private readonly sqlite3_stmt stmt;
         private readonly int index;
 
-        internal ResultSetValue(sqlite3_stmt stmt, int index)
+        internal ResultSetValueImpl(sqlite3_stmt stmt, int index)
         {
             this.stmt = stmt;
             this.index = index;

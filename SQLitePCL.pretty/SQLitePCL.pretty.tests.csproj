@@ -39,12 +39,16 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="pretty.cs" />
     <Compile Include="prettyTests.cs" />
-    <Compile Include="prettyExtensions.cs" />
-    <Compile Include="prettyInterfaces.cs" />
-    <Compile Include="prettyEnums.cs" />
-    <Compile Include="prettyImplementation.cs" />
-    <Compile Include="prettySQLiteValue.cs" />
+    <Compile Include="SQLite3.cs" />
+    <Compile Include="Interfaces.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="Implementation.cs" />
+    <Compile Include="SQLiteValue.cs" />
+    <Compile Include="DatabaseConnection.cs" />
+    <Compile Include="SQLiteVersion.cs" />
+    <Compile Include="SQLiteException.cs" />
+    <Compile Include="Statement.cs" />
+    <Compile Include="ResultSet.cs" />
   </ItemGroup>
 </Project>

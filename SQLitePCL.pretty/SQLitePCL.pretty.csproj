@@ -33,12 +33,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="pretty.cs" />
-    <Compile Include="prettyEnums.cs" />
-    <Compile Include="prettyExtensions.cs" />
-    <Compile Include="prettyImplementation.cs" />
-    <Compile Include="prettyInterfaces.cs" />
-    <Compile Include="prettySQLiteValue.cs" />
+    <Compile Include="SQLiteException.cs" />
+    <Compile Include="SQLiteVersion.cs" />
+    <Compile Include="SQLiteValue.cs" />
+    <Compile Include="Interfaces.cs" />
+    <Compile Include="Implementation.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="DatabaseConnection.cs" />
+    <Compile Include="SQLite3.cs" />
+    <Compile Include="Statement.cs" />
+    <Compile Include="ResultSet.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>

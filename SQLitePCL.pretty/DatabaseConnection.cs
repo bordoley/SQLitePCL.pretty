@@ -20,11 +20,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.IO;
 
 namespace SQLitePCL.pretty
 {
-    public static class SQLiteExtensions
+    public static class DatabaseConnection
     {
         public static void Execute(this IDatabaseConnection  db, string sql)
         {
@@ -65,7 +64,7 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public static void Backup(this DatabaseConnection db, string dbName, DatabaseConnection destConn, string destDbName)
+        public static void Backup(this SQLiteDatabaseConnection db, string dbName, SQLiteDatabaseConnection destConn, string destDbName)
         {
             Contract.Requires(db != null);
             Contract.Requires(dbName != null);
@@ -143,79 +142,6 @@ namespace SQLitePCL.pretty
             return stmt;
         }
 
-        public static void Bind(this IStatement stmt, params object[] a)
-        {
-            Contract.Requires(stmt != null);
-            Contract.Requires(a != null);
-            Contract.Requires(stmt.BindParameterCount == a.Length);
-
-            var count = a.Length;
-            for (int i = 0; i < count; i++)
-            {
-                // I miss F# pattern matching
-                if (a[i] == null)
-                {
-                    stmt.BindNull(i);
-                }
-                else
-                {
-                    Type t = a[i].GetType();
-
-                    if (typeof(String) == t)
-                    {
-                        stmt.Bind(i, (string)a[i]);
-                    }
-                    else if (
-                        (typeof(Int32) == t)
-                        || (typeof(Boolean) == t)
-                        || (typeof(Byte) == t)
-                        || (typeof(UInt16) == t)
-                        || (typeof(Int16) == t)
-                        || (typeof(sbyte) == t)
-                        || (typeof(Int64) == t)
-                        || (typeof(UInt32) == t))
-                    {
-                        stmt.Bind(i, (long)(Convert.ChangeType(a[i], typeof(long))));
-                    }
-                    else if (
-                        (typeof(double) == t)
-                        || (typeof(float) == t)
-                        || (typeof(decimal) == t))
-                    {
-                        stmt.Bind(i, (double)(Convert.ChangeType(a[i], typeof(double))));
-                    }
-                    else if (typeof(byte[]) == t)
-                    {
-                        stmt.Bind(i, (byte[])a[i]);
-                    }
-                    else
-                    {
-                        throw new NotSupportedException("Invalid type conversion" + t);
-                    }
-                }
-            }
-        }
-
-        public static IEnumerable<string> Columns(this IReadOnlyList<IResultSetValue> rs)
-        { 
-            Contract.Requires(rs != null);
-
-            return rs.Select(value => value.ColumnName);
-        }
-
-        public static Stream ToReadWriteStream(this IResultSetValue value)
-        {
-            Contract.Requires(value != null);
-
-            return value.ToStream(true);
-        }
-
-        public static Stream ToReadOnlyStream(this IResultSetValue value)
-        {
-            Contract.Requires(value != null);
-
-            return value.ToStream(false);
-        }
 
         public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
         {
@@ -405,6 +331,262 @@ namespace SQLitePCL.pretty
             Contract.Requires(reduce != null);
 
             db.RegisterScalarFunc(name, 8, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]));
+        }
+    }
+
+    public sealed class SQLiteDatabaseConnection : IDatabaseConnection
+    {
+        private readonly sqlite3 db;
+
+        internal SQLiteDatabaseConnection(sqlite3 db)
+        {
+            this.db = db;
+
+            // FIXME: Could argue that the shouldn't be setup until the first subscriber to the events
+            raw.sqlite3_rollback_hook(db, v => Rollback(), null);
+            raw.sqlite3_trace(db, (v, stmt) => Trace(stmt), null);
+            raw.sqlite3_profile(db, (v, stmt, ts) => Profile(stmt, TimeSpan.FromTicks(ts)), null); 
+            raw.sqlite3_update_hook(db, (v, type, database, table, rowid) => Update((ActionCode)type, database, table, rowid), null);
+        }
+
+        // We initialize the event handlers with empty delegates so that we don't
+        // have add annoying null checks all over the place.
+        // See: http://blogs.msdn.com/b/ericlippert/archive/2009/04/29/events-and-races.aspx
+        // FIXME: One could argue that we really shouldn't initialized the callbacks
+        // with sqlite3 until we actually have listeners. not sure how much it matters though
+        public event Action Rollback = () => { };
+        public event Action<String,TimeSpan> Profile = (stmt, TimeSpan) => {};
+        public event Action<String> Trace = (stmt) => {};
+
+        public event Action<ActionCode,string, string,long> Update = (type, database, table, rowid) => {};
+
+        public int BusyTimeout
+        {
+            set
+            {
+                int rc = raw.sqlite3_busy_timeout(db, value);
+                SQLiteException.CheckOk(db, rc);
+            }
+        }
+
+        public int Changes
+        {
+            get
+            {
+                return raw.sqlite3_changes(db);
+            }
+        }
+
+        public bool IsAutoCommit
+        { 
+            get
+            {
+                return raw.sqlite3_get_autocommit(db) == 0 ? false : true;
+            }
+        }
+
+        public IDatabaseBackup BackupInit(string dbName, SQLiteDatabaseConnection destConn, string destDbName)
+        {
+            Contract.Requires(dbName != null);
+            Contract.Requires(destConn != null);
+            Contract.Requires(destDbName != null);
+
+            sqlite3_backup backup = raw.sqlite3_backup_init(destConn.db, destDbName, db, dbName);
+            return new DatabaseBackupImpl(backup);
+        }
+
+        public IEnumerator<IStatement> GetEnumerator()
+        {
+            sqlite3_stmt next = null;
+            while ((next = raw.sqlite3_next_stmt(db, next)) != null)
+            {
+                yield return new StatementImpl(next);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+
+        public string GetFileName(string database)
+        {
+            Contract.Requires(database != null);
+
+            var filename = raw.sqlite3_db_filename(db, database);
+
+            // If there is no attached database N on the database connection, or 
+            // if database N is a temporary or in-memory database, then a NULL pointer is returned.
+            if (filename == null)
+            {
+                throw new InvalidOperationException("Database is either not attached, temporary or in memory");
+            }
+
+            return filename;
+        }
+
+        public IStatement PrepareStatement(string sql, out string tail)
+        {
+            Contract.Requires(sql != null);
+
+            sqlite3_stmt stmt;
+            int rc = raw.sqlite3_prepare_v2(db, sql, out stmt, out tail);
+            SQLiteException.CheckOk(db, rc);
+
+            return new StatementImpl(stmt);
+        }
+
+        public void RegisterCollation(string name, Comparison<string> comparison)
+        {
+            Contract.Requires(name != null);
+            Contract.Requires(comparison != null);
+
+            int rc = raw.sqlite3_create_collation(db, name, null, (v, s1, s2) => comparison(s1, s2));
+            SQLiteException.CheckOk(db, rc);
+        }
+
+        public void RegisterCommitHook(Func<bool> onCommit)
+        {
+            Contract.Requires(onCommit != null);
+
+            raw.sqlite3_commit_hook(db, v => onCommit() ? 1 : 0, null);
+        }
+
+        public void Dispose()
+        {
+            db.Dispose();
+        }
+
+        private sealed class CtxState<T>
+        {
+            private readonly T value;
+
+            internal CtxState(T value)
+            {
+                this.value = value;
+            }
+
+            internal T Value
+            {
+                get
+                {
+                    return value;
+                }
+            }
+        }
+
+        public void RegisterAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>,T> func, Func<T, ISQLiteValue> resultSelector)
+        {
+            Contract.Requires(name != null);
+            Contract.Requires(func != null);
+            Contract.Requires(resultSelector != null);
+            Contract.Requires(nArg >= -1);
+
+            delegate_function_aggregate_step funcStep = (ctx, user_data, args) =>
+                {
+                    CtxState<T> state;
+                    if (ctx.state == null)
+                    {
+                        state = new CtxState<T>(seed);
+                        ctx.state = state;
+                    }
+                    else
+                    {
+                        state = (CtxState<T>)ctx.state;
+                    }
+
+                    IReadOnlyList<ISQLiteValue> iArgs = args.Select(value => value.ToSQLiteValue()).ToList();
+
+                    T next = func(state.Value, iArgs);
+                    ctx.state = new CtxState<T>(next);
+                };
+
+            delegate_function_aggregate_final funcFinal = (ctx, user_data) =>
+                {
+                    CtxState<T> state;
+                    if (ctx.state == null)
+                    {
+                        state = new CtxState<T>(seed);
+                        ctx.state = state;
+                    }
+                    else
+                    {
+                        state = (CtxState<T>)ctx.state;
+                    }
+
+                    // FIXME: Is catching the exception really the right thing to do?
+                    try
+                    {
+                        ISQLiteValue result = resultSelector(state.Value);
+                        switch (result.SQLiteType)
+                        {
+                            case SQLiteType.Blob:
+                                raw.sqlite3_result_blob(ctx, result.ToBlob());
+                                return;
+                            case SQLiteType.Null:
+                                raw.sqlite3_result_null(ctx);
+                                return;
+                            case SQLiteType.Text:
+                                raw.sqlite3_result_text(ctx, result.ToString());
+                                return;
+                            case SQLiteType.Float:
+                                raw.sqlite3_result_double(ctx, result.ToDouble());
+                                return;
+                            case SQLiteType.Integer:
+                                raw.sqlite3_result_int64(ctx, result.ToInt64());
+                                return;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        raw.sqlite3_result_error(ctx, e.Message);
+                    }
+                };
+
+            int rc = raw.sqlite3_create_function(db, name, nArg, null, funcStep, funcFinal);
+            SQLiteException.CheckOk(rc);
+        }
+
+        public void RegisterScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
+        {
+            Contract.Requires(name != null);
+            Contract.Requires(reduce != null);
+            Contract.Requires(nArg >= -1);
+
+            int rc = raw.sqlite3_create_function(db, name, nArg, null, (ctx, ud, args) =>
+                {
+                    IReadOnlyList<ISQLiteValue> iArgs = args.Select(value => value.ToSQLiteValue()).ToList();
+
+                    // FIXME: Is catching the exception really the right thing to do?
+                    try
+                    {
+                        ISQLiteValue result = reduce(iArgs);
+                        switch (result.SQLiteType)
+                        {
+                            case SQLiteType.Blob:
+                                raw.sqlite3_result_blob(ctx, result.ToBlob());
+                                return;
+                            case SQLiteType.Null:
+                                raw.sqlite3_result_null(ctx);
+                                return;
+                            case SQLiteType.Text:
+                                raw.sqlite3_result_text(ctx, result.ToString());
+                                return;
+                            case SQLiteType.Float:
+                                raw.sqlite3_result_double(ctx, result.ToDouble());
+                                return;
+                            case SQLiteType.Integer:
+                                raw.sqlite3_result_int64(ctx, result.ToInt64());
+                                return;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        raw.sqlite3_result_error(ctx, e.Message);
+                    }
+
+                });
+            SQLiteException.CheckOk(rc);
         }
     }
 }

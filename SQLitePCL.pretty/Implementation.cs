@@ -24,11 +24,11 @@ using System.Runtime.CompilerServices;
 
 namespace SQLitePCL.pretty
 {
-    internal sealed class DatabaseBackup : IDatabaseBackup
+    internal sealed class DatabaseBackupImpl : IDatabaseBackup
     {
         private readonly sqlite3_backup backup;
 
-        internal DatabaseBackup(sqlite3_backup backup)
+        internal DatabaseBackupImpl(sqlite3_backup backup)
         {
             this.backup = backup;
         }
@@ -76,15 +76,15 @@ namespace SQLitePCL.pretty
         }
     }
 
-    internal sealed class Statement: IStatement 
+    internal sealed class StatementImpl: IStatement 
     {
         private readonly sqlite3_stmt stmt;
         private readonly IReadOnlyList<IResultSetValue> current;
 
-        internal Statement(sqlite3_stmt stmt)
+        internal StatementImpl(sqlite3_stmt stmt)
         {
             this.stmt = stmt;
-            this.current = new ResultSet(stmt);
+            this.current = new ResultSetImpl(stmt);
         }
 
         public int BindParameterCount 
@@ -253,11 +253,11 @@ namespace SQLitePCL.pretty
         }
     }
         
-    internal sealed class ResultSet : IReadOnlyList<IResultSetValue>  
+    internal sealed class ResultSetImpl : IReadOnlyList<IResultSetValue>  
     {
         private readonly sqlite3_stmt stmt;
 
-        internal ResultSet(sqlite3_stmt stmt)
+        internal ResultSetImpl(sqlite3_stmt stmt)
         {
             this.stmt = stmt;
         }
