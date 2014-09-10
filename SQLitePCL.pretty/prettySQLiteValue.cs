@@ -34,64 +34,64 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public static ISQLiteValue Of(int value) 
+        public static ISQLiteValue ToSQLiteValue(this int value) 
         {
-            return Of((long) value);
+            return ToSQLiteValue((long) value);
         }
 
-        public static ISQLiteValue Of(bool value) 
+        public static ISQLiteValue ToSQLiteValue(this bool value) 
         {
-            return Of((long) (Convert.ChangeType(value, typeof(long))));
+            return ToSQLiteValue((long) (Convert.ChangeType(value, typeof(long))));
         }
 
-        public static ISQLiteValue Of(byte value) 
+        public static ISQLiteValue ToSQLiteValue(this byte value) 
         {
-            return Of((long) (Convert.ChangeType(value, typeof(long))));
+            return ToSQLiteValue((long) (Convert.ChangeType(value, typeof(long))));
         }
 
-        public static ISQLiteValue Of(char value) 
+        public static ISQLiteValue ToSQLiteValue(this char value) 
         {
-            return Of((long) (Convert.ChangeType(value, typeof(long))));
+            return ToSQLiteValue((long) (Convert.ChangeType(value, typeof(long))));
         }
 
-        public static ISQLiteValue Of(sbyte value) 
+        public static ISQLiteValue ToSQLiteValue(this sbyte value) 
         {
-            return Of((long) (Convert.ChangeType(value, typeof(long))));
+            return ToSQLiteValue((long) (Convert.ChangeType(value, typeof(long))));
         }
 
-        public static ISQLiteValue Of(UInt32 value) 
+        public static ISQLiteValue ToSQLiteValue(this UInt32 value) 
         {
-            return Of((long) (Convert.ChangeType(value, typeof(long))));
+            return ToSQLiteValue((long) (Convert.ChangeType(value, typeof(long))));
         }
 
-        public static ISQLiteValue Of(long value)
+        public static ISQLiteValue ToSQLiteValue(this long value)
         {
             return new IntValue(value);
         }
 
-        public static ISQLiteValue Of(double value)
+        public static ISQLiteValue ToSQLiteValue(this double value)
         {
             return new FloatValue(value);
         }
 
-        public static ISQLiteValue Of(string value)
+        public static ISQLiteValue ToSQLiteValue(this string value)
         {
             Contract.Requires(value != null);
             return new StringValue(value);
         }
 
-        public static ISQLiteValue Of(byte[] blob)
+        public static ISQLiteValue ToSQLiteValue(this byte[] blob)
         {
             Contract.Requires(blob != null);
             return new BlobValue(blob);
         }
 
-        internal static ISQLiteValue Of(sqlite3_value value)
+        internal static ISQLiteValue ToSQLiteValue(this sqlite3_value value)
         {
             return new NativeValue(value);
         }
 
-        internal static IResultSetValue Of(sqlite3_stmt stmt, int index)
+        internal static IResultSetValue ResultSetValueAt(this sqlite3_stmt stmt, int index)
         {
             return new ResultSetValue(stmt, index);
         }
@@ -222,7 +222,7 @@ namespace SQLitePCL.pretty
 
         public byte[] ToBlob()
         {
-            return SQLiteValue.Of(this.ToString()).ToBlob();
+            return this.ToString().ToSQLiteValue().ToBlob();
         }
 
         public double ToDouble()
@@ -276,7 +276,7 @@ namespace SQLitePCL.pretty
         // the resulting byte sequence as a BLOB instead of as TEXT.
         public byte[] ToBlob()
         {
-            return SQLiteValue.Of(this.ToString()).ToBlob();
+            return this.ToString().ToSQLiteValue().ToBlob();
         }
 
         public double ToDouble()
@@ -398,7 +398,7 @@ namespace SQLitePCL.pretty
         // When casting a BLOB value to a REAL, the value is first converted to TEXT.
         public double ToDouble()
         {
-            return SQLiteValue.Of(this.ToString()).ToDouble();
+            return this.ToString().ToSQLiteValue().ToDouble();
         }
 
         public int ToInt()
@@ -409,7 +409,7 @@ namespace SQLitePCL.pretty
         // When casting a BLOB value to INTEGER, the value is first converted to TEXT.
         public long ToInt64() 
         {
-            return SQLiteValue.Of(this.ToString()).ToInt64();
+            return this.ToString().ToSQLiteValue().ToInt64();
         }
 
         public override string ToString()

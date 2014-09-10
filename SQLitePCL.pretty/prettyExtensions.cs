@@ -406,59 +406,5 @@ namespace SQLitePCL.pretty
 
             db.RegisterScalarFunc(name, 8, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]));
         }
-
-        public static ISQLiteValue ToSQLiteValue(this int value) 
-        {
-            return SQLiteValue.Of(value);
-        }
-
-        public static ISQLiteValue ToSQLiteValue(this bool value) 
-        {
-            return SQLiteValue.Of(value);
-        }
-
-        public static ISQLiteValue ToSQLiteValue(this byte value) 
-        {
-            return SQLiteValue.Of(value);
-        }
-
-        public static ISQLiteValue ToSQLiteValue(this char value) 
-        {
-            return SQLiteValue.Of(value);
-        }
-
-        public static ISQLiteValue ToSQLiteValue(this sbyte value) 
-        {
-            return SQLiteValue.Of(value);
-        }
-
-        public static ISQLiteValue ToSQLiteValue(this UInt32 value) 
-        {
-            return SQLiteValue.Of(value);
-        }
-
-        public static ISQLiteValue ToSQLiteValue(this long value)
-        {
-            return SQLiteValue.Of(value);
-        }
-
-        public static ISQLiteValue ToSQLiteValue(this double value)
-        {
-            return SQLiteValue.Of(value);
-        }
-
-        public static ISQLiteValue ToSQLiteValue(this string value)
-        {
-            Contract.Requires(value != null);
-
-            return SQLiteValue.Of(value);
-        }
-
-        public static ISQLiteValue ToSQLiteValue(this byte[] blob)
-        {
-            Contract.Requires(blob != null);
-
-            return SQLiteValue.Of(blob);
-        }
     }
 }

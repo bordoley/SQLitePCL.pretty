@@ -350,7 +350,7 @@ namespace SQLitePCL.pretty
                     state = (CtxState<T>)ctx.state;
                 }
 
-                IReadOnlyList<ISQLiteValue> iArgs = args.Select(value => SQLiteValue.Of(value)).ToList();
+                IReadOnlyList<ISQLiteValue> iArgs = args.Select(value => value.ToSQLiteValue()).ToList();
 
                 T next = func(state.Value, iArgs);
                 ctx.state = new CtxState<T>(next);
@@ -410,7 +410,7 @@ namespace SQLitePCL.pretty
 
             int rc = raw.sqlite3_create_function(db, name, nArg, null, (ctx, ud, args) =>
                 {
-                    IReadOnlyList<ISQLiteValue> iArgs = args.Select(value => SQLiteValue.Of(value)).ToList();
+                    IReadOnlyList<ISQLiteValue> iArgs = args.Select(value => value.ToSQLiteValue()).ToList();
 
                     // FIXME: Is catching the exception really the right thing to do?
                     try

@@ -289,7 +289,8 @@ namespace SQLitePCL.pretty
             {
                 Contract.Requires(index >= 0);
                 Contract.Requires(index < this.Count);
-                return SQLiteValue.Of(stmt, index);
+
+                return stmt.ResultSetValueAt(index);
             }
         }
     }
