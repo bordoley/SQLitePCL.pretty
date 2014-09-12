@@ -226,7 +226,7 @@ namespace SQLitePCL.pretty.tests
             // so not exposing it using a pretty api. users can always use the ugly one.
             // see: https://github.com/ericsink/SQLitePCL.raw/commit/9eb0b2ae514374f8cf44a90c20972aa6622b4112
             int rc = SQLitePCL.raw.sqlite3__vfs__delete(null, filename, 1);
-            SQLiteException.CheckOk(rc);
+            Assert.AreEqual(raw.SQLITE_OK, rc);
         }
 
         [TestMethod]

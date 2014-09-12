@@ -40,15 +40,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="prettyTests.cs" />
-    <Compile Include="SQLite3.cs" />
-    <Compile Include="Interfaces.cs" />
-    <Compile Include="Enums.cs" />
-    <Compile Include="Implementation.cs" />
-    <Compile Include="SQLiteValue.cs" />
-    <Compile Include="DatabaseConnection.cs" />
-    <Compile Include="SQLiteVersion.cs" />
-    <Compile Include="SQLiteException.cs" />
-    <Compile Include="Statement.cs" />
-    <Compile Include="ResultSet.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="SQLitePCL.pretty.csproj">
+      <Project>{C6743D26-E16E-41CA-A757-72BE2D7EAF28}</Project>
+      <Name>SQLitePCL.pretty</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>
