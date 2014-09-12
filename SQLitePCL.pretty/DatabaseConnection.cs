@@ -23,6 +23,120 @@ using System.Linq;
 
 namespace SQLitePCL.pretty
 {
+    public sealed class DatabaseProfileEventArgs : EventArgs
+    {
+        public static DatabaseProfileEventArgs Create(string statement, TimeSpan elapsed)
+        {
+            Contract.Requires(statement != null);
+            return new DatabaseProfileEventArgs(statement, elapsed);
+        }
+
+        private readonly string statement;
+        private readonly TimeSpan elapsed;
+
+        private DatabaseProfileEventArgs(string statement, TimeSpan elapsed)
+        {
+            this.statement = statement;
+            this.elapsed = elapsed;
+        }
+
+        public string Statement
+        {
+            get
+            {
+                return statement;
+            }
+        }
+
+        public TimeSpan ExecutionTime
+        {
+            get
+            {
+                return elapsed;
+            }
+        }
+    }
+
+    public sealed class DatabaseTraceEventArgs : EventArgs
+    {
+        public static DatabaseTraceEventArgs Create(string statement)
+        {
+            Contract.Requires(statement != null);
+            return new DatabaseTraceEventArgs(statement);
+        }
+
+        private readonly string statement;
+
+        private DatabaseTraceEventArgs(string statement)
+        {
+            this.statement = statement;
+        }
+
+        public string Statement
+        {
+            get
+            {
+                return statement;
+            }
+        }
+    }
+
+    public sealed class DatabaseUpdateEventArgs : EventArgs
+    {
+        public static DatabaseUpdateEventArgs Create(ActionCode action, String database, string table, long rowId)
+        {
+            Contract.Requires(database != null);
+            Contract.Requires(table != null);
+
+            return new DatabaseUpdateEventArgs(action, database, table, rowId);
+        }
+
+        private readonly ActionCode action;
+        private readonly String database;
+        private readonly String table;
+        private readonly long rowId;
+
+        private DatabaseUpdateEventArgs(ActionCode action, String database, string table, long rowId)
+        {
+            this.action = action;
+            this.database = database;
+            this.table = table;
+            this.rowId = rowId;
+        }
+
+        public ActionCode Action
+        {
+            get
+            { 
+                return action;
+            }
+        }
+
+        public String Database
+        {
+            get
+            {
+                return database;
+            }
+        }
+
+        public String Table
+        {
+            get
+            {
+                return table;
+            }
+        }
+
+        public long RowId
+        {
+            get
+            {
+                return rowId;
+            }
+        }
+    }
+
     public static class DatabaseConnection
     {
         public static void Execute(this IDatabaseConnection  db, string sql)
@@ -343,10 +457,21 @@ namespace SQLitePCL.pretty
             this.db = db;
 
             // FIXME: Could argue that the shouldn't be setup until the first subscriber to the events
-            raw.sqlite3_rollback_hook(db, v => Rollback(), null);
-            raw.sqlite3_trace(db, (v, stmt) => Trace(stmt), null);
-            raw.sqlite3_profile(db, (v, stmt, ts) => Profile(stmt, TimeSpan.FromTicks(ts)), null); 
-            raw.sqlite3_update_hook(db, (v, type, database, table, rowid) => Update((ActionCode)type, database, table, rowid), null);
+            raw.sqlite3_rollback_hook(db, v => Rollback(this, EventArgs.Empty), null);
+
+            raw.sqlite3_trace(
+                db, 
+                (v, stmt) => Trace(this, DatabaseTraceEventArgs.Create(stmt)), 
+                null);
+
+            raw.sqlite3_profile(
+                db, (v, stmt, ts) => Profile(this, DatabaseProfileEventArgs.Create(stmt, TimeSpan.FromTicks(ts))), 
+                null); 
+
+            raw.sqlite3_update_hook(
+                db, 
+                (v, type, database, table, rowid) => Update(this, DatabaseUpdateEventArgs.Create((ActionCode)type, database, table, rowid)), 
+                null);
         }
 
         // We initialize the event handlers with empty delegates so that we don't
@@ -354,11 +479,10 @@ namespace SQLitePCL.pretty
         // See: http://blogs.msdn.com/b/ericlippert/archive/2009/04/29/events-and-races.aspx
         // FIXME: One could argue that we really shouldn't initialized the callbacks
         // with sqlite3 until we actually have listeners. not sure how much it matters though
-        public event Action Rollback = () => { };
-        public event Action<String,TimeSpan> Profile = (stmt, TimeSpan) => {};
-        public event Action<String> Trace = (stmt) => {};
-
-        public event Action<ActionCode,string, string,long> Update = (type, database, table, rowid) => {};
+        public event EventHandler Rollback = (o, e) => { };
+        public event EventHandler<DatabaseProfileEventArgs> Profile = (o,e) => {};
+        public event EventHandler<DatabaseTraceEventArgs> Trace = (o,e) => {};
+        public event EventHandler<DatabaseUpdateEventArgs> Update = (obj, args) => {};
 
         public int BusyTimeout
         {

@@ -705,10 +705,10 @@ namespace SQLitePCL.pretty.tests
                         return false;
                     });
 
-                db.Rollback += () => count_rollbacks++;
-                db.Update += (type, database, tbl, rowid) => count_updates++;
-                db.Trace += sql => count_traces++;
-                db.Profile += (sql, ns) => count_profiles++;
+                db.Rollback += (o,e) => count_rollbacks++;
+                db.Update += (o,e) => count_updates++;
+                db.Trace += (o,e) => count_traces++;
+                db.Profile += (o,e) => count_profiles++;
 
                 db.Execute("CREATE TABLE foo (x int);");
 

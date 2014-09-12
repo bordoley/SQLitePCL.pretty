@@ -20,16 +20,16 @@ using System.Collections.Generic;
 using System.IO;
 
 namespace SQLitePCL.pretty
-{
+{ 
     public interface IDatabaseConnection : IEnumerable<IStatement>, IDisposable
     {
-        event Action Rollback;
+        event EventHandler Rollback;
 
-        event Action<String> Trace;
+        event EventHandler<DatabaseTraceEventArgs> Trace;
 
-        event Action<String, TimeSpan> Profile;
+        event EventHandler<DatabaseProfileEventArgs> Profile;
 
-        event Action<ActionCode, string, string,long> Update;
+        event EventHandler<DatabaseUpdateEventArgs> Update;
 
         bool IsAutoCommit { get; }
 
