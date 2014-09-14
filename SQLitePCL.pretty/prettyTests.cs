@@ -320,13 +320,13 @@ namespace SQLitePCL.pretty.tests
         {
             using (var db = SQLite3.Open(":memory:"))
             {
-                Assert.AreEqual(db.Count(), 0); 
+                Assert.AreEqual(db.Statements.Count(), 0); 
 
                 using (var stmt = db.PrepareStatement("SELECT 5;"))
                 {
-                    Assert.AreEqual(db.Count(), 1);
+                    Assert.AreEqual(db.Statements.Count(), 1);
 
-                    var firstStmt = db.First();
+                    var firstStmt = db.Statements.First();
 
                     // IStatement can't sanely implement equality at the 
                     // interface level. Doing so would tightly bind the 

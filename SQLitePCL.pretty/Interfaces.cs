@@ -21,7 +21,7 @@ using System.IO;
 
 namespace SQLitePCL.pretty
 { 
-    public interface IDatabaseConnection : IEnumerable<IStatement>, IDisposable
+    public interface IDatabaseConnection : IDisposable
     {
         event EventHandler Rollback;
 
@@ -36,6 +36,8 @@ namespace SQLitePCL.pretty
         int BusyTimeout { set; }
 
         int Changes { get; }
+
+        IEnumerable<IStatement> Statements { get; }
 
         string GetFileName(string database);
 

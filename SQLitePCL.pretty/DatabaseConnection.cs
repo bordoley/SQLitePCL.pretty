@@ -451,10 +451,13 @@ namespace SQLitePCL.pretty
     public sealed class SQLiteDatabaseConnection : IDatabaseConnection
     {
         private readonly sqlite3 db;
+        private readonly IEnumerable<IStatement> statements;
 
         internal SQLiteDatabaseConnection(sqlite3 db)
         {
             this.db = db;
+
+            statements = new DelegatingEnumerable<IStatement>(() => StatementsEnumerator());
 
             // FIXME: Could argue that the shouldn't be setup until the first subscriber to the events
             raw.sqlite3_rollback_hook(db, v => Rollback(this, EventArgs.Empty), null);
@@ -509,17 +512,7 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public IDatabaseBackup BackupInit(string dbName, SQLiteDatabaseConnection destConn, string destDbName)
-        {
-            Contract.Requires(dbName != null);
-            Contract.Requires(destConn != null);
-            Contract.Requires(destDbName != null);
-
-            sqlite3_backup backup = raw.sqlite3_backup_init(destConn.db, destDbName, db, dbName);
-            return new DatabaseBackupImpl(backup);
-        }
-
-        public IEnumerator<IStatement> GetEnumerator()
+        private IEnumerator<IStatement> StatementsEnumerator()
         {
             sqlite3_stmt next = null;
             while ((next = raw.sqlite3_next_stmt(db, next)) != null)
@@ -528,9 +521,22 @@ namespace SQLitePCL.pretty
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        public IEnumerable<IStatement> Statements 
+        { 
+            get
+            {
+                return statements;
+            }
+        }
+
+        public IDatabaseBackup BackupInit(string dbName, SQLiteDatabaseConnection destConn, string destDbName)
         {
-            return this.GetEnumerator();
+            Contract.Requires(dbName != null);
+            Contract.Requires(destConn != null);
+            Contract.Requires(destDbName != null);
+
+            sqlite3_backup backup = raw.sqlite3_backup_init(destConn.db, destDbName, db, dbName);
+            return new DatabaseBackupImpl(backup);
         }
 
         public string GetFileName(string database)
