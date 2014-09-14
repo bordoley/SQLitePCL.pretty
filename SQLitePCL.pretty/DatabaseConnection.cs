@@ -487,11 +487,11 @@ namespace SQLitePCL.pretty
         public event EventHandler<DatabaseTraceEventArgs> Trace = (o,e) => {};
         public event EventHandler<DatabaseUpdateEventArgs> Update = (obj, args) => {};
 
-        public int BusyTimeout
+        public TimeSpan BusyTimeout
         {
             set
             {
-                int rc = raw.sqlite3_busy_timeout(db, value);
+                int rc = raw.sqlite3_busy_timeout(db, (int) value.TotalMilliseconds);
                 SQLiteException.CheckOk(db, rc);
             }
         }

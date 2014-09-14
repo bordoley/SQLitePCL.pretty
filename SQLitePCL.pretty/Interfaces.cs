@@ -33,7 +33,7 @@ namespace SQLitePCL.pretty
 
         bool IsAutoCommit { get; }
 
-        int BusyTimeout { set; }
+        TimeSpan BusyTimeout { set; }
 
         int Changes { get; }
 
