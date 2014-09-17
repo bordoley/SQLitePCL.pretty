@@ -46,40 +46,40 @@ namespace SQLitePCL.pretty
     // Added to support IDatabaseConnection.Update
     public enum ActionCode
     {
-        CreateIndex = rawExt.SQLITE_CREATE_INDEX,
-        CreateTable = rawExt.SQLITE_CREATE_TABLE,
-        CreateTempIndex = rawExt.SQLITE_CREATE_TEMP_INDEX,
-        CreateTempTable = rawExt.SQLITE_CREATE_TEMP_TABLE,
-        CreateTempTrigger = rawExt.SQLITE_CREATE_TEMP_TRIGGER,
-        CreateTempView = rawExt.SQLITE_CREATE_TEMP_VIEW,
-        CreateTrigger = rawExt.SQLITE_CREATE_TRIGGER,
-        CreateView = rawExt.SQLITE_CREATE_VIEW,
-        Delete = rawExt.SQLITE_DELETE,
-        DropIndex = rawExt.SQLITE_DROP_INDEX,
-        DropTable = rawExt.SQLITE_DROP_TABLE,
-        DropTempIndex = rawExt.SQLITE_DROP_TEMP_INDEX,
-        DropTempTable = rawExt.SQLITE_DROP_TEMP_TABLE,
-        DropTempTrigger = rawExt.SQLITE_DROP_TEMP_TRIGGER,
-        DropTempView = rawExt.SQLITE_DROP_TEMP_VIEW,
-        DropTrigger = rawExt.SQLITE_DROP_TRIGGER,
-        DropView = rawExt.SQLITE_DROP_VIEW,
-        Insert = rawExt.SQLITE_INSERT,
-        Pragma = rawExt.SQLITE_PRAGMA,
-        Read = rawExt.SQLITE_READ,
-        Select = rawExt.SQLITE_SELECT,
-        Transaction = rawExt.SQLITE_TRANSACTION,
-        Update = rawExt.SQLITE_UPDATE,
-        Attach = rawExt.SQLITE_ATTACH,
-        Detach = rawExt.SQLITE_DETACH,
-        AlterTable = rawExt.SQLITE_ALTER_TABLE,
-        ReIndex = rawExt.SQLITE_REINDEX,
-        Analyze = rawExt.SQLITE_ANALYZE,
-        CreateVTable = rawExt.SQLITE_CREATE_VTABLE,
-        DropVTable = rawExt.SQLITE_DROP_VTABLE,
-        Function = rawExt.SQLITE_FUNCTION,
-        SavePoint = rawExt.SQLITE_SAVEPOINT,
-        Copy = rawExt.SQLITE_COPY, 
-        Recursive = rawExt.SQLITE_RECURSIVE
+        CreateIndex = raw.SQLITE_CREATE_INDEX,
+        CreateTable = raw.SQLITE_CREATE_TABLE,
+        CreateTempIndex = raw.SQLITE_CREATE_TEMP_INDEX,
+        CreateTempTable = raw.SQLITE_CREATE_TEMP_TABLE,
+        CreateTempTrigger = raw.SQLITE_CREATE_TEMP_TRIGGER,
+        CreateTempView = raw.SQLITE_CREATE_TEMP_VIEW,
+        CreateTrigger = raw.SQLITE_CREATE_TRIGGER,
+        CreateView = raw.SQLITE_CREATE_VIEW,
+        Delete = raw.SQLITE_DELETE,
+        DropIndex = raw.SQLITE_DROP_INDEX,
+        DropTable = raw.SQLITE_DROP_TABLE,
+        DropTempIndex = raw.SQLITE_DROP_TEMP_INDEX,
+        DropTempTable = raw.SQLITE_DROP_TEMP_TABLE,
+        DropTempTrigger = raw.SQLITE_DROP_TEMP_TRIGGER,
+        DropTempView = raw.SQLITE_DROP_TEMP_VIEW,
+        DropTrigger = raw.SQLITE_DROP_TRIGGER,
+        DropView = raw.SQLITE_DROP_VIEW,
+        Insert = raw.SQLITE_INSERT,
+        Pragma = raw.SQLITE_PRAGMA,
+        Read = raw.SQLITE_READ,
+        Select = raw.SQLITE_SELECT,
+        Transaction = raw.SQLITE_TRANSACTION,
+        Update = raw.SQLITE_UPDATE,
+        Attach = raw.SQLITE_ATTACH,
+        Detach = raw.SQLITE_DETACH,
+        AlterTable = raw.SQLITE_ALTER_TABLE,
+        ReIndex = raw.SQLITE_REINDEX,
+        Analyze = raw.SQLITE_ANALYZE,
+        CreateVTable = raw.SQLITE_CREATE_VTABLE,
+        DropVTable = raw.SQLITE_DROP_VTABLE,
+        Function = raw.SQLITE_FUNCTION,
+        SavePoint = raw.SQLITE_SAVEPOINT,
+        Copy = raw.SQLITE_COPY, 
+        Recursive = raw.SQLITE_RECURSIVE
     }
 
     public enum ErrorCode
@@ -177,45 +177,5 @@ namespace SQLitePCL.pretty
         NoticeRecoverRollback = raw.SQLITE_NOTICE_RECOVER_ROLLBACK,
 
         WarningAutoIndex= raw.SQLITE_WARNING_AUTOINDEX
-    }
-
-    // FIXME: These should be defined in raw.sqlite. Submit a PR.
-    // http://www.sqlite.org/capi3ref.html#sqlite3_set_authorizer
-    internal static class rawExt
-    {
-        public const int SQLITE_CREATE_INDEX          = 1;    /* Index Name      Table Name      */
-        public const int SQLITE_CREATE_TABLE          = 2;    /* Table Name      NULL            */
-        public const int SQLITE_CREATE_TEMP_INDEX     = 3;    /* Index Name      Table Name      */
-        public const int SQLITE_CREATE_TEMP_TABLE     = 4;    /* Table Name      NULL            */
-        public const int SQLITE_CREATE_TEMP_TRIGGER   = 5;    /* Trigger Name    Table Name      */
-        public const int SQLITE_CREATE_TEMP_VIEW      = 6;    /* View Name       NULL            */
-        public const int SQLITE_CREATE_TRIGGER        = 7;    /* Trigger Name    Table Name      */
-        public const int SQLITE_CREATE_VIEW           = 8;    /* View Name       NULL            */
-        public const int SQLITE_DELETE                = 9;    /* Table Name      NULL            */
-        public const int SQLITE_DROP_INDEX            = 10;   /* Index Name      Table Name      */
-        public const int SQLITE_DROP_TABLE            = 11;   /* Table Name      NULL            */
-        public const int SQLITE_DROP_TEMP_INDEX       = 12;   /* Index Name      Table Name      */
-        public const int SQLITE_DROP_TEMP_TABLE       = 13;   /* Table Name      NULL            */
-        public const int SQLITE_DROP_TEMP_TRIGGER     = 14;   /* Trigger Name    Table Name      */
-        public const int SQLITE_DROP_TEMP_VIEW        = 15;   /* View Name       NULL            */
-        public const int SQLITE_DROP_TRIGGER          = 16;   /* Trigger Name    Table Name      */
-        public const int SQLITE_DROP_VIEW             = 17;   /* View Name       NULL            */
-        public const int SQLITE_INSERT                = 18;   /* Table Name      NULL            */
-        public const int SQLITE_PRAGMA                = 19;   /* Pragma Name     1st arg or NULL */
-        public const int SQLITE_READ                  = 20;   /* Table Name      Column Name     */
-        public const int SQLITE_SELECT                = 21;   /* NULL            NULL            */
-        public const int SQLITE_TRANSACTION           = 22;   /* Operation       NULL            */
-        public const int SQLITE_UPDATE                = 23;   /* Table Name      Column Name     */
-        public const int SQLITE_ATTACH                = 24;   /* Filename        NULL            */
-        public const int SQLITE_DETACH                = 25;   /* Database Name   NULL            */
-        public const int SQLITE_ALTER_TABLE           = 26;   /* Database Name   Table Name      */
-        public const int SQLITE_REINDEX               = 27;   /* Index Name      NULL            */
-        public const int SQLITE_ANALYZE               = 28;   /* Table Name      NULL            */
-        public const int SQLITE_CREATE_VTABLE         = 29;   /* Table Name      Module Name     */
-        public const int SQLITE_DROP_VTABLE           = 30;   /* Table Name      Module Name     */
-        public const int SQLITE_FUNCTION              = 31;   /* NULL            Function Name   */
-        public const int SQLITE_SAVEPOINT             = 32;   /* Operation       Savepoint Name  */
-        public const int SQLITE_COPY                  = 0;    /* No longer used */
-        public const int SQLITE_RECURSIVE             = 33;   /* NULL            NULL            */
     }
 }

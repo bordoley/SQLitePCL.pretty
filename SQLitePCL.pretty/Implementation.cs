@@ -345,37 +345,17 @@ namespace SQLitePCL.pretty
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            Contract.Requires(buffer != null);
-            Contract.Requires(offset >= 0);
-            Contract.Requires(count >= 0);
+            Contract.Requires<ArgumentNullException>(buffer != null); 
+            Contract.Requires<ArgumentException>(offset + count <= buffer.Length);
+            Contract.Requires<ArgumentOutOfRangeException>(offset >= 0);
+            Contract.Requires<ArgumentOutOfRangeException>(count >= 0);
 
-            if (offset == 0)
-            {
-                int numBytes = (int)Math.Min(this.Length - this.Position, count);
+            int numBytes = (int)Math.Min(this.Length - this.Position, count);
+            int rc = raw.sqlite3_blob_read(blob, buffer, offset, (int)this.Position, numBytes);
+            SQLiteException.CheckOk(rc);
 
-                int rc = raw.sqlite3_blob_read(blob, buffer, (int)this.Position, numBytes);
-                SQLiteException.CheckOk(rc);
-
-                this.Position += numBytes;
-                return numBytes;
-            }
-            else
-            {
-                // FIXME: No way to read from an offset in the buffer
-                // https://github.com/ericsink/SQLitePCL.raw/issues/3
-
-                byte[] newBuffer = new byte[count-offset];
-
-
-                int numBytes = (int)Math.Min(this.Length - this.Position, count);
-                int rc = raw.sqlite3_blob_read(blob, newBuffer, (int)this.Position, numBytes);
-                SQLiteException.CheckOk(rc);
-
-                System.Array.Copy(newBuffer, 0, buffer, offset, count);
-
-                this.Position += numBytes;
-                return numBytes;
-            }
+            this.Position += numBytes;
+            return numBytes;
         }
 
         public override long Seek(long offset, SeekOrigin origin)
@@ -390,30 +370,17 @@ namespace SQLitePCL.pretty
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            Contract.Requires(buffer != null);
-            Contract.Requires(offset >= 0);
-            Contract.Requires(count >= 0);
+            Contract.Requires<ArgumentNullException>(buffer != null); 
+            Contract.Requires<ArgumentException>(offset + count <= buffer.Length);
+            Contract.Requires<ArgumentOutOfRangeException>(offset >= 0);
+            Contract.Requires<ArgumentOutOfRangeException>(count >= 0);
 
-            if (this.Length - this.Position < count)
-            {
-                return;
-            }
+            int numBytes = (int)Math.Min(this.Length - this.Position, count);
 
-            if (offset == 0)
-            {
-                // FIXME: The IO.Stream spec doesn't specify this method to throw an exception if writing fails
-                int rc = raw.sqlite3_blob_write(blob, buffer, count, (int)this.Position);
-                SQLiteException.CheckOk(rc);
-            }
-            else
-            {
-                // FIXME: No way to read from an offset in the buffer
-                // https://github.com/ericsink/SQLitePCL.raw/issues/3
-                byte[] newBuffer = new byte[count - offset];
-                System.Array.Copy(buffer, offset, newBuffer, 0, count);
-                int rc = raw.sqlite3_blob_write(blob, newBuffer, count, (int)this.Position);
-                SQLiteException.CheckOk(rc);
-            }
+            int rc = raw.sqlite3_blob_write(blob, buffer, offset, numBytes, (int)this.Position);
+            SQLiteException.CheckOk(rc);
+
+            this.Position += numBytes;
         }
     }
 
