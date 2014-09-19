@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2014 David Bordoley
    Copyright 2014 Zumero, LLC
 
@@ -524,9 +524,9 @@ namespace SQLitePCL.pretty
         public Stream ToStream(bool canWrite)
         {
             sqlite3 db = raw.sqlite3_db_handle(stmt);
-            string sdb = raw.sqlite3_column_database_name(stmt, index + 1);
-            string tableName = raw.sqlite3_column_table_name(stmt, index + 1);
-            string columnName = raw.sqlite3_column_name(stmt, index + 1);
+            string sdb = raw.sqlite3_column_database_name(stmt, index);
+            string tableName = raw.sqlite3_column_table_name(stmt, index);
+            string columnName = raw.sqlite3_column_name(stmt, index);
             long rowId = raw.sqlite3_last_insert_rowid(db);
 
             sqlite3_blob blob;

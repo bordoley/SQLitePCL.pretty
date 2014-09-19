@@ -103,15 +103,15 @@ namespace SQLitePCL.pretty.tests
                     Assert.That(Enumerable.SequenceEqual(bytes, byteArr));
 
                     // FIXME: This is failing but I suspect its a mac issue
-                    //using (var blob = row.GetResultAsReadOnlyStream(0))
-                    //{
-                    //    Assert.AreEqual(bytes.Length, blob.Length);
-                    //    for (int i = 0; i < blob.Length; i++) 
-                    //   {
-                    //        int b = blob.ReadByte();
-                    //        Assert.Equals(9, b);
-                    //    }
-                    //}
+                    using (var blob = row[0].ToReadOnlyStream())
+                    {
+                        Assert.AreEqual(bytes.Length, blob.Length);
+                        for (int i = 0; i < blob.Length; i++) 
+                       {
+                            int b = blob.ReadByte();
+                            Assert.Equals(9, b);
+                        }
+                    }
                 }
             }
         }
