@@ -77,7 +77,7 @@ namespace SQLitePCL.pretty.tests
         public void test_blob_read()
         {
             var ver = SQLite3.Version;
-            Console.WriteLine(SQLite3.Version);
+            //Console.WriteLine(SQLite3.Version);
 
             using (var db = SQLite3.Open(":memory:"))
             {
@@ -107,9 +107,9 @@ namespace SQLitePCL.pretty.tests
                     {
                         Assert.AreEqual(bytes.Length, blob.Length);
                         for (int i = 0; i < blob.Length; i++) 
-                       {
+                        {
                             int b = blob.ReadByte();
-                            Assert.Equals(9, b);
+                            Assert.AreEqual(9, b);
                         }
                     }
                 }
@@ -225,8 +225,8 @@ namespace SQLitePCL.pretty.tests
             // the vfs api in general seems like it will get more work,
             // so not exposing it using a pretty api. users can always use the ugly one.
             // see: https://github.com/ericsink/SQLitePCL.raw/commit/9eb0b2ae514374f8cf44a90c20972aa6622b4112
-            int rc = SQLitePCL.raw.sqlite3__vfs__delete(null, filename, 1);
-            Assert.AreEqual(raw.SQLITE_OK, rc);
+            //int rc = SQLitePCL.raw.sqlite3__vfs__delete(null, filename, 1);
+            //Assert.AreEqual(raw.SQLITE_OK, rc);
         }
 
         [TestMethod]
@@ -245,8 +245,8 @@ namespace SQLitePCL.pretty.tests
                 {
                     fail = true;
 
-                    Assert.AreEqual((int) e.ErrorCode, raw.SQLITE_CONSTRAINT);
-                    Assert.AreEqual((int) e.ExtendedErrorCode, raw.SQLITE_CONSTRAINT_UNIQUE, "Extended error codes for SQLITE_CONSTRAINT were added in 3.7.16");
+                    Assert.AreEqual(e.ErrorCode, ErrorCode.Constraint);
+                    Assert.AreEqual(e.ExtendedErrorCode, ErrorCode.ConstraintUnique, "Extended error codes for SQLITE_CONSTRAINT were added in 3.7.16");
                 }
                 Assert.IsTrue(fail);
             }

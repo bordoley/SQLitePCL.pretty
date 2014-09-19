@@ -335,8 +335,12 @@ namespace SQLitePCL.pretty
 
         protected override void Dispose(bool disposing)
         {
-            int rc = raw.sqlite3_blob_close(blob);
-            SQLiteException.CheckOk(rc);
+            // Closing the BLOB often forces the changes out to disk and so if any I/O errors occur, 
+            // they will likely occur at the time when the BLOB is closed. Any errors that occur during 
+            // closing are reported as a non-zero return value.
+            // The BLOB is closed unconditionally. Even if this routine returns an error code, 
+            // the BLOB is still closed.
+            raw.sqlite3_blob_close(blob);
         }
 
         public override void Flush()
@@ -351,7 +355,7 @@ namespace SQLitePCL.pretty
             Contract.Requires<ArgumentOutOfRangeException>(count >= 0);
 
             int numBytes = (int)Math.Min(this.Length - this.Position, count);
-            int rc = raw.sqlite3_blob_read(blob, buffer, offset, (int)this.Position, numBytes);
+            int rc = raw.sqlite3_blob_read(blob, buffer, offset, numBytes, (int)this.Position);
             SQLiteException.CheckOk(rc);
 
             this.Position += numBytes;
