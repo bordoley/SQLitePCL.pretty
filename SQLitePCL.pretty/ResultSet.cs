@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2014 David Bordoley
    Copyright 2014 Zumero, LLC
 
@@ -15,7 +15,6 @@
    limitations under the License.
 */
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -25,7 +24,7 @@ namespace SQLitePCL.pretty
     public static class ResultSet
     {
         public static IEnumerable<string> Columns(this IReadOnlyList<IResultSetValue> rs)
-        { 
+        {
             Contract.Requires(rs != null);
 
             return rs.Select(value => value.ColumnName);

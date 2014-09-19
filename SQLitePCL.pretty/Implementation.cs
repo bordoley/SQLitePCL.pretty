@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2014 David Bordoley
    Copyright 2014 Zumero, LLC
 
@@ -20,7 +20,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
-using System.Runtime.CompilerServices;
 
 namespace SQLitePCL.pretty
 {
@@ -33,16 +32,16 @@ namespace SQLitePCL.pretty
             this.backup = backup;
         }
 
-        public int PageCount 
-        { 
+        public int PageCount
+        {
             get
             {
                 return raw.sqlite3_backup_pagecount(backup);
             }
         }
 
-        public int RemainingPages 
-        { 
+        public int RemainingPages
+        {
             get
             {
                 return raw.sqlite3_backup_remaining(backup);
@@ -55,7 +54,7 @@ namespace SQLitePCL.pretty
             SQLiteException.CheckOk(rc);
         }
 
-        public bool Step (int nPages)
+        public bool Step(int nPages)
         {
             int rc = raw.sqlite3_backup_step(backup, nPages);
 
@@ -68,7 +67,7 @@ namespace SQLitePCL.pretty
                 return false;
             }
             else
-            { 
+            {
                 SQLiteException.CheckOk(rc);
                 // Never happens, exception always thrown.
                 return false;
@@ -76,7 +75,7 @@ namespace SQLitePCL.pretty
         }
     }
 
-    internal sealed class StatementImpl: IStatement 
+    internal sealed class StatementImpl : IStatement
     {
         private readonly sqlite3_stmt stmt;
         private readonly IReadOnlyList<IResultSetValue> current;
@@ -87,24 +86,24 @@ namespace SQLitePCL.pretty
             this.current = new ResultSetImpl(stmt);
         }
 
-        public int BindParameterCount 
-        { 
-            get 
-            { 
-                return raw.sqlite3_bind_parameter_count(stmt); 
-            }
-        } 
-
-        public string SQL 
-        { 
-            get 
-            { 
-                return raw.sqlite3_sql(stmt); 
+        public int BindParameterCount
+        {
+            get
+            {
+                return raw.sqlite3_bind_parameter_count(stmt);
             }
         }
 
-        public bool ReadOnly 
-        { 
+        public string SQL
+        {
+            get
+            {
+                return raw.sqlite3_sql(stmt);
+            }
+        }
+
+        public bool ReadOnly
+        {
             get
             {
                 return raw.sqlite3_stmt_readonly(stmt) == 0 ? false : true;
@@ -112,7 +111,7 @@ namespace SQLitePCL.pretty
         }
 
         public bool Busy
-        { 
+        {
             get
             {
                 return raw.sqlite3_stmt_busy(stmt) == 0 ? false : true;
@@ -125,7 +124,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(index >= 0);
             Contract.Requires(index < this.BindParameterCount);
 
-            int rc = raw.sqlite3_bind_blob(stmt, index+1, blob);
+            int rc = raw.sqlite3_bind_blob(stmt, index + 1, blob);
             SQLiteException.CheckOk(stmt, rc);
         }
 
@@ -134,7 +133,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(index >= 0);
             Contract.Requires(index < this.BindParameterCount);
 
-            int rc = raw.sqlite3_bind_double(stmt, index+1, val);
+            int rc = raw.sqlite3_bind_double(stmt, index + 1, val);
             SQLiteException.CheckOk(stmt, rc);
         }
 
@@ -143,7 +142,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(index >= 0);
             Contract.Requires(index < this.BindParameterCount);
 
-            int rc = raw.sqlite3_bind_int(stmt, index+1, val);
+            int rc = raw.sqlite3_bind_int(stmt, index + 1, val);
             SQLiteException.CheckOk(stmt, rc);
         }
 
@@ -152,7 +151,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(index >= 0);
             Contract.Requires(index < this.BindParameterCount);
 
-            int rc = raw.sqlite3_bind_int64(stmt, index+1, val);
+            int rc = raw.sqlite3_bind_int64(stmt, index + 1, val);
             SQLiteException.CheckOk(stmt, rc);
         }
 
@@ -162,7 +161,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(index >= 0);
             Contract.Requires(index < this.BindParameterCount);
 
-            int rc = raw.sqlite3_bind_text(stmt, index+1, text);
+            int rc = raw.sqlite3_bind_text(stmt, index + 1, text);
             SQLiteException.CheckOk(stmt, rc);
         }
 
@@ -171,7 +170,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(index >= 0);
             Contract.Requires(index < this.BindParameterCount);
 
-            int rc = raw.sqlite3_bind_null(stmt, index+1);
+            int rc = raw.sqlite3_bind_null(stmt, index + 1);
             SQLiteException.CheckOk(stmt, rc);
         }
 
@@ -181,7 +180,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(index < this.BindParameterCount);
             Contract.Requires(size >= 0);
 
-            int rc = raw.sqlite3_bind_zeroblob(stmt, index+1, size);
+            int rc = raw.sqlite3_bind_zeroblob(stmt, index + 1, size);
             SQLiteException.CheckOk(stmt, rc);
         }
 
@@ -211,7 +210,7 @@ namespace SQLitePCL.pretty
             stmt.Dispose();
         }
 
-        public IReadOnlyList<IResultSetValue> Current 
+        public IReadOnlyList<IResultSetValue> Current
         {
             get
             {
@@ -219,10 +218,10 @@ namespace SQLitePCL.pretty
             }
         }
 
-        Object IEnumerator.Current 
+        Object IEnumerator.Current
         {
-            get 
-            { 
+            get
+            {
                 return current;
             }
         }
@@ -231,7 +230,7 @@ namespace SQLitePCL.pretty
         {
             int rc = raw.sqlite3_step(stmt);
             if (rc == raw.SQLITE_DONE)
-            { 
+            {
                 return false;
             }
             else if (rc == raw.SQLITE_ROW)
@@ -252,8 +251,8 @@ namespace SQLitePCL.pretty
             SQLiteException.CheckOk(stmt, rc);
         }
     }
-        
-    internal sealed class ResultSetImpl : IReadOnlyList<IResultSetValue>  
+
+    internal sealed class ResultSetImpl : IReadOnlyList<IResultSetValue>
     {
         private readonly sqlite3_stmt stmt;
 
@@ -262,8 +261,8 @@ namespace SQLitePCL.pretty
             this.stmt = stmt;
         }
 
-        public int Count 
-        { 
+        public int Count
+        {
             get
             {
                 return raw.sqlite3_column_count(stmt);
@@ -295,7 +294,7 @@ namespace SQLitePCL.pretty
         }
     }
 
-    internal sealed class BlobStream : Stream 
+    internal sealed class BlobStream : Stream
     {
         private readonly sqlite3_blob blob;
         private readonly bool canWrite;
@@ -322,23 +321,23 @@ namespace SQLitePCL.pretty
             get { return canWrite; }
         }
 
-        public override long Length 
-        { 
-            get { return raw.sqlite3_blob_bytes(blob); } 
+        public override long Length
+        {
+            get { return raw.sqlite3_blob_bytes(blob); }
         }
 
-        public override long Position 
-        { 
+        public override long Position
+        {
             get { return this.position; }
             set { this.position = value; }
         }
 
         protected override void Dispose(bool disposing)
         {
-            // Closing the BLOB often forces the changes out to disk and so if any I/O errors occur, 
-            // they will likely occur at the time when the BLOB is closed. Any errors that occur during 
+            // Closing the BLOB often forces the changes out to disk and so if any I/O errors occur,
+            // they will likely occur at the time when the BLOB is closed. Any errors that occur during
             // closing are reported as a non-zero return value.
-            // The BLOB is closed unconditionally. Even if this routine returns an error code, 
+            // The BLOB is closed unconditionally. Even if this routine returns an error code,
             // the BLOB is still closed.
             raw.sqlite3_blob_close(blob);
         }
@@ -349,7 +348,7 @@ namespace SQLitePCL.pretty
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            Contract.Requires<ArgumentNullException>(buffer != null); 
+            Contract.Requires<ArgumentNullException>(buffer != null);
             Contract.Requires<ArgumentException>(offset + count <= buffer.Length);
             Contract.Requires<ArgumentOutOfRangeException>(offset >= 0);
             Contract.Requires<ArgumentOutOfRangeException>(count >= 0);
@@ -374,7 +373,7 @@ namespace SQLitePCL.pretty
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            Contract.Requires<ArgumentNullException>(buffer != null); 
+            Contract.Requires<ArgumentNullException>(buffer != null);
             Contract.Requires<ArgumentException>(offset + count <= buffer.Length);
             Contract.Requires<ArgumentOutOfRangeException>(offset >= 0);
             Contract.Requires<ArgumentOutOfRangeException>(count >= 0);

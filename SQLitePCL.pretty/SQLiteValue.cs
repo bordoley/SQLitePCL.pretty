@@ -16,9 +16,7 @@
 */
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using System.IO;
 using System.Text;
 
@@ -36,34 +34,34 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public static ISQLiteValue ToSQLiteValue(this int value) 
+        public static ISQLiteValue ToSQLiteValue(this int value)
         {
-            return ToSQLiteValue((long) value);
+            return ToSQLiteValue((long)value);
         }
 
-        public static ISQLiteValue ToSQLiteValue(this bool value) 
+        public static ISQLiteValue ToSQLiteValue(this bool value)
         {
-            return ToSQLiteValue((long) (Convert.ChangeType(value, typeof(long))));
+            return ToSQLiteValue((long)(Convert.ChangeType(value, typeof(long))));
         }
 
-        public static ISQLiteValue ToSQLiteValue(this byte value) 
+        public static ISQLiteValue ToSQLiteValue(this byte value)
         {
-            return ToSQLiteValue((long) (Convert.ChangeType(value, typeof(long))));
+            return ToSQLiteValue((long)(Convert.ChangeType(value, typeof(long))));
         }
 
-        public static ISQLiteValue ToSQLiteValue(this char value) 
+        public static ISQLiteValue ToSQLiteValue(this char value)
         {
-            return ToSQLiteValue((long) (Convert.ChangeType(value, typeof(long))));
+            return ToSQLiteValue((long)(Convert.ChangeType(value, typeof(long))));
         }
 
-        public static ISQLiteValue ToSQLiteValue(this sbyte value) 
+        public static ISQLiteValue ToSQLiteValue(this sbyte value)
         {
-            return ToSQLiteValue((long) (Convert.ChangeType(value, typeof(long))));
+            return ToSQLiteValue((long)(Convert.ChangeType(value, typeof(long))));
         }
 
-        public static ISQLiteValue ToSQLiteValue(this UInt32 value) 
+        public static ISQLiteValue ToSQLiteValue(this UInt32 value)
         {
-            return ToSQLiteValue((long) (Convert.ChangeType(value, typeof(long))));
+            return ToSQLiteValue((long)(Convert.ChangeType(value, typeof(long))));
         }
 
         public static ISQLiteValue ToSQLiteValue(this long value)
@@ -125,21 +123,21 @@ namespace SQLitePCL.pretty
             this.value = value;
         }
 
-        public SQLiteType SQLiteType 
-        { 
+        public SQLiteType SQLiteType
+        {
             get
             {
-                return (SQLiteType) raw.sqlite3_value_type(value);
+                return (SQLiteType)raw.sqlite3_value_type(value);
             }
         }
 
-        public int Length 
-        { 
+        public int Length
+        {
             get
             {
                 return raw.sqlite3_value_bytes(value);
             }
-        } 
+        }
 
         public byte[] ToBlob()
         {
@@ -166,26 +164,26 @@ namespace SQLitePCL.pretty
             return raw.sqlite3_value_text(value);
         }
     }
-        
+
     // Type coercion rules
     // http://www.sqlite.org/capi3ref.html#sqlite3_column_blob
-    internal struct NullValue : ISQLiteValue 
+    internal struct NullValue : ISQLiteValue
     {
-        public SQLiteType SQLiteType 
-        { 
+        public SQLiteType SQLiteType
+        {
             get
             {
                 return SQLiteType.Null;
             }
         }
 
-        public int Length 
-        { 
+        public int Length
+        {
             get
             {
                 return 0;
             }
-        } 
+        }
 
         public byte[] ToBlob()
         {
@@ -202,7 +200,7 @@ namespace SQLitePCL.pretty
             return 0;
         }
 
-        public long ToInt64() 
+        public long ToInt64()
         {
             return 0;
         }
@@ -213,7 +211,7 @@ namespace SQLitePCL.pretty
         }
     }
 
-    internal struct IntValue : ISQLiteValue 
+    internal struct IntValue : ISQLiteValue
     {
         private readonly long value;
 
@@ -222,21 +220,21 @@ namespace SQLitePCL.pretty
             this.value = value;
         }
 
-        public SQLiteType SQLiteType 
-        { 
+        public SQLiteType SQLiteType
+        {
             get
             {
                 return SQLiteType.Integer;
             }
         }
 
-        public int Length 
-        { 
+        public int Length
+        {
             get
             {
                 return this.ToBlob().Length;
             }
-        } 
+        }
 
         public byte[] ToBlob()
         {
@@ -250,10 +248,10 @@ namespace SQLitePCL.pretty
 
         public int ToInt()
         {
-            return (int) value;
+            return (int)value;
         }
 
-        public long ToInt64() 
+        public long ToInt64()
         {
             return value;
         }
@@ -264,7 +262,7 @@ namespace SQLitePCL.pretty
         }
     }
 
-    internal struct FloatValue : ISQLiteValue 
+    internal struct FloatValue : ISQLiteValue
     {
         private readonly double value;
 
@@ -273,24 +271,24 @@ namespace SQLitePCL.pretty
             this.value = value;
         }
 
-        public SQLiteType SQLiteType 
-        { 
+        public SQLiteType SQLiteType
+        {
             get
             {
                 return SQLiteType.Float;
             }
         }
 
-        public int Length 
-        { 
+        public int Length
+        {
             get
             {
                 return this.ToBlob().Length;
             }
-        } 
+        }
 
         // Casting to a BLOB consists of first casting the value to TEXT
-        // in the encoding of the database connection, then interpreting 
+        // in the encoding of the database connection, then interpreting
         // the resulting byte sequence as a BLOB instead of as TEXT.
         public byte[] ToBlob()
         {
@@ -304,10 +302,10 @@ namespace SQLitePCL.pretty
 
         public int ToInt()
         {
-            return (int) value;
+            return (int)value;
         }
 
-        public long ToInt64() 
+        public long ToInt64()
         {
             return (long)value;
         }
@@ -318,7 +316,7 @@ namespace SQLitePCL.pretty
         }
     }
 
-    internal class StringValue : ISQLiteValue 
+    internal class StringValue : ISQLiteValue
     {
         private readonly string value;
 
@@ -327,21 +325,21 @@ namespace SQLitePCL.pretty
             this.value = value;
         }
 
-        public SQLiteType SQLiteType 
-        { 
+        public SQLiteType SQLiteType
+        {
             get
             {
                 return SQLiteType.Text;
             }
         }
 
-        public int Length 
-        { 
+        public int Length
+        {
             get
             {
                 return this.ToBlob().Length;
             }
-        } 
+        }
 
         public byte[] ToBlob()
         {
@@ -350,9 +348,9 @@ namespace SQLitePCL.pretty
 
         // When casting a TEXT value to REAL, the longest possible prefix
         // of the value that can be interpreted as a real number is extracted
-        // from the TEXT value and the remainder ignored. Any leading spaces 
-        // in the TEXT value are ignored when converging from TEXT to REAL. 
-        // If there is no prefix that can be interpreted as a real number, 
+        // from the TEXT value and the remainder ignored. Any leading spaces
+        // in the TEXT value are ignored when converging from TEXT to REAL.
+        // If there is no prefix that can be interpreted as a real number,
         // the result of the conversion is 0.0.
         public double ToDouble()
         {
@@ -361,18 +359,18 @@ namespace SQLitePCL.pretty
 
         public int ToInt()
         {
-            return (int) this.ToInt64();
+            return (int)this.ToInt64();
         }
 
-        // When casting a TEXT value to INTEGER, the longest possible prefix of 
-        // the value that can be interpreted as an integer number is extracted from 
-        // the TEXT value and the remainder ignored. Any leading spaces in the TEXT 
-        // value when converting from TEXT to INTEGER are ignored. If there is no 
-        // prefix that can be interpreted as an integer number, the result of the 
-        // conversion is 0. The CAST operator understands decimal integers only — 
-        // conversion of hexadecimal integers stops at the "x" in the "0x" prefix 
+        // When casting a TEXT value to INTEGER, the longest possible prefix of
+        // the value that can be interpreted as an integer number is extracted from
+        // the TEXT value and the remainder ignored. Any leading spaces in the TEXT
+        // value when converting from TEXT to INTEGER are ignored. If there is no
+        // prefix that can be interpreted as an integer number, the result of the
+        // conversion is 0. The CAST operator understands decimal integers only —
+        // conversion of hexadecimal integers stops at the "x" in the "0x" prefix
         // of the hexadecimal integer string and thus result of the CAST is always zero.
-        public long ToInt64() 
+        public long ToInt64()
         {
             throw new NotImplementedException();
         }
@@ -383,7 +381,7 @@ namespace SQLitePCL.pretty
         }
     }
 
-    internal class BlobValue : ISQLiteValue 
+    internal class BlobValue : ISQLiteValue
     {
         private readonly byte[] value;
 
@@ -392,21 +390,21 @@ namespace SQLitePCL.pretty
             this.value = value;
         }
 
-        public SQLiteType SQLiteType 
-        { 
+        public SQLiteType SQLiteType
+        {
             get
             {
                 return SQLiteType.Blob;
             }
         }
 
-        public int Length 
-        { 
+        public int Length
+        {
             get
             {
                 return value.Length;
             }
-        } 
+        }
 
         public byte[] ToBlob()
         {
@@ -421,11 +419,11 @@ namespace SQLitePCL.pretty
 
         public int ToInt()
         {
-            return (int) this.ToInt64();
+            return (int)this.ToInt64();
         }
 
         // When casting a BLOB value to INTEGER, the value is first converted to TEXT.
-        public long ToInt64() 
+        public long ToInt64()
         {
             return this.ToString().ToSQLiteValue().ToInt64();
         }
@@ -447,54 +445,53 @@ namespace SQLitePCL.pretty
             this.index = index;
         }
 
-        public string ColumnName 
-        { 
+        public string ColumnName
+        {
             get
-            { 
+            {
                 return raw.sqlite3_column_name(stmt, index);
             }
         }
 
-        public string ColumnDatabaseName 
-        { 
+        public string ColumnDatabaseName
+        {
             get
             {
                 return raw.sqlite3_column_database_name(stmt, index);
             }
         }
 
-        public String ColumnOriginName 
-        { 
+        public String ColumnOriginName
+        {
             get
             {
                 return raw.sqlite3_column_origin_name(stmt, index);
             }
-
         }
 
-        public string ColumnTableName 
-        { 
+        public string ColumnTableName
+        {
             get
             {
                 return raw.sqlite3_column_table_name(stmt, index);
             }
         }
 
-        public SQLiteType SQLiteType 
-        { 
+        public SQLiteType SQLiteType
+        {
             get
             {
-                return (SQLiteType) raw.sqlite3_column_type(stmt, index);
+                return (SQLiteType)raw.sqlite3_column_type(stmt, index);
             }
         }
 
-        public int Length 
-        { 
+        public int Length
+        {
             get
             {
                 return raw.sqlite3_column_bytes(stmt, index);
             }
-        } 
+        }
 
         public byte[] ToBlob()
         {
@@ -530,7 +527,7 @@ namespace SQLitePCL.pretty
             long rowId = raw.sqlite3_last_insert_rowid(db);
 
             sqlite3_blob blob;
-            int rc = raw.sqlite3_blob_open(db, sdb, tableName, columnName, rowId, canWrite ? 1 : 0 , out blob);
+            int rc = raw.sqlite3_blob_open(db, sdb, tableName, columnName, rowId, canWrite ? 1 : 0, out blob);
             SQLiteException.CheckOk(stmt, rc);
 
             return new BlobStream(blob, canWrite);

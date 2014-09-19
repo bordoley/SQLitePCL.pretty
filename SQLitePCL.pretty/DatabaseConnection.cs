@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2014 David Bordoley
    Copyright 2014 Zumero, LLC
 
@@ -16,7 +16,6 @@
 */
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -107,7 +106,7 @@ namespace SQLitePCL.pretty
         public ActionCode Action
         {
             get
-            { 
+            {
                 return action;
             }
         }
@@ -139,7 +138,7 @@ namespace SQLitePCL.pretty
 
     public static class DatabaseConnection
     {
-        public static void Execute(this IDatabaseConnection  db, string sql)
+        public static void Execute(this IDatabaseConnection db, string sql)
         {
             Contract.Requires(db != null);
             Contract.Requires(sql != null);
@@ -151,7 +150,7 @@ namespace SQLitePCL.pretty
         }
 
         // allows only one statement in the sql string
-        public static void Execute(this IDatabaseConnection  db, string sql, params object[] a)
+        public static void Execute(this IDatabaseConnection db, string sql, params object[] a)
         {
             Contract.Requires(db != null);
             Contract.Requires(sql != null);
@@ -191,7 +190,7 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(this IDatabaseConnection  db, string sql)
+        public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(this IDatabaseConnection db, string sql)
         {
             Contract.Requires(db != null);
             Contract.Requires(sql != null);
@@ -200,7 +199,7 @@ namespace SQLitePCL.pretty
             return db.Query(sql, empty);
         }
 
-        public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(this IDatabaseConnection  db, string sql, params object[] a)
+        public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(this IDatabaseConnection db, string sql, params object[] a)
         {
             Contract.Requires(db != null);
             Contract.Requires(sql != null);
@@ -214,7 +213,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(db != null);
             Contract.Requires(sql != null);
 
-            for (var next = sql; next != null;)
+            for (var next = sql; next != null; )
             {
                 string tail = null;
                 IStatement stmt = db.PrepareStatement(next, out tail);
@@ -255,7 +254,6 @@ namespace SQLitePCL.pretty
             stmt.Bind(a);
             return stmt;
         }
-
 
         public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
         {
@@ -358,7 +356,7 @@ namespace SQLitePCL.pretty
         }
 
         public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
-        {            
+        {
             Contract.Requires(db != null);
             Contract.Requires(name != null);
             Contract.Requires(reduce != null);
@@ -463,17 +461,17 @@ namespace SQLitePCL.pretty
             raw.sqlite3_rollback_hook(db, v => Rollback(this, EventArgs.Empty), null);
 
             raw.sqlite3_trace(
-                db, 
-                (v, stmt) => Trace(this, DatabaseTraceEventArgs.Create(stmt)), 
+                db,
+                (v, stmt) => Trace(this, DatabaseTraceEventArgs.Create(stmt)),
                 null);
 
             raw.sqlite3_profile(
-                db, (v, stmt, ts) => Profile(this, DatabaseProfileEventArgs.Create(stmt, TimeSpan.FromTicks(ts))), 
-                null); 
+                db, (v, stmt, ts) => Profile(this, DatabaseProfileEventArgs.Create(stmt, TimeSpan.FromTicks(ts))),
+                null);
 
             raw.sqlite3_update_hook(
-                db, 
-                (v, type, database, table, rowid) => Update(this, DatabaseUpdateEventArgs.Create((ActionCode)type, database, table, rowid)), 
+                db,
+                (v, type, database, table, rowid) => Update(this, DatabaseUpdateEventArgs.Create((ActionCode)type, database, table, rowid)),
                 null);
         }
 
@@ -483,15 +481,18 @@ namespace SQLitePCL.pretty
         // FIXME: One could argue that we really shouldn't initialized the callbacks
         // with sqlite3 until we actually have listeners. not sure how much it matters though
         public event EventHandler Rollback = (o, e) => { };
-        public event EventHandler<DatabaseProfileEventArgs> Profile = (o,e) => {};
-        public event EventHandler<DatabaseTraceEventArgs> Trace = (o,e) => {};
-        public event EventHandler<DatabaseUpdateEventArgs> Update = (obj, args) => {};
+
+        public event EventHandler<DatabaseProfileEventArgs> Profile = (o, e) => { };
+
+        public event EventHandler<DatabaseTraceEventArgs> Trace = (o, e) => { };
+
+        public event EventHandler<DatabaseUpdateEventArgs> Update = (obj, args) => { };
 
         public TimeSpan BusyTimeout
         {
             set
             {
-                int rc = raw.sqlite3_busy_timeout(db, (int) value.TotalMilliseconds);
+                int rc = raw.sqlite3_busy_timeout(db, (int)value.TotalMilliseconds);
                 SQLiteException.CheckOk(db, rc);
             }
         }
@@ -505,7 +506,7 @@ namespace SQLitePCL.pretty
         }
 
         public bool IsAutoCommit
-        { 
+        {
             get
             {
                 return raw.sqlite3_get_autocommit(db) == 0 ? false : true;
@@ -521,8 +522,8 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public IEnumerable<IStatement> Statements 
-        { 
+        public IEnumerable<IStatement> Statements
+        {
             get
             {
                 return statements;
@@ -545,7 +546,7 @@ namespace SQLitePCL.pretty
 
             var filename = raw.sqlite3_db_filename(db, database);
 
-            // If there is no attached database N on the database connection, or 
+            // If there is no attached database N on the database connection, or
             // if database N is a temporary or in-memory database, then a NULL pointer is returned.
             if (filename == null)
             {
@@ -605,7 +606,7 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public void RegisterAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>,T> func, Func<T, ISQLiteValue> resultSelector)
+        public void RegisterAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(name != null);
             Contract.Requires(func != null);
@@ -653,15 +654,19 @@ namespace SQLitePCL.pretty
                             case SQLiteType.Blob:
                                 raw.sqlite3_result_blob(ctx, result.ToBlob());
                                 return;
+
                             case SQLiteType.Null:
                                 raw.sqlite3_result_null(ctx);
                                 return;
+
                             case SQLiteType.Text:
                                 raw.sqlite3_result_text(ctx, result.ToString());
                                 return;
+
                             case SQLiteType.Float:
                                 raw.sqlite3_result_double(ctx, result.ToDouble());
                                 return;
+
                             case SQLiteType.Integer:
                                 raw.sqlite3_result_int64(ctx, result.ToInt64());
                                 return;
@@ -696,15 +701,19 @@ namespace SQLitePCL.pretty
                             case SQLiteType.Blob:
                                 raw.sqlite3_result_blob(ctx, result.ToBlob());
                                 return;
+
                             case SQLiteType.Null:
                                 raw.sqlite3_result_null(ctx);
                                 return;
+
                             case SQLiteType.Text:
                                 raw.sqlite3_result_text(ctx, result.ToString());
                                 return;
+
                             case SQLiteType.Float:
                                 raw.sqlite3_result_double(ctx, result.ToDouble());
                                 return;
+
                             case SQLiteType.Integer:
                                 raw.sqlite3_result_int64(ctx, result.ToInt64());
                                 return;
@@ -714,7 +723,6 @@ namespace SQLitePCL.pretty
                     {
                         raw.sqlite3_result_error(ctx, e.Message);
                     }
-
                 });
             SQLiteException.CheckOk(rc);
         }

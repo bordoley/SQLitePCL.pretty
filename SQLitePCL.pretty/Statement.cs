@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2014 David Bordoley
    Copyright 2014 Zumero, LLC
 

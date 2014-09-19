@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2014 David Bordoley
    Copyright 2014 Zumero, LLC
 
@@ -33,6 +33,7 @@ namespace SQLitePCL.pretty
     {
         // Only includes flags suitable for sqlite3_open_v2
         ReadOnly = raw.SQLITE_OPEN_READONLY,
+
         ReadWrite = raw.SQLITE_OPEN_READWRITE,
         Create = raw.SQLITE_OPEN_CREATE,
         Uri = raw.SQLITE_OPEN_URI,
@@ -78,7 +79,7 @@ namespace SQLitePCL.pretty
         DropVTable = raw.SQLITE_DROP_VTABLE,
         Function = raw.SQLITE_FUNCTION,
         SavePoint = raw.SQLITE_SAVEPOINT,
-        Copy = raw.SQLITE_COPY, 
+        Copy = raw.SQLITE_COPY,
         Recursive = raw.SQLITE_RECURSIVE
     }
 
@@ -176,6 +177,6 @@ namespace SQLitePCL.pretty
         NoticeRecoverWal = raw.SQLITE_NOTICE_RECOVER_WAL,
         NoticeRecoverRollback = raw.SQLITE_NOTICE_RECOVER_ROLLBACK,
 
-        WarningAutoIndex= raw.SQLITE_WARNING_AUTOINDEX
+        WarningAutoIndex = raw.SQLITE_WARNING_AUTOINDEX
     }
 }

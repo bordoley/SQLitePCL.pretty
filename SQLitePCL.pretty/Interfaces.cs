@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2014 David Bordoley
    Copyright 2014 Zumero, LLC
 
@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.IO;
 
 namespace SQLitePCL.pretty
-{ 
+{
     public interface IDatabaseConnection : IDisposable
     {
         event EventHandler Rollback;
@@ -48,7 +48,7 @@ namespace SQLitePCL.pretty
         void RegisterCommitHook(Func<bool> onCommit);
 
         void RegisterAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector);
-    
+
         void RegisterScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce);
     }
 

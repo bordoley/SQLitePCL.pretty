@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2014 David Bordoley
    Copyright 2014 Zumero, LLC
 
@@ -24,7 +24,7 @@ namespace SQLitePCL.pretty
         internal static SQLiteVersion Of(int version)
         {
             int release = version % 1000;
-            int minor = (version / 1000) % 1000; 
+            int minor = (version / 1000) % 1000;
             int major = version / 1000000;
             return new SQLiteVersion(major, minor, release);
         }
@@ -66,7 +66,7 @@ namespace SQLitePCL.pretty
 
         public int ToInt()
         {
-            return (this.Major * 1000000 + this.Minor * 1000 + this.Release); 
+            return (this.Major * 1000000 + this.Minor * 1000 + this.Release);
         }
 
         public override string ToString()

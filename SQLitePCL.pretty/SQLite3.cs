@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2014 David Bordoley
    Copyright 2014 Zumero, LLC
 
@@ -16,12 +16,8 @@
 */
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
-using System.IO;
-using System.Text;
 
 namespace SQLitePCL.pretty
 {
@@ -29,7 +25,7 @@ namespace SQLitePCL.pretty
     {
         private static IEnumerator<String> compilerOptionsEnumerator()
         {
-            for (int i = 0;; i++)
+            for (int i = 0; ; i++)
             {
                 var option = raw.sqlite3_compileoption_get(i);
                 if (option != null)
@@ -43,7 +39,7 @@ namespace SQLitePCL.pretty
             }
         }
 
-        private static readonly IEnumerable<String> compilerOptions = 
+        private static readonly IEnumerable<String> compilerOptions =
             new DelegatingEnumerable<String>(() => compilerOptionsEnumerator());
 
         public static IEnumerable<String> CompilerOptions

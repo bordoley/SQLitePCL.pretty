@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2014 David Bordoley
    Copyright 2014 Zumero, LLC
 
@@ -18,16 +18,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SQLitePCL.pretty;
 
 #if USE_NUNIT
+
 using NUnit.Framework;
-using TestInitialize = NUnit.Framework.SetUpAttribute;
-using TestContext = System.Object;
-using TestProperty = NUnit.Framework.PropertyAttribute;
 using TestClass = NUnit.Framework.TestFixtureAttribute;
 using TestMethod = NUnit.Framework.TestAttribute;
-using TestCleanup = NUnit.Framework.TearDownAttribute;
+
 #elif WINDOWS_PHONE
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 #elif NETFX_CORE
@@ -81,10 +78,10 @@ namespace SQLitePCL.pretty.tests
 
             using (var db = SQLite3.Open(":memory:"))
             {
-                byte[] bytes = new byte[] {9,9,9,9,9};
+                byte[] bytes = new byte[] { 9, 9, 9, 9, 9 };
 
                 db.Execute("CREATE TABLE foo (b blob);");
-                using ( var stmt = db.PrepareStatement("INSERT INTO foo (b) VALUES (:x)") )
+                using (var stmt = db.PrepareStatement("INSERT INTO foo (b) VALUES (:x)"))
                 {
                     stmt.Bind(0, bytes);
                     stmt.MoveNext();
@@ -106,7 +103,7 @@ namespace SQLitePCL.pretty.tests
                     using (var blob = row[0].ToReadOnlyStream())
                     {
                         Assert.AreEqual(bytes.Length, blob.Length);
-                        for (int i = 0; i < blob.Length; i++) 
+                        for (int i = 0; i < blob.Length; i++)
                         {
                             int b = blob.ReadByte();
                             Assert.AreEqual(9, b);
@@ -148,14 +145,14 @@ namespace SQLitePCL.pretty.tests
         {
             long memory_used = SQLite3.MemoryUsed;
             long memory_highwater = SQLite3.MemoryHighWater;
-            #if not
+#if not
             // these asserts fail on the iOS builtin sqlite.  not sure
             // why.  not sure the asserts are worth doing anyway.
             Assert.IsTrue(memory_used > 0);
             Assert.IsTrue(memory_highwater >= memory_used);
-            #endif
+#endif
         }
-            
+
         [TestMethod]
         public void test_backup()
         {
@@ -296,7 +293,7 @@ namespace SQLitePCL.pretty.tests
                 }
             }
         }
-            
+
         [TestMethod]
         public void test_stmt_complete()
         {
@@ -313,14 +310,14 @@ namespace SQLitePCL.pretty.tests
                 Assert.IsTrue(SQLite3.IsCompleteStatement("SELECT COUNT(*) FROM foo;"));
                 Assert.IsTrue(SQLite3.IsCompleteStatement("SELECT 5;"));
             }
-        } 
-            
+        }
+
         [TestMethod]
         public void test_next_stmt()
         {
             using (var db = SQLite3.Open(":memory:"))
             {
-                Assert.AreEqual(db.Statements.Count(), 0); 
+                Assert.AreEqual(db.Statements.Count(), 0);
 
                 using (var stmt = db.PrepareStatement("SELECT 5;"))
                 {
@@ -328,11 +325,11 @@ namespace SQLitePCL.pretty.tests
 
                     var firstStmt = db.Statements.First();
 
-                    // IStatement can't sanely implement equality at the 
-                    // interface level. Doing so would tightly bind the 
+                    // IStatement can't sanely implement equality at the
+                    // interface level. Doing so would tightly bind the
                     // interface to the underlying SQLite implementation
                     // which we don't want to do.
-                    Assert.AreEqual(stmt.SQL, firstStmt.SQL); 
+                    Assert.AreEqual(stmt.SQL, firstStmt.SQL);
                 }
             }
         }
@@ -363,7 +360,7 @@ namespace SQLitePCL.pretty.tests
                 }
             }
         }
-            
+
         [TestMethod]
         public void test_changes()
         {
@@ -377,7 +374,7 @@ namespace SQLitePCL.pretty.tests
                 db.Execute("UPDATE foo SET x=5;");
                 Assert.AreEqual(db.Changes, 3);
             }
-        } 
+        }
 
         [TestMethod]
         public void test_explicit_prepare()
@@ -388,7 +385,7 @@ namespace SQLitePCL.pretty.tests
                 const int num = 7;
                 using (var stmt = db.PrepareStatement("INSERT INTO foo (x) VALUES (?)"))
                 {
-                    for (int i=0; i<num; i++)
+                    for (int i = 0; i < num; i++)
                     {
                         stmt.Reset();
                         stmt.ClearBindings();
@@ -411,11 +408,11 @@ namespace SQLitePCL.pretty.tests
         {
             using (var db = SQLite3.Open(":memory:"))
             {
-                try 
+                try
                 {
                     db.Execute("CREATE TABLE foo (x int);INSERT INTO foo (x) VALUES (1);");
                     Assert.Fail();
-                } 
+                }
                 catch (ArgumentException)
                 {
                 }
@@ -435,15 +432,15 @@ namespace SQLitePCL.pretty.tests
                     stmt.MoveNext();
                     blob = stmt.Current[0].ToBlob();
                 }
-                     
+
                 db.Execute("INSERT INTO foo (x,v,t,d,b,q) VALUES (?,?,?,?,?,?)", 32, 44, "hello", 3.14, blob, null);
 
-                #if not
+#if not
                 // maybe we should just let this fail so we can
                 // see the differences between running against the built-in
                 // sqlite vs a recent version?
                 if (1 == raw.sqlite3_compileoption_used("ENABLE_COLUMN_METADATA"))
-                #endif
+#endif
                 {
                     using (var stmt = db.PrepareStatement("SELECT x AS mario FROM foo;"))
                     {
@@ -475,12 +472,11 @@ namespace SQLitePCL.pretty.tests
                 db.Execute("INSERT INTO foo (x,v,t,d,b,q) VALUES (?,?,?,?,?,?)", 32, 44, "hello", 3.14, blob, null);
                 foreach (var r in db.Query("SELECT x,v,t,d,b,q FROM foo;"))
                 {
-
                     Assert.AreEqual(r[1].ToInt(), 44);
                     Assert.AreEqual(r[2].ToString(), "hello");
                     Assert.AreEqual(r[3].ToDouble(), 3.14);
                     Assert.AreEqual(r[4].ToBlob().Length, blob.Length);
-                    for (int i=0; i<blob.Length; i++)
+                    for (int i = 0; i < blob.Length; i++)
                     {
                         Assert.AreEqual(r[4].ToBlob()[i], blob[i]);
                     }
@@ -503,11 +499,11 @@ namespace SQLitePCL.pretty.tests
 
                     byte[] b2 = row[4].ToBlob();
                     Assert.AreEqual(b2.Length, blob.Length);
-                    for (int i=0; i<blob.Length; i++)
+                    for (int i = 0; i < blob.Length; i++)
                     {
                         Assert.AreEqual(b2[i], blob[i]);
                     }
-                        
+
                     Assert.AreEqual(row[5].SQLiteType, SQLiteType.Null);
 
                     Assert.AreEqual(row[0].ColumnName, "x");
@@ -575,7 +571,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(c, val * val * val);
             }
         }
- 
+
         [TestMethod]
         public void test_makeblob()
         {
@@ -587,11 +583,11 @@ namespace SQLitePCL.pretty.tests
                         byte[] b = new byte[v.ToInt()];
                         for (int i = 0; i < b.Length; i++)
                         {
-                            b[i] = (byte) (i % 256);
+                            b[i] = (byte)(i % 256);
                         }
                         return b.ToSQLiteValue();
                     });
-                        
+
                 var c = db.Query("SELECT makeblob(?);", val).Select(rs => rs[0].ToBlob()).First();
                 Assert.AreEqual(c.Length, val);
             }
@@ -604,7 +600,6 @@ namespace SQLitePCL.pretty.tests
             {
                 db.RegisterScalarFunc("my_mean", (IReadOnlyList<ISQLiteValue> values) =>
                     (values.Aggregate(0d, (acc, v) => acc + v.ToDouble()) / values.Count).ToSQLiteValue());
-
 
                 var result = db.Query("SELECT my_mean(1,2,3,4,5,6,7,8);").Select(rs => rs[0].ToDouble()).First();
                 Assert.IsTrue(result >= (36 / 8));
@@ -644,7 +639,7 @@ namespace SQLitePCL.pretty.tests
         {
             using (var db = SQLite3.Open(":memory:"))
             {
-                db.RegisterScalarFunc("len_as_blobs", (IReadOnlyList<ISQLiteValue> values) => 
+                db.RegisterScalarFunc("len_as_blobs", (IReadOnlyList<ISQLiteValue> values) =>
                     values.Where(v => v.SQLiteType != SQLiteType.Null).Aggregate(0, (acc, val) => acc + val.Length).ToSQLiteValue());
                 Assert.AreEqual(0, db.Query("SELECT len_as_blobs();").Select(v => v[0].ToInt()).First());
                 Assert.AreEqual(0, db.Query("SELECT len_as_blobs(null);").Select(v => v[0].ToInt()).First());
@@ -669,11 +664,11 @@ namespace SQLitePCL.pretty.tests
         {
             using (var db = SQLite3.Open(":memory:"))
             {
-                db.RegisterAggregateFunc<Tuple<long,long>>("sum_plus_count", Tuple.Create(0L, 0L), 
-                    (Tuple<long,long> acc, ISQLiteValue arg) => Tuple.Create(acc.Item1 + arg.ToInt64(), acc.Item2 + 1L),
-                    (Tuple<long,long> acc) => (acc.Item1 + acc.Item2).ToSQLiteValue());
+                db.RegisterAggregateFunc<Tuple<long, long>>("sum_plus_count", Tuple.Create(0L, 0L),
+                    (Tuple<long, long> acc, ISQLiteValue arg) => Tuple.Create(acc.Item1 + arg.ToInt64(), acc.Item2 + 1L),
+                    (Tuple<long, long> acc) => (acc.Item1 + acc.Item2).ToSQLiteValue());
                 db.Execute("CREATE TABLE foo (x int);");
-                for (int i= 0; i < 5; i++)
+                for (int i = 0; i < 5; i++)
                 {
                     db.Execute("INSERT INTO foo (x) VALUES (?);", i);
                 }
@@ -705,10 +700,10 @@ namespace SQLitePCL.pretty.tests
                         return false;
                     });
 
-                db.Rollback += (o,e) => count_rollbacks++;
-                db.Update += (o,e) => count_updates++;
-                db.Trace += (o,e) => count_traces++;
-                db.Profile += (o,e) => count_profiles++;
+                db.Rollback += (o, e) => count_rollbacks++;
+                db.Update += (o, e) => count_updates++;
+                db.Trace += (o, e) => count_traces++;
+                db.Profile += (o, e) => count_profiles++;
 
                 db.Execute("CREATE TABLE foo (x int);");
 
