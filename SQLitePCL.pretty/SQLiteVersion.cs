@@ -19,8 +19,18 @@ using System;
 
 namespace SQLitePCL.pretty
 {
-    public struct SQLiteVersion : IComparable<SQLiteVersion>
+    public struct SQLiteVersion : IComparable<SQLiteVersion>, IEquatable<SQLiteVersion>
     {
+        public static bool operator ==(SQLiteVersion x, SQLiteVersion y)
+        {
+            return x.Equals(y);
+        }
+
+        public static bool operator !=(SQLiteVersion x, SQLiteVersion y)
+        {
+            return !(x == y);
+        }
+
         internal static SQLiteVersion Of(int version)
         {
             int release = version % 1000;
@@ -72,6 +82,23 @@ namespace SQLitePCL.pretty
         public override string ToString()
         {
             return string.Format("{0}.{1}.{2}", major, minor, release);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.ToInt();
+        }
+
+        public bool Equals(SQLiteVersion other)
+        {
+            return this.Major == other.Major &&
+                this.Minor == other.Minor &&
+                this.Release == other.Release;
+        }
+
+        public override bool Equals(object other)
+        {
+           return other is SQLiteValue && this == (SQLiteVersion)other;
         }
 
         public int CompareTo(SQLiteVersion other)
