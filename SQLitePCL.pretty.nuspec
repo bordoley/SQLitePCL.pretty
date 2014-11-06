@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>SQLitePCL.pretty</id>
+    <version>0.0.1</version>
+    <title>SQLitePCL.pretty</title>
+    <authors>David Bordoley</authors>
+    <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/bordoley/SQLitePCL.pretty</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A pretty face on top of SQLitePCL.raw</description>
+    <tags>portable sqlite pcl</tags>
+  </metadata>
+  <files>
+    <file src="SQLitePCL.pretty\bin\Release\**\SQLitePCL.pretty*" target="lib" />
+  </files>
+</package>

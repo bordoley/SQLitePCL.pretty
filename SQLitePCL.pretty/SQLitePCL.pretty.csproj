@@ -96,11 +96,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>
-    <Reference Include="SQLitePCL.raw">
-      <HintPath>..\..\packages\SQLitePCL.raw_basic.0.6.1\lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10\SQLitePCL.raw.dll</HintPath>
-    </Reference>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <Reference Include="SQLitePCL.raw">
+      <HintPath>..\packages\SQLitePCL.raw_basic.0.6.1\lib\portable-net45+sl5+netcore45+wp8+MonoAndroid10+MonoTouch10\SQLitePCL.raw.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>
