@@ -10,6 +10,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A pretty face on top of SQLitePCL.raw</description>
     <tags>portable sqlite pcl</tags>
+    <dependencies>
+      <dependency id="SQLitePCL.raw_basic" version="0.6.1" />
+    </dependencies>
   </metadata>
   <files>
     <file src="SQLitePCL.pretty\bin\Release\**\SQLitePCL.pretty*" target="lib" />
