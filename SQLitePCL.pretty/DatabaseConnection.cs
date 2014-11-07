@@ -542,8 +542,6 @@ namespace SQLitePCL.pretty
 
         public string GetFileName(string database)
         {
-            Contract.Requires(database != null);
-
             var filename = raw.sqlite3_db_filename(db, database);
 
             // If there is no attached database N on the database connection, or
@@ -558,8 +556,6 @@ namespace SQLitePCL.pretty
 
         public IStatement PrepareStatement(string sql, out string tail)
         {
-            Contract.Requires(sql != null);
-
             sqlite3_stmt stmt;
             int rc = raw.sqlite3_prepare_v2(db, sql, out stmt, out tail);
             SQLiteException.CheckOk(db, rc);
@@ -569,17 +565,12 @@ namespace SQLitePCL.pretty
 
         public void RegisterCollation(string name, Comparison<string> comparison)
         {
-            Contract.Requires(name != null);
-            Contract.Requires(comparison != null);
-
             int rc = raw.sqlite3_create_collation(db, name, null, (v, s1, s2) => comparison(s1, s2));
             SQLiteException.CheckOk(db, rc);
         }
 
         public void RegisterCommitHook(Func<bool> onCommit)
         {
-            Contract.Requires(onCommit != null);
-
             raw.sqlite3_commit_hook(db, v => onCommit() ? 1 : 0, null);
         }
 
@@ -608,11 +599,6 @@ namespace SQLitePCL.pretty
 
         public void RegisterAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            Contract.Requires(name != null);
-            Contract.Requires(func != null);
-            Contract.Requires(resultSelector != null);
-            Contract.Requires(nArg >= -1);
-
             delegate_function_aggregate_step funcStep = (ctx, user_data, args) =>
                 {
                     CtxState<T> state;
@@ -684,10 +670,6 @@ namespace SQLitePCL.pretty
 
         public void RegisterScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
         {
-            Contract.Requires(name != null);
-            Contract.Requires(reduce != null);
-            Contract.Requires(nArg >= -1);
-
             int rc = raw.sqlite3_create_function(db, name, nArg, null, (ctx, ud, args) =>
                 {
                     IReadOnlyList<ISQLiteValue> iArgs = args.Select(value => value.ToSQLiteValue()).ToList();

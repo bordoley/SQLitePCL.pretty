@@ -19,6 +19,7 @@ using System;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SQLitePCL.pretty
 {
@@ -318,6 +319,10 @@ namespace SQLitePCL.pretty
 
     internal class StringValue : ISQLiteValue
     {
+        private static Regex isNegative = new Regex("^[ ]*[-]");
+        private static Regex stringToDoubleCast = new Regex("^[ ]*([-]?)[0-9]+([.][0-9]+)?");
+        private static Regex stringToLongCast = new Regex("^[ ]*([-]?)[0-9]+");
+
         private readonly string value;
 
         internal StringValue(string value)
@@ -354,7 +359,17 @@ namespace SQLitePCL.pretty
         // the result of the conversion is 0.0.
         public double ToDouble()
         {
-            throw new NotImplementedException();
+            var result = stringToDoubleCast.Match(this.value);
+            if (result.Success)
+            {
+                double parsed;
+                if (Double.TryParse(result.Value, out parsed))
+                {
+                    return parsed;
+                }
+            }
+
+            return 0.0;
         }
 
         public int ToInt()
@@ -372,7 +387,25 @@ namespace SQLitePCL.pretty
         // of the hexadecimal integer string and thus result of the CAST is always zero.
         public long ToInt64()
         {
-            throw new NotImplementedException();
+            var result = stringToLongCast.Match(this.value);
+            if (result.Success)
+            {
+                long parsed;
+                if (long.TryParse(result.Value, out parsed))
+                {
+                    return parsed;
+                }
+                else if (isNegative.Match(this.value).Success)
+                {
+                    return long.MinValue;
+                }
+                else
+                {
+                    return long.MaxValue;
+                }
+            }
+
+            return 0;
         }
 
         public override string ToString()
