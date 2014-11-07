@@ -120,66 +120,42 @@ namespace SQLitePCL.pretty
 
         public void Bind(int index, byte[] blob)
         {
-            Contract.Requires(blob != null);
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.BindParameterCount);
-
             int rc = raw.sqlite3_bind_blob(stmt, index + 1, blob);
             SQLiteException.CheckOk(stmt, rc);
         }
 
         public void Bind(int index, double val)
         {
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.BindParameterCount);
-
             int rc = raw.sqlite3_bind_double(stmt, index + 1, val);
             SQLiteException.CheckOk(stmt, rc);
         }
 
         public void Bind(int index, int val)
         {
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.BindParameterCount);
-
             int rc = raw.sqlite3_bind_int(stmt, index + 1, val);
             SQLiteException.CheckOk(stmt, rc);
         }
 
         public void Bind(int index, long val)
         {
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.BindParameterCount);
-
             int rc = raw.sqlite3_bind_int64(stmt, index + 1, val);
             SQLiteException.CheckOk(stmt, rc);
         }
 
         public void Bind(int index, string text)
         {
-            Contract.Requires(text != null);
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.BindParameterCount);
-
             int rc = raw.sqlite3_bind_text(stmt, index + 1, text);
             SQLiteException.CheckOk(stmt, rc);
         }
 
         public void BindNull(int index)
         {
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.BindParameterCount);
-
             int rc = raw.sqlite3_bind_null(stmt, index + 1);
             SQLiteException.CheckOk(stmt, rc);
         }
 
         public void BindZeroBlob(int index, int size)
         {
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.BindParameterCount);
-            Contract.Requires(size >= 0);
-
             int rc = raw.sqlite3_bind_zeroblob(stmt, index + 1, size);
             SQLiteException.CheckOk(stmt, rc);
         }
@@ -192,16 +168,11 @@ namespace SQLitePCL.pretty
 
         public int GetBindParameterIndex(string parameter)
         {
-            Contract.Requires(parameter != null);
-
             return raw.sqlite3_bind_parameter_index(stmt, parameter) - 1;
         }
 
         public string GetBindParameterName(int index)
         {
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.BindParameterCount);
-
             return raw.sqlite3_bind_parameter_name(stmt, index + 1);
         }
 

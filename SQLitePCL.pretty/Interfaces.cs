@@ -54,6 +54,7 @@ namespace SQLitePCL.pretty
         void RegisterScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce);
     }
 
+    [ContractClass(typeof(IStatementContract))]
     public interface IStatement : IEnumerator<IReadOnlyList<IResultSetValue>>
     {
         int BindParameterCount { get; }

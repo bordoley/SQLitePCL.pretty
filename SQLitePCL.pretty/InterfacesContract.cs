@@ -16,6 +16,7 @@
 */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
@@ -80,5 +81,93 @@ namespace SQLitePCL.pretty
             Contract.Requires(reduce != null);
             Contract.Requires(nArg >= -1); 
         }
+    }
+
+    [ContractClassFor(typeof(IStatement))]
+    internal abstract class IStatementContract : IStatement
+    {
+        public abstract int BindParameterCount { get; }
+
+        public abstract string SQL { get; }
+
+        public abstract bool ReadOnly { get; }
+
+        public abstract bool Busy { get; }
+
+        public void Bind(int index, byte[] blob)
+        {
+            Contract.Requires(blob != null);
+            Contract.Requires(index >= 0);
+            Contract.Requires(index < this.BindParameterCount);
+        }
+
+        public void Bind(int index, double val)
+        {
+            Contract.Requires(index >= 0);
+            Contract.Requires(index < this.BindParameterCount);
+        }
+
+        public void Bind(int index, int val)
+        {
+            Contract.Requires(index >= 0);
+            Contract.Requires(index < this.BindParameterCount);
+        }
+
+        public void Bind(int index, long val)
+        {
+            Contract.Requires(index >= 0);
+            Contract.Requires(index < this.BindParameterCount);
+        }
+
+        public void Bind(int index, string text)
+        {
+            Contract.Requires(text != null);
+            Contract.Requires(index >= 0);
+            Contract.Requires(index < this.BindParameterCount);
+        }
+
+        public void BindNull(int index)
+        {
+            Contract.Requires(index >= 0);
+            Contract.Requires(index < this.BindParameterCount);
+        }
+
+        public void BindZeroBlob(int index, int size)
+        {
+            Contract.Requires(index >= 0);
+            Contract.Requires(index < this.BindParameterCount);
+            Contract.Requires(size >= 0);
+        }
+
+        public abstract void ClearBindings();
+
+        public int GetBindParameterIndex(string parameter)
+        {
+            Contract.Requires(parameter != null);
+            return default(int);
+        }
+
+        public string GetBindParameterName(int index)
+        {
+            Contract.Requires(index >= 0);
+            Contract.Requires(index < this.BindParameterCount);
+            return default(string);
+        }
+
+        public abstract IReadOnlyList<IResultSetValue> Current { get; }
+
+        object IEnumerator.Current
+        {
+            get
+            {
+                return this.Current;
+            }
+        }
+
+        public abstract bool MoveNext();
+
+        public abstract void Reset();
+
+        public abstract void Dispose();
     }
 }
