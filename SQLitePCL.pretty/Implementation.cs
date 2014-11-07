@@ -257,8 +257,10 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                Contract.Requires(index >= 0);
-                Contract.Requires(index < this.Count);
+                if (index < 0 || index >= this.Count)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
 
                 return stmt.ResultSetValueAt(index);
             }
@@ -319,10 +321,10 @@ namespace SQLitePCL.pretty
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            Contract.Requires<ArgumentNullException>(buffer != null);
-            Contract.Requires<ArgumentException>(offset + count <= buffer.Length);
-            Contract.Requires<ArgumentOutOfRangeException>(offset >= 0);
-            Contract.Requires<ArgumentOutOfRangeException>(count >= 0);
+            if (buffer == null) { throw new ArgumentNullException(); }
+            if (offset + count > buffer.Length) { new ArgumentException(); }
+            if (offset < 0 ) { throw new ArgumentOutOfRangeException(); }
+            if (count < 0 ) { throw new ArgumentOutOfRangeException(); }
 
             int numBytes = (int)Math.Min(this.Length - this.Position, count);
             int rc = raw.sqlite3_blob_read(blob, buffer, offset, numBytes, (int)this.Position);
@@ -344,10 +346,10 @@ namespace SQLitePCL.pretty
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            Contract.Requires<ArgumentNullException>(buffer != null);
-            Contract.Requires<ArgumentException>(offset + count <= buffer.Length);
-            Contract.Requires<ArgumentOutOfRangeException>(offset >= 0);
-            Contract.Requires<ArgumentOutOfRangeException>(count >= 0);
+            if (buffer == null) { throw new ArgumentNullException(); }
+            if (offset + count > buffer.Length) { new ArgumentException(); }
+            if (offset < 0 ) { throw new ArgumentOutOfRangeException(); }
+            if (count < 0 ) { throw new ArgumentOutOfRangeException(); }
 
             int numBytes = (int)Math.Min(this.Length - this.Position, count);
 
