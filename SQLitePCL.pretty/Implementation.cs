@@ -271,6 +271,8 @@ namespace SQLitePCL.pretty
     {
         private readonly sqlite3_blob blob;
         private readonly bool canWrite;
+
+        bool disposed = false;
         private long position = 0;
 
         internal BlobStream(sqlite3_blob blob, bool canWrite)
@@ -307,12 +309,17 @@ namespace SQLitePCL.pretty
 
         protected override void Dispose(bool disposing)
         {
+            if (disposed) { return; }
+
             // Closing the BLOB often forces the changes out to disk and so if any I/O errors occur,
             // they will likely occur at the time when the BLOB is closed. Any errors that occur during
             // closing are reported as a non-zero return value.
             // The BLOB is closed unconditionally. Even if this routine returns an error code,
             // the BLOB is still closed.
             raw.sqlite3_blob_close(blob);
+
+            disposed = true;
+            base.Dispose(disposing);
         }
 
         public override void Flush()
