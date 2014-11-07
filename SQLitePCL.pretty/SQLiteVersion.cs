@@ -19,7 +19,7 @@ using System;
 
 namespace SQLitePCL.pretty
 {
-    public struct SQLiteVersion : IComparable<SQLiteVersion>, IEquatable<SQLiteVersion>
+    public struct SQLiteVersion : IEquatable<SQLiteVersion>, IComparable<SQLiteVersion>, IComparable
     {
         public static bool operator ==(SQLiteVersion x, SQLiteVersion y)
         {
@@ -43,7 +43,7 @@ namespace SQLitePCL.pretty
         private readonly int minor;
         private readonly int release;
 
-        internal SQLiteVersion(int major, int minor, int release)
+        private SQLiteVersion(int major, int minor, int release)
         {
             this.major = major;
             this.minor = minor;
@@ -98,12 +98,21 @@ namespace SQLitePCL.pretty
 
         public override bool Equals(object other)
         {
-           return other is SQLiteValue && this == (SQLiteVersion)other;
+           return other is SQLiteVersion && this == (SQLiteVersion)other;
         }
 
         public int CompareTo(SQLiteVersion other)
         {
             return this.ToInt().CompareTo(other.ToInt());
+        }
+
+        public int CompareTo(object obj)
+        {
+            if (obj is SQLiteVersion)
+            {
+                return this.CompareTo((SQLiteVersion)obj);
+            }
+            throw new ArgumentException("Can only compare to other SQLiteValues");
         }
     }
 }
