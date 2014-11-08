@@ -147,46 +147,6 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [TestMethod]
-        public void test_column_origin()
-        {
-            using (var db = SQLite3.Open(":memory:"))
-            {
-                db.Execute("CREATE TABLE foo (x int, v int, t text, d real, b blob, q blob);");
-
-                byte[] blob;
-                using (var stmt = db.PrepareStatement("SELECT randomblob(5);"))
-                {
-                    stmt.MoveNext();
-                    blob = stmt.Current[0].ToBlob();
-                }
-
-                db.Execute("INSERT INTO foo (x,v,t,d,b,q) VALUES (?,?,?,?,?,?)", 32, 44, "hello", 3.14, blob, null);
-
-#if not
-                // maybe we should just let this fail so we can
-                // see the differences between running against the built-in
-                // sqlite vs a recent version?
-                if (1 == raw.sqlite3_compileoption_used("ENABLE_COLUMN_METADATA"))
-#endif
-                {
-                    using (var stmt = db.PrepareStatement("SELECT x AS mario FROM foo;"))
-                    {
-                        stmt.MoveNext();
-                        var row = stmt.Current;
-
-                        Assert.IsTrue(stmt.ReadOnly);
-
-                        // FIXME: These test fail on mac but whatever
-                        // Assert.AreEqual(row[0].ColumnDatabaseName, "main");
-                        // Assert.AreEqual(row[0].ColumnTableName, "foo");
-                        // Assert.AreEqual(row[0].ColumnOriginName, "x");
-                        Assert.AreEqual(row[0].ColumnName, "mario");
-                        Assert.AreEqual(row[0].SQLiteType, SQLiteType.Integer);
-                    }
-                }
-            }
-        }
 
         [TestMethod]
         public void test_row()

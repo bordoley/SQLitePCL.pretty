@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2014 David Bordoley
    Copyright 2014 Zumero, LLC
 
@@ -272,6 +272,54 @@ namespace SQLitePCL.pretty.tests
 
                 Assert.AreEqual(last.Item1, 0);
                 Assert.AreEqual(last.Item2, 0);
+            }
+        }
+    }
+
+    [TestFixture]
+    public class ResultSetTests
+    {
+        [Test]
+        public void TestCount()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                db.ExecuteAll(
+                    @"CREATE TABLE foo (x int, v int);
+                      INSERT INTO foo (x, v) VALUES (1, 2);
+                      INSERT INTO foo (x, v) VALUES (2, 3);");
+                
+
+                foreach (var row in db.Query("select * from foo"))
+                {
+                    Assert.AreEqual(row.Count, 2);
+                }
+
+                foreach (var row in db.Query("select x from foo"))
+                {
+                    Assert.AreEqual(row.Count, 1);
+                }
+            }
+        }
+
+        [Test]
+        public void TestBracketOp()
+        { 
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                db.ExecuteAll(
+                    @"CREATE TABLE foo (x int, v int);
+                      INSERT INTO foo (x, v) VALUES (1, 2);
+                      INSERT INTO foo (x, v) VALUES (2, 3);");
+
+                foreach (var row in db.Query("select * from foo"))
+                {
+                    Assert.Throws(typeof(ArgumentOutOfRangeException), () => { var x = row[-1]; });
+                    Assert.Throws(typeof(ArgumentOutOfRangeException), () => { var x = row[row.Count]; });
+
+                    Assert.AreEqual(row[0].SQLiteType, SQLiteType.Integer);
+                    Assert.AreEqual(row[1].SQLiteType, SQLiteType.Integer);
+                }
             }
         }
     }

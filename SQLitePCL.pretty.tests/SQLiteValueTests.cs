@@ -207,5 +207,62 @@ namespace SQLitePCL.pretty.tests
                 }
             }
         }
+
+        [Test]
+        public void TestResultSetValue()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                db.Execute("CREATE TABLE foo (w int, x text, y real, z blob, n text);");
+
+                byte[] blob = {1, 2};
+                db.Execute("INSERT INTO foo (w, x, y, z, n) VALUES (?,?,?,?,?)", 32, "hello", 3.14, blob, null);
+
+                using (var stmt = db.PrepareStatement("SELECT * from foo"))
+                {
+                    stmt.MoveNext();
+                    var row = stmt.Current;
+
+                    Assert.AreEqual(row[0].ColumnDatabaseName, "main");
+                    Assert.AreEqual(row[0].ColumnTableName, "foo");
+                    Assert.AreEqual(row[0].ColumnOriginName, "w");
+                    Assert.AreEqual(row[0].ColumnName, "w");
+                    Assert.AreEqual(row[0].SQLiteType, SQLiteType.Integer);
+
+                    Assert.AreEqual(row[1].ColumnDatabaseName, "main");
+                    Assert.AreEqual(row[1].ColumnTableName, "foo");
+                    Assert.AreEqual(row[1].ColumnOriginName, "x");
+                    Assert.AreEqual(row[1].ColumnName, "x");
+                    Assert.AreEqual(row[1].SQLiteType, SQLiteType.Text);
+
+                    Assert.AreEqual(row[2].ColumnDatabaseName, "main");
+                    Assert.AreEqual(row[2].ColumnTableName, "foo");
+                    Assert.AreEqual(row[2].ColumnOriginName, "y");
+                    Assert.AreEqual(row[2].ColumnName, "y");
+                    Assert.AreEqual(row[2].SQLiteType, SQLiteType.Float);
+
+                    Assert.AreEqual(row[3].ColumnDatabaseName, "main");
+                    Assert.AreEqual(row[3].ColumnTableName, "foo");
+                    Assert.AreEqual(row[3].ColumnOriginName, "z");
+                    Assert.AreEqual(row[3].ColumnName, "z");
+                    Assert.AreEqual(row[3].SQLiteType, SQLiteType.Blob);
+
+                    Assert.AreEqual(row[4].ColumnDatabaseName, "main");
+                    Assert.AreEqual(row[4].ColumnTableName, "foo");
+                    Assert.AreEqual(row[4].ColumnOriginName, "n");
+                    Assert.AreEqual(row[4].ColumnName, "n");
+                    Assert.AreEqual(row[4].SQLiteType, SQLiteType.Null);
+                }
+
+                using (var stmt = db.PrepareStatement("SELECT w AS mario FROM foo;"))
+                {
+                    stmt.MoveNext();
+                    var row = stmt.Current;
+
+                    Assert.AreEqual(row[0].ColumnOriginName, "w");
+                    Assert.AreEqual(row[0].ColumnName, "mario");
+                }      
+            }
+        }
     }
 }
