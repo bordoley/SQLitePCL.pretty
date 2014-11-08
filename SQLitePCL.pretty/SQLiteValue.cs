@@ -565,9 +565,12 @@ namespace SQLitePCL.pretty
         public Stream ToStream(bool canWrite)
         {
             sqlite3 db = raw.sqlite3_db_handle(stmt);
-            string sdb = raw.sqlite3_column_database_name(stmt, index);
-            string tableName = raw.sqlite3_column_table_name(stmt, index);
-            string columnName = raw.sqlite3_column_name(stmt, index);
+            string sdb = this.ColumnDatabaseName;
+            string tableName = this.ColumnTableName;
+            string columnName = this.ColumnName;
+
+            // FIXME: The rowid really needs to be queried and provided as an argument
+            // PRobably need to rewrite this API
             long rowId = raw.sqlite3_last_insert_rowid(db);
 
             sqlite3_blob blob;
