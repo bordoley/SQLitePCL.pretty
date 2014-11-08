@@ -323,4 +323,10 @@ namespace SQLitePCL.pretty.tests
             }
         }
     }
+
+    [TestFixture]
+    public class BlobStreamTests()
+    {
+    
+    }
 }

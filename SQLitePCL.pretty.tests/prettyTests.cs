@@ -80,14 +80,6 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [TestMethod]
-        public void test_create_table_temp_db()
-        {
-            using (var db = SQLite3.Open(""))
-            {
-                db.Execute("CREATE TABLE foo (x int);");
-            }
-        }
 
         [TestMethod]
         public void test_error()
@@ -143,63 +135,6 @@ namespace SQLitePCL.pretty.tests
                 }
                 catch (ArgumentException)
                 {
-                }
-            }
-        }
-
-
-        [TestMethod]
-        public void test_row()
-        {
-            using (var db = SQLite3.Open(":memory:"))
-            {
-                db.Execute("CREATE TABLE foo (x int, v int, t text, d real, b blob, q blob);");
-
-                byte[] blob = db.Query("SELECT randomblob(5);").Select(row => row[0].ToBlob()).First();
-
-                db.Execute("INSERT INTO foo (x,v,t,d,b,q) VALUES (?,?,?,?,?,?)", 32, 44, "hello", 3.14, blob, null);
-                foreach (var r in db.Query("SELECT x,v,t,d,b,q FROM foo;"))
-                {
-                    Assert.AreEqual(r[1].ToInt(), 44);
-                    Assert.AreEqual(r[2].ToString(), "hello");
-                    Assert.AreEqual(r[3].ToDouble(), 3.14);
-                    Assert.AreEqual(r[4].ToBlob().Length, blob.Length);
-                    for (int i = 0; i < blob.Length; i++)
-                    {
-                        Assert.AreEqual(r[4].ToBlob()[i], blob[i]);
-                    }
-                    Assert.AreEqual(r[5].ToBlob(), null);
-                }
-
-                using (var stmt = db.PrepareStatement("SELECT x,v,t,d,b,q FROM foo;"))
-                {
-                    stmt.MoveNext();
-
-                    // Statement and Result don't expose this api
-                    // Assert.AreEqual(stmt.db_handle(), db);
-
-                    var row = stmt.Current;
-
-                    Assert.AreEqual(row[0].ToInt(), 32);
-                    Assert.AreEqual(row[1].ToInt64(), 44);
-                    Assert.AreEqual(row[2].ToString(), "hello");
-                    Assert.AreEqual(row[3].ToDouble(), 3.14);
-
-                    byte[] b2 = row[4].ToBlob();
-                    Assert.AreEqual(b2.Length, blob.Length);
-                    for (int i = 0; i < blob.Length; i++)
-                    {
-                        Assert.AreEqual(b2[i], blob[i]);
-                    }
-
-                    Assert.AreEqual(row[5].SQLiteType, SQLiteType.Null);
-
-                    Assert.AreEqual(row[0].ColumnName, "x");
-                    Assert.AreEqual(row[1].ColumnName, "v");
-                    Assert.AreEqual(row[2].ColumnName, "t");
-                    Assert.AreEqual(row[3].ColumnName, "d");
-                    Assert.AreEqual(row[4].ColumnName, "b");
-                    Assert.AreEqual(row[5].ColumnName, "q");
                 }
             }
         }
