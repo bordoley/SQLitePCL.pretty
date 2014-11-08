@@ -41,7 +41,7 @@ namespace SQLitePCL.pretty
 
         IEnumerable<IStatement> Statements { get; }
 
-        string GetFileName(string database);
+        bool TryGetFileName(string database, out string filename);
 
         IStatement PrepareStatement(string sql, out string tail);
 

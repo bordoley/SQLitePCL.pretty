@@ -43,10 +43,11 @@ namespace SQLitePCL.pretty
 
         public abstract void Dispose();
 
-        public string GetFileName(string database)
+        public bool TryGetFileName(string database, out string filename)
         {
             Contract.Requires(database != null);
-            return default(string);
+            filename = default(string);
+            return default(bool);
         }
 
         public IStatement PrepareStatement(string sql, out string tail)

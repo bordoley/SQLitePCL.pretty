@@ -24,19 +24,19 @@ namespace SQLitePCL.pretty
 {
     public sealed class DatabaseProfileEventArgs : EventArgs
     {
-        public static DatabaseProfileEventArgs Create(string statement, TimeSpan elapsed)
+        public static DatabaseProfileEventArgs Create(string statement, TimeSpan executionTime)
         {
             Contract.Requires(statement != null);
-            return new DatabaseProfileEventArgs(statement, elapsed);
+            return new DatabaseProfileEventArgs(statement, executionTime);
         }
 
         private readonly string statement;
-        private readonly TimeSpan elapsed;
+        private readonly TimeSpan executionTime;
 
-        private DatabaseProfileEventArgs(string statement, TimeSpan elapsed)
+        private DatabaseProfileEventArgs(string statement, TimeSpan executionTime)
         {
             this.statement = statement;
-            this.elapsed = elapsed;
+            this.executionTime = executionTime;
         }
 
         public string Statement
@@ -51,7 +51,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                return elapsed;
+                return executionTime;
             }
         }
     }
@@ -195,7 +195,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(db != null);
             Contract.Requires(sql != null);
 
-            object[] empty = new object[0];
+            object[] empty = {};
             return db.Query(sql, empty);
         }
 
@@ -444,6 +444,21 @@ namespace SQLitePCL.pretty
 
             db.RegisterScalarFunc(name, 8, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]));
         }
+
+        public static string GetFileName(this IDatabaseConnection db, string database)
+        {
+            Contract.Requires(db != null);
+            Contract.Requires(database != null);
+
+            string filename = null;
+
+            if (db.TryGetFileName(database, out filename))
+            {
+                return filename;
+            }
+
+            throw new InvalidOperationException("Database is either not attached, temporary or in memory");
+        }
     }
 
     public sealed class SQLiteDatabaseConnection : IDatabaseConnection
@@ -540,18 +555,18 @@ namespace SQLitePCL.pretty
             return new DatabaseBackupImpl(backup);
         }
 
-        public string GetFileName(string database)
+        public bool TryGetFileName(string database, out string filename)
         {
-            var filename = raw.sqlite3_db_filename(db, database);
+            filename = raw.sqlite3_db_filename(db, database);
 
             // If there is no attached database N on the database connection, or
             // if database N is a temporary or in-memory database, then a NULL pointer is returned.
-            if (filename == null)
+            if (filename != null)
             {
-                throw new InvalidOperationException("Database is either not attached, temporary or in memory");
+                return true;
             }
 
-            return filename;
+            return false;
         }
 
         public IStatement PrepareStatement(string sql, out string tail)
