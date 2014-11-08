@@ -50,6 +50,9 @@ namespace SQLitePCL.pretty
 
         public void Dispose()
         {
+            // FIXME: Dispose methods should never throw exceptions
+            // FIXME: sqlite3_backup implements IDisposable so why does finish exist
+            // as a method.
             int rc = raw.sqlite3_backup_finish(backup);
             SQLiteException.CheckOk(rc);
         }
@@ -166,9 +169,10 @@ namespace SQLitePCL.pretty
             SQLiteException.CheckOk(stmt, rc);
         }
 
-        public int GetBindParameterIndex(string parameter)
+        public bool TryGetBindParameterIndex(string parameter, out int index)
         {
-            return raw.sqlite3_bind_parameter_index(stmt, parameter) - 1;
+            index = raw.sqlite3_bind_parameter_index(stmt, parameter) - 1;
+            return index >= 0;
         }
 
         public string GetBindParameterName(int index)
@@ -317,6 +321,8 @@ namespace SQLitePCL.pretty
             // The BLOB is closed unconditionally. Even if this routine returns an error code,
             // the BLOB is still closed.
             raw.sqlite3_blob_close(blob);
+
+            // FIXME: sqlite3_blob is disposable so why do we need to call close?
 
             disposed = true;
             base.Dispose(disposing);

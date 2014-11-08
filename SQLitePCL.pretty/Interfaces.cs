@@ -81,7 +81,7 @@ namespace SQLitePCL.pretty
 
         void ClearBindings();
 
-        int GetBindParameterIndex(string parameter);
+        bool TryGetBindParameterIndex(string parameter, out int index);
 
         string GetBindParameterName(int index);
     }

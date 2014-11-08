@@ -105,6 +105,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DatabaseConnectionTests.cs" />
+    <Compile Include="ImplementationTests.cs" />
     <Compile Include="prettyTests.cs" />
     <Compile Include="SQLite3Tests.cs" />
     <Compile Include="SQLiteValueTests.cs" />

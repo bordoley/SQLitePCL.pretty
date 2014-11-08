@@ -39,42 +39,9 @@ namespace SQLitePCL.pretty.tests
     public class test_cases
     {
         [TestMethod]
-        public void test_bind_parameter_index()
-        {
-            using (var db = SQLite3.Open(":memory:"))
-            {
-                db.Execute("CREATE TABLE foo (x int, v int, t text, d real, b blob, q blob);");
-
-                using (var stmt = db.PrepareStatement("INSERT INTO foo (x,v,t,d,b,q) VALUES (:x,:v,:t,:d,:b,:q)"))
-                {
-                    Assert.IsTrue(stmt.ReadOnly == false);
-
-                    Assert.AreEqual(stmt.BindParameterCount, 6);
-
-                    Assert.AreEqual(stmt.GetBindParameterIndex(":m"), -1);
-
-                    Assert.AreEqual(stmt.GetBindParameterIndex(":x"), 0);
-                    Assert.AreEqual(stmt.GetBindParameterIndex(":v"), 1);
-                    Assert.AreEqual(stmt.GetBindParameterIndex(":t"), 2);
-                    Assert.AreEqual(stmt.GetBindParameterIndex(":d"), 3);
-                    Assert.AreEqual(stmt.GetBindParameterIndex(":b"), 4);
-                    Assert.AreEqual(stmt.GetBindParameterIndex(":q"), 5);
-
-                    Assert.AreEqual(stmt.GetBindParameterName(0), ":x");
-                    Assert.AreEqual(stmt.GetBindParameterName(1), ":v");
-                    Assert.AreEqual(stmt.GetBindParameterName(2), ":t");
-                    Assert.AreEqual(stmt.GetBindParameterName(3), ":d");
-                    Assert.AreEqual(stmt.GetBindParameterName(4), ":b");
-                    Assert.AreEqual(stmt.GetBindParameterName(5), ":q");
-                }
-            }
-        }
-
-        [TestMethod]
         public void test_blob_read()
         {
             var ver = SQLite3.Version;
-            //Console.WriteLine(SQLite3.Version);
 
             using (var db = SQLite3.Open(":memory:"))
             {
@@ -114,66 +81,12 @@ namespace SQLitePCL.pretty.tests
         }
 
         [TestMethod]
-        public void test_backup()
-        {
-            using (var db = SQLite3.Open(":memory:"))
-            {
-                db.ExecuteAll(
-                    @"CREATE TABLE foo (x text);
-                      INSERT INTO foo (x) VALUES ('b');
-                      INSERT INTO foo (x) VALUES ('c');
-                      INSERT INTO foo (x) VALUES ('d');
-                      INSERT INTO foo (x) VALUES ('e');");
-                db.Execute("INSERT INTO foo (x) VALUES ('f')");
-
-                using (var db2 = SQLite3.Open(":memory:"))
-                {
-                    using (var bak = db.BackupInit("main", db2, "main"))
-                    {
-                        bak.Step(-1);
-                        Assert.AreEqual(bak.RemainingPages, 0);
-                        Assert.IsTrue(bak.PageCount > 0);
-                    }
-                }
-            }
-        }
-
-        [TestMethod]
         public void test_create_table_temp_db()
         {
             using (var db = SQLite3.Open(""))
             {
                 db.Execute("CREATE TABLE foo (x int);");
             }
-        }
-
-        [TestMethod]
-        public void test_create_table_file()
-        {
-            string name;
-            using (var db = SQLite3.Open(":memory:"))
-            {
-                using (var stmt = db.PrepareStatement("SELECT lower(hex(randomblob(16)));"))
-                {
-                    stmt.MoveNext();
-                    name = "tmp" + stmt.Current[0].ToString();
-                }
-            }
-            string filename;
-            using (var db = SQLite3.Open(name))
-            {
-                db.Execute("CREATE TABLE foo (x int);");
-                filename = db.GetFileName("main");
-            }
-
-            // TODO verify the filename is what we expect
-
-            // FIXME: This isn't a straight wrapper around a SQLite API and
-            // the vfs api in general seems like it will get more work,
-            // so not exposing it using a pretty api. users can always use the ugly one.
-            // see: https://github.com/ericsink/SQLitePCL.raw/commit/9eb0b2ae514374f8cf44a90c20972aa6622b4112
-            //int rc = SQLitePCL.raw.sqlite3__vfs__delete(null, filename, 1);
-            //Assert.AreEqual(raw.SQLITE_OK, rc);
         }
 
         [TestMethod]
@@ -200,23 +113,6 @@ namespace SQLitePCL.pretty.tests
         }
 
         [TestMethod]
-        public void test_create_table_memory_db()
-        {
-            using (var db = SQLite3.Open(":memory:"))
-            {
-                db.Execute("CREATE TABLE foo (x int);");
-            }
-        }
-
-        [TestMethod]
-        public void test_create_table_explicit_close()
-        {
-            var db = SQLite3.Open(":memory:");
-            db.Execute("CREATE TABLE foo (x int);");
-            db.Dispose(); // Pretty interface only support dispose no close method
-        }
-
-        [TestMethod]
         public void test_count()
         {
             using (var db = SQLite3.Open(":memory:"))
@@ -231,60 +127,6 @@ namespace SQLitePCL.pretty.tests
                     stmt.MoveNext();
                     int c = stmt.Current[0].ToInt();
                     Assert.AreEqual(c, 3);
-                }
-            }
-        }
-
-        [TestMethod]
-        public void test_stmt_busy()
-        {
-            using (var db = SQLite3.Open(":memory:"))
-            {
-                db.Execute("CREATE TABLE foo (x int);");
-                db.Execute("INSERT INTO foo (x) VALUES (1);");
-                db.Execute("INSERT INTO foo (x) VALUES (2);");
-                db.Execute("INSERT INTO foo (x) VALUES (3);");
-                const string sql = "SELECT x FROM foo";
-                using (var stmt = db.PrepareStatement(sql))
-                {
-                    Assert.AreEqual(sql, stmt.SQL);
-
-                    Assert.IsFalse(stmt.Busy);
-                    stmt.MoveNext();
-                    Assert.IsTrue(stmt.Busy);
-                    stmt.MoveNext();
-                    Assert.IsTrue(stmt.Busy);
-                    stmt.MoveNext();
-                    Assert.IsTrue(stmt.Busy);
-                    stmt.MoveNext();
-                    Assert.IsFalse(stmt.Busy);
-                }
-            }
-        }
-
-        [TestMethod]
-        public void test_explicit_prepare()
-        {
-            using (var db = SQLite3.Open(":memory:"))
-            {
-                db.Execute("CREATE TABLE foo (x int);");
-                const int num = 7;
-                using (var stmt = db.PrepareStatement("INSERT INTO foo (x) VALUES (?)"))
-                {
-                    for (int i = 0; i < num; i++)
-                    {
-                        stmt.Reset();
-                        stmt.ClearBindings();
-                        stmt.Bind(0, i);
-                        stmt.MoveNext();
-                    }
-                }
-
-                using (var stmt = db.PrepareStatement("SELECT COUNT(*) FROM foo"))
-                {
-                    stmt.MoveNext();
-                    int c = stmt.Current[0].ToInt();
-                    Assert.AreEqual(c, num);
                 }
             }
         }

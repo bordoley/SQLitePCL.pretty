@@ -142,10 +142,11 @@ namespace SQLitePCL.pretty
 
         public abstract void ClearBindings();
 
-        public int GetBindParameterIndex(string parameter)
+        public bool TryGetBindParameterIndex(string parameter, out int index)
         {
             Contract.Requires(parameter != null);
-            return default(int);
+            index = default(int);
+            return default(bool);
         }
 
         public string GetBindParameterName(int index)

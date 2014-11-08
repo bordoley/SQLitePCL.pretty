@@ -561,12 +561,7 @@ namespace SQLitePCL.pretty
 
             // If there is no attached database N on the database connection, or
             // if database N is a temporary or in-memory database, then a NULL pointer is returned.
-            if (filename != null)
-            {
-                return true;
-            }
-
-            return false;
+            return filename != null;
         }
 
         public IStatement PrepareStatement(string sql, out string tail)
