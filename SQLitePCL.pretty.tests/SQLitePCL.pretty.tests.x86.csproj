@@ -105,6 +105,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="prettyTests.cs" />
+    <Compile Include="SQLite3Tests.cs" />
     <Compile Include="SQLiteValueTests.cs" />
     <Compile Include="SQLiteVersionTests.cs" />
   </ItemGroup>

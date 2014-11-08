@@ -31,14 +31,18 @@ namespace SQLitePCL.pretty
             }
 
             if (raw.SQLITE_OK != rc)
+            {
                 throw SQLiteException.Create(rc, rc, msg);
+            }
         }
 
         internal static void CheckOk(sqlite3 db, int rc)
         {
             int extended = raw.sqlite3_extended_errcode(db);
             if (raw.SQLITE_OK != rc)
+            {
                 throw SQLiteException.Create(rc, extended, raw.sqlite3_errmsg(db));
+            }
         }
 
         internal static void CheckOk(sqlite3_stmt stmt, int rc)

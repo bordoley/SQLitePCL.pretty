@@ -125,35 +125,6 @@ namespace SQLitePCL.pretty.tests
         }
 
         [TestMethod]
-        public void test_libversion()
-        {
-            string sourceid = SQLite3.SourceId;
-            Assert.IsTrue(sourceid != null);
-            Assert.IsTrue(sourceid.Length > 0);
-
-            string libversion = SQLite3.Version.ToString();
-            Assert.IsTrue(libversion != null);
-            Assert.IsTrue(libversion.Length > 0);
-            Assert.AreEqual(libversion[0], '3');
-
-            int libversion_number = SQLite3.Version.ToInt();
-            Assert.AreEqual(libversion_number / 1000000, 3);
-        }
-
-        [TestMethod]
-        public void test_sqlite3_memory()
-        {
-            long memory_used = SQLite3.MemoryUsed;
-            long memory_highwater = SQLite3.MemoryHighWater;
-#if not
-            // these asserts fail on the iOS builtin sqlite.  not sure
-            // why.  not sure the asserts are worth doing anyway.
-            Assert.IsTrue(memory_used > 0);
-            Assert.IsTrue(memory_highwater >= memory_used);
-#endif
-        }
-
-        [TestMethod]
         public void test_backup()
         {
             using (var db = SQLite3.Open(":memory:"))
@@ -175,16 +146,6 @@ namespace SQLitePCL.pretty.tests
                         Assert.IsTrue(bak.PageCount > 0);
                     }
                 }
-            }
-        }
-
-        [TestMethod]
-        public void test_compileoption()
-        {
-            foreach (var opt in SQLite3.CompilerOptions)
-            {
-                bool used = SQLite3.CompileOptionUsed(opt);
-                Assert.IsTrue(used);
             }
         }
 
@@ -259,15 +220,6 @@ namespace SQLitePCL.pretty.tests
         }
 
         [TestMethod]
-        public void test_open_v2()
-        {
-            using (var db = SQLite3.Open(":memory:", ConnectionFlags.ReadWrite | ConnectionFlags.Create, null))
-            {
-                db.Execute("CREATE TABLE foo (x int);");
-            }
-        }
-
-        [TestMethod]
         public void test_create_table_explicit_close()
         {
             var db = SQLite3.Open(":memory:");
@@ -291,24 +243,6 @@ namespace SQLitePCL.pretty.tests
                     int c = stmt.Current[0].ToInt();
                     Assert.AreEqual(c, 3);
                 }
-            }
-        }
-
-        [TestMethod]
-        public void test_stmt_complete()
-        {
-            using (var db = SQLite3.Open(":memory:"))
-            {
-                db.Execute("CREATE TABLE foo (x int);");
-
-                Assert.IsFalse(SQLite3.IsCompleteStatement("SELECT x FROM"));
-                Assert.IsFalse(SQLite3.IsCompleteStatement("SELECT"));
-                Assert.IsFalse(SQLite3.IsCompleteStatement("INSERT INTO"));
-                Assert.IsFalse(SQLite3.IsCompleteStatement("SELECT x FROM foo"));
-
-                Assert.IsTrue(SQLite3.IsCompleteStatement("SELECT x FROM foo;"));
-                Assert.IsTrue(SQLite3.IsCompleteStatement("SELECT COUNT(*) FROM foo;"));
-                Assert.IsTrue(SQLite3.IsCompleteStatement("SELECT 5;"));
             }
         }
 
