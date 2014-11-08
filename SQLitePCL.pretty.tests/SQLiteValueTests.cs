@@ -249,13 +249,7 @@ namespace SQLitePCL.pretty.tests
                     Assert.AreEqual(row[3].ColumnOriginName, "z");
                     Assert.AreEqual(row[3].ColumnName, "z");
                     Assert.AreEqual(row[3].SQLiteType, SQLiteType.Blob);
-                    
-                    byte[] b2 = row[3].ToBlob();
-                    Assert.AreEqual(b2.Length, blob.Length);
-                    for (int i = 0; i < blob.Length; i++)
-                    {
-                        Assert.AreEqual(b2[i], blob[i]);
-                    }
+                    Assert.That(Enumerable.SequenceEqual(row[3].ToBlob(), blob));
 
                     Assert.AreEqual(row[4].ColumnDatabaseName, "main");
                     Assert.AreEqual(row[4].ColumnTableName, "foo");

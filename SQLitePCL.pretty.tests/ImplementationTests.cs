@@ -16,6 +16,7 @@
 */
 
 using System;
+using System.IO;
 using System.Linq;
 
 using NUnit.Framework;
@@ -325,8 +326,81 @@ namespace SQLitePCL.pretty.tests
     }
 
     [TestFixture]
-    public class BlobStreamTests()
+    public class BlobStreamTests
     {
-    
+        [Test]
+        public void TestRead()
+        { 
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                byte[] bytes = new byte[1000];
+                Random random = new Random();
+                random.NextBytes(bytes);
+
+                db.Execute("CREATE TABLE foo (x blob);");
+                db.Execute("INSERT INTO foo (x) VALUES(?);", bytes);
+
+                db.Query("SELECT x FROM foo;")
+                    .Select(row =>
+                        {
+                            using (var stream = row[0].ToReadOnlyStream())
+                            {
+                                Assert.True(stream.CanRead);
+                                Assert.False(stream.CanWrite);
+
+                                for (int i = 0; i < stream.Length; i++)
+                                {
+                                    int b = stream.ReadByte();
+                                    Assert.AreEqual(bytes[i], b);
+                                }
+                            }
+
+                            return row;
+                        }).First();
+            }
+        }
+
+        [Test]
+        public void TestWrite()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                byte[] bytes = new byte[1000];
+                Random random = new Random();
+                random.NextBytes(bytes);
+
+                var source = new MemoryStream(bytes);
+
+                db.Execute("CREATE TABLE foo (x blob);");
+                db.Execute("INSERT INTO foo (x) VALUES(?);", source);
+                db.Query("SELECT x FROM foo")
+                    .Select(row => 
+                        {
+                            using (var stream = row[0].ToReadWriteStream())
+                            {
+                                Assert.True(stream.CanRead);
+                                Assert.True(stream.CanWrite);
+                                source.CopyTo(stream);
+                            }
+                            return row;
+                        })
+                    .First();
+
+                db.Query("SELECT x FROM foo;")
+                    .Select(row =>
+                        {
+                            using (var stream = row[0].ToReadOnlyStream())
+                            {
+                                for (int i = 0; i < stream.Length; i++)
+                                {
+                                    int b = stream.ReadByte();
+                                    Assert.AreEqual(bytes[i], b);
+                                }
+                            }
+
+                            return row;
+                        }).First();
+            }
+        }
     }
 }

@@ -307,8 +307,8 @@ namespace SQLitePCL.pretty
 
         public override long Position
         {
-            get { return this.position; }
-            set { this.position = value; }
+            get { throw new NotSupportedException(); }
+            set { throw new NotSupportedException(); }
         }
 
         protected override void Dispose(bool disposing)
@@ -339,11 +339,11 @@ namespace SQLitePCL.pretty
             if (offset < 0 ) { throw new ArgumentOutOfRangeException(); }
             if (count < 0 ) { throw new ArgumentOutOfRangeException(); }
 
-            int numBytes = (int)Math.Min(this.Length - this.Position, count);
-            int rc = raw.sqlite3_blob_read(blob, buffer, offset, numBytes, (int)this.Position);
+            int numBytes = (int)Math.Min(this.Length - position, count);
+            int rc = raw.sqlite3_blob_read(blob, buffer, offset, numBytes, (int)position);
             SQLiteException.CheckOk(rc);
 
-            this.Position += numBytes;
+            position += numBytes;
             return numBytes;
         }
 
@@ -364,12 +364,12 @@ namespace SQLitePCL.pretty
             if (offset < 0 ) { throw new ArgumentOutOfRangeException(); }
             if (count < 0 ) { throw new ArgumentOutOfRangeException(); }
 
-            int numBytes = (int)Math.Min(this.Length - this.Position, count);
+            int numBytes = (int)Math.Min(this.Length - position, count);
 
-            int rc = raw.sqlite3_blob_write(blob, buffer, offset, numBytes, (int)this.Position);
+            int rc = raw.sqlite3_blob_write(blob, buffer, offset, numBytes, (int)position);
             SQLiteException.CheckOk(rc);
 
-            this.Position += numBytes;
+            position += numBytes;
         }
     }
 

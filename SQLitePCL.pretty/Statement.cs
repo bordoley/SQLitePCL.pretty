@@ -17,6 +17,7 @@
 
 using System;
 using System.Diagnostics.Contracts;
+using System.IO;
 
 namespace SQLitePCL.pretty
 {
@@ -66,6 +67,16 @@ namespace SQLitePCL.pretty
                     else if (typeof(byte[]) == t)
                     {
                         stmt.Bind(i, (byte[])a[i]);
+                    }
+                    else if (a[i] is Stream)
+                    {
+                        var stream = (Stream)a[i];
+                        if (!stream.CanRead) 
+                        { 
+                            throw new NotSupportedException("Stream in position " + i + " is not readable"); 
+                        }
+                           
+                        stmt.BindZeroBlob(i, (int) stream.Length);
                     }
                     else
                     {

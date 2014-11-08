@@ -39,49 +39,6 @@ namespace SQLitePCL.pretty.tests
     public class test_cases
     {
         [TestMethod]
-        public void test_blob_read()
-        {
-            var ver = SQLite3.Version;
-
-            using (var db = SQLite3.Open(":memory:"))
-            {
-                byte[] bytes = new byte[] { 9, 9, 9, 9, 9 };
-
-                db.Execute("CREATE TABLE foo (b blob);");
-                using (var stmt = db.PrepareStatement("INSERT INTO foo (b) VALUES (:x)"))
-                {
-                    stmt.Bind(0, bytes);
-                    stmt.MoveNext();
-                }
-
-                using (var stmt = db.PrepareStatement("SELECT b FROM foo;"))
-                {
-                    stmt.MoveNext();
-                    stmt.MoveNext();
-                    stmt.MoveNext();
-
-                    var row = stmt.Current;
-                    var count = row.Count;
-                    var byteArr = row[0].ToBlob();
-                    Assert.AreEqual(byteArr.Length, bytes.Length);
-                    Assert.That(Enumerable.SequenceEqual(bytes, byteArr));
-
-                    // FIXME: This is failing but I suspect its a mac issue
-                    using (var blob = row[0].ToReadOnlyStream())
-                    {
-                        Assert.AreEqual(bytes.Length, blob.Length);
-                        for (int i = 0; i < blob.Length; i++)
-                        {
-                            int b = blob.ReadByte();
-                            Assert.AreEqual(9, b);
-                        }
-                    }
-                }
-            }
-        }
-
-
-        [TestMethod]
         public void test_error()
         {
             using (var db = SQLite3.Open(":memory:"))
