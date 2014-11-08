@@ -64,6 +64,47 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Test]
+        public void TestFloatValue()
+        {
+            double[] tests =
+            {
+                1,
+                1.0,
+                1.11,
+                1.7E+3,
+                -195489100.8377,
+                1.12345678901234567E100,
+                -1.12345678901234567E100
+            };
+
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                foreach (var test in tests)
+                {
+                    db.Execute("CREATE TABLE foo (x real);");
+                    db.Execute("INSERT INTO foo (x) VALUES (?)", test);
+
+                    var rows = db.Query("SELECT x FROM foo;");
+                    foreach (var row in rows)
+                    {
+                        var expected = row.Single();
+                        var result = test.ToSQLiteValue();
+
+                        Assert.Throws(typeof(NotSupportedException), () => { var x = result.Length; });
+                        Assert.Throws(typeof(NotSupportedException), () => { result.ToString(); });
+                        Assert.Throws(typeof(NotSupportedException), () => { result.ToBlob(); });
+
+                        Assert.AreEqual(expected.SQLiteType, result.SQLiteType);
+                        Assert.AreEqual(expected.ToInt64(), result.ToInt64());
+                        Assert.AreEqual(expected.ToInt(), result.ToInt());
+                    }
+
+                    db.Execute("DROP TABLE foo;");
+                }
+            }
+        }
+
+        [Test]
         public void TestIntValue()
         {
             long[] tests = 

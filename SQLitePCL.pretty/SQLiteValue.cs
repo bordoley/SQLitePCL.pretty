@@ -284,7 +284,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                return this.ToBlob().Length;
+                throw new NotSupportedException();
             }
         }
 
@@ -293,7 +293,7 @@ namespace SQLitePCL.pretty
         // the resulting byte sequence as a BLOB instead of as TEXT.
         public byte[] ToBlob()
         {
-            return this.ToString().ToSQLiteValue().ToBlob();
+            throw new NotSupportedException();
         }
 
         public double ToDouble()
@@ -303,17 +303,28 @@ namespace SQLitePCL.pretty
 
         public int ToInt()
         {
-            return (int)value;
+            return (int)this.ToInt64();
         }
 
         public long ToInt64()
         {
-            return (long)value;
+            if (this.value > Int64.MaxValue)
+            {
+                return Int64.MaxValue;
+            }
+            else if (this.value < Int64.MinValue)
+            {
+                return Int64.MinValue;
+            }
+            else
+            {
+                return (long)value;
+            }
         }
 
         public override string ToString()
         {
-            return value.ToString();
+            throw new NotSupportedException();
         }
     }
 
