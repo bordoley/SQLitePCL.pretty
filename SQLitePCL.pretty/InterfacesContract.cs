@@ -19,6 +19,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.IO;
 
 namespace SQLitePCL.pretty
 {
@@ -39,6 +40,8 @@ namespace SQLitePCL.pretty
 
         public abstract int Changes { get; }
 
+        public abstract long LastInsertedRowId { get; }
+
         public abstract IEnumerable<IStatement> Statements { get; }
 
         public abstract void Dispose();
@@ -48,6 +51,14 @@ namespace SQLitePCL.pretty
             Contract.Requires(database != null);
             filename = default(string);
             return default(bool);
+        }
+
+        public Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite)
+        {
+            Contract.Requires(database != null);
+            Contract.Requires(tableName != null);
+            Contract.Requires(columnName != null);
+            return default(Stream);
         }
 
         public IStatement PrepareStatement(string sql, out string tail)

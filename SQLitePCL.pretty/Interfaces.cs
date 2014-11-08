@@ -39,9 +39,13 @@ namespace SQLitePCL.pretty
 
         int Changes { get; }
 
+        long LastInsertedRowId { get; }
+
         IEnumerable<IStatement> Statements { get; }
 
         bool TryGetFileName(string database, out string filename);
+
+        Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite);
 
         IStatement PrepareStatement(string sql, out string tail);
 
@@ -113,8 +117,6 @@ namespace SQLitePCL.pretty
         String ColumnOriginName { get; }
 
         string ColumnTableName { get; }
-
-        Stream ToStream(bool canWrite);
     }
 
     public interface IDatabaseBackup : IDisposable

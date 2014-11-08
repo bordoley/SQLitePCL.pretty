@@ -343,7 +343,7 @@ namespace SQLitePCL.pretty.tests
                 db.Query("SELECT x FROM foo;")
                     .Select(row =>
                         {
-                            using (var stream = row[0].ToReadOnlyStream())
+                            using (var stream = db.OpenBlob(row[0], db.LastInsertedRowId))
                             {
                                 Assert.True(stream.CanRead);
                                 Assert.False(stream.CanWrite);
@@ -376,7 +376,7 @@ namespace SQLitePCL.pretty.tests
                 db.Query("SELECT x FROM foo")
                     .Select(row => 
                         {
-                            using (var stream = row[0].ToReadWriteStream())
+                            using (var stream = db.OpenBlob(row[0], db.LastInsertedRowId, true))
                             {
                                 Assert.True(stream.CanRead);
                                 Assert.True(stream.CanWrite);
@@ -389,7 +389,7 @@ namespace SQLitePCL.pretty.tests
                 db.Query("SELECT x FROM foo;")
                     .Select(row =>
                         {
-                            using (var stream = row[0].ToReadOnlyStream())
+                            using (var stream = db.OpenBlob(row[0], db.LastInsertedRowId))
                             {
                                 for (int i = 0; i < stream.Length; i++)
                                 {

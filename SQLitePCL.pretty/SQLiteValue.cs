@@ -91,27 +91,10 @@ namespace SQLitePCL.pretty
         {
             return new NativeValue(value);
         }
-    }
 
-    public static class ResultSetValue
-    {
         internal static IResultSetValue ResultSetValueAt(this sqlite3_stmt stmt, int index)
         {
             return new ResultSetValueImpl(stmt, index);
-        }
-
-        public static Stream ToReadWriteStream(this IResultSetValue value)
-        {
-            Contract.Requires(value != null);
-
-            return value.ToStream(true);
-        }
-
-        public static Stream ToReadOnlyStream(this IResultSetValue value)
-        {
-            Contract.Requires(value != null);
-
-            return value.ToStream(false);
         }
     }
 
@@ -560,24 +543,6 @@ namespace SQLitePCL.pretty
         public override string ToString()
         {
             return raw.sqlite3_column_text(stmt, index);
-        }
-
-        public Stream ToStream(bool canWrite)
-        {
-            sqlite3 db = raw.sqlite3_db_handle(stmt);
-            string sdb = this.ColumnDatabaseName;
-            string tableName = this.ColumnTableName;
-            string columnName = this.ColumnName;
-
-            // FIXME: The rowid really needs to be queried and provided as an argument
-            // PRobably need to rewrite this API
-            long rowId = raw.sqlite3_last_insert_rowid(db);
-
-            sqlite3_blob blob;
-            int rc = raw.sqlite3_blob_open(db, sdb, tableName, columnName, rowId, canWrite ? 1 : 0, out blob);
-            SQLiteException.CheckOk(stmt, rc);
-
-            return new BlobStream(blob, canWrite);
         }
     }
 }

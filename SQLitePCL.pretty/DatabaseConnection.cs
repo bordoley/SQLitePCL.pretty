@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.IO;
 using System.Linq;
 
 namespace SQLitePCL.pretty
@@ -459,6 +460,11 @@ namespace SQLitePCL.pretty
 
             throw new InvalidOperationException("Database is either not attached, temporary or in memory");
         }
+
+        public static Stream OpenBlob(this IDatabaseConnection db, IResultSetValue value, long rowId, bool canWrite = false)
+        {
+            return db.OpenBlob(value.ColumnDatabaseName, value.ColumnTableName, value.ColumnOriginName, rowId, canWrite);
+        }
     }
 
     public sealed class SQLiteDatabaseConnection : IDatabaseConnection
@@ -528,6 +534,14 @@ namespace SQLitePCL.pretty
             }
         }
 
+        public long LastInsertedRowId
+        {
+            get
+            {
+                return raw.sqlite3_last_insert_rowid(db);
+            }
+        }
+
         private IEnumerator<IStatement> StatementsEnumerator()
         {
             sqlite3_stmt next = null;
@@ -564,6 +578,14 @@ namespace SQLitePCL.pretty
             return filename != null;
         }
 
+        public Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite)
+        {
+            sqlite3_blob blob;
+            int rc = raw.sqlite3_blob_open(db, database, tableName, columnName, rowId, canWrite ? 1 : 0, out blob);
+            SQLiteException.CheckOk(db, rc);
+
+            return new BlobStream(blob, canWrite);
+        }
         public IStatement PrepareStatement(string sql, out string tail)
         {
             sqlite3_stmt stmt;
