@@ -112,7 +112,7 @@ namespace SQLitePCL.pretty
             {
                 return this.CompareTo((SQLiteVersion)obj);
             }
-            throw new ArgumentException("Can only compare to other SQLiteValues");
+            throw new ArgumentException("Can only compare to other SQLiteVersion");
         }
     }
 }
