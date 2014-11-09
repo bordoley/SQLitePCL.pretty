@@ -272,6 +272,7 @@ namespace SQLitePCL.pretty
         private readonly sqlite3_blob blob;
         private readonly bool canWrite;
 
+        private bool disposed = false;
         private long position = 0;
 
         internal BlobStream(sqlite3_blob blob, bool canWrite)
@@ -306,9 +307,23 @@ namespace SQLitePCL.pretty
             set { throw new NotSupportedException(); }
         }
 
+        // http://msdn.microsoft.com/en-us/library/system.idisposable(v=vs.110).aspx
         protected override void Dispose(bool disposing)
         {
-            this.blob.Dispose();
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                // Free any other managed objects here. 
+                blob.Dispose();
+            }
+
+            // Free any unmanaged objects here. 
+
+            disposed = true;
             base.Dispose(disposing);
         }
 
