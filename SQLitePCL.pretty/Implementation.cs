@@ -50,11 +50,7 @@ namespace SQLitePCL.pretty
 
         public void Dispose()
         {
-            // FIXME: Dispose methods should never throw exceptions
-            // FIXME: sqlite3_backup implements IDisposable so why does finish exist
-            // as a method.
-            int rc = raw.sqlite3_backup_finish(backup);
-            SQLiteException.CheckOk(rc);
+            backup.Dispose();
         }
 
         public bool Step(int nPages)
@@ -276,7 +272,6 @@ namespace SQLitePCL.pretty
         private readonly sqlite3_blob blob;
         private readonly bool canWrite;
 
-        bool disposed = false;
         private long position = 0;
 
         internal BlobStream(sqlite3_blob blob, bool canWrite)
@@ -313,18 +308,7 @@ namespace SQLitePCL.pretty
 
         protected override void Dispose(bool disposing)
         {
-            if (disposed) { return; }
-
-            // Closing the BLOB often forces the changes out to disk and so if any I/O errors occur,
-            // they will likely occur at the time when the BLOB is closed. Any errors that occur during
-            // closing are reported as a non-zero return value.
-            // The BLOB is closed unconditionally. Even if this routine returns an error code,
-            // the BLOB is still closed.
-            raw.sqlite3_blob_close(blob);
-
-            // FIXME: sqlite3_blob is disposable so why do we need to call close?
-
-            disposed = true;
+            this.blob.Dispose();
             base.Dispose(disposing);
         }
 
