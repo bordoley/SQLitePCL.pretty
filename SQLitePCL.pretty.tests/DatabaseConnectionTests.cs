@@ -98,8 +98,7 @@ namespace SQLitePCL.pretty.tests
                         Assert.AreEqual(currentAction, e.Action);
                         Assert.AreEqual("main", e.Database);
                         Assert.AreEqual("foo", e.Table);
-                        Assert.AreEqual(rowid, e.RowId);
-                        
+                        Assert.AreEqual(rowid, e.RowId);     
                     };
 
                 currentAction = ActionCode.CreateTable;

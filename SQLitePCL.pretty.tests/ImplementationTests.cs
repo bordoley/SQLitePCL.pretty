@@ -340,10 +340,10 @@ namespace SQLitePCL.pretty.tests
                 db.Execute("CREATE TABLE foo (x blob);");
                 db.Execute("INSERT INTO foo (x) VALUES(?);", bytes);
 
-                db.Query("SELECT x FROM foo;")
+                db.Query("SELECT rowid, x FROM foo;")
                     .Select(row =>
                         {
-                            using (var stream = db.OpenBlob(row[0], db.LastInsertedRowId))
+                            using (var stream = db.OpenBlob(row[1], row[0].ToInt64()))
                             {
                                 Assert.True(stream.CanRead);
                                 Assert.False(stream.CanWrite);
@@ -373,10 +373,10 @@ namespace SQLitePCL.pretty.tests
 
                 db.Execute("CREATE TABLE foo (x blob);");
                 db.Execute("INSERT INTO foo (x) VALUES(?);", source);
-                db.Query("SELECT x FROM foo")
+                db.Query("SELECT rowid, x FROM foo")
                     .Select(row => 
                         {
-                            using (var stream = db.OpenBlob(row[0], db.LastInsertedRowId, true))
+                            using (var stream = db.OpenBlob(row[1], row[0].ToInt64(), true))
                             {
                                 Assert.True(stream.CanRead);
                                 Assert.True(stream.CanWrite);
@@ -386,10 +386,10 @@ namespace SQLitePCL.pretty.tests
                         })
                     .First();
 
-                db.Query("SELECT x FROM foo;")
+                db.Query("SELECT rowid, x FROM foo;")
                     .Select(row =>
                         {
-                            using (var stream = db.OpenBlob(row[0], db.LastInsertedRowId))
+                            using (var stream = db.OpenBlob(row[1], row[0].ToInt64()))
                             {
                                 for (int i = 0; i < stream.Length; i++)
                                 {
