@@ -38,47 +38,42 @@ namespace SQLitePCL.pretty.tests
                 var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream"));
 
                 db.Execute("INSERT INTO foo (w, x, y, z) VALUES (?, ?, ?, ?)", 1, 1.1, "hello", stream);
-                db.Query("SELECT rowid, z FROM foo where rowid = ?", db.LastInsertedRowId)
-                    .Select(row =>
-                        {
-                            using (var dst = db.OpenBlob(row[1], row[0].ToInt64(), true))
-                            {
-                                stream.CopyTo(dst);
-                            }
-                            return row;
-                        })
-                    .FirstOrDefault();
 
-                db.Query("SELECT rowid, * FROM foo")
-                    .Select(row =>
-                        {
-                            Console.Write(
-                                row[0].ToInt64() + ": " + 
+                foreach (var row in db.Query("SELECT rowid, z FROM foo where rowid = ?", db.LastInsertedRowId))
+                {
+                    using (var dst = db.OpenBlob(row[1], row[0].ToInt64(), true))
+                    {
+                        stream.CopyTo(dst);
+                    }
+                }
+
+                foreach (var row in db.Query("SELECT rowid, * FROM foo"))
+                {
+                    Console.Write(
+                                row[0].ToInt64() + ": " +
                                 row[1].ToInt() + ", " +
                                 row[2].ToInt64() + ", " +
                                 row[3].ToString() + ", ");
 
-                            if (row[4].SQLiteType == SQLiteType.Null)
-                            {
-                                Console.Write("null\n");
-                            }
-                            else
-                            {
-                                using (var blob = db.OpenBlob(row[4], row[0].ToInt64()))
-                                {
-                                    var str = new StreamReader(blob).ReadToEnd();
-                                    Console.Write(str + "\n");
-                                }
-                            }
-                            return row;
-                        })
-                    .LastOrDefault();
-                
+                    if (row[4].SQLiteType == SQLiteType.Null)
+                    {
+                        Console.Write("null\n");
+                    }
+                    else
+                    {
+                        using (var blob = db.OpenBlob(row[4], row[0].ToInt64()))
+                        {
+                            var str = new StreamReader(blob).ReadToEnd();
+                            Console.Write(str + "\n");
+                        }
+                    }
+                }
+
                 stream.Dispose();
 
                 // Blob dispose is broken: https://github.com/ericsink/SQLitePCL.raw/pull/9
                 // so tryig to drop the table causes an exception.
-                //db.Execute("DROP TABLE foo;");
+                db.Execute("DROP TABLE foo;");
             }
         }
     }
