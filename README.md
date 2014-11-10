@@ -37,23 +37,20 @@ SQLitePCL.raw includes a set of extension methods in a package called SQLitePCL.
 
 # Let me see an example
 ```
+using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream")))
 using (var db = SQLite3.Open(":memory:"))
 {
     db.ExecuteAll(
         @"CREATE TABLE foo (w int, x float, y string, z blob);
-          INSERT INTO foo (w,x,y,z) VALUES (0, 0, '', null);");
-
-    var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream"));
+            INSERT INTO foo (w,x,y,z) VALUES (0, 0, '', null);");
 
     db.Execute("INSERT INTO foo (w, x, y, z) VALUES (?, ?, ?, ?)", 1, 1.1, "hello", stream);
 
-    foreach (var row in db.Query("SELECT rowid, z FROM foo where rowid = ?", db.LastInsertedRowId))
-    {
-        using (var dst = db.OpenBlob(row[1], row[0].ToInt64(), true))
-        {
-            stream.CopyTo(dst);
-        }
-    }
+    var dst = db.Query("SELECT rowid, z FROM foo where rowid = ?", db.LastInsertedRowId)
+                .Select(row => db.OpenBlob(row[1], row[0].ToInt64(), true))
+                .First();
+
+    using (dst) { stream.CopyTo(dst); }
 
     foreach (var row in db.Query("SELECT rowid, * FROM foo"))
     {
@@ -66,18 +63,15 @@ using (var db = SQLite3.Open(":memory:"))
         if (row[4].SQLiteType == SQLiteType.Null)
         {
             Console.Write("null\n");
+            continue;
         }
-        else
+
+        using (var blob = db.OpenBlob(row[4], row[0].ToInt64()))
         {
-            using (var blob = db.OpenBlob(row[4], row[0].ToInt64()))
-            {
-                var str = new StreamReader(blob).ReadToEnd();
-                Console.Write(str + "\n");
-            }
+            var str = new StreamReader(blob).ReadToEnd();
+            Console.Write(str + "\n");
         }
     }
-
-    stream.Dispose();
 }
 ```
 
