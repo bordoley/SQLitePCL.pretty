@@ -4,7 +4,7 @@ SQLitePCL.pretty
 
 # What is this?
 
-This library wraps the C like SQLiteAPI provided by SQLitePCL.raw with a C# friendly object oriented API. 
+This library wraps the C like SQLiteAPI provided by SQLitePCL.raw with a friendly C# object oriented API. 
 
 # Why is it called SQLitePCL.pretty?
 
@@ -35,4 +35,51 @@ SQLitePCL.raw includes a set of extension methods in a package called SQLitePCL.
 
 * SQLiteVersion - A struct that wraps the SQLite numeric version.
 
-# Let me see some examples?
+# Let me see an example
+```
+using (var db = SQLite3.Open(":memory:"))
+{
+    db.ExecuteAll(
+        @"CREATE TABLE foo (w int, x float, y string, z blob);
+          INSERT INTO foo (w,x,y,z) VALUES (0, 0, '', null);");
+
+    var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream"));
+
+    db.Execute("INSERT INTO foo (w, x, y, z) VALUES (?, ?, ?, ?)", 1, 1.1, "hello", stream);
+
+    foreach (var row in db.Query("SELECT rowid, z FROM foo where rowid = ?", db.LastInsertedRowId))
+    {
+        using (var dst = db.OpenBlob(row[1], row[0].ToInt64(), true))
+        {
+            stream.CopyTo(dst);
+        }
+    }
+
+    foreach (var row in db.Query("SELECT rowid, * FROM foo"))
+    {
+        Console.Write(
+                    row[0].ToInt64() + ": " +
+                    row[1].ToInt() + ", " +
+                    row[2].ToInt64() + ", " +
+                    row[3].ToString() + ", ");
+
+        if (row[4].SQLiteType == SQLiteType.Null)
+        {
+            Console.Write("null\n");
+        }
+        else
+        {
+            using (var blob = db.OpenBlob(row[4], row[0].ToInt64()))
+            {
+                var str = new StreamReader(blob).ReadToEnd();
+                Console.Write(str + "\n");
+            }
+        }
+    }
+
+    stream.Dispose();
+}
+```
+
+
+Additionally, you can take a look at the [unit tests](http://github.com/bordoley/SQLitePCL.pretty/tree/master/SQLitePCL.pretty.tests) for more examples.
