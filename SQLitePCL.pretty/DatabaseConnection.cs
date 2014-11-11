@@ -472,6 +472,8 @@ namespace SQLitePCL.pretty
         private readonly sqlite3 db;
         private readonly IEnumerable<IStatement> statements;
 
+        private volatile bool disposed = false;
+
         internal SQLiteDatabaseConnection(sqlite3 db)
         {
             this.db = db;
@@ -513,6 +515,8 @@ namespace SQLitePCL.pretty
         {
             set
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
                 int rc = raw.sqlite3_busy_timeout(db, (int)value.TotalMilliseconds);
                 SQLiteException.CheckOk(db, rc);
             }
@@ -522,6 +526,8 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
                 return raw.sqlite3_changes(db);
             }
         }
@@ -530,6 +536,8 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
                 return raw.sqlite3_get_autocommit(db) == 0 ? false : true;
             }
         }
@@ -538,12 +546,16 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
                 return raw.sqlite3_last_insert_rowid(db);
             }
         }
 
         private IEnumerator<IStatement> StatementsEnumerator()
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             sqlite3_stmt next = null;
             while ((next = raw.sqlite3_next_stmt(db, next)) != null)
             {
@@ -555,6 +567,8 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
                 return statements;
             }
         }
@@ -565,12 +579,16 @@ namespace SQLitePCL.pretty
             Contract.Requires(destConn != null);
             Contract.Requires(destDbName != null);
 
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             sqlite3_backup backup = raw.sqlite3_backup_init(destConn.db, destDbName, db, dbName);
             return new DatabaseBackupImpl(backup);
         }
 
         public bool TryGetFileName(string database, out string filename)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             filename = raw.sqlite3_db_filename(db, database);
 
             // If there is no attached database N on the database connection, or
@@ -580,6 +598,8 @@ namespace SQLitePCL.pretty
 
         public Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             sqlite3_blob blob;
             int rc = raw.sqlite3_blob_open(db, database, tableName, columnName, rowId, canWrite ? 1 : 0, out blob);
             SQLiteException.CheckOk(db, rc);
@@ -588,6 +608,8 @@ namespace SQLitePCL.pretty
         }
         public IStatement PrepareStatement(string sql, out string tail)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             sqlite3_stmt stmt;
             int rc = raw.sqlite3_prepare_v2(db, sql, out stmt, out tail);
             SQLiteException.CheckOk(db, rc);
@@ -597,17 +619,22 @@ namespace SQLitePCL.pretty
 
         public void RegisterCollation(string name, Comparison<string> comparison)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             int rc = raw.sqlite3_create_collation(db, name, null, (v, s1, s2) => comparison(s1, s2));
             SQLiteException.CheckOk(db, rc);
         }
 
         public void RegisterCommitHook(Func<bool> onCommit)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             raw.sqlite3_commit_hook(db, v => onCommit() ? 1 : 0, null);
         }
 
         public void Dispose()
         {
+            disposed = true;
             db.Dispose();
         }
 
@@ -631,6 +658,8 @@ namespace SQLitePCL.pretty
 
         public void RegisterAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             delegate_function_aggregate_step funcStep = (ctx, user_data, args) =>
                 {
                     CtxState<T> state;
@@ -702,6 +731,8 @@ namespace SQLitePCL.pretty
 
         public void RegisterScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             int rc = raw.sqlite3_create_function(db, name, nArg, null, (ctx, ud, args) =>
                 {
                     IReadOnlyList<ISQLiteValue> iArgs = args.Select(value => value.ToSQLiteValue()).ToList();

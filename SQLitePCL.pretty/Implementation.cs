@@ -27,6 +27,8 @@ namespace SQLitePCL.pretty
     {
         private readonly sqlite3_backup backup;
 
+        private bool disposed = false;
+
         internal DatabaseBackupImpl(sqlite3_backup backup)
         {
             this.backup = backup;
@@ -36,6 +38,8 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
                 return raw.sqlite3_backup_pagecount(backup);
             }
         }
@@ -44,17 +48,22 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
                 return raw.sqlite3_backup_remaining(backup);
             }
         }
 
         public void Dispose()
         {
+            disposed = true;
             backup.Dispose();
         }
 
         public bool Step(int nPages)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             int rc = raw.sqlite3_backup_step(backup, nPages);
 
             if (rc == raw.SQLITE_OK)
@@ -79,6 +88,8 @@ namespace SQLitePCL.pretty
         private readonly sqlite3_stmt stmt;
         private readonly IReadOnlyList<IResultSetValue> current;
 
+        private bool disposed = false;
+
         internal StatementImpl(sqlite3_stmt stmt)
         {
             this.stmt = stmt;
@@ -89,6 +100,8 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
                 return raw.sqlite3_bind_parameter_count(stmt);
             }
         }
@@ -97,6 +110,8 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
                 return raw.sqlite3_sql(stmt);
             }
         }
@@ -105,6 +120,8 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
                 return raw.sqlite3_stmt_readonly(stmt) == 0 ? false : true;
             }
         }
@@ -113,71 +130,94 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
                 return raw.sqlite3_stmt_busy(stmt) == 0 ? false : true;
             }
         }
 
         public void Bind(int index, byte[] blob)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             int rc = raw.sqlite3_bind_blob(stmt, index + 1, blob);
             SQLiteException.CheckOk(stmt, rc);
         }
 
         public void Bind(int index, double val)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             int rc = raw.sqlite3_bind_double(stmt, index + 1, val);
             SQLiteException.CheckOk(stmt, rc);
         }
 
         public void Bind(int index, int val)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             int rc = raw.sqlite3_bind_int(stmt, index + 1, val);
             SQLiteException.CheckOk(stmt, rc);
         }
 
         public void Bind(int index, long val)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             int rc = raw.sqlite3_bind_int64(stmt, index + 1, val);
             SQLiteException.CheckOk(stmt, rc);
         }
 
         public void Bind(int index, string text)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             int rc = raw.sqlite3_bind_text(stmt, index + 1, text);
             SQLiteException.CheckOk(stmt, rc);
         }
 
         public void BindNull(int index)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             int rc = raw.sqlite3_bind_null(stmt, index + 1);
             SQLiteException.CheckOk(stmt, rc);
         }
 
         public void BindZeroBlob(int index, int size)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             int rc = raw.sqlite3_bind_zeroblob(stmt, index + 1, size);
             SQLiteException.CheckOk(stmt, rc);
         }
 
         public void ClearBindings()
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             int rc = raw.sqlite3_clear_bindings(stmt);
             SQLiteException.CheckOk(stmt, rc);
         }
 
         public bool TryGetBindParameterIndex(string parameter, out int index)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             index = raw.sqlite3_bind_parameter_index(stmt, parameter) - 1;
             return index >= 0;
         }
 
         public string GetBindParameterName(int index)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             return raw.sqlite3_bind_parameter_name(stmt, index + 1);
         }
 
         public void Dispose()
         {
+            disposed = true;
             stmt.Dispose();
         }
 
@@ -185,6 +225,8 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
                 return current;
             }
         }
@@ -193,12 +235,14 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                return current;
+                return this.Current;
             }
         }
 
         public bool MoveNext()
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             int rc = raw.sqlite3_step(stmt);
             if (rc == raw.SQLITE_DONE)
             {
@@ -218,6 +262,8 @@ namespace SQLitePCL.pretty
 
         public void Reset()
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             int rc = raw.sqlite3_reset(stmt);
             SQLiteException.CheckOk(stmt, rc);
         }
@@ -269,6 +315,18 @@ namespace SQLitePCL.pretty
 
     internal sealed class BlobStream : Stream
     {
+        private static void CheckOkOrThrowIOException(int rc)
+        {
+            try
+            {
+                SQLiteException.CheckOk(rc);
+            }
+            catch (SQLiteException e)
+            {
+                throw new IOException("Received SQLiteExcepction", e);
+            }
+        }
+
         private readonly sqlite3_blob blob;
         private readonly bool canWrite;
 
@@ -283,22 +341,36 @@ namespace SQLitePCL.pretty
 
         public override bool CanRead
         {
-            get { return true; }
+            get 
+            {
+                return !disposed; 
+            }
         }
 
         public override bool CanSeek
         {
-            get { return false; }
+            get 
+            {
+                return false; 
+            }
         }
 
         public override bool CanWrite
         {
-            get { return canWrite; }
+            get 
+            {
+                return !disposed && canWrite; 
+            }
         }
 
         public override long Length
         {
-            get { return raw.sqlite3_blob_bytes(blob); }
+            get 
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+                return raw.sqlite3_blob_bytes(blob); 
+            }
         }
 
         public override long Position
@@ -333,6 +405,8 @@ namespace SQLitePCL.pretty
 
         public override int Read(byte[] buffer, int offset, int count)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             if (buffer == null) { throw new ArgumentNullException(); }
             if (offset + count > buffer.Length) { new ArgumentException(); }
             if (offset < 0 ) { throw new ArgumentOutOfRangeException(); }
@@ -340,7 +414,7 @@ namespace SQLitePCL.pretty
 
             int numBytes = (int)Math.Min(this.Length - position, count);
             int rc = raw.sqlite3_blob_read(blob, buffer, offset, numBytes, (int)position);
-            SQLiteException.CheckOk(rc);
+            CheckOkOrThrowIOException(rc);
 
             position += numBytes;
             return numBytes;
@@ -358,6 +432,9 @@ namespace SQLitePCL.pretty
 
         public override void Write(byte[] buffer, int offset, int count)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (!canWrite) { throw new NotSupportedException(); }
+
             if (buffer == null) { throw new ArgumentNullException(); }
             if (offset + count > buffer.Length) { new ArgumentException(); }
             if (offset < 0 ) { throw new ArgumentOutOfRangeException(); }
@@ -366,7 +443,8 @@ namespace SQLitePCL.pretty
             int numBytes = (int)Math.Min(this.Length - position, count);
 
             int rc = raw.sqlite3_blob_write(blob, buffer, offset, numBytes, (int)position);
-            SQLiteException.CheckOk(rc);
+
+            CheckOkOrThrowIOException(rc);
 
             position += numBytes;
         }
