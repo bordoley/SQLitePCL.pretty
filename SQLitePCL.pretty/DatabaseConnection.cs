@@ -472,7 +472,7 @@ namespace SQLitePCL.pretty
         private readonly sqlite3 db;
         private readonly IEnumerable<IStatement> statements;
 
-        private volatile bool disposed = false;
+        private bool disposed = false;
 
         internal SQLiteDatabaseConnection(sqlite3 db)
         {
