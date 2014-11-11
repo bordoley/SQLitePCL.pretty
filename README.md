@@ -1,6 +1,6 @@
 SQLitePCL.pretty
 ================
-*A pretty face on top of [SQLitePCL.raw](https://github.com/ericsink/SQLitePCL.raw).* 
+*A pretty face on top of [SQLitePCL.raw](http://github.com/ericsink/SQLitePCL.raw).* 
 
 # What is this?
 
@@ -9,6 +9,10 @@ This library wraps the C like SQLiteAPI provided by SQLitePCL.raw with a friendl
 # Why is it called SQLitePCL.pretty?
 
 SQLitePCL.raw includes a set of extension methods in a package called SQLitePCL.ugly used to make writing unit tests easier, but with no intent of providing an interface "The C# Way". This API is the logical compliment. It's "pretty" and meant to provide an API that C# developers will find familiar and can easily consume.
+
+# How do I add SQLitePCL.pretty to my project?
+
+Use the [NuGet package](http://www.nuget.org/packages/SQLitePCL.pretty/).
 
 # API Overview
 
