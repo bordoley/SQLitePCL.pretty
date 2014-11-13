@@ -1,150 +1,156 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace SQLitePCL.pretty
 {
-    internal class AsyncStatementImpl : IASyncStatement
+    public static class AsyncStatement
     {
-        private readonly IStatement stmt;
-        private readonly OperationsQueue queue;
-
-        private volatile bool disposed = false;
-        
-        internal AsyncStatementImpl(IStatement stmt, OperationsQueue queue)
+        public static Task Use(this IAsyncStatement This, Action<IStatement> f)
         {
-            this.stmt = stmt;
-            this.queue = queue;
+            Contract.Requires(This != null);
+            Contract.Requires(f != null);
+
+            return This.Use(conn =>
+                {
+                    f(conn);
+                    return Unit.Default;
+                });
         }
 
-        public Task<int> GetBindParameterCountAsync()
+        public static Task<int> GetBindParameterCountAsync(this IAsyncStatement This)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            Contract.Requires(This != null);
 
-            return queue.EnqueueOperation(() =>
+            return This.Use(stmt =>
                 {
                     return stmt.BindParameterCount;
                 });
         }
 
-        public Task<string> GetSQLAsync()
+        public static Task<string> GetSQLAsync(this IAsyncStatement This)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            Contract.Requires(This != null);
 
-            return queue.EnqueueOperation(() =>
+            return This.Use(stmt =>
                 {
                     return stmt.SQL;
                 });
         }
 
-        public Task<bool> IsReadOnlyAsync()
+        public static Task<bool> IsReadOnlyAsync(this IAsyncStatement This)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            Contract.Requires(This != null);
 
-            return queue.EnqueueOperation(() =>
+            return This.Use(stmt =>
                 {
                     // FIXME: Rename in IStatement
                     return stmt.ReadOnly;
                 });
         }
 
-        public Task BindAsync(int index, byte[] blob)
+        public static Task BindAsync(this IAsyncStatement This, int index, byte[] blob)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            Contract.Requires(This != null);
 
-            return queue.EnqueueOperation(() =>
+            return This.Use(stmt =>
                 {
                     stmt.Bind(index, blob);
                 });
         }
 
-        public Task BindAsync(int index, double val)
+        public static Task BindAsync(this IAsyncStatement This, int index, double val)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            Contract.Requires(This != null);
 
-            return queue.EnqueueOperation(() =>
+            return This.Use(stmt =>
                 {
                     stmt.Bind(index, val);
                 });
         }
 
-        public Task BindAsync(int index, int val)
+        public static Task BindAsync(this IAsyncStatement This, int index, int val)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            Contract.Requires(This != null);
 
-            return queue.EnqueueOperation(() =>
+            return This.Use(stmt =>
                 {
                     stmt.Bind(index, val);
                 });
         }
 
-        public Task BindAsync(int index, long val)
+        public static Task BindAsync(this IAsyncStatement This, int index, long val)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            Contract.Requires(This != null);
 
-            return queue.EnqueueOperation(() =>
+            return This.Use(stmt =>
                 {
                     stmt.Bind(index, val);
                 });
         }
 
-        public Task BindAsync(int index, string text)
+        public static Task BindAsync(this IAsyncStatement This, int index, string text)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            Contract.Requires(This != null);
+            Contract.Requires(text != null);
 
-            return queue.EnqueueOperation(() =>
+            return This.Use(stmt =>
                 {
                     stmt.Bind(index, text);
                 });
         }
 
-        public Task BindNullAsync(int index)
+        public static Task BindNullAsync(this IAsyncStatement This, int index)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            Contract.Requires(This != null);
 
-            return queue.EnqueueOperation(() =>
+            return This.Use(stmt =>
                 {
                     stmt.BindNull(index);
-                });
+                }); 
         }
 
-        public Task BindZeroBlobAsync(int index, int size)
+        public static Task BindZeroBlobAsync(this IAsyncStatement This, int index, int size)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            Contract.Requires(This != null);
 
-            return queue.EnqueueOperation(() =>
+            return This.Use(stmt =>
                 {
                     stmt.BindZeroBlob(index, size);
                 });
         }
 
-        public Task ClearBindingsAsync()
+        public static Task ClearBindingsAsync(this IAsyncStatement This)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            Contract.Requires(This != null);
 
-            return queue.EnqueueOperation(() =>
+            return This.Use(stmt =>
                 {
                     stmt.ClearBindings();
                 });
         }
 
-        public Task BindAsync(params object[] a)
+        public static Task BindAsync(this IAsyncStatement This, params object[] a)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            Contract.Requires(This != null);
+            Contract.Requires(a != null);
 
-            return queue.EnqueueOperation(() =>
+            return This.Use(stmt =>
                 {
                     stmt.Bind(a);
                 });
         }
 
-        public Task<int> GetBindParameterIndexAsync(string parameter)
+        public static Task<int> GetBindParameterIndexAsync(this IAsyncStatement This, string parameter)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            Contract.Requires(This != null);
+            Contract.Requires(parameter != null);
 
-            return queue.EnqueueOperation(() =>
+            return This.Use(stmt =>
                 {
                     // FIXME: Make this an extension method in Statement.cs
                     int index = -1;
@@ -157,26 +163,67 @@ namespace SQLitePCL.pretty
                 });
         }
 
-        public Task<string> GetBindParameterNameAsync(int index)
+        public static Task<string> GetBindParameterNameAsync(this IAsyncStatement This, int index)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            Contract.Requires(This != null);
 
-            return queue.EnqueueOperation(() =>
+            return This.Use(stmt =>
                 {
                     return stmt.GetBindParameterName(index);
                 });
         }
 
-        public IObservable<T> Select<T>(Func<IReadOnlyList<IResultSetValue>, T> selector)
+        public static IObservable<T> Select<T>(this IAsyncStatement This, Func<IReadOnlyList<IResultSetValue>, T> selector)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(selector != null);
+
+            return This.Use(stmt =>
+                {
+                    return new DelegatingEnumerable<IReadOnlyList<IResultSetValue>>(() => stmt)
+                        .Select(selector)
+                        .ToObservable();
+                });
+        }
+
+        public static Task Reset(this IAsyncStatement This)
+        {
+            return This.Use(stmt =>
+                {
+                    stmt.Reset();
+                });
+        }
+    }
+
+    internal class AsyncStatementImpl : IAsyncStatement
+    {
+        private readonly IStatement stmt;
+        private readonly OperationsQueue queue;
+
+        private volatile bool disposed = false;
+        
+        internal AsyncStatementImpl(IStatement stmt, OperationsQueue queue)
+        {
+            this.stmt = stmt;
+            this.queue = queue;
+        }
+
+        public IObservable<T> Use<T>(Func<IStatement, IObservable<T>> f)
+        {
+            Contract.Requires(f != null);
+
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-            return queue.EnqueueObservableOperation(() =>
-                {
-                    return new DelegatingEnumerable<IReadOnlyList<IResultSetValue>>(() => this.stmt)
-                        .Select(selector)
-                        .ToObservable();    
-                });
+            return queue.EnqueueObservableOperation(() => f(this.stmt));
+        }
+
+        public Task<T> Use<T>(Func<IStatement, T> f)
+        {
+            Contract.Requires(f != null);
+
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+            return queue.EnqueueOperation(() => f(this.stmt));
         }
 
         public void Dispose()

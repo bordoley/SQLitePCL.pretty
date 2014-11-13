@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Concurrency;
 using System.Threading.Tasks;
@@ -30,6 +31,65 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(This != null);
             return new AsyncDatabaseConnectionImpl(This);
+        }
+
+        public static Task Use(this IAsyncDatabaseConnection This, Action<IDatabaseConnection> f)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(f != null);
+
+            return This.Use(conn =>
+                {
+                    f(conn);
+                    return Unit.Default;
+                });
+        }
+
+        public static Task ExecuteAll(this IAsyncDatabaseConnection This, string sql)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(sql != null);
+
+            return This.Use(conn =>
+            {
+                conn.ExecuteAll(sql);
+            });
+        }
+
+        public static Task Execute(this IAsyncDatabaseConnection This, string sql, params object[] a)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(sql != null);
+            Contract.Requires(a != null);
+
+            return This.Use(conn =>
+                {
+                    conn.Execute(sql, a);
+                });
+        }
+
+        public static Task<string> GetFilenameAsync(this IAsyncDatabaseConnection This, string database)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(database != null);
+
+            return This.Use(conn =>
+                {
+                    return conn.GetFileName(database);
+                });
+        }
+
+        public static IObservable<T> QueryAndSelect<T>(this IAsyncDatabaseConnection This, string sql, Func<IReadOnlyList<IResultSetValue>, T> selector, params object[] a)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(sql != null);
+            Contract.Requires(selector != null);
+            Contract.Requires(a != null);
+
+            return This.Use(conn =>
+            {
+                return conn.Query(sql, a).Select(selector).ToObservable();
+            });
         }
     }
 
@@ -90,52 +150,34 @@ namespace SQLitePCL.pretty
             }).Wait();
         }
 
-        Task ExecuteAll(string sql)
+        public IObservable<T> Use<T>(Func<IDatabaseConnection, IObservable<T>> f)
         {
-            return queue.EnqueueOperation(() =>
-                {
-                    this.conn.ExecuteAll(sql);
-                });
-        }
+            Contract.Requires(f != null);
 
-        Task Execute(string sql, params object[] a)
-        {
-            return queue.EnqueueOperation(() =>
-                {
-                    this.conn.Execute(sql, a);
-                });
-        }
-
-        public Task<string> GetFilenameAsync(string database)
-        {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-            return queue.EnqueueOperation(() =>
-                {
-                    return this.conn.GetFileName(database);
-                });
+            return queue.EnqueueObservableOperation(() => f(this.conn));
         }
 
-        public Task<Tuple<IASyncStatement, string>> PrepareStatement(string sql)
+        public Task<T> Use<T>(Func<IDatabaseConnection, T> f)
         {
+            Contract.Requires(f != null);
+
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-            return queue.EnqueueOperation(() =>
-                {
-                    string tail = null;
-                    var stmt = this.conn.PrepareStatement(sql, out tail);
-                    return Tuple.Create<IASyncStatement, string>(new AsyncStatementImpl(stmt, queue), tail);
-                });
+            return queue.EnqueueOperation(() => f(this.conn));
         }
 
-        public IObservable<T> QueryAndSelect<T>(string sql, Func<IReadOnlyList<IResultSetValue>, T> selector, params object[] a)
+        public Task<Tuple<IAsyncStatement, string>> PrepareStatement(string sql)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            Contract.Requires(sql != null);
 
-            return queue.EnqueueObservableOperation(() => 
-                {
-                    return this.conn.Query(sql,a).Select(selector).ToObservable();   
-                });
+            return this.Use(conn =>
+            {
+                string tail = null;
+                var stmt = conn.PrepareStatement(sql, out tail);
+                return Tuple.Create<IAsyncStatement, string>(new AsyncStatementImpl(stmt, queue), tail);
+            });
         }
     }
 }

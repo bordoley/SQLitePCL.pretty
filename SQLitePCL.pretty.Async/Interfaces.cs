@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2014 David Bordoley
    Copyright 2014 Zumero, LLC
 
@@ -31,49 +31,16 @@ namespace SQLitePCL.pretty
 
         IObservable<DatabaseUpdateEventArgs> Update { get; }
 
-        Task ExecuteAll(string sql);
+        IObservable<T> Use<T>(Func<IDatabaseConnection, IObservable<T>> f);
 
-        Task Execute(string sql, params object[] a);
+        Task<T> Use<T>(Func<IDatabaseConnection, T> f);
 
-        Task<String> GetFilenameAsync(string database);
-
-        //Task<T> OpenBlobAsync<T>(string database, string tableName, string columnName, long rowId, Func<Stream, T> selector, bool canWrite = false);
-
-        Task<Tuple<IASyncStatement,String>> PrepareStatementAsync(string sql);
-
-        IObservable<T> QueryAndSelect<T>(string sql, Func<IReadOnlyList<IResultSetValue>, T> selector, params object[] a);
+        Task<Tuple<IAsyncStatement, string>> PrepareStatement(string sql);
     }
 
-    public interface IASyncStatement : IDisposable
+    public interface IAsyncStatement : IDisposable
     {
-        Task<int> GetBindParameterCountAsync();
-
-        Task<string> GetSQLAsync();
-
-        Task<bool> IsReadOnlyAsync();
-
-        Task BindAsync(int index, byte[] blob);
-
-        Task BindAsync(int index, double val);
-
-        Task BindAsync(int index, int val);
-
-        Task BindAsync(int index, long val);
-
-        Task BindAsync(int index, string text);
-
-        Task BindNullAsync(int index);
-
-        Task BindZeroBlobAsync(int index, int size);
-
-        Task ClearBindingsAsync();
-
-        Task BindAsync(params object[] a);
-
-        Task<int> GetBindParameterIndexAsync(string parameter);
-
-        Task<string> GetBindParameterNameAsync(int index);
-
-        IObservable<T> Select<T>(Func<IReadOnlyList<IResultSetValue>, T> selector);
+        IObservable<T> Use<T>(Func<IStatement, IObservable<T>> f);
+        Task<T> Use<T>(Func<IStatement, T> f);
     }
 }
