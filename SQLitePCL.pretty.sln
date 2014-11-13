@@ -7,6 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLitePCL.pretty", "SQLiteP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLitePCL.pretty.tests.x86", "SQLitePCL.pretty.tests\SQLitePCL.pretty.tests.x86.csproj", "{467AB566-4D9E-4D9E-BB28-8167E6F2A239}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLitePCL.pretty.Async", "SQLitePCL.pretty.Async\SQLitePCL.pretty.Async.csproj", "{ED71D4D4-498E-432E-B941-F704CECCF254}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C6743D26-E16E-41CA-A757-72BE2D7EAF28} = {C6743D26-E16E-41CA-A757-72BE2D7EAF28}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +45,16 @@ Global
 		{467AB566-4D9E-4D9E-BB28-8167E6F2A239}.Release|Mixed Platforms.Build.0 = Release|x86
 		{467AB566-4D9E-4D9E-BB28-8167E6F2A239}.Release|x86.ActiveCfg = Release|x86
 		{467AB566-4D9E-4D9E-BB28-8167E6F2A239}.Release|x86.Build.0 = Release|x86
+		{ED71D4D4-498E-432E-B941-F704CECCF254}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED71D4D4-498E-432E-B941-F704CECCF254}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED71D4D4-498E-432E-B941-F704CECCF254}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{ED71D4D4-498E-432E-B941-F704CECCF254}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{ED71D4D4-498E-432E-B941-F704CECCF254}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{ED71D4D4-498E-432E-B941-F704CECCF254}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED71D4D4-498E-432E-B941-F704CECCF254}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED71D4D4-498E-432E-B941-F704CECCF254}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{ED71D4D4-498E-432E-B941-F704CECCF254}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{ED71D4D4-498E-432E-B941-F704CECCF254}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
