@@ -1,6 +1,5 @@
 /*
    Copyright 2014 David Bordoley
-   Copyright 2014 Zumero, LLC
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,9 +16,7 @@
 
 using System;
 using System.Collections.Generic;
-
-using System.IO;
-using System.Threading.Tasks;
+using System.Reactive.Concurrency;
 
 namespace SQLitePCL.pretty
 {
@@ -31,16 +28,11 @@ namespace SQLitePCL.pretty
 
         IObservable<DatabaseUpdateEventArgs> Update { get; }
 
-        IObservable<T> Use<T>(Func<IDatabaseConnection, IObservable<T>> f);
-
-        Task<T> Use<T>(Func<IDatabaseConnection, T> f);
-
-        Task<Tuple<IAsyncStatement, string>> PrepareStatement(string sql);
+        IObservable<T> Use<T>(Func<IDatabaseConnection, IEnumerable<T>> f, IScheduler scheduler);
     }
 
     public interface IAsyncStatement : IDisposable
     {
-        IObservable<T> Use<T>(Func<IStatement, IObservable<T>> f);
-        Task<T> Use<T>(Func<IStatement, T> f);
+        IObservable<T> Use<T>(Func<IStatement, IEnumerable<T>> f, IScheduler scheduler);
     }
 }

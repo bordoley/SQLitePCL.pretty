@@ -27,6 +27,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
+using System.Threading;
 using System.Threading.Tasks;
 
 // Based off of https://github.com/akavache/Akavache/blob/master/Akavache/Portable/KeyedOperationQueue.cs
@@ -78,12 +79,11 @@ namespace SQLitePCL.pretty
                 .Catch(Observable.Return(operation));
         }
 
-        private readonly IScheduler scheduler;
         private readonly Subject<Operation> queuedOps = new Subject<Operation>();
         readonly IConnectableObservable<Operation> resultObs;
         AsyncSubject<Unit> shutdownObs;
 
-        internal OperationsQueue(IScheduler scheduler)
+        internal OperationsQueue()
         {
             resultObs = queuedOps
                 .Select(ProcessOperation)
@@ -93,25 +93,21 @@ namespace SQLitePCL.pretty
             resultObs.Connect();
         }
 
-        public IObservable<T> EnqueueObservableOperation<T>(Func<IObservable<T>> asyncCalculationFunc)
+        public IObservable<T> EnqueueOperation<T>(Func<IObservable<T>> asyncCalculationFunc)
         {
             var item = Operation<T>.Create(asyncCalculationFunc);
             queuedOps.OnNext(item);
             return item.Result;
         }
 
-        public Task<T> EnqueueOperation<T>(Func<T> calculationFunc)
+        public Task<T> EnqueueOperation<T>(Func<T> calculationFunc, IScheduler scheduler)
         {
-            return EnqueueObservableOperation(() => SafeStart(calculationFunc)).ToTask();
+            return EnqueueOperation(() => SafeStart(calculationFunc, scheduler)).ToTask();
         }
 
-        public Task EnqueueOperation(Action action)
+        public Task<T> EnqueueOperation<T>(Func<T> calculationFunc, IScheduler scheduler, CancellationToken cancellationToken)
         {
-            return EnqueueOperation(() =>
-            {
-                action();
-                return Unit.Default;
-            });
+            return EnqueueOperation(() => SafeStart(calculationFunc, scheduler)).ToTask(cancellationToken);
         }
 
         public Task Shutdown()
@@ -137,7 +133,7 @@ namespace SQLitePCL.pretty
             }
         }
 
-        private IObservable<T> SafeStart<T>(Func<T> calculationFunc)
+        private IObservable<T> SafeStart<T>(Func<T> calculationFunc, IScheduler scheduler)
         {
             var ret = new AsyncSubject<T>();
             Observable.Start(() =>

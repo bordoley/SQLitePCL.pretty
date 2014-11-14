@@ -21,81 +21,306 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Concurrency;
+using System.Reactive.Threading.Tasks;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SQLitePCL.pretty
 {
     public static class AsyncDatabaseConnection
     {
+        internal static readonly IScheduler defaultScheduler = TaskPoolScheduler.Default;
+
         public static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this IDatabaseConnection This)
         {
             Contract.Requires(This != null);
             return new AsyncDatabaseConnectionImpl(This);
         }
 
-        public static Task Use(this IAsyncDatabaseConnection This, Action<IDatabaseConnection> f)
+        public static Task Use(
+            this IAsyncDatabaseConnection This,
+            Action<IDatabaseConnection> f, 
+            IScheduler scheduler, 
+            CancellationToken cancellationToken)
         {
             Contract.Requires(This != null);
             Contract.Requires(f != null);
+            Contract.Requires(scheduler != null);
 
             return This.Use(conn =>
                 {
                     f(conn);
-                    return Unit.Default;
-                });
+                    return Enumerable.Empty<Unit>(); ;
+                }, scheduler).ToTask(cancellationToken);
+        }
+
+        public static Task Use(this IAsyncDatabaseConnection This, Action<IDatabaseConnection> f)
+        {
+            return Use(This, f, defaultScheduler, CancellationToken.None);
+        }
+
+        public static Task Use(this IAsyncDatabaseConnection This, Action<IDatabaseConnection> f, CancellationToken cancellationToken)
+        {
+            return Use(This, f, defaultScheduler, cancellationToken);
+        }
+
+        public static Task Use(this IAsyncDatabaseConnection This, Action<IDatabaseConnection> f, IScheduler scheduler)
+        {
+            return Use(This, f, scheduler, CancellationToken.None);
+        }
+
+        public static Task<T> Use<T>(
+            this IAsyncDatabaseConnection This, 
+            Func<IDatabaseConnection, T> f,
+            IScheduler scheduler, 
+            CancellationToken cancellationToken)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(f != null);
+            Contract.Requires(scheduler != null);
+
+            return This.Use(conn => Enumerable.Repeat(f(conn), 1), scheduler).ToTask(cancellationToken);
+        }
+
+        public static Task<T> Use<T>(this IAsyncDatabaseConnection This, Func<IDatabaseConnection, T> f)
+        {
+            return Use(This, f, defaultScheduler, CancellationToken.None);
+        }
+
+        public static Task<T> Use<T>(this IAsyncDatabaseConnection This, Func<IDatabaseConnection, T> f, CancellationToken cancellationToken)
+        {
+            return Use(This, f, defaultScheduler, cancellationToken);
+        }
+
+        public static Task<T> Use<T>(this IAsyncDatabaseConnection This, Func<IDatabaseConnection, T> f, IScheduler scheduler)
+        {
+            return Use(This, f, scheduler, CancellationToken.None);
+        }
+
+        public static IObservable<T> Use<T>(this IAsyncDatabaseConnection This, Func<IDatabaseConnection, IEnumerable<T>> f)
+        {
+            return This.Use(f, defaultScheduler);
+        }
+
+        public static Task ExecuteAll(
+            this IAsyncDatabaseConnection This,
+            string sql,
+            IScheduler scheduler,
+            CancellationToken cancellationToken)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(sql != null);
+            Contract.Requires(scheduler != null);
+            
+            // FIXME: I think this could actually honor the cancellation token if it was implemented in a way to return an enumerable
+            return This.Use(conn =>
+            {
+                conn.ExecuteAll(sql);
+            }, scheduler, cancellationToken);
         }
 
         public static Task ExecuteAll(this IAsyncDatabaseConnection This, string sql)
         {
-            Contract.Requires(This != null);
-            Contract.Requires(sql != null);
-
-            return This.Use(conn =>
-            {
-                conn.ExecuteAll(sql);
-            });
+            return ExecuteAll(This, sql, defaultScheduler, CancellationToken.None);
         }
 
-        public static Task Execute(this IAsyncDatabaseConnection This, string sql, params object[] a)
+        public static Task ExecuteAll(this IAsyncDatabaseConnection This, string sql, CancellationToken cancellationToken)
+        {
+            return ExecuteAll(This, sql, defaultScheduler, cancellationToken);
+        }
+
+        public static Task ExecuteAll(this IAsyncDatabaseConnection This, string sql, IScheduler scheduler)
+        {
+            return ExecuteAll(This, sql, scheduler, CancellationToken.None);
+        }
+
+        public static Task Execute(
+            this IAsyncDatabaseConnection This, 
+            string sql, 
+            IScheduler scheduler,
+            CancellationToken cancellationToken,
+            params object[] a)
         {
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
+            Contract.Requires(scheduler != null);
             Contract.Requires(a != null);
 
             return This.Use(conn =>
                 {
                     conn.Execute(sql, a);
-                });
+                }, scheduler, cancellationToken);
         }
 
-        public static Task<string> GetFilenameAsync(this IAsyncDatabaseConnection This, string database)
+        public static Task Execute(this IAsyncDatabaseConnection This, string sql, params object[] a)
+        {
+            return Execute(This, sql, defaultScheduler, CancellationToken.None, a);
+        }
+
+        public static Task Execute(this IAsyncDatabaseConnection This, string sql, IScheduler scheduler, params object[] a)
+        {
+            return Execute(This, sql, scheduler, CancellationToken.None, a);
+        }
+
+        public static Task Execute(this IAsyncDatabaseConnection This, string sql, CancellationToken cancellationToken, params object[] a)
+        {
+            return Execute(This, sql, defaultScheduler, cancellationToken, a);
+        }
+
+        public static Task Execute(
+            this IAsyncDatabaseConnection This,
+            string sql,
+            IScheduler scheduler,
+            CancellationToken cancellationToken)
         {
             Contract.Requires(This != null);
-            Contract.Requires(database != null);
+            Contract.Requires(sql != null);
+            Contract.Requires(scheduler != null);
 
             return This.Use(conn =>
+            {
+                conn.Execute(sql);
+            }, scheduler, cancellationToken);
+        }
+
+        public static Task Execute(this IAsyncDatabaseConnection This, string sql)
+        {
+            return Execute(This, sql, defaultScheduler, CancellationToken.None);
+        }
+
+        public static Task Execute(this IAsyncDatabaseConnection This, string sql, IScheduler scheduler)
+        {
+            return Execute(This, sql, scheduler, CancellationToken.None);
+        }
+
+        public static Task Execute(this IAsyncDatabaseConnection This, string sql, CancellationToken cancellationToken)
+        {
+            return Execute(This, sql, defaultScheduler, cancellationToken);
+        }
+
+        public static Task<IAsyncStatement> PrepareStatement(
+           this IAsyncDatabaseConnection This,
+           string sql,
+           IScheduler scheduler,
+           CancellationToken cancellationToken)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(sql != null);
+            Contract.Requires(scheduler != null);
+
+            return Use<IAsyncStatement>(This, conn =>
+            {
+                var stmt = conn.PrepareStatement(sql);
+                return new AsyncStatementImpl(stmt, This);
+            });
+        }
+
+        public static Task<IAsyncStatement> PrepareStatement(this IAsyncDatabaseConnection This, string sql)
+        {
+            return PrepareStatement(This, sql, defaultScheduler, CancellationToken.None);
+        }
+
+        public static Task<IAsyncStatement> PrepareStatement(this IAsyncDatabaseConnection This, string sql, IScheduler scheduler)
+        {
+            return PrepareStatement(This, sql, scheduler, CancellationToken.None);
+        }
+
+        public static Task<IAsyncStatement> PrepareStatement(this IAsyncDatabaseConnection This, string sql, CancellationToken cancellationToken)
+        {
+            return PrepareStatement(This, sql, defaultScheduler, cancellationToken);
+        }
+
+        public static Task<Tuple<IAsyncStatement, string>> PrepareStatementWithTail(
+            this IAsyncDatabaseConnection This,
+            string sql,
+            IScheduler scheduler,
+            CancellationToken cancellationToken)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(sql != null);
+            Contract.Requires(scheduler != null);
+
+            return Use(This, conn =>
                 {
-                    return conn.GetFileName(database);
+                    string tail = null;
+                    var stmt = conn.PrepareStatement(sql, out tail);
+                    return Tuple.Create<IAsyncStatement, string>(new AsyncStatementImpl(stmt, This), tail);
                 });
         }
 
-        public static IObservable<T> QueryAndSelect<T>(this IAsyncDatabaseConnection This, string sql, Func<IReadOnlyList<IResultSetValue>, T> selector, params object[] a)
+        public static Task<Tuple<IAsyncStatement, string>> PrepareStatementWithTail(
+            this IAsyncDatabaseConnection This,
+            string sql)
+        {
+            return PrepareStatementWithTail(This, sql, defaultScheduler, CancellationToken.None);
+        }
+
+        public static Task<Tuple<IAsyncStatement, string>> PrepareStatementWithTail(
+            this IAsyncDatabaseConnection This,
+            string sql,
+            IScheduler scheduler)
+        {
+            return PrepareStatementWithTail(This, sql, scheduler, CancellationToken.None);
+        }
+
+        public static Task<Tuple<IAsyncStatement, string>> PrepareStatementWithTail(
+            this IAsyncDatabaseConnection This,
+            string sql,
+            CancellationToken cancellationToken)
+        {
+            return PrepareStatementWithTail(This, sql, defaultScheduler, cancellationToken);
+        }
+
+        public static IObservable<T> Query<T>(
+            this IAsyncDatabaseConnection This, 
+            string sql, 
+            Func<IReadOnlyList<IResultSetValue>, T> selector, 
+            IScheduler scheduler,
+            params object[] a)
         {
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
             Contract.Requires(selector != null);
+            Contract.Requires(scheduler != null);
             Contract.Requires(a != null);
 
             return This.Use(conn =>
             {
-                return conn.Query(sql, a).Select(selector).ToObservable();
-            });
+                return conn.Query(sql, a).Select(selector);
+            }, scheduler);
+        }
+
+        public static IObservable<T> Query<T>(this IAsyncDatabaseConnection This, string sql, Func<IReadOnlyList<IResultSetValue>, T> selector, params object[] a)
+        {
+            return Query(This, sql, selector, defaultScheduler, a);
+        }
+
+        public static IObservable<T> Query<T>(
+            this IAsyncDatabaseConnection This,
+            string sql,
+            Func<IReadOnlyList<IResultSetValue>, T> selector,
+            IScheduler scheduler)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(sql != null);
+            Contract.Requires(selector != null);
+            Contract.Requires(scheduler != null);
+
+            return This.Use(conn =>
+            {
+                return conn.Query(sql).Select(selector);
+            }, scheduler);
+        }
+
+        public static IObservable<T> Query<T>(this IAsyncDatabaseConnection This, string sql, Func<IReadOnlyList<IResultSetValue>, T> selector)
+        {
+            return Query(This, sql, selector, defaultScheduler);
         }
     }
 
     internal sealed class AsyncDatabaseConnectionImpl : IAsyncDatabaseConnection
     {
-        private readonly OperationsQueue queue = new OperationsQueue(TaskPoolScheduler.Default);
+        private readonly OperationsQueue queue = new OperationsQueue();
 
         private readonly IDatabaseConnection conn;
         private readonly IObservable<DatabaseTraceEventArgs> trace;
@@ -143,41 +368,22 @@ namespace SQLitePCL.pretty
                 return;
             }
 
+            // FIXME: Can this deadlock?
             this.disposed = true;
             queue.EnqueueOperation(() =>
             {
                 this.conn.Dispose();
-            }).Wait();
+                return Unit.Default;
+            }, Scheduler.CurrentThread).Wait();
         }
 
-        public IObservable<T> Use<T>(Func<IDatabaseConnection, IObservable<T>> f)
+        public IObservable<T> Use<T>(Func<IDatabaseConnection, IEnumerable<T>> f, IScheduler scheduler)
         {
             Contract.Requires(f != null);
 
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-            return queue.EnqueueObservableOperation(() => f(this.conn));
-        }
-
-        public Task<T> Use<T>(Func<IDatabaseConnection, T> f)
-        {
-            Contract.Requires(f != null);
-
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            return queue.EnqueueOperation(() => f(this.conn));
-        }
-
-        public Task<Tuple<IAsyncStatement, string>> PrepareStatement(string sql)
-        {
-            Contract.Requires(sql != null);
-
-            return this.Use(conn =>
-            {
-                string tail = null;
-                var stmt = conn.PrepareStatement(sql, out tail);
-                return Tuple.Create<IAsyncStatement, string>(new AsyncStatementImpl(stmt, queue), tail);
-            });
+            return queue.EnqueueOperation(() => f(this.conn).ToObservable(scheduler));
         }
     }
 }
