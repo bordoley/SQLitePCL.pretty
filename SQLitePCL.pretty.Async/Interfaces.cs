@@ -28,11 +28,11 @@ namespace SQLitePCL.pretty
 
         IObservable<DatabaseUpdateEventArgs> Update { get; }
 
-        IObservable<T> Use<T>(Func<IDatabaseConnection, IEnumerable<T>> f, IScheduler scheduler);
+        IObservable<T> Use<T>(Func<IDatabaseConnection, IEnumerable<T>> f);
     }
 
     public interface IAsyncStatement : IDisposable
     {
-        IObservable<T> Use<T>(Func<IStatement, IEnumerable<T>> f, IScheduler scheduler);
+        IObservable<T> Use<T>(Func<IStatement, IEnumerable<T>> f);
     }
 }

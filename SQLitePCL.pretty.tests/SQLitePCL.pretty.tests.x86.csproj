@@ -102,8 +102,21 @@
     <Reference Include="nunit.framework">
       <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="System.Reactive.Core">
+      <HintPath>..\packages\Rx-Core.2.2.5\lib\net45\System.Reactive.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Interfaces">
+      <HintPath>..\packages\Rx-Interfaces.2.2.5\lib\net45\System.Reactive.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Linq">
+      <HintPath>..\packages\Rx-Linq.2.2.5\lib\net45\System.Reactive.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.PlatformServices">
+      <HintPath>..\packages\Rx-PlatformServices.2.2.5\lib\net45\System.Reactive.PlatformServices.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncTests\AsyncDatabaseConnectionTests.cs" />
     <Compile Include="DatabaseConnectionTests.cs" />
     <Compile Include="Example.cs" />
     <Compile Include="ImplementationTests.cs" />
@@ -113,6 +126,10 @@
     <Compile Include="SQLiteVersionTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SQLitePCL.pretty.Async\SQLitePCL.pretty.Async.csproj">
+      <Project>{ed71d4d4-498e-432e-b941-f704ceccf254}</Project>
+      <Name>SQLitePCL.pretty.Async</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SQLitePCL.pretty\SQLitePCL.pretty.csproj">
       <Project>{C6743D26-E16E-41CA-A757-72BE2D7EAF28}</Project>
       <Name>SQLitePCL.pretty</Name>
