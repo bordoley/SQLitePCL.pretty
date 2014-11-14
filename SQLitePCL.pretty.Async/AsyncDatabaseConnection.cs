@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2014 David Bordoley
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -280,7 +280,7 @@ namespace SQLitePCL.pretty
             queue.EnqueueOperation(() =>
             {
                 this.conn.Dispose();
-                return Unit.Default;
+                return Enumerable.Repeat(Unit.Default, 1);
             }, Scheduler.CurrentThread).Wait();
         }
 
@@ -290,7 +290,31 @@ namespace SQLitePCL.pretty
 
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-            return queue.EnqueueOperation(() => f(this.conn).ToObservable(scheduler));
+            return Observable.Create((IObserver<T> observer, CancellationToken t) =>
+               {
+                   return queue.EnqueueOperation(() =>
+                       {
+                           try
+                           {
+                               t.ThrowIfCancellationRequested();
+                               foreach (var e in f(this.conn))
+                               {
+                                   t.ThrowIfCancellationRequested();
+                                   observer.OnNext(e);
+                                   t.ThrowIfCancellationRequested();
+                                }
+                                t.ThrowIfCancellationRequested();
+
+                                observer.OnCompleted();
+                            }
+                            catch(System.OperationCanceledException) { }
+                            catch (Exception ex)
+                            {
+                                observer.OnError(ex);
+                            }
+                            return Unit.Default;
+                       }, scheduler);
+               });
         }
     }
 }

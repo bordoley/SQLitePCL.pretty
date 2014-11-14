@@ -87,7 +87,7 @@ namespace SQLitePCL.pretty
         {
             resultObs = queuedOps
                 .Select(ProcessOperation)
-                .Merge()
+                .Concat()
                 .Multicast(new Subject<Operation>());
 
             resultObs.Connect();

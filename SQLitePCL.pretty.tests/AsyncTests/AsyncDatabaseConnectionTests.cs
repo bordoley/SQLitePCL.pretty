@@ -17,6 +17,7 @@
 using System;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -44,15 +45,40 @@ namespace SQLitePCL.pretty.tests
                               INSERT INTO foo (x) VALUES (2);
                               INSERT INTO foo (x) VALUES (3);");
                     });
-                foreach (var r in db.Query("SELECT * FROM foo;", result => 
-                    {
-                        Console.WriteLine("result thread" + Thread.CurrentThread.ManagedThreadId);
-                        return result[0].ToInt(); 
-                    }).ToEnumerable())
+
+                
+                //db.Query("SELECT * FROM foo;", result =>
+                 //       {
+                  //          Console.WriteLine("result thread" + Thread.CurrentThread.ManagedThreadId + " " + result[0].ToInt());
+                   //         return result[0].ToInt();
+                    //    })
+                   // .ObserveOn(NewThreadScheduler.Default);
+                //.Do(r =>
+                //    {
+                //       Console.WriteLine("do thread" + Thread.CurrentThread.ManagedThreadId);
+                //      Console.WriteLine(r);
+                //  });
+
+                var x = db.Query("SELECT * FROM foo;", result =>
                 {
-                    Console.WriteLine("enumerate thread:" + Thread.CurrentThread.ManagedThreadId);
-                    Console.WriteLine("Result: " + r);
-                }
+                    Console.WriteLine("x result thread" + Thread.CurrentThread.ManagedThreadId + " " + result[0].ToInt());
+                    return result[0].ToInt();
+                })
+    .ObserveOn(NewThreadScheduler.Default);
+
+                var y = db.Query("SELECT * FROM foo;", result =>
+                    {
+                        Console.WriteLine("y result thread" + Thread.CurrentThread.ManagedThreadId + " " + result[0].ToInt());
+                        return result[0].ToInt();
+                    })
+                    .ObserveOn(NewThreadScheduler.Default);
+                //.Do(r =>
+                //{
+                //    Console.WriteLine("y do thread" + Thread.CurrentThread.ManagedThreadId);
+                //   Console.WriteLine(r);
+                //});
+
+                await Task.WhenAll(y.ToTask(), x.ToTask(), y.ToTask(), x.ToTask(), y.ToTask());
             }
         }
     }
