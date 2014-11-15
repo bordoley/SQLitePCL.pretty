@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2014 David Bordoley
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -318,25 +318,31 @@ namespace SQLitePCL.pretty
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             return Observable.Create((IObserver<T> observer, CancellationToken cancellationToken) =>
-               {
-                   return queue.EnqueueOperation(() =>
-                       {
-                           try
-                           {
-                               cancellationToken.ThrowIfCancellationRequested();
+                {
+                    return queue.EnqueueOperation(() =>
+                        {
+                            var cancellationTokenRegistration = cancellationToken.Register(() => { /* this.conn.Interrupt() */});
+                               
+                            try
+                            {
+                                cancellationToken.ThrowIfCancellationRequested();
 
-                               foreach (var e in f(this.conn))
-                               {  
-                                   observer.OnNext(e);
-                                   cancellationToken.ThrowIfCancellationRequested();
+                                foreach (var e in f(this.conn))
+                                {  
+                                    observer.OnNext(e);
+                                    cancellationToken.ThrowIfCancellationRequested();
                                 }
                                 observer.OnCompleted();
-                            }
-                            catch (Exception ex)
-                            {
+                             }
+                             catch (Exception ex)
+                             {
                                 observer.OnError(ex);
-                            }
-                            return Unit.Default;
+                             }
+                             finally
+                             {
+                                cancellationTokenRegistration.Dispose();
+                             }
+                             return Unit.Default;
                        }, scheduler, cancellationToken);
                });
         }
