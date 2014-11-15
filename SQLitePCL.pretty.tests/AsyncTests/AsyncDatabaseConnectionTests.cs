@@ -31,12 +31,12 @@ namespace SQLitePCL.pretty.tests
     public class AsyncDatabaseConnectionTests
     {
         [Test]
-        public async Task TestUse()
+        public void TestUse()
         {
             using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection(NewThreadScheduler.Default))
             {
                 Console.WriteLine("root thread:" + Thread.CurrentThread.ManagedThreadId);
-                await db.Use(conn =>
+                db.Use(conn =>
                     {
                         Console.WriteLine("excute thread:" + Thread.CurrentThread.ManagedThreadId);
                         conn.ExecuteAll(
@@ -44,41 +44,21 @@ namespace SQLitePCL.pretty.tests
                               INSERT INTO foo (x) VALUES (1);
                               INSERT INTO foo (x) VALUES (2);
                               INSERT INTO foo (x) VALUES (3);");
-                    });
-
-                
-                //db.Query("SELECT * FROM foo;", result =>
-                 //       {
-                  //          Console.WriteLine("result thread" + Thread.CurrentThread.ManagedThreadId + " " + result[0].ToInt());
-                   //         return result[0].ToInt();
-                    //    })
-                   // .ObserveOn(NewThreadScheduler.Default);
-                //.Do(r =>
-                //    {
-                //       Console.WriteLine("do thread" + Thread.CurrentThread.ManagedThreadId);
-                //      Console.WriteLine(r);
-                //  });
+                    }).Wait();
 
                 var x = db.Query("SELECT * FROM foo;", result =>
-                {
-                    Console.WriteLine("x result thread" + Thread.CurrentThread.ManagedThreadId + " " + result[0].ToInt());
-                    return result[0].ToInt();
-                })
-    .ObserveOn(NewThreadScheduler.Default);
+                    {
+                        Console.WriteLine("x result thread" + Thread.CurrentThread.ManagedThreadId + " " + result[0].ToInt());
+                        return result[0].ToInt();
+                    });
 
                 var y = db.Query("SELECT * FROM foo;", result =>
                     {
                         Console.WriteLine("y result thread" + Thread.CurrentThread.ManagedThreadId + " " + result[0].ToInt());
                         return result[0].ToInt();
-                    })
-                    .ObserveOn(NewThreadScheduler.Default);
-                //.Do(r =>
-                //{
-                //    Console.WriteLine("y do thread" + Thread.CurrentThread.ManagedThreadId);
-                //   Console.WriteLine(r);
-                //});
+                    });
 
-                await Task.WhenAll(y.ToTask(), x.ToTask(), y.ToTask(), x.ToTask(), y.ToTask());
+                Task.WaitAll(y.ToTask(), x.ToTask(), y.ToTask(), x.ToTask(), y.ToTask());
             }
         }
     }

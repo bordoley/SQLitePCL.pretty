@@ -16,10 +16,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Reactive.Concurrency;
 
 namespace SQLitePCL.pretty
 {
+    [ContractClass(typeof(IAsyncDatabaseConnectionContract))]
     public interface IAsyncDatabaseConnection : IDisposable
     {
         IObservable<DatabaseTraceEventArgs> Trace { get; }
@@ -31,6 +33,7 @@ namespace SQLitePCL.pretty
         IObservable<T> Use<T>(Func<IDatabaseConnection, IEnumerable<T>> f);
     }
 
+    [ContractClass(typeof(IAsyncStatementContract))]
     public interface IAsyncStatement : IDisposable
     {
         IObservable<T> Use<T>(Func<IStatement, IEnumerable<T>> f);
