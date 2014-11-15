@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>SQLitePCL.pretty.Async</id>
+    <version>0.0.4-alpha</version>
+    <title>SQLitePCL.pretty.Async</title>
+    <authors>David Bordoley</authors>
+    <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/bordoley/SQLitePCL.pretty</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Async API for SQLitePCL.pretty</description>
+    <tags>portable sqlite pcl</tags>
+    <dependencies>
+      <dependency id="SQLitePCL.pretty" version="0.0.4" /> 
+      <dependency id="Rx-Main" version="2.2.5" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="SQLitePCL.pretty.Async\bin\Release\SQLitePCL.pretty.Async.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10" />
+  </files>
+</package>
