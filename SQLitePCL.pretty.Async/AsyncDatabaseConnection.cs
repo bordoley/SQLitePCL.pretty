@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -108,6 +109,32 @@ namespace SQLitePCL.pretty
         public static Task ExecuteAsync(this IAsyncDatabaseConnection This, string sql)
         {
             return ExecuteAsync(This, sql, CancellationToken.None);
+        }
+
+        public static Task<Stream> OpenBlobAsync(
+            this IAsyncDatabaseConnection This,
+            string database,
+            string tableName,
+            string columnName,
+            long rowId,
+            bool canWrite = false)
+        {
+            return OpenBlobAsync(This, database, tableName, columnName, rowId, CancellationToken.None, canWrite);
+        }
+
+        public static Task<Stream> OpenBlobAsync(
+            this IAsyncDatabaseConnection This, 
+            string database,
+            string tableName, 
+            string columnName, 
+            long rowId,
+            CancellationToken cancellationToken,
+            bool canWrite = false)
+        {
+            return This.Use(db =>
+                {
+                    return db.OpenBlob(database, tableName, columnName, rowId, canWrite);
+                }, cancellationToken);
         }
 
         public static Task<IAsyncStatement> PrepareStatementAsync(

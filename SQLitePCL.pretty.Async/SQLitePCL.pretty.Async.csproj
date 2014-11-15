@@ -34,6 +34,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AsyncBlobStream.cs" />
     <Compile Include="AsyncDatabaseConnection.cs" />
     <Compile Include="AsyncStatement.cs" />
     <Compile Include="Interfaces.cs" />
