@@ -65,9 +65,9 @@ namespace SQLitePCL.pretty
 
         string SQL { get; }
 
-        bool ReadOnly { get; }
+        bool IsReadOnly { get; }
 
-        bool Busy { get; }
+        bool IsBusy { get; }
 
         void Bind(int index, byte[] blob);
 

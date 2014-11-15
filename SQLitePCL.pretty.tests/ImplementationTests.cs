@@ -106,15 +106,15 @@ namespace SQLitePCL.pretty.tests
 
                 using (var stmt = db.PrepareStatement("SELECT x FROM foo;"))
                 {
-                    Assert.IsFalse(stmt.Busy);
+                    Assert.IsFalse(stmt.IsBusy);
                     stmt.MoveNext();
-                    Assert.IsTrue(stmt.Busy);
+                    Assert.IsTrue(stmt.IsBusy);
                     stmt.MoveNext();
-                    Assert.IsTrue(stmt.Busy);
+                    Assert.IsTrue(stmt.IsBusy);
                     stmt.MoveNext();
-                    Assert.IsTrue(stmt.Busy);
+                    Assert.IsTrue(stmt.IsBusy);
                     stmt.MoveNext();
-                    Assert.IsFalse(stmt.Busy);
+                    Assert.IsFalse(stmt.IsBusy);
                 }
             }
         }
@@ -162,7 +162,7 @@ namespace SQLitePCL.pretty.tests
                 {
                     using (var stmt = db.PrepareStatement(test.Item1))
                     {
-                        Assert.AreEqual(test.Item2, stmt.ReadOnly);
+                        Assert.AreEqual(test.Item2, stmt.IsReadOnly);
                         stmt.MoveNext();
                     }
                 }
