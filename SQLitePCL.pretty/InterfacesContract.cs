@@ -102,9 +102,9 @@ namespace SQLitePCL.pretty
 
         public abstract string SQL { get; }
 
-        public abstract bool ReadOnly { get; }
+        public abstract bool IsReadOnly { get; }
 
-        public abstract bool Busy { get; }
+        public abstract bool IsBusy { get; }
 
         public void Bind(int index, byte[] blob)
         {

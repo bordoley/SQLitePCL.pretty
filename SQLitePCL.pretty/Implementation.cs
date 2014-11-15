@@ -116,7 +116,7 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public bool ReadOnly
+        public bool IsReadOnly
         {
             get
             {
@@ -126,7 +126,7 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public bool Busy
+        public bool IsBusy
         {
             get
             {
