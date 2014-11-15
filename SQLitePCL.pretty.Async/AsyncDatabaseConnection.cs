@@ -1,4 +1,4 @@
-/*
+﻿/*
    Copyright 2014 David Bordoley
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -290,30 +290,27 @@ namespace SQLitePCL.pretty
 
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-            return Observable.Create((IObserver<T> observer, CancellationToken t) =>
+            return Observable.Create((IObserver<T> observer, CancellationToken cancellationToken) =>
                {
                    return queue.EnqueueOperation(() =>
                        {
                            try
                            {
-                               t.ThrowIfCancellationRequested();
-                               foreach (var e in f(this.conn))
-                               {
-                                   t.ThrowIfCancellationRequested();
-                                   observer.OnNext(e);
-                                   t.ThrowIfCancellationRequested();
-                                }
-                                t.ThrowIfCancellationRequested();
+                               cancellationToken.ThrowIfCancellationRequested();
 
+                               foreach (var e in f(this.conn))
+                               {  
+                                   observer.OnNext(e);
+                                   cancellationToken.ThrowIfCancellationRequested();
+                                }
                                 observer.OnCompleted();
                             }
-                            catch(System.OperationCanceledException) { }
                             catch (Exception ex)
                             {
                                 observer.OnError(ex);
                             }
                             return Unit.Default;
-                       }, scheduler);
+                       }, scheduler, cancellationToken);
                });
         }
     }

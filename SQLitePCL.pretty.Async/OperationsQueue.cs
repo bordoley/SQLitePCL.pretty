@@ -38,7 +38,7 @@ namespace SQLitePCL.pretty
         public abstract IObservable<Unit> EvaluateFunc();
     }
 
-    internal class Operation<T> : Operation
+    internal sealed class Operation<T> : Operation
     {
         public static Operation<T> Create(Func<IObservable<T>> f)
         {
@@ -70,9 +70,9 @@ namespace SQLitePCL.pretty
         }
     }
     
-    internal class OperationsQueue
+    internal sealed class OperationsQueue
     {
-        static IObservable<Operation> ProcessOperation(Operation operation)
+        private static IObservable<Operation> ProcessOperation(Operation operation)
         {
             return Observable.Defer(operation.EvaluateFunc)
                 .Select(_ => operation)
@@ -100,16 +100,6 @@ namespace SQLitePCL.pretty
             return item.Result;
         }
 
-        public Task<T> EnqueueOperation<T>(Func<T> calculationFunc, IScheduler scheduler)
-        {
-            return EnqueueOperation(() => SafeStart(calculationFunc, scheduler)).ToTask();
-        }
-
-        public Task<T> EnqueueOperation<T>(Func<T> calculationFunc, IScheduler scheduler, CancellationToken cancellationToken)
-        {
-            return EnqueueOperation(() => SafeStart(calculationFunc, scheduler)).ToTask(cancellationToken);
-        }
-
         public Task Shutdown()
         {
             lock (queuedOps)
@@ -132,8 +122,11 @@ namespace SQLitePCL.pretty
                 return shutdownObs.AsObservable().ToTask();
             }
         }
+    }
 
-        private IObservable<T> SafeStart<T>(Func<T> calculationFunc, IScheduler scheduler)
+    internal static class OperationsQueueExtensions
+    {
+        private static IObservable<T> SafeStart<T>(Func<T> calculationFunc, IScheduler scheduler)
         {
             var ret = new AsyncSubject<T>();
             Observable.Start(() =>
@@ -151,6 +144,16 @@ namespace SQLitePCL.pretty
             }, scheduler);
 
             return ret;
+        }
+
+        public static Task<T> EnqueueOperation<T>(this OperationsQueue This, Func<T> calculationFunc, IScheduler scheduler, CancellationToken cancellationToken)
+        {
+            return This.EnqueueOperation(() => SafeStart(calculationFunc, scheduler)).ToTask(cancellationToken);
+        }
+
+        public static Task<T> EnqueueOperation<T>(this OperationsQueue This, Func<T> calculationFunc, IScheduler scheduler)
+        {
+            return This.EnqueueOperation(calculationFunc, scheduler, CancellationToken.None);
         }
     }
 }
