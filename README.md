@@ -104,11 +104,12 @@ using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
 
     using (dst) { await stream.CopyToAsync(dst); }
 
+    // Observe on the taskpool in order to avoid deadlocking when disposing the database.
     await db.Query("SELECT rowid, * FROM foo", row =>
         row[0].ToInt64() + ": " +
         row[1].ToInt() + ", " +
         row[2].ToInt64() + ", " +
         row[3].ToString() + ", " +
-        row[4].ToString()).Do(str => { Console.WriteLine(str); });
+        row[4].ToString()).Do(str => { Console.WriteLine(str); }).ObserveOn(TaskPoolScheduler.Default);
 }
 ```
