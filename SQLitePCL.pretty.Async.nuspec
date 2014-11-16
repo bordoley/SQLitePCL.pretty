@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>SQLitePCL.pretty.Async</id>
-    <version>0.0.4-alpha</version>
+    <version>0.0.5-alpha</version>
     <title>SQLitePCL.pretty.Async</title>
     <authors>David Bordoley</authors>
     <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
@@ -11,7 +11,7 @@
     <description>Async API for SQLitePCL.pretty</description>
     <tags>portable sqlite pcl</tags>
     <dependencies>
-      <dependency id="SQLitePCL.pretty" version="0.0.4" /> 
+      <dependency id="SQLitePCL.pretty" version="0.0.5" /> 
       <dependency id="Rx-Main" version="2.2.5" />
     </dependencies>
   </metadata>
