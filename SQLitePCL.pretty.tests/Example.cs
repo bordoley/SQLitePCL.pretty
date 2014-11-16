@@ -17,7 +17,9 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 using NUnit.Framework;
 
@@ -68,6 +70,33 @@ namespace SQLitePCL.pretty.tests
                 // Blob dispose is broken: https://github.com/ericsink/SQLitePCL.raw/pull/9
                 // so tryig to drop the table causes an exception.
                 //db.Execute("DROP TABLE foo;");
+            }
+        }
+
+        [Test]
+        public async Task DoExampleAsync()
+        { 
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream")))
+            using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            {
+                await db.ExecuteAllAsync(
+                    @"CREATE TABLE foo (w int, x float, y string, z blob);
+                      INSERT INTO foo (w,x,y,z) VALUES (0, 0, '', null);");
+
+                await db.ExecuteAsync("INSERT INTO foo (w, x, y, z) VALUES (?, ?, ?, ?)", 1, 1.1, "hello", stream);
+
+                var rowId = await db.Query("SELECT rowid, z FROM foo where y = 'hello'", row => row[0].ToInt64()).FirstAsync();
+
+                var dst = await db.OpenBlobAsync("main", "foo", "z", rowId, true);
+
+                using (dst) { await stream.CopyToAsync(dst); }
+
+                await db.Query("SELECT rowid, * FROM foo", row =>
+                    row[0].ToInt64() + ": " +
+                    row[1].ToInt() + ", " +
+                    row[2].ToInt64() + ", " +
+                    row[3].ToString() + ", " +
+                    row[4].ToString()).Do(str => { Console.WriteLine(str); });
             }
         }
     }
