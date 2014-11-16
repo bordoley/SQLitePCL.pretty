@@ -12,7 +12,9 @@ SQLitePCL.raw includes a set of extension methods in a package called SQLitePCL.
 
 # How do I add SQLitePCL.pretty to my project?
 
-Use the [NuGet package](http://www.nuget.org/packages/SQLitePCL.pretty/).
+Use the NuGet packages:
+* [SQLitePCL.pretty](http://www.nuget.org/packages/SQLitePCL.pretty/)
+* [SQlitePCL.pretty.Async](http://www.nuget.org/packages/SQLitePCL.pretty.Async/)
 
 # API Overview
 
@@ -46,7 +48,7 @@ using (var db = SQLite3.Open(":memory:"))
 {
     db.ExecuteAll(
         @"CREATE TABLE foo (w int, x float, y string, z blob);
-            INSERT INTO foo (w,x,y,z) VALUES (0, 0, '', null);");
+          INSERT INTO foo (w,x,y,z) VALUES (0, 0, '', null);");
 
     db.Execute("INSERT INTO foo (w, x, y, z) VALUES (?, ?, ?, ?)", 1, 1.1, "hello", stream);
 
@@ -81,3 +83,32 @@ using (var db = SQLite3.Open(":memory:"))
 
 
 Additionally, you can take a look at the [unit tests](http://github.com/bordoley/SQLitePCL.pretty/tree/master/SQLitePCL.pretty.tests) for more examples.
+
+# Thats great and all, but I'm a writing a mobile app and can't block the UI thread
+
+In that case, be sure to include SQLitePCL.pretty.Async in your project, and checkout the following example
+
+```
+using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream")))
+using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+{
+    await db.ExecuteAllAsync(
+        @"CREATE TABLE foo (w int, x float, y string, z blob);
+          INSERT INTO foo (w,x,y,z) VALUES (0, 0, '', null);");
+
+    await db.ExecuteAsync("INSERT INTO foo (w, x, y, z) VALUES (?, ?, ?, ?)", 1, 1.1, "hello", stream);
+
+    var rowId = await db.Query("SELECT rowid, z FROM foo where y = 'hello'", row => row[0].ToInt64()).FirstAsync();
+
+    var dst = await db.OpenBlobAsync("main", "foo", "z", rowId, true);
+
+    using (dst) { await stream.CopyToAsync(dst); }
+
+    await db.Query("SELECT rowid, * FROM foo", row =>
+        row[0].ToInt64() + ": " +
+        row[1].ToInt() + ", " +
+        row[2].ToInt64() + ", " +
+        row[3].ToString() + ", " +
+        row[4].ToString()).Do(str => { Console.WriteLine(str); });
+}
+```
