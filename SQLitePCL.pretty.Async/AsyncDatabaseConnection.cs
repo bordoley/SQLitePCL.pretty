@@ -302,13 +302,9 @@ namespace SQLitePCL.pretty
                 return;
             }
 
-            // FIXME: Can this deadlock?
             this.disposed = true;
-            queue.EnqueueOperation(() =>
-            {
-                this.conn.Dispose();
-                return Enumerable.Repeat(Unit.Default, 1);
-            }, Scheduler.CurrentThread).Wait();
+            this.queue.Shutdown().Wait();
+            this.conn.Dispose();
         }
 
         public IObservable<T> Use<T>(Func<IDatabaseConnection, IEnumerable<T>> f)
