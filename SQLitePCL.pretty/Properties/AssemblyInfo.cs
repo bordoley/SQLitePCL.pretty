@@ -1,24 +1,16 @@
+using System.Resources;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-
-// Information about this assembly is defined by the following attributes.
-// Change them to the values specific to your project.
+using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("SQLitePCL.pretty")]
 [assembly: AssemblyDescription("A pretty face on top of SQLitePCL.raw")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("SQLitePCL.pretty")]
-[assembly: AssemblyCopyright("David Bordoley")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+[assembly: AssemblyCopyright("Copyright ©  2014")]
 
-// The assembly version has the format "{Major}.{Minor}.{Build}.{Revision}".
-// The form "{Major}.{Minor}.*" will automatically update the build and revision,
-// and "{Major}.{Minor}.{Build}.*" will update just the revision.
-
-[assembly: AssemblyVersion("0.0.4")]
-[assembly: AssemblyFileVersion("0.0.4")]
+[assembly: AssemblyVersion("0.0.5")]
+[assembly: AssemblyFileVersion("0.0.5")]
+[assembly: NeutralResourcesLanguageAttribute("en-US")]
 
 [assembly: InternalsVisibleTo("SQLitePCL.pretty.Async")]
 [assembly: InternalsVisibleTo("SQLitePCL.pretty.tests")]
