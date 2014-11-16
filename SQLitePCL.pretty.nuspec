@@ -8,8 +8,17 @@
     <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/bordoley/SQLitePCL.pretty</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>A pretty face on top of SQLitePCL.raw</description>
-    <tags>portable sqlite pcl</tags>
+    <summary>A pretty face on top of SQLitePCL.raw</summary>
+    <description>
+      SQLitePCL.pretty wraps the C like SQLiteAPI provided by SQLitePCL.raw with a 
+      friendly C# object oriented API. Notable features include support for using LINQ
+      expressions on SQL query results, SQLite events exposed as C# events, and the ability
+      to take advantage of advance SQLite features, such as collation, aggregate, scalar,
+      and commit hook functions.
+
+      For asynchronous query support, an additional companion API is available. See: SQLitePCL.pretty.Async 
+    </description>
+    <tags>portable sqlite pcl LINQ</tags>
     <dependencies>
       <dependency id="SQLitePCL.raw_basic" version="0.6.1" />
     </dependencies>

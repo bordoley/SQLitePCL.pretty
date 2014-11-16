@@ -8,8 +8,9 @@
     <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/bordoley/SQLitePCL.pretty</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Async API for SQLitePCL.pretty</description>
-    <tags>portable sqlite pcl</tags>
+    <summary>Async API for SQLitePCL.pretty</summary>
+    <description>Provides an asynchronous API for executing and observing the results of SQLite queries.</description>
+    <tags>portable sqlite pcl rx reactive LINQ</tags>
     <dependencies>
       <dependency id="SQLitePCL.pretty" version="0.0.5" /> 
       <dependency id="Rx-Main" version="2.2.5" />
