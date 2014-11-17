@@ -32,70 +32,74 @@ using System.Threading.Tasks;
 
 // Based off of https://github.com/akavache/Akavache/blob/master/Akavache/Portable/KeyedOperationQueue.cs
 namespace SQLitePCL.pretty
-{
-    internal abstract class Operation
+{    
+    internal sealed class OperationsQueue
     {
-        public abstract IObservable<Unit> EvaluateFunc();
-    }
-
-    internal sealed class Operation<T> : Operation
-    {
-        public static Operation<T> Create(Func<IObservable<T>> f)
+        private abstract class Operation
         {
-            return new Operation<T>(f);
+            public abstract Task EvaluateFunc();
         }
 
-        private readonly Func<IObservable<T>> f;
-        private readonly ReplaySubject<T> result = new ReplaySubject<T>();
-
-        private Operation(Func<IObservable<T>> f)
+        private sealed class Operation<T> : Operation
         {
-            this.f = f;
-        }
-
-        public IObservable<T> Result
-        {
-            get
+            public static Operation<T> Create(Func<Task<T>> f, CancellationToken cancellationToken)
             {
-                return result;
+                return new Operation<T>(f, cancellationToken);
+            }
+
+            private readonly Func<Task<T>> f;
+            private readonly CancellationToken cancellationToken;
+            private readonly TaskCompletionSource<T> result = new TaskCompletionSource<T>();
+
+            private Operation(Func<Task<T>> f, CancellationToken cancellationToken)
+            {
+                this.f = f;
+                this.cancellationToken = cancellationToken;
+            }
+
+            public Task<T> Result
+            {
+                get
+                {
+                    return result.Task;
+                }
+            }
+
+            public override async Task EvaluateFunc()
+            {
+                try
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    var result = await f().ConfigureAwait(false);
+                    this.result.SetResult(result);
+                }
+                catch (Exception ex)
+                {
+                    this.result.SetException(ex);
+                }
             }
         }
 
-        public override IObservable<Unit> EvaluateFunc()
-        {
-            var ret = f().Multicast(result);
-            ret.Connect();
-
-            return ret.Select(_ => Unit.Default);
-        }
-    }
-    
-    internal sealed class OperationsQueue
-    {
-        private static IObservable<Operation> ProcessOperation(Operation operation)
-        {
-            return Observable.Defer(operation.EvaluateFunc)
-                .Select(_ => operation)
-                .Catch(Observable.Return(operation));
-        }
-
         private readonly Subject<Operation> queuedOps = new Subject<Operation>();
-        readonly IConnectableObservable<Operation> resultObs;
-        AsyncSubject<Unit> shutdownObs;
+        private readonly IConnectableObservable<Unit> resultObs;
+        private Task shutdown;
 
         internal OperationsQueue()
         {
             resultObs = queuedOps
-                .Select(ProcessOperation)
+                .Select(operation => 
+                    // Defer Processing of the operation until subscribed to
+                    Observable.Defer(() => operation.EvaluateFunc().ToObservable()))
                 .Concat()
-                .Multicast(new Subject<Operation>());
+                .Multicast(new Subject<Unit>());
 
             resultObs.Connect();
         }
 
-        public IObservable<T> EnqueueOperation<T>(Func<IObservable<T>> asyncCalculationFunc)
+        public Task<T> EnqueueOperation<T>(Func<Task<T>> asyncCalculationFunc, CancellationToken cancellationToken)
         {
-            var item = Operation<T>.Create(asyncCalculationFunc);
+            var item = Operation<T>.Create(asyncCalculationFunc, cancellationToken);
             queuedOps.OnNext(item);
             return item.Result;
         }
@@ -104,56 +108,21 @@ namespace SQLitePCL.pretty
         {
             lock (queuedOps)
             {
-                if (shutdownObs != null) return shutdownObs.AsObservable().ToTask();
-
+                if (shutdown != null) { return shutdown; }
                 queuedOps.OnCompleted();
-
-                shutdownObs = new AsyncSubject<Unit>();
-                var sub = resultObs.Materialize()
-                    .Where(x => x.Kind != NotificationKind.OnNext)
-                    .SelectMany(x =>
-                        (x.Kind == NotificationKind.OnError) ?
-                            Observable.Throw<Unit>(x.Exception) :
-                            Observable.Return(Unit.Default))
-                    .Multicast(shutdownObs);
-
-                sub.Connect();
-
-                return shutdownObs.AsObservable().ToTask();
-            }
+                shutdown = resultObs.LastOrDefaultAsync().ToTask();
+                return shutdown;
+            }    
         }
     }
 
     internal static class OperationsQueueExtensions
     {
-        private static IObservable<T> SafeStart<T>(Func<T> calculationFunc, IScheduler scheduler)
-        {
-            var ret = new AsyncSubject<T>();
-            Observable.Start(() =>
-            {
-                try
-                {
-                    var val = calculationFunc();
-                    ret.OnNext(val);
-                    ret.OnCompleted();
-                }
-                catch (Exception ex)
-                {
-                    ret.OnError(ex);
-                }
-            }, scheduler);
-
-            return ret;
-        }
-
         public static Task<T> EnqueueOperation<T>(this OperationsQueue This, Func<T> calculationFunc, IScheduler scheduler, CancellationToken cancellationToken)
         {
-            return This.EnqueueOperation(() => SafeStart(calculationFunc, scheduler)).ToTask(cancellationToken);
-        }
-
-        public static Task<T> EnqueueOperation<T>(this OperationsQueue This, Func<T> calculationFunc, IScheduler scheduler)
-        {
-            return This.EnqueueOperation(calculationFunc, scheduler, CancellationToken.None);
+            return This.EnqueueOperation(() => 
+                Observable.Start(() => calculationFunc(), scheduler).ToTask(), 
+                cancellationToken);
         }
     }
 }
