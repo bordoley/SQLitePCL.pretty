@@ -32,16 +32,48 @@ namespace SQLitePCL.pretty
     {
         public static Task Reset(this IAsyncStatement This, CancellationToken cancellationToken)
         {
-            return This.Use(stmt =>
-                {
-                    ((IEnumerator)stmt).Reset();
-                    return Enumerable.Empty<Unit>();
-                }).ToTask(cancellationToken);
+            return This.Use(stmt => { ((IEnumerator)stmt).Reset(); }, cancellationToken);
         }
 
         public static Task Reset(this IAsyncStatement This)
         {
             return Reset(This, CancellationToken.None);
+        }
+
+        public static Task Use(
+            this IAsyncStatement This,
+            Action<IStatement> f,
+            CancellationToken cancellationToken)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(f != null);
+
+            return This.Use(conn =>
+            {
+                f(conn);
+                return Enumerable.Empty<Unit>();
+            }, cancellationToken);
+        }
+
+        public static Task Use(this IAsyncStatement This, Action<IStatement> f)
+        {
+            return Use(This, f, CancellationToken.None);
+        }
+
+        public static Task<T> Use<T>(
+            this IAsyncStatement This,
+            Func<IStatement, T> f,
+            CancellationToken cancellationToken)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(f != null);
+
+            return This.Use(conn => Enumerable.Repeat(f(conn), 1)).ToTask(cancellationToken);
+        }
+
+        public static Task<T> Use<T>(this IAsyncStatement This, Func<IStatement, T> f)
+        {
+            return Use(This, f, CancellationToken.None);
         }
     }
 
