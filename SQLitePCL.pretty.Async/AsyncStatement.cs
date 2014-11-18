@@ -30,16 +30,6 @@ namespace SQLitePCL.pretty
 {
     public static class AsyncStatement
     {
-        public static Task Reset(this IAsyncStatement This, CancellationToken cancellationToken)
-        {
-            return This.Use(stmt => { ((IEnumerator)stmt).Reset(); }, cancellationToken);
-        }
-
-        public static Task Reset(this IAsyncStatement This)
-        {
-            return Reset(This, CancellationToken.None);
-        }
-
         public static Task Use(
             this IAsyncStatement This,
             Action<IStatement> f,
