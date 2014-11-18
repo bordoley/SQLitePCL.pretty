@@ -106,6 +106,16 @@ namespace SQLitePCL.pretty
             }
         }
 
+        public int ColumnCount
+        {
+            get
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+                return raw.sqlite3_column_count(stmt);
+            }
+        }
+
         public string SQL
         {
             get
@@ -198,6 +208,34 @@ namespace SQLitePCL.pretty
 
             int rc = raw.sqlite3_clear_bindings(stmt);
             SQLiteException.CheckOk(stmt, rc);
+        }
+
+        public string GetColumnName(int index)
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+            return raw.sqlite3_column_name(stmt, index);
+        }
+
+        public string GetColumnDatabaseName(int index)
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+            return raw.sqlite3_column_database_name(stmt, index);
+        }
+
+        public String GetColumnOriginName(int index) 
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+            return raw.sqlite3_column_origin_name(stmt, index);
+        }
+
+        public string ColumnTableName(int index)
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+            return raw.sqlite3_column_table_name(stmt, index);
         }
 
         public bool TryGetBindParameterIndex(string parameter, out int index)

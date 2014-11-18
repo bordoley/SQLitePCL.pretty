@@ -63,6 +63,8 @@ namespace SQLitePCL.pretty
     {
         int BindParameterCount { get; }
 
+        int ColumnCount { get; }
+
         string SQL { get; }
 
         bool IsReadOnly { get; }
@@ -84,6 +86,14 @@ namespace SQLitePCL.pretty
         void BindZeroBlob(int index, int size);
 
         void ClearBindings();
+
+        string GetColumnName(int index);
+
+        string GetColumnDatabaseName(int index);
+        
+        string GetColumnOriginName(int index);
+
+        string ColumnTableName(int index);
 
         bool TryGetBindParameterIndex(string parameter, out int index);
 
@@ -114,7 +124,7 @@ namespace SQLitePCL.pretty
 
         string ColumnDatabaseName { get; }
 
-        String ColumnOriginName { get; }
+        string ColumnOriginName { get; }
 
         string ColumnTableName { get; }
     }
