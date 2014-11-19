@@ -87,15 +87,18 @@ namespace SQLitePCL.pretty
     internal sealed class StatementImpl : IStatement
     {
         private readonly sqlite3_stmt stmt;
+        private readonly SQLiteDatabaseConnection db;
         private readonly IReadOnlyOrderedDictionary<string, IBindParameter> bindParameters;
         private readonly IReadOnlyList<IColumnInfo> columns;
         private readonly IReadOnlyList<IResultSetValue> current;
 
         private bool disposed = false;
 
-        internal StatementImpl(sqlite3_stmt stmt)
+        internal StatementImpl(sqlite3_stmt stmt, SQLiteDatabaseConnection db)
         {
             this.stmt = stmt;
+            this.db = db;
+
             this.bindParameters = new BindParameterOrderedDictionaryImpl(this);
             this.columns = new ColumnsListImpl(this);
             this.current = new ResultSetImpl(this);
@@ -180,6 +183,7 @@ namespace SQLitePCL.pretty
 
         public void Dispose()
         {
+            db.RemoveStatement(this);
             disposed = true;
             stmt.Dispose();
         }

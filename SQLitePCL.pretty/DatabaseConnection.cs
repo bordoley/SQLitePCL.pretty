@@ -470,15 +470,15 @@ namespace SQLitePCL.pretty
     public sealed class SQLiteDatabaseConnection : IDatabaseConnection
     {
         private readonly sqlite3 db;
-        private readonly IEnumerable<IStatement> statements;
+        private readonly Dictionary<sqlite3_stmt, StatementImpl> statements = new Dictionary<sqlite3_stmt, StatementImpl>();
+        private readonly IEnumerable<IStatement> statementsEnumerable;
 
         private bool disposed = false;
 
         internal SQLiteDatabaseConnection(sqlite3 db)
         {
             this.db = db;
-
-            statements = new DelegatingEnumerable<IStatement>(() => StatementsEnumerator());
+            this.statementsEnumerable = new DelegatingEnumerable<IStatement>(() => StatementsEnumerator());
 
             // FIXME: Could argue that the shouldn't be setup until the first subscriber to the events
             raw.sqlite3_rollback_hook(db, v => Rollback(this, EventArgs.Empty), null);
@@ -552,24 +552,31 @@ namespace SQLitePCL.pretty
             }
         }
 
-        private IEnumerator<IStatement> StatementsEnumerator()
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            sqlite3_stmt next = null;
-            while ((next = raw.sqlite3_next_stmt(db, next)) != null)
-            {
-                yield return new StatementImpl(next);
-            }
-        }
-
         public IEnumerable<IStatement> Statements
         {
             get
             {
+                return this.statementsEnumerable;
+            }
+        }
+
+        private IEnumerator<IStatement> StatementsEnumerator()
+        {
+            sqlite3_stmt next = null;
+
+            while (true)
+            {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-                return statements;
+                next = raw.sqlite3_next_stmt(db, next);
+                if (next != null)
+                {
+                    yield return statements[next];
+                }
+                else
+                {
+                    break;
+                }
             }
         }
 
@@ -606,6 +613,7 @@ namespace SQLitePCL.pretty
 
             return new BlobStream(blob, canWrite);
         }
+
         public IStatement PrepareStatement(string sql, out string tail)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
@@ -614,7 +622,14 @@ namespace SQLitePCL.pretty
             int rc = raw.sqlite3_prepare_v2(db, sql, out stmt, out tail);
             SQLiteException.CheckOk(db, rc);
 
-            return new StatementImpl(stmt);
+            var retval = new StatementImpl(stmt, this);
+            statements.Add(stmt, retval);
+            return retval;
+        }
+
+        internal void RemoveStatement(StatementImpl stmt)
+        {
+            statements.Remove(stmt.sqlite3_stmt);
         }
 
         public void RegisterCollation(string name, Comparison<string> comparison)
