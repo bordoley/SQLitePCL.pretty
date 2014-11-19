@@ -8,8 +8,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProduct("SQLitePCL.pretty")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 
-[assembly: AssemblyVersion("0.0.5")]
-[assembly: AssemblyFileVersion("0.0.5")]
+[assembly: AssemblyVersion("0.0.6")]
+[assembly: AssemblyFileVersion("0.0.6")]
 [assembly: NeutralResourcesLanguageAttribute("en-US")]
 
 [assembly: InternalsVisibleTo("SQLitePCL.pretty.Async")]
