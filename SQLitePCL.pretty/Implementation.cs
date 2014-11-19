@@ -96,9 +96,18 @@ namespace SQLitePCL.pretty
         internal StatementImpl(sqlite3_stmt stmt)
         {
             this.stmt = stmt;
-            this.bindParameters = new BindParameterOrderedDictionaryImpl(stmt);
-            this.columns = new ColumnsListImpl(stmt);
-            this.current = new ResultSetImpl(stmt);
+            this.bindParameters = new BindParameterOrderedDictionaryImpl(this);
+            this.columns = new ColumnsListImpl(this);
+            this.current = new ResultSetImpl(this);
+        }
+
+        internal sqlite3_stmt sqlite3_stmt
+        {
+            get 
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                return stmt;
+            }
         }
 
         public IReadOnlyOrderedDictionary<string, IBindParameter> BindParameters
@@ -143,9 +152,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-                return raw.sqlite3_sql(stmt);
+                return raw.sqlite3_sql(this.sqlite3_stmt);
             }
         }
 
@@ -153,9 +160,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-                return raw.sqlite3_stmt_readonly(stmt) == 0 ? false : true;
+                return raw.sqlite3_stmt_readonly(this.sqlite3_stmt) == 0 ? false : true;
             }
         }
 
@@ -163,18 +168,14 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-                return raw.sqlite3_stmt_busy(stmt) == 0 ? false : true;
+                return raw.sqlite3_stmt_busy(this.sqlite3_stmt) == 0 ? false : true;
             }
         }
 
         public void ClearBindings()
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            int rc = raw.sqlite3_clear_bindings(stmt);
-            SQLiteException.CheckOk(stmt, rc);
+            int rc = raw.sqlite3_clear_bindings(this.sqlite3_stmt);
+            SQLiteException.CheckOk(this.sqlite3_stmt, rc);
         }
 
         public void Dispose()
@@ -185,9 +186,7 @@ namespace SQLitePCL.pretty
 
         public bool MoveNext()
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            int rc = raw.sqlite3_step(stmt);
+            int rc = raw.sqlite3_step(this.sqlite3_stmt);
             if (rc == raw.SQLITE_DONE)
             {
                 return false;
@@ -198,7 +197,7 @@ namespace SQLitePCL.pretty
             }
             else
             {
-                SQLiteException.CheckOk(stmt, rc);
+                SQLiteException.CheckOk(this.sqlite3_stmt, rc);
                 // Never gets returned
                 return false;
             }
@@ -206,25 +205,23 @@ namespace SQLitePCL.pretty
 
         public void Reset()
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            int rc = raw.sqlite3_reset(stmt);
+            int rc = raw.sqlite3_reset(this.sqlite3_stmt);
             SQLiteException.CheckOk(stmt, rc);
         }
     }
 
     internal sealed class BindParameterOrderedDictionaryImpl : IReadOnlyOrderedDictionary<string, IBindParameter>
     {
-        private readonly sqlite3_stmt stmt;
+        private readonly StatementImpl stmt;
 
-        internal BindParameterOrderedDictionaryImpl(sqlite3_stmt stmt)
+        internal BindParameterOrderedDictionaryImpl(StatementImpl stmt)
         {
             this.stmt = stmt;
         }
 
         private bool TryGetBindParameterIndex(string parameter, out int index)
         {
-            index = raw.sqlite3_bind_parameter_index(stmt, parameter) - 1;
+            index = raw.sqlite3_bind_parameter_index(stmt.sqlite3_stmt, parameter) - 1;
             return index >= 0;
         }
 
@@ -237,7 +234,7 @@ namespace SQLitePCL.pretty
                     throw new ArgumentOutOfRangeException();
                 }
 
-                return new BindParameterImpl(stmt, index);
+                return new BindParameterImpl(stmt.sqlite3_stmt, index);
             }
         }
 
@@ -259,7 +256,7 @@ namespace SQLitePCL.pretty
         {
             get 
             {
-                return raw.sqlite3_bind_parameter_count(stmt);
+                return raw.sqlite3_bind_parameter_count(stmt.sqlite3_stmt);
             }
         }
 
@@ -377,9 +374,9 @@ namespace SQLitePCL.pretty
 
     internal sealed class ColumnsListImpl : IReadOnlyList<IColumnInfo>
     {
-        private readonly sqlite3_stmt stmt;
+        private readonly StatementImpl stmt;
 
-        internal ColumnsListImpl(sqlite3_stmt stmt)
+        internal ColumnsListImpl(StatementImpl stmt)
         {
             this.stmt = stmt;
         }
@@ -401,7 +398,7 @@ namespace SQLitePCL.pretty
         {
             get 
             {
-                return raw.sqlite3_column_count(stmt);
+                return raw.sqlite3_column_count(stmt.sqlite3_stmt);
             }
         }
 
@@ -421,10 +418,10 @@ namespace SQLitePCL.pretty
 
     internal sealed class ColumnInfoImpl : IColumnInfo
     {
-        private readonly sqlite3_stmt stmt;
+        private readonly StatementImpl stmt;
         private readonly int index;
 
-        internal ColumnInfoImpl(sqlite3_stmt stmt, int index)
+        internal ColumnInfoImpl(StatementImpl stmt, int index)
         {
             this.stmt = stmt;
             this.index = index;
@@ -434,7 +431,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                return raw.sqlite3_column_name(stmt, index);
+                return raw.sqlite3_column_name(stmt.sqlite3_stmt, index);
             }
         }
 
@@ -442,7 +439,7 @@ namespace SQLitePCL.pretty
         {
             get 
             {
-                return raw.sqlite3_column_database_name(stmt, index);
+                return raw.sqlite3_column_database_name(stmt.sqlite3_stmt, index);
             }
         }
 
@@ -450,7 +447,7 @@ namespace SQLitePCL.pretty
         {
             get 
             {
-                return raw.sqlite3_column_origin_name(stmt, index);
+                return raw.sqlite3_column_origin_name(stmt.sqlite3_stmt, index);
             }
         }
 
@@ -458,16 +455,16 @@ namespace SQLitePCL.pretty
         {
             get 
             {
-                return raw.sqlite3_column_table_name(stmt, index);
+                return raw.sqlite3_column_table_name(stmt.sqlite3_stmt, index);
             }
         }
     }
 
     internal sealed class ResultSetImpl : IReadOnlyList<IResultSetValue>
     {
-        private readonly sqlite3_stmt stmt;
+        private readonly StatementImpl stmt;
 
-        internal ResultSetImpl(sqlite3_stmt stmt)
+        internal ResultSetImpl(StatementImpl stmt)
         {
             this.stmt = stmt;
         }
@@ -476,7 +473,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                return raw.sqlite3_column_count(stmt);
+                return raw.sqlite3_column_count(stmt.sqlite3_stmt);
             }
         }
 

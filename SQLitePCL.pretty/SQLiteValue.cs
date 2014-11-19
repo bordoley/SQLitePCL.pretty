@@ -92,7 +92,7 @@ namespace SQLitePCL.pretty
             return new NativeValue(value);
         }
 
-        internal static IResultSetValue ResultSetValueAt(this sqlite3_stmt stmt, int index)
+        internal static IResultSetValue ResultSetValueAt(this StatementImpl stmt, int index)
         {
             return new ResultSetValueImpl(stmt, index);
         }
@@ -463,10 +463,10 @@ namespace SQLitePCL.pretty
 
     internal sealed class ResultSetValueImpl : IResultSetValue
     {
-        private readonly sqlite3_stmt stmt;
+        private readonly StatementImpl stmt;
         private readonly int index;
 
-        internal ResultSetValueImpl(sqlite3_stmt stmt, int index)
+        internal ResultSetValueImpl(StatementImpl stmt, int index)
         {
             this.stmt = stmt;
             this.index = index;
@@ -484,7 +484,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                return (SQLiteType)raw.sqlite3_column_type(stmt, index);
+                return (SQLiteType)raw.sqlite3_column_type(stmt.sqlite3_stmt, index);
             }
         }
 
@@ -492,33 +492,33 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                return raw.sqlite3_column_bytes(stmt, index);
+                return raw.sqlite3_column_bytes(stmt.sqlite3_stmt, index);
             }
         }
 
         public byte[] ToBlob()
         {
-            return raw.sqlite3_column_blob(stmt, index);
+            return raw.sqlite3_column_blob(stmt.sqlite3_stmt, index);
         }
 
         public double ToDouble()
         {
-            return raw.sqlite3_column_double(stmt, index);
+            return raw.sqlite3_column_double(stmt.sqlite3_stmt, index);
         }
 
         public int ToInt()
         {
-            return raw.sqlite3_column_int(stmt, index);
+            return raw.sqlite3_column_int(stmt.sqlite3_stmt, index);
         }
 
         public long ToInt64()
         {
-            return raw.sqlite3_column_int64(stmt, index);
+            return raw.sqlite3_column_int64(stmt.sqlite3_stmt, index);
         }
 
         public override string ToString()
         {
-            return raw.sqlite3_column_text(stmt, index);
+            return raw.sqlite3_column_text(stmt.sqlite3_stmt, index);
         }
     }
 }
