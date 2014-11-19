@@ -31,9 +31,13 @@ Use the NuGet packages:
 
 * IStatement - This interface is used to bind parameters and to enumerate the result set of a SQL query. Its a lower level interface that you rarely need to use in practice but is available if needed.
 
+* IBindParameter - This interface is used to bind a parameter to a value when preparing a statement to stepped through. An IStatement provides access to its bind parameters via IReadonlyOrderedDictionary which allows accessing bind parameter by either index or name.
+
+* IColumnInfo = This interface provides additional info about a column in a result set, such as the database, table and column names of the value.
+
 * ISQLiteValue - This interface is used to wrap SQLite dynamically typed values which are used in result sets as well as in aggregate and scalar functions. 
 
-* IResultSetValue - A subclass of ISQLiteValue that includes additional result set specific details about a value, including the database, table and column names of the value.
+* IResultSetValue - A subclass of ISQLiteValue that includes the IColumnInfo associated with the value.
 
 * IDatabaseBackup - Interface to SQLite's backup API.
 
