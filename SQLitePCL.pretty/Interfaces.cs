@@ -63,7 +63,7 @@ namespace SQLitePCL.pretty
     {
         int BindParameterCount { get; }
 
-        int ColumnCount { get; }
+        IReadOnlyList<IColumnInfo> Columns { get; }
 
         string SQL { get; }
 
@@ -87,17 +87,20 @@ namespace SQLitePCL.pretty
 
         void ClearBindings();
 
-        string GetColumnName(int index);
-
-        string GetColumnDatabaseName(int index);
-        
-        string GetColumnOriginName(int index);
-
-        string ColumnTableName(int index);
-
         bool TryGetBindParameterIndex(string parameter, out int index);
 
         string GetBindParameterName(int index);
+    }
+
+    public interface IColumnInfo
+    {
+        string Name { get; }
+
+        string DatabaseName { get; }
+
+        string OriginName { get; }
+
+        string TableName { get; }
     }
 
     public interface ISQLiteValue

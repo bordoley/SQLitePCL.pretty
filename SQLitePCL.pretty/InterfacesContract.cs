@@ -100,7 +100,7 @@ namespace SQLitePCL.pretty
     {
         public abstract int BindParameterCount { get; }
 
-        public abstract int ColumnCount { get; }
+        public abstract IReadOnlyList<IColumnInfo> Columns { get; }
 
         public abstract string SQL { get; }
 
@@ -154,34 +154,6 @@ namespace SQLitePCL.pretty
         }
 
         public abstract void ClearBindings();
-
-        public string GetColumnName(int index)
-        {
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.ColumnCount);
-            return default(string);
-        }
-
-        public string GetColumnDatabaseName(int index)
-        {
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.ColumnCount);
-            return default(string);
-        }
-
-        public string GetColumnOriginName(int index)
-        {
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.ColumnCount);
-            return default(string);
-        }
-
-        public string ColumnTableName(int index)
-        {
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.ColumnCount);
-            return default(string);
-        }
 
         public bool TryGetBindParameterIndex(string parameter, out int index)
         {

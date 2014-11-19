@@ -87,6 +87,7 @@ namespace SQLitePCL.pretty
     {
         private readonly sqlite3_stmt stmt;
         private readonly IReadOnlyList<IResultSetValue> current;
+        private readonly IReadOnlyList<IColumnInfo> columns;
 
         private bool disposed = false;
 
@@ -94,6 +95,7 @@ namespace SQLitePCL.pretty
         {
             this.stmt = stmt;
             this.current = new ResultSetImpl(stmt);
+            this.columns = new ColumnsListImpl(stmt);
         }
 
         public int BindParameterCount
@@ -106,13 +108,11 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public int ColumnCount
+        public IReadOnlyList<IColumnInfo> Columns 
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-                return raw.sqlite3_column_count(stmt);
+                return columns;
             }
         }
 
@@ -210,34 +210,6 @@ namespace SQLitePCL.pretty
             SQLiteException.CheckOk(stmt, rc);
         }
 
-        public string GetColumnName(int index)
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            return raw.sqlite3_column_name(stmt, index);
-        }
-
-        public string GetColumnDatabaseName(int index)
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            return raw.sqlite3_column_database_name(stmt, index);
-        }
-
-        public String GetColumnOriginName(int index) 
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            return raw.sqlite3_column_origin_name(stmt, index);
-        }
-
-        public string ColumnTableName(int index)
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            return raw.sqlite3_column_table_name(stmt, index);
-        }
-
         public bool TryGetBindParameterIndex(string parameter, out int index)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
@@ -304,6 +276,94 @@ namespace SQLitePCL.pretty
 
             int rc = raw.sqlite3_reset(stmt);
             SQLiteException.CheckOk(stmt, rc);
+        }
+    }
+
+    internal sealed class ColumnsListImpl : IReadOnlyList<IColumnInfo>
+    {
+        private readonly sqlite3_stmt stmt;
+
+        internal ColumnsListImpl(sqlite3_stmt stmt)
+        {
+            this.stmt = stmt;
+        }
+
+        public IColumnInfo this[int index]
+        {
+            get 
+            { 
+                if (index < 0 || index >= this.Count)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+
+                return new ColumnInfoImpl(stmt, index);
+            }
+        }
+
+        public int Count
+        {
+            get 
+            {
+                return raw.sqlite3_column_count(stmt);
+            }
+        }
+
+        public IEnumerator<IColumnInfo> GetEnumerator()
+        {
+            for (int i = 0; i < this.Count; i++)
+            {
+                yield return this[i];
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+    }
+
+    internal sealed class ColumnInfoImpl : IColumnInfo
+    {
+        private readonly sqlite3_stmt stmt;
+        private readonly int index;
+
+        internal ColumnInfoImpl(sqlite3_stmt stmt, int index)
+        {
+            this.stmt = stmt;
+            this.index = index;
+        }
+
+        public string Name
+        {
+            get
+            {
+                return raw.sqlite3_column_table_name(stmt, index);
+            }
+        }
+
+        public string DatabaseName
+        {
+            get 
+            {
+                return raw.sqlite3_column_database_name(stmt, index);
+            }
+        }
+
+        public string OriginName
+        {
+            get 
+            {
+                return raw.sqlite3_column_origin_name(stmt, index);
+            }
+        }
+
+        public string TableName
+        {
+            get 
+            {
+                return raw.sqlite3_column_table_name(stmt, index);
+            }
         }
     }
 
