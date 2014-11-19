@@ -86,25 +86,27 @@ namespace SQLitePCL.pretty
     internal sealed class StatementImpl : IStatement
     {
         private readonly sqlite3_stmt stmt;
-        private readonly IReadOnlyList<IResultSetValue> current;
+        private readonly IReadOnlyList<IBindParameter> bindParameters;
         private readonly IReadOnlyList<IColumnInfo> columns;
+        private readonly IReadOnlyList<IResultSetValue> current;
 
         private bool disposed = false;
 
         internal StatementImpl(sqlite3_stmt stmt)
         {
             this.stmt = stmt;
-            this.current = new ResultSetImpl(stmt);
+            this.bindParameters = new BindParameterListImpl(stmt);
             this.columns = new ColumnsListImpl(stmt);
+            this.current = new ResultSetImpl(stmt);
         }
 
-        public int BindParameterCount
+        public IReadOnlyList<IBindParameter> BindParameters
         {
             get
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-                return raw.sqlite3_bind_parameter_count(stmt);
+                return bindParameters;
             }
         }
 
@@ -112,7 +114,27 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                
                 return columns;
+            }
+        }
+
+        public IReadOnlyList<IResultSetValue> Current
+        {
+            get
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+                return current;
+            }
+        }
+
+        Object IEnumerator.Current
+        {
+            get
+            {
+                return this.Current;
             }
         }
 
@@ -146,62 +168,6 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public void Bind(int index, byte[] blob)
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            int rc = raw.sqlite3_bind_blob(stmt, index + 1, blob);
-            SQLiteException.CheckOk(stmt, rc);
-        }
-
-        public void Bind(int index, double val)
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            int rc = raw.sqlite3_bind_double(stmt, index + 1, val);
-            SQLiteException.CheckOk(stmt, rc);
-        }
-
-        public void Bind(int index, int val)
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            int rc = raw.sqlite3_bind_int(stmt, index + 1, val);
-            SQLiteException.CheckOk(stmt, rc);
-        }
-
-        public void Bind(int index, long val)
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            int rc = raw.sqlite3_bind_int64(stmt, index + 1, val);
-            SQLiteException.CheckOk(stmt, rc);
-        }
-
-        public void Bind(int index, string text)
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            int rc = raw.sqlite3_bind_text(stmt, index + 1, text);
-            SQLiteException.CheckOk(stmt, rc);
-        }
-
-        public void BindNull(int index)
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            int rc = raw.sqlite3_bind_null(stmt, index + 1);
-            SQLiteException.CheckOk(stmt, rc);
-        }
-
-        public void BindZeroBlob(int index, int size)
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            int rc = raw.sqlite3_bind_zeroblob(stmt, index + 1, size);
-            SQLiteException.CheckOk(stmt, rc);
-        }
-
         public void ClearBindings()
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
@@ -218,36 +184,13 @@ namespace SQLitePCL.pretty
             return index >= 0;
         }
 
-        public string GetBindParameterName(int index)
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            return raw.sqlite3_bind_parameter_name(stmt, index + 1);
-        }
-
         public void Dispose()
         {
             disposed = true;
             stmt.Dispose();
         }
 
-        public IReadOnlyList<IResultSetValue> Current
-        {
-            get
-            {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-                return current;
-            }
-        }
-
-        Object IEnumerator.Current
-        {
-            get
-            {
-                return this.Current;
-            }
-        }
+        
 
         public bool MoveNext()
         {
@@ -275,6 +218,112 @@ namespace SQLitePCL.pretty
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             int rc = raw.sqlite3_reset(stmt);
+            SQLiteException.CheckOk(stmt, rc);
+        }
+    }
+
+    internal sealed class BindParameterListImpl : IReadOnlyList<IBindParameter>
+    {
+        private readonly sqlite3_stmt stmt;
+
+        internal BindParameterListImpl(sqlite3_stmt stmt)
+        {
+            this.stmt = stmt;
+        }
+
+        public IBindParameter this[int index]
+        {
+            get 
+            {
+                if (index < 0 || index >= this.Count)
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+
+                return new BindParameterImpl(stmt, index);
+            }
+        }
+
+        public int Count
+        {
+            get 
+            {
+                return raw.sqlite3_bind_parameter_count(stmt);
+            }
+        }
+
+        public IEnumerator<IBindParameter> GetEnumerator()
+        {
+            for (int i = 0; i < this.Count; i++)
+            {
+                yield return this[i];
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+    }
+
+    internal sealed class BindParameterImpl : IBindParameter
+    {
+        private readonly sqlite3_stmt stmt;
+        private readonly int index;
+
+        internal BindParameterImpl(sqlite3_stmt stmt, int index)
+        {
+            this.stmt = stmt;
+            this.index = index;
+        }
+
+        public string Name
+        {
+            get 
+            {
+                return raw.sqlite3_bind_parameter_name(stmt, index + 1);
+            }
+        }
+
+        public void Bind(byte[] blob)
+        {
+            int rc = raw.sqlite3_bind_blob(stmt, index + 1, blob);
+            SQLiteException.CheckOk(stmt, rc);
+        }
+
+        public void Bind(double val)
+        {
+            int rc = raw.sqlite3_bind_double(stmt, index + 1, val);
+            SQLiteException.CheckOk(stmt, rc);
+        }
+
+        public void Bind(int val)
+        {
+            int rc = raw.sqlite3_bind_int(stmt, index + 1, val);
+            SQLiteException.CheckOk(stmt, rc);
+        }
+
+        public void Bind(long val)
+        {
+            int rc = raw.sqlite3_bind_int64(stmt, index + 1, val);
+            SQLiteException.CheckOk(stmt, rc);
+        }
+
+        public void Bind(string text)
+        {
+            int rc = raw.sqlite3_bind_text(stmt, index + 1, text);
+            SQLiteException.CheckOk(stmt, rc);
+        }
+
+        public void BindNull()
+        {
+            int rc = raw.sqlite3_bind_null(stmt, index + 1);
+            SQLiteException.CheckOk(stmt, rc);
+        }
+
+        public void BindZeroBlob(int size)
+        {
+            int rc = raw.sqlite3_bind_zeroblob(stmt, index + 1, size);
             SQLiteException.CheckOk(stmt, rc);
         }
     }

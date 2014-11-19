@@ -61,35 +61,39 @@ namespace SQLitePCL.pretty
     [ContractClass(typeof(IStatementContract))]
     public interface IStatement : IEnumerator<IReadOnlyList<IResultSetValue>>
     {
-        int BindParameterCount { get; }
+        IReadOnlyList<IBindParameter> BindParameters { get; }
 
         IReadOnlyList<IColumnInfo> Columns { get; }
-
+       
         string SQL { get; }
 
         bool IsReadOnly { get; }
 
         bool IsBusy { get; }
 
-        void Bind(int index, byte[] blob);
-
-        void Bind(int index, double val);
-
-        void Bind(int index, int val);
-
-        void Bind(int index, long val);
-
-        void Bind(int index, string text);
-
-        void BindNull(int index);
-
-        void BindZeroBlob(int index, int size);
-
         void ClearBindings();
 
         bool TryGetBindParameterIndex(string parameter, out int index);
+    }
 
-        string GetBindParameterName(int index);
+    [ContractClass(typeof(IBindParameterContract))]
+    public interface IBindParameter
+    {
+        string Name { get; }
+
+        void Bind(byte[] blob);
+
+        void Bind(double val);
+
+        void Bind(int val);
+
+        void Bind(long val);
+
+        void Bind(string text);
+
+        void BindNull();
+
+        void BindZeroBlob(int size);
     }
 
     public interface IColumnInfo

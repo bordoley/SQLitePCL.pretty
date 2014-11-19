@@ -27,7 +27,7 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(stmt != null);
             Contract.Requires(a != null);
-            Contract.Requires(stmt.BindParameterCount == a.Length);
+            Contract.Requires(stmt.BindParameters.Count == a.Length);
 
             var count = a.Length;
             for (int i = 0; i < count; i++)
@@ -35,7 +35,7 @@ namespace SQLitePCL.pretty
                 // I miss F# pattern matching
                 if (a[i] == null)
                 {
-                    stmt.BindNull(i);
+                    stmt.BindParameters[i].BindNull();
                 }
                 else
                 {
@@ -43,7 +43,7 @@ namespace SQLitePCL.pretty
 
                     if (typeof(String) == t)
                     {
-                        stmt.Bind(i, (string)a[i]);
+                        stmt.BindParameters[i].Bind((string) a[i]);
                     }
                     else if (
                         (typeof(Int32) == t)
@@ -55,18 +55,18 @@ namespace SQLitePCL.pretty
                         || (typeof(Int64) == t)
                         || (typeof(UInt32) == t))
                     {
-                        stmt.Bind(i, (long)(Convert.ChangeType(a[i], typeof(long))));
+                        stmt.BindParameters[i].Bind((long)(Convert.ChangeType(a[i], typeof(long))));
                     }
                     else if (
                         (typeof(double) == t)
                         || (typeof(float) == t)
                         || (typeof(decimal) == t))
                     {
-                        stmt.Bind(i, (double)(Convert.ChangeType(a[i], typeof(double))));
+                        stmt.BindParameters[i].Bind((double)(Convert.ChangeType(a[i], typeof(double))));
                     }
                     else if (typeof(byte[]) == t)
                     {
-                        stmt.Bind(i, (byte[])a[i]);
+                        stmt.BindParameters[i].Bind((byte[])a[i]);
                     }
                     else if (a[i] is Stream)
                     {
@@ -76,7 +76,7 @@ namespace SQLitePCL.pretty
                             throw new NotSupportedException("Stream in position " + i + " is not readable"); 
                         }
                            
-                        stmt.BindZeroBlob(i, (int) stream.Length);
+                        stmt.BindParameters[i].BindZeroBlob((int) stream.Length);
                     }
                     else
                     {

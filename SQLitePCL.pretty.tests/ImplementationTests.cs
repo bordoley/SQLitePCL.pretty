@@ -137,7 +137,7 @@ namespace SQLitePCL.pretty.tests
                 {
                     using (var stmt = db.PrepareStatement(test.Item1))
                     {
-                        Assert.AreEqual(test.Item2, stmt.BindParameterCount);
+                        Assert.AreEqual(test.Item2, stmt.BindParameters.Count);
                         stmt.MoveNext();
                     }
                 }
@@ -238,12 +238,12 @@ namespace SQLitePCL.pretty.tests
 
                 using (var stmt = db.PrepareStatement("INSERT INTO foo (x,v,t,d,b,q) VALUES (:x,:v,:t,:d,:b,:q)"))
                 {
-                    Assert.AreEqual(stmt.GetBindParameterName(0), ":x");
-                    Assert.AreEqual(stmt.GetBindParameterName(1), ":v");
-                    Assert.AreEqual(stmt.GetBindParameterName(2), ":t");
-                    Assert.AreEqual(stmt.GetBindParameterName(3), ":d");
-                    Assert.AreEqual(stmt.GetBindParameterName(4), ":b");
-                    Assert.AreEqual(stmt.GetBindParameterName(5), ":q");
+                    Assert.AreEqual(stmt.BindParameters[0].Name, ":x");
+                    Assert.AreEqual(stmt.BindParameters[1].Name, ":v");
+                    Assert.AreEqual(stmt.BindParameters[2].Name, ":t");
+                    Assert.AreEqual(stmt.BindParameters[3].Name, ":d");
+                    Assert.AreEqual(stmt.BindParameters[4].Name, ":b");
+                    Assert.AreEqual(stmt.BindParameters[5].Name, ":q");
                 }
             }
         }
@@ -257,8 +257,8 @@ namespace SQLitePCL.pretty.tests
 
                 using (var stmt = db.PrepareStatement("INSERT INTO foo (x,v) VALUES (:x,:v)"))
                 {
-                    stmt.Bind(0, 1);
-                    stmt.Bind(1, 2);
+                    stmt.BindParameters[0].Bind(1);
+                    stmt.BindParameters[1].Bind(2);
                     stmt.MoveNext();
 
                     stmt.Reset();

@@ -98,7 +98,7 @@ namespace SQLitePCL.pretty
     [ContractClassFor(typeof(IStatement))]
     internal abstract class IStatementContract : IStatement
     {
-        public abstract int BindParameterCount { get; }
+        public abstract IReadOnlyList<IBindParameter> BindParameters { get;  }
 
         public abstract IReadOnlyList<IColumnInfo> Columns { get; }
 
@@ -108,51 +108,6 @@ namespace SQLitePCL.pretty
 
         public abstract bool IsBusy { get; }
 
-        public void Bind(int index, byte[] blob)
-        {
-            Contract.Requires(blob != null);
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.BindParameterCount);
-        }
-
-        public void Bind(int index, double val)
-        {
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.BindParameterCount);
-        }
-
-        public void Bind(int index, int val)
-        {
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.BindParameterCount);
-        }
-
-        public void Bind(int index, long val)
-        {
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.BindParameterCount);
-        }
-
-        public void Bind(int index, string text)
-        {
-            Contract.Requires(text != null);
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.BindParameterCount);
-        }
-
-        public void BindNull(int index)
-        {
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.BindParameterCount);
-        }
-
-        public void BindZeroBlob(int index, int size)
-        {
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.BindParameterCount);
-            Contract.Requires(size >= 0);
-        }
-
         public abstract void ClearBindings();
 
         public bool TryGetBindParameterIndex(string parameter, out int index)
@@ -160,13 +115,6 @@ namespace SQLitePCL.pretty
             Contract.Requires(parameter != null);
             index = default(int);
             return default(bool);
-        }
-
-        public string GetBindParameterName(int index)
-        {
-            Contract.Requires(index >= 0);
-            Contract.Requires(index < this.BindParameterCount);
-            return default(string);
         }
 
         public abstract IReadOnlyList<IResultSetValue> Current { get; }
@@ -184,5 +132,42 @@ namespace SQLitePCL.pretty
         public abstract void Reset();
 
         public abstract void Dispose();
+    }
+
+    [ContractClassFor(typeof(IBindParameter))]
+    internal abstract class IBindParameterContract : IBindParameter
+    {
+        public abstract string Name { get; }
+
+        public void Bind(byte[] blob)
+        {
+            Contract.Requires(blob != null);
+        }
+
+        public void Bind(double val)
+        {
+        }
+
+        public void Bind(int val)
+        {
+        }
+
+        public void Bind(long val)
+        {
+        }
+
+        public void Bind(string text)
+        {
+            Contract.Requires(text != null);
+        }
+
+        public void BindNull()
+        {
+        }
+
+        public void BindZeroBlob(int size)
+        {
+            Contract.Requires(size >= 0);
+        }
     }
 }
