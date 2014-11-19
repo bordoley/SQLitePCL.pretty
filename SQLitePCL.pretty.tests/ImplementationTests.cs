@@ -16,6 +16,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -204,27 +205,19 @@ namespace SQLitePCL.pretty.tests
 
                 using (var stmt = db.PrepareStatement("INSERT INTO foo (x,v,t,d,b,q) VALUES (:x,:v,:t,:d,:b,:q)"))
                 {
-                    int index = -1;
+                    Action<string> test = (string key) => 
+                        {
+                            var param = stmt.BindParameters[key];
+                            Assert.AreEqual(key, param.Name);
+                        };
 
-                    Assert.False(stmt.TryGetBindParameterIndex(":m", out index));
-
-                    Assert.True(stmt.TryGetBindParameterIndex(":x", out index));
-                    Assert.AreEqual(index, 0);
-
-                    Assert.True(stmt.TryGetBindParameterIndex(":v", out index));
-                    Assert.AreEqual(index, 1);
-
-                    Assert.True(stmt.TryGetBindParameterIndex(":t", out index));
-                    Assert.AreEqual(index, 2);
-
-                    Assert.True(stmt.TryGetBindParameterIndex(":d", out index));
-                    Assert.AreEqual(index, 3);
-
-                    Assert.True(stmt.TryGetBindParameterIndex(":b", out index));
-                    Assert.AreEqual(index, 4);
-
-                    Assert.True(stmt.TryGetBindParameterIndex(":q", out index));
-                    Assert.AreEqual(index, 5);
+                    Assert.Throws(typeof(KeyNotFoundException), () => test(":m"));
+                    test(":x");
+                    test(":v");
+                    test(":t");
+                    test(":d");
+                    test(":b");
+                    test(":q");
                 }
             }
         }

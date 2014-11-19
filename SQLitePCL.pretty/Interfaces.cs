@@ -61,7 +61,7 @@ namespace SQLitePCL.pretty
     [ContractClass(typeof(IStatementContract))]
     public interface IStatement : IEnumerator<IReadOnlyList<IResultSetValue>>
     {
-        IReadOnlyList<IBindParameter> BindParameters { get; }
+        IReadOnlyOrderedDictionary<string, IBindParameter> BindParameters { get; }
 
         IReadOnlyList<IColumnInfo> Columns { get; }
        
@@ -72,8 +72,11 @@ namespace SQLitePCL.pretty
         bool IsBusy { get; }
 
         void ClearBindings();
+    }
 
-        bool TryGetBindParameterIndex(string parameter, out int index);
+    public interface IReadOnlyOrderedDictionary<TKey, TValue> : IReadOnlyDictionary<TKey, TValue>
+    {
+        TValue this[int index] { get; }
     }
 
     [ContractClass(typeof(IBindParameterContract))]

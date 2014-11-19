@@ -19,6 +19,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.IO;
 
 namespace SQLitePCL.pretty
@@ -86,7 +87,7 @@ namespace SQLitePCL.pretty
     internal sealed class StatementImpl : IStatement
     {
         private readonly sqlite3_stmt stmt;
-        private readonly IReadOnlyList<IBindParameter> bindParameters;
+        private readonly IReadOnlyOrderedDictionary<string, IBindParameter> bindParameters;
         private readonly IReadOnlyList<IColumnInfo> columns;
         private readonly IReadOnlyList<IResultSetValue> current;
 
@@ -95,12 +96,12 @@ namespace SQLitePCL.pretty
         internal StatementImpl(sqlite3_stmt stmt)
         {
             this.stmt = stmt;
-            this.bindParameters = new BindParameterListImpl(stmt);
+            this.bindParameters = new BindParameterOrderedDictionaryImpl(stmt);
             this.columns = new ColumnsListImpl(stmt);
             this.current = new ResultSetImpl(stmt);
         }
 
-        public IReadOnlyList<IBindParameter> BindParameters
+        public IReadOnlyOrderedDictionary<string, IBindParameter> BindParameters
         {
             get
             {
@@ -176,21 +177,11 @@ namespace SQLitePCL.pretty
             SQLiteException.CheckOk(stmt, rc);
         }
 
-        public bool TryGetBindParameterIndex(string parameter, out int index)
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            index = raw.sqlite3_bind_parameter_index(stmt, parameter) - 1;
-            return index >= 0;
-        }
-
         public void Dispose()
         {
             disposed = true;
             stmt.Dispose();
         }
-
-        
 
         public bool MoveNext()
         {
@@ -222,13 +213,19 @@ namespace SQLitePCL.pretty
         }
     }
 
-    internal sealed class BindParameterListImpl : IReadOnlyList<IBindParameter>
+    internal sealed class BindParameterOrderedDictionaryImpl : IReadOnlyOrderedDictionary<string, IBindParameter>
     {
         private readonly sqlite3_stmt stmt;
 
-        internal BindParameterListImpl(sqlite3_stmt stmt)
+        internal BindParameterOrderedDictionaryImpl(sqlite3_stmt stmt)
         {
             this.stmt = stmt;
+        }
+
+        private bool TryGetBindParameterIndex(string parameter, out int index)
+        {
+            index = raw.sqlite3_bind_parameter_index(stmt, parameter) - 1;
+            return index >= 0;
         }
 
         public IBindParameter this[int index]
@@ -244,6 +241,20 @@ namespace SQLitePCL.pretty
             }
         }
 
+        public IBindParameter this[string key]
+        {
+            get
+            {
+                IBindParameter value = null;
+                if (this.TryGetValue(key, out value))
+                {
+                    return value;
+                }
+
+                throw new KeyNotFoundException();
+            }
+        }
+
         public int Count
         {
             get 
@@ -252,17 +263,53 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public IEnumerator<IBindParameter> GetEnumerator()
+        public IEnumerable<string> Keys
+        {
+            get
+            {
+                return this.Select(pair => pair.Key);
+            }
+        }
+
+        public IEnumerable<IBindParameter> Values
+        {
+            get
+            {
+                return this.Select(pair => pair.Value);
+            }
+        }
+
+        public bool ContainsKey(string key)
+        {
+            int i;
+            return this.TryGetBindParameterIndex(key, out i);
+        }
+
+        public IEnumerator<KeyValuePair<string, IBindParameter>> GetEnumerator()
         {
             for (int i = 0; i < this.Count; i++)
             {
-                yield return this[i];
+                var next = this[i];
+                yield return new KeyValuePair<string, IBindParameter>("name", next);
             }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
+        }
+
+        public bool TryGetValue(string key, out IBindParameter value)
+        {
+            int i = 0;
+            if (this.TryGetBindParameterIndex(key, out i))
+            {
+                value = this[i];
+                return true;
+            }
+
+            value = null;
+            return false;
         }
     }
 

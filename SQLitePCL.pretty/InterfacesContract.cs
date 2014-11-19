@@ -98,24 +98,13 @@ namespace SQLitePCL.pretty
     [ContractClassFor(typeof(IStatement))]
     internal abstract class IStatementContract : IStatement
     {
-        public abstract IReadOnlyList<IBindParameter> BindParameters { get;  }
-
-        public abstract IReadOnlyList<IColumnInfo> Columns { get; }
-
-        public abstract string SQL { get; }
-
-        public abstract bool IsReadOnly { get; }
+        public abstract IReadOnlyOrderedDictionary<string, IBindParameter> BindParameters { get; }
 
         public abstract bool IsBusy { get; }
 
-        public abstract void ClearBindings();
+        public abstract bool IsReadOnly { get; }
 
-        public bool TryGetBindParameterIndex(string parameter, out int index)
-        {
-            Contract.Requires(parameter != null);
-            index = default(int);
-            return default(bool);
-        }
+        public abstract IReadOnlyList<IColumnInfo> Columns { get; }
 
         public abstract IReadOnlyList<IResultSetValue> Current { get; }
 
@@ -127,11 +116,15 @@ namespace SQLitePCL.pretty
             }
         }
 
+        public abstract string SQL { get; }
+
+        public abstract void ClearBindings();
+
+        public abstract void Dispose();
+
         public abstract bool MoveNext();
 
         public abstract void Reset();
-
-        public abstract void Dispose();
     }
 
     [ContractClassFor(typeof(IBindParameter))]
