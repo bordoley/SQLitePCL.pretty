@@ -223,38 +223,38 @@ namespace SQLitePCL.pretty.tests
                     stmt.MoveNext();
                     var row = stmt.Current;
 
-                    Assert.AreEqual(row[0].ColumnDatabaseName, "main");
-                    Assert.AreEqual(row[0].ColumnTableName, "foo");
-                    Assert.AreEqual(row[0].ColumnOriginName, "w");
-                    Assert.AreEqual(row[0].ColumnName, "w");
+                    Assert.AreEqual(row[0].ColumnInfo.DatabaseName, "main");
+                    Assert.AreEqual(row[0].ColumnInfo.TableName, "foo");
+                    Assert.AreEqual(row[0].ColumnInfo.OriginName, "w");
+                    Assert.AreEqual(row[0].ColumnInfo.Name, "w");
                     Assert.AreEqual(row[0].SQLiteType, SQLiteType.Integer);
                     Assert.AreEqual(row[0].ToInt(), 32);
 
-                    Assert.AreEqual(row[1].ColumnDatabaseName, "main");
-                    Assert.AreEqual(row[1].ColumnTableName, "foo");
-                    Assert.AreEqual(row[1].ColumnOriginName, "x");
-                    Assert.AreEqual(row[1].ColumnName, "x");
+                    Assert.AreEqual(row[1].ColumnInfo.DatabaseName, "main");
+                    Assert.AreEqual(row[1].ColumnInfo.TableName, "foo");
+                    Assert.AreEqual(row[1].ColumnInfo.OriginName, "x");
+                    Assert.AreEqual(row[1].ColumnInfo.Name, "x");
                     Assert.AreEqual(row[1].SQLiteType, SQLiteType.Text);
                     Assert.AreEqual(row[1].ToString(), "hello");
 
-                    Assert.AreEqual(row[2].ColumnDatabaseName, "main");
-                    Assert.AreEqual(row[2].ColumnTableName, "foo");
-                    Assert.AreEqual(row[2].ColumnOriginName, "y");
-                    Assert.AreEqual(row[2].ColumnName, "y");
+                    Assert.AreEqual(row[2].ColumnInfo.DatabaseName, "main");
+                    Assert.AreEqual(row[2].ColumnInfo.TableName, "foo");
+                    Assert.AreEqual(row[2].ColumnInfo.OriginName, "y");
+                    Assert.AreEqual(row[2].ColumnInfo.Name, "y");
                     Assert.AreEqual(row[2].SQLiteType, SQLiteType.Float);
                     Assert.AreEqual(row[2].ToDouble(), 3.14);
 
-                    Assert.AreEqual(row[3].ColumnDatabaseName, "main");
-                    Assert.AreEqual(row[3].ColumnTableName, "foo");
-                    Assert.AreEqual(row[3].ColumnOriginName, "z");
-                    Assert.AreEqual(row[3].ColumnName, "z");
+                    Assert.AreEqual(row[3].ColumnInfo.DatabaseName, "main");
+                    Assert.AreEqual(row[3].ColumnInfo.TableName, "foo");
+                    Assert.AreEqual(row[3].ColumnInfo.OriginName, "z");
+                    Assert.AreEqual(row[3].ColumnInfo.Name, "z");
                     Assert.AreEqual(row[3].SQLiteType, SQLiteType.Blob);
                     Assert.That(Enumerable.SequenceEqual(row[3].ToBlob(), blob));
 
-                    Assert.AreEqual(row[4].ColumnDatabaseName, "main");
-                    Assert.AreEqual(row[4].ColumnTableName, "foo");
-                    Assert.AreEqual(row[4].ColumnOriginName, "n");
-                    Assert.AreEqual(row[4].ColumnName, "n");
+                    Assert.AreEqual(row[4].ColumnInfo.DatabaseName, "main");
+                    Assert.AreEqual(row[4].ColumnInfo.TableName, "foo");
+                    Assert.AreEqual(row[4].ColumnInfo.OriginName, "n");
+                    Assert.AreEqual(row[4].ColumnInfo.Name, "n");
                     Assert.AreEqual(row[4].SQLiteType, SQLiteType.Null);
                 }
 
@@ -263,8 +263,8 @@ namespace SQLitePCL.pretty.tests
                     stmt.MoveNext();
                     var row = stmt.Current;
 
-                    Assert.AreEqual(row[0].ColumnOriginName, "w");
-                    Assert.AreEqual(row[0].ColumnName, "mario");
+                    Assert.AreEqual(row[0].ColumnInfo.OriginName, "w");
+                    Assert.AreEqual(row[0].ColumnInfo.Name, "mario");
                 }      
             }
         }

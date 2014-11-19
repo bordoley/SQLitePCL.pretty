@@ -23,11 +23,11 @@ namespace SQLitePCL.pretty
 {
     public static class ResultSet
     {
-        public static IEnumerable<string> Columns(this IReadOnlyList<IResultSetValue> rs)
+        public static IEnumerable<IColumnInfo> Columns(this IReadOnlyList<IResultSetValue> rs)
         {
             Contract.Requires(rs != null);
 
-            return rs.Select(value => value.ColumnName);
+            return rs.Select(value => value.ColumnInfo);
         }
     }
 }

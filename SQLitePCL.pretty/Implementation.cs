@@ -338,7 +338,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                return raw.sqlite3_column_table_name(stmt, index);
+                return raw.sqlite3_column_name(stmt, index);
             }
         }
 

@@ -472,35 +472,11 @@ namespace SQLitePCL.pretty
             this.index = index;
         }
 
-        public string ColumnName
-        {
+        public IColumnInfo ColumnInfo 
+        { 
             get
             {
-                return raw.sqlite3_column_name(stmt, index);
-            }
-        }
-
-        public string ColumnDatabaseName
-        {
-            get
-            {
-                return raw.sqlite3_column_database_name(stmt, index);
-            }
-        }
-
-        public String ColumnOriginName
-        {
-            get
-            {
-                return raw.sqlite3_column_origin_name(stmt, index);
-            }
-        }
-
-        public string ColumnTableName
-        {
-            get
-            {
-                return raw.sqlite3_column_table_name(stmt, index);
+                return new ColumnInfoImpl(stmt, index);
             }
         }
 

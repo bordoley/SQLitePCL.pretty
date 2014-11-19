@@ -123,13 +123,7 @@ namespace SQLitePCL.pretty
 
     public interface IResultSetValue : ISQLiteValue
     {
-        string ColumnName { get; }
-
-        string ColumnDatabaseName { get; }
-
-        string ColumnOriginName { get; }
-
-        string ColumnTableName { get; }
+        IColumnInfo ColumnInfo { get; }
     }
 
     public interface IDatabaseBackup : IDisposable

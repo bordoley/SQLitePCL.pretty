@@ -463,7 +463,7 @@ namespace SQLitePCL.pretty
 
         public static Stream OpenBlob(this IDatabaseConnection db, IResultSetValue value, long rowId, bool canWrite = false)
         {
-            return db.OpenBlob(value.ColumnDatabaseName, value.ColumnTableName, value.ColumnOriginName, rowId, canWrite);
+            return db.OpenBlob(value.ColumnInfo.DatabaseName, value.ColumnInfo.TableName, value.ColumnInfo.OriginName, rowId, canWrite);
         }
     }
 
