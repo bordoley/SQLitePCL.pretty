@@ -181,35 +181,31 @@ namespace SQLitePCL.pretty
             return PrepareStatementWithTailAsync(This, sql, CancellationToken.None);
         }
 
-        public static IObservable<T> Query<T>(
+        public static IObservable<IReadOnlyList<IResultSetValue>> Query(
             this IAsyncDatabaseConnection This,
             string sql,
-            Func<IReadOnlyList<IResultSetValue>, T> selector,
             params object[] a)
         {
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
-            Contract.Requires(selector != null);
             Contract.Requires(a != null);
 
             return This.Use(conn =>
             {
-                return conn.Query(sql, a).Select(selector);
+                return conn.Query(sql, a);
             });
         }
 
-        public static IObservable<T> Query<T>(
+        public static IObservable<IReadOnlyList<IResultSetValue>> Query(
             this IAsyncDatabaseConnection This,
-            string sql,
-            Func<IReadOnlyList<IResultSetValue>, T> selector)
+            string sql)
         {
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
-            Contract.Requires(selector != null);
 
             return This.Use(conn =>
             {
-                return conn.Query(sql).Select(selector);
+                return conn.Query(sql);
             });
         }
 

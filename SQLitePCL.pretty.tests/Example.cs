@@ -85,19 +85,22 @@ namespace SQLitePCL.pretty.tests
 
                 await db.ExecuteAsync("INSERT INTO foo (w, x, y, z) VALUES (?, ?, ?, ?)", 1, 1.1, "hello", stream);
 
-                var rowId = await db.Query("SELECT rowid, z FROM foo where y = 'hello'", row => row[0].ToInt64()).FirstAsync();
+                var rowId = await db.Query("SELECT rowid, z FROM foo where y = 'hello'").Select(row => row[0].ToInt64()).FirstAsync();
 
                 var dst = await db.OpenBlobAsync("main", "foo", "z", rowId, true);
 
                 using (dst) { await stream.CopyToAsync(dst); }
 
                 // Observe on the taskpool in order to avoid deadlocking when disposing the database.
-                await db.Query("SELECT rowid, * FROM foo", row =>
-                    row[0].ToInt64() + ": " +
-                    row[1].ToInt() + ", " +
-                    row[2].ToInt64() + ", " +
-                    row[3].ToString() + ", " +
-                    row[4].ToString()).Do(str => { Console.WriteLine(str); }).ObserveOn(TaskPoolScheduler.Default);
+                await db.Query("SELECT rowid, * FROM foo")
+                        .Select(row =>
+                            row[0].ToInt64() + ": " +
+                            row[1].ToInt() + ", " +
+                            row[2].ToInt64() + ", " +
+                            row[3].ToString() + ", " +
+                            row[4].ToString())
+                        .Do(str => { Console.WriteLine(str); })
+                        .ObserveOn(TaskPoolScheduler.Default);
             }
         }
     }

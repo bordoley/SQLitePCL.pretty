@@ -17,6 +17,7 @@
 using NUnit.Framework;
 using System;
 using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,17 +43,19 @@ namespace SQLitePCL.pretty.tests
                               INSERT INTO foo (x) VALUES (3);");
                     }).Wait();
 
-                var x = db.Query("SELECT * FROM foo;", result =>
-                    {
-                        Console.WriteLine("x result thread" + Thread.CurrentThread.ManagedThreadId + " " + result[0].ToInt());
-                        return result[0].ToInt();
-                    });
+                var x = db.Query("SELECT * FROM foo;")
+                            .Select(result =>
+                                {
+                                    Console.WriteLine("x result thread" + Thread.CurrentThread.ManagedThreadId + " " + result[0].ToInt());
+                                    return result[0].ToInt();
+                                });
 
-                var y = db.Query("SELECT * FROM foo;", result =>
-                    {
-                        Console.WriteLine("y result thread" + Thread.CurrentThread.ManagedThreadId + " " + result[0].ToInt());
-                        return result[0].ToInt();
-                    });
+                var y = db.Query("SELECT * FROM foo;")
+                            .Select(result =>
+                                {
+                                    Console.WriteLine("y result thread" + Thread.CurrentThread.ManagedThreadId + " " + result[0].ToInt());
+                                    return result[0].ToInt();
+                                });
 
                 Task.WaitAll(y.ToTask(), x.ToTask(), y.ToTask(), x.ToTask(), y.ToTask());
             }
