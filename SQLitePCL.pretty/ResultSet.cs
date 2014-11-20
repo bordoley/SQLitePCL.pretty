@@ -61,7 +61,7 @@ namespace SQLitePCL.pretty
                 return rs.Select(val => val.ColumnInfo).GetEnumerator();
             }
 
-            IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            IEnumerator IEnumerable.GetEnumerator()
             {
                 return this.GetEnumerator();
             }
