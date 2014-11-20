@@ -556,6 +556,8 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
                 return this.statementsEnumerable;
             }
         }
@@ -600,7 +602,7 @@ namespace SQLitePCL.pretty
 
             // If there is no attached database N on the database connection, or
             // if database N is a temporary or in-memory database, then a NULL pointer is returned.
-            return filename != null;
+            return !String.IsNullOrEmpty(filename);
         }
 
         public Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite)

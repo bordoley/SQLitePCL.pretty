@@ -189,17 +189,6 @@ namespace SQLitePCL.pretty.tests
                 Assert.IsNull(filename);
             }
 
-            // FIXME: Is this correct behavior for the C API?
-            // According to the docs it looks like a bug:
-            // https://www.sqlite.org/c3ref/db_filename.html
-            using (var db = SQLite3.Open(":memory:"))
-            {
-                db.Execute("CREATE TABLE foo (x int);");
-                string filename = null;
-                Assert.True(db.TryGetFileName("main", out filename));
-                Assert.AreEqual("", filename);
-            }
-
             var tempFile = Path.GetTempFileName();
             using (var db = SQLite3.Open(tempFile))
             {
