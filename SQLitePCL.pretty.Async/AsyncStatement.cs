@@ -86,7 +86,7 @@ namespace SQLitePCL.pretty
 
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-            return conn.Use(_ => f(this.stmt));
+            return conn.Use(_ => f(new StatementWrapper(this.stmt)));
         }
 
         public void Dispose()
@@ -103,4 +103,90 @@ namespace SQLitePCL.pretty
                 }).Wait();
         }
     }
+
+     internal sealed class StatementWrapper : IStatement
+     {
+         private readonly IStatement stmt;
+
+         internal StatementWrapper(IStatement stmt)
+         {
+             this.stmt = stmt;
+         }
+
+         public IReadOnlyOrderedDictionary<string, IBindParameter> BindParameters
+         {
+             get 
+             {
+                 return stmt.BindParameters;
+             }
+         }
+
+         public IReadOnlyList<IColumnInfo> Columns
+         {
+             get 
+             {
+                 return stmt.Columns;
+             }
+         }
+
+         public string SQL
+         {
+             get 
+             {
+                 return stmt.SQL;
+             }
+         }
+
+         public bool IsReadOnly
+         {
+             get 
+             {
+                 return stmt.IsReadOnly;
+             }
+         }
+
+         public bool IsBusy
+         {
+             get 
+             {
+                 return stmt.IsBusy;
+             }
+         }
+
+         public void ClearBindings()
+         {
+             stmt.ClearBindings();
+         }
+
+         public IReadOnlyList<IResultSetValue> Current
+         {
+             get 
+             {
+                 return stmt.Current;
+             }
+         }
+
+         object IEnumerator.Current
+         {
+             get 
+             {
+                 return this.Current;
+             }
+         }
+
+         public bool MoveNext()
+         {
+             return stmt.MoveNext();
+         }
+
+         public void Reset()
+         {
+             stmt.Reset();
+         }
+
+         public void Dispose()
+         {
+             // No-op
+         }
+     }
 }

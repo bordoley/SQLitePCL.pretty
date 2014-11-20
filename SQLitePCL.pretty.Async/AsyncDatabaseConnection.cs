@@ -323,7 +323,7 @@ namespace SQLitePCL.pretty
                             {
                                 cancellationToken.ThrowIfCancellationRequested();
 
-                                foreach (var e in f(this.conn))
+                                foreach (var e in f(new DatabaseConnectionWrapper(this.conn)))
                                 {  
                                     observer.OnNext(e);
                                     cancellationToken.ThrowIfCancellationRequested();
@@ -341,6 +341,117 @@ namespace SQLitePCL.pretty
                              return Unit.Default;
                        }, scheduler, cancellationToken);
                });
+        }
+    }
+
+    internal sealed class DatabaseConnectionWrapper : IDatabaseConnection
+    {
+        private readonly IDatabaseConnection db;
+
+        internal DatabaseConnectionWrapper(IDatabaseConnection db)
+        {
+            this.db = db;
+        }
+
+        public event EventHandler Rollback
+        {
+            add { throw new NotSupportedException(); }
+            remove { throw new NotSupportedException(); }
+        }
+
+        public event EventHandler<DatabaseTraceEventArgs> Trace
+        {
+            add { throw new NotSupportedException(); }
+            remove { throw new NotSupportedException(); }
+        }
+
+        public event EventHandler<DatabaseProfileEventArgs> Profile
+        {
+            add { throw new NotSupportedException(); }
+            remove { throw new NotSupportedException(); }
+        }
+
+        public event EventHandler<DatabaseUpdateEventArgs> Update
+        {
+            add { throw new NotSupportedException(); }
+            remove { throw new NotSupportedException(); }
+        }
+
+        public bool IsAutoCommit
+        {
+            get 
+            {
+                return db.IsAutoCommit;
+            }
+        }
+
+        public TimeSpan BusyTimeout
+        {
+            set { throw new NotSupportedException(); }
+        }
+
+        public int Changes
+        {
+            get
+            {
+                return db.Changes;
+            }
+        }
+
+        public long LastInsertedRowId
+        {
+            get 
+            {
+                return db.LastInsertedRowId;
+            }
+        }
+
+        public IEnumerable<IStatement> Statements
+        {
+            get 
+            {
+                return db.Statements;
+            }
+        }
+
+        public bool TryGetFileName(string database, out string filename)
+        {
+            return db.TryGetFileName(database, out filename);
+        }
+
+        public Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite)
+        {
+            return db.OpenBlob(database, tableName, columnName, rowId, canWrite);
+        }
+
+        public IStatement PrepareStatement(string sql, out string tail)
+        {
+            return db.PrepareStatement(sql, out tail);
+        }
+
+        public void RegisterCollation(string name, Comparison<string> comparison)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void RegisterCommitHook(Func<bool> onCommit)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void RegisterAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void RegisterScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void Dispose()
+        {
+            // No-op
         }
     }
 }
