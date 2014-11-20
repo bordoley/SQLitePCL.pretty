@@ -72,7 +72,7 @@ namespace SQLitePCL.pretty
         private readonly IStatement stmt;
         private readonly IAsyncDatabaseConnection conn;
 
-        private volatile bool disposed = false;
+        private bool disposed = false;
 
         internal AsyncStatementImpl(IStatement stmt, IAsyncDatabaseConnection conn)
         {

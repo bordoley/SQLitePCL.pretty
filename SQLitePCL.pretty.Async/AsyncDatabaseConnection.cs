@@ -259,7 +259,7 @@ namespace SQLitePCL.pretty
         private readonly IObservable<DatabaseProfileEventArgs> profile;
         private readonly IObservable<DatabaseUpdateEventArgs> update;
 
-        private volatile bool disposed = false;
+        private bool disposed = false;
 
         internal AsyncDatabaseConnectionImpl(IDatabaseConnection conn, IScheduler scheduler)
         {
