@@ -15,6 +15,7 @@
    limitations under the License.
 */
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -23,11 +24,47 @@ namespace SQLitePCL.pretty
 {
     public static class ResultSet
     {
-        public static IEnumerable<IColumnInfo> Columns(this IReadOnlyList<IResultSetValue> rs)
+        public static IReadOnlyList<IColumnInfo> Columns(this IReadOnlyList<IResultSetValue> rs)
         {
             Contract.Requires(rs != null);
 
-            return rs.Select(value => value.ColumnInfo);
+            return new ResultSetColumnsListImpl(rs);
+        }
+
+        internal sealed class ResultSetColumnsListImpl : IReadOnlyList<IColumnInfo>
+        {
+            private readonly IReadOnlyList<IResultSetValue> rs;
+
+            internal ResultSetColumnsListImpl(IReadOnlyList<IResultSetValue> rs)
+            {
+                this.rs = rs;
+            }
+
+            public IColumnInfo this[int index]
+            {
+                get
+                {
+                    return rs[index].ColumnInfo;
+                }
+            }
+
+            public int Count
+            {
+                get
+                {
+                    return rs.Count;
+                }
+            }
+
+            public IEnumerator<IColumnInfo> GetEnumerator()
+            {
+                return rs.Select(val => val.ColumnInfo).GetEnumerator();
+            }
+
+            IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                return this.GetEnumerator();
+            }
         }
     }
 }
