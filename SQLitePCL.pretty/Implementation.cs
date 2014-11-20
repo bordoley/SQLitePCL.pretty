@@ -291,7 +291,7 @@ namespace SQLitePCL.pretty
             for (int i = 0; i < this.Count; i++)
             {
                 var next = this[i];
-                yield return new KeyValuePair<string, IBindParameter>("name", next);
+                yield return new KeyValuePair<string, IBindParameter>(next.Name, next);
             }
         }
 
