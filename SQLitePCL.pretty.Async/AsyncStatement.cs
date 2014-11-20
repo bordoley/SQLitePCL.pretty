@@ -82,8 +82,6 @@ namespace SQLitePCL.pretty
 
         public IObservable<T> Use<T>(Func<IStatement, IEnumerable<T>> f)
         {
-            Contract.Requires(f != null);
-
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             return conn.Use(_ => f(new StatementWrapper(this.stmt)));

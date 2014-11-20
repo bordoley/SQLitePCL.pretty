@@ -309,8 +309,6 @@ namespace SQLitePCL.pretty
 
         public IObservable<T> Use<T>(Func<IDatabaseConnection, IEnumerable<T>> f)
         {
-            Contract.Requires(f != null);
-
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             return Observable.Create((IObserver<T> observer, CancellationToken cancellationToken) =>
