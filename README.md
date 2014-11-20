@@ -22,6 +22,8 @@ While the code is well tested, the API is currently in flux. Users should expect
 
 # API Overview
 
+## Synchronous API
+
 * SQLite3 - This is the main static class you use to obtain database connections. It also provides APIs for obtaining the SQLite version, compile options used, and information about SQLite memory use.
 
 * IDatabaseConnection - The main interface for interacting with a SQLite database. You use this class to prepare and execute SQL statements. In addition, numerous extension methods are provided to make writing queries easier. This class also supports several advance SQLite features:
@@ -37,7 +39,7 @@ While the code is well tested, the API is currently in flux. Users should expect
 
 * IBindParameter - This interface is used to bind a parameter to a value when preparing a statement to stepped through. An IStatement provides access to its bind parameters via IReadonlyOrderedDictionary which allows accessing bind parameter by either index or name.
 
-* IColumnInfo = This interface provides additional info about a column in a result set, such as the database, table and column names of the value.
+* IColumnInfo - This interface provides additional info about a column in a result set, such as the database, table and column names of the value.
 
 * ISQLiteValue - This interface is used to wrap SQLite dynamically typed values which are used in result sets as well as in aggregate and scalar functions. 
 
@@ -48,6 +50,13 @@ While the code is well tested, the API is currently in flux. Users should expect
 * SQLiteException - An exception wrapper around SQLite's error codes.
 
 * SQLiteVersion - A struct that wraps the SQLite numeric version.
+
+## Asynchronous API
+* IAsyncDatabaseConnection - A wrapper around an instance of an IDatabaseConnection that provides lock free FIFO scheduling of access to the database connection. Work items can be scheduled on the TaskPool, ThreadPool, SynchronizationContext or any other RX IScheduler. Note that this class is not thread safe, and only provides a way to schedule work on a given database connection in a non-blocking fashion. In addition, this interface provides exposes database events as IObservable instances, and numerous extension methods are provided to asynchronously execute queries against a database connection. 
+
+* IAsyncStatement - A wrapper around an instance IStatement, that allows asynchronous querying and reuse of a prepared statement. Note that work items scheduled on the async statements queue are run on the same queue as the database connection used to generate the IAsyncStatement.
+
+Note: IAsyncDatabaseConnection and IAsyncStatement are not re-entrant. You may not access them from code running within a work item. Doing so may result in deadlock or other unexpected behavior and is not supported.
 
 # Let me see an example
 ```
