@@ -85,7 +85,7 @@ namespace SQLitePCL.pretty
             return conn.Use(_ => f(new StatementWrapper(this.stmt)));
         }
 
-        public void Dispose()
+        public async Task DisposeAsync()
         {
             if (disposed)
             {
@@ -93,10 +93,15 @@ namespace SQLitePCL.pretty
             }
 
             disposed = true;
-            conn.Use(_ =>
+            await conn.Use(_ =>
                 {
                     stmt.Dispose();
-                }).Wait();
+                });
+        }
+
+        public void Dispose()
+        {
+            this.DisposeAsync().Wait();
         }
     }
 

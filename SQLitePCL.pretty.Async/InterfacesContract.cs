@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Threading.Tasks;
 
 namespace SQLitePCL.pretty
 {
@@ -29,26 +30,30 @@ namespace SQLitePCL.pretty
 
         public abstract IObservable<DatabaseUpdateEventArgs> Update { get; }
 
+        public abstract void Dispose();
+
+        public abstract Task DisposeAsync();
+
         public IObservable<T> Use<T>(Func<IDatabaseConnection, IEnumerable<T>> f)
         {
             Contract.Requires(f != null);
 
             return default(IObservable<T>);
         }
-
-        public abstract void Dispose();
     }
 
     [ContractClassFor(typeof(IAsyncStatement))]
     internal abstract class IAsyncStatementContract : IAsyncStatement
     {
+        public abstract void Dispose();
+
+        public abstract Task DisposeAsync();
+
         public IObservable<T> Use<T>(Func<IStatement, IEnumerable<T>> f)
         {
             Contract.Requires(f != null);
 
             return default(IObservable<T>);
         }
-
-        public abstract void Dispose();
     }
 }

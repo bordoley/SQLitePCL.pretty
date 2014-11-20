@@ -296,7 +296,7 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public void Dispose()
+        public async Task DisposeAsync()
         {
             if (disposed)
             {
@@ -304,8 +304,13 @@ namespace SQLitePCL.pretty
             }
 
             this.disposed = true;
-            this.queue.Shutdown().Wait();
+            await this.queue.DisposeAsync();
             this.conn.Dispose();
+        }
+
+        public void Dispose()
+        {
+            this.DisposeAsync().Wait();
         }
 
         public IObservable<T> Use<T>(Func<IDatabaseConnection, IEnumerable<T>> f)

@@ -33,7 +33,7 @@ using System.Threading.Tasks;
 // Based off of https://github.com/akavache/Akavache/blob/master/Akavache/Portable/KeyedOperationQueue.cs
 namespace SQLitePCL.pretty
 {
-    internal sealed class OperationsQueue
+    internal sealed class OperationsQueue : IDisposable
     {
         private abstract class Operation
         {
@@ -104,7 +104,7 @@ namespace SQLitePCL.pretty
             return item.Result;
         }
 
-        public Task Shutdown()
+        public Task DisposeAsync()
         {
             lock (queuedOps)
             {
@@ -113,6 +113,11 @@ namespace SQLitePCL.pretty
                 shutdown = resultObs.LastOrDefaultAsync().ToTask();
                 return shutdown;
             }
+        }
+
+        public void Dispose()
+        {
+            this.DisposeAsync().Wait();
         }
     }
 
