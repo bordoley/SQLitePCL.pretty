@@ -15,12 +15,11 @@
    limitations under the License.
 */
 
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
-using NUnit.Framework;
 
 namespace SQLitePCL.pretty.tests
 {
@@ -33,7 +32,7 @@ namespace SQLitePCL.pretty.tests
             using (var db = SQLite3.Open(":memory:"))
             {
                 db.Execute("CREATE TABLE foo (x int);");
-                foreach (int i in Enumerable.Range(0,1000))
+                foreach (int i in Enumerable.Range(0, 1000))
                 {
                     db.Execute("INSERT INTO foo (x) VALUES (?);", i);
                 }
@@ -92,7 +91,7 @@ namespace SQLitePCL.pretty.tests
     }
 
     [TestFixture]
-    public class StatementTests 
+    public class StatementTests
     {
         [Test]
         public void TestBusy()
@@ -173,8 +172,8 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestGetSQL()
         {
-            String[] sql = 
-            { 
+            String[] sql =
+            {
                 "CREATE TABLE foo (x int)",
                 "INSERT INTO foo (x) VALUES (1)",
                 "INSERT INTO foo (x) VALUES (2)",
@@ -186,7 +185,7 @@ namespace SQLitePCL.pretty.tests
             {
                 foreach (var sqlStmt in sql)
                 {
-                    using(var stmt = db.PrepareStatement(sqlStmt))
+                    using (var stmt = db.PrepareStatement(sqlStmt))
                     {
                         stmt.MoveNext();
 
@@ -205,7 +204,7 @@ namespace SQLitePCL.pretty.tests
 
                 using (var stmt = db.PrepareStatement("INSERT INTO foo (x,v,t,d,b,q) VALUES (:x,:v,:t,:d,:b,:q)"))
                 {
-                    Action<string> test = (string key) => 
+                    Action<string> test = (string key) =>
                         {
                             var param = stmt.BindParameters[key];
                             Assert.AreEqual(key, param.Name);
@@ -259,7 +258,7 @@ namespace SQLitePCL.pretty.tests
                     stmt.MoveNext();
                 }
 
-                var last = 
+                var last =
                     db.Query("SELECT * from FOO")
                         .Select(row => Tuple.Create(row[0].ToInt(), row[1].ToInt()))
                         .Last();
@@ -282,7 +281,6 @@ namespace SQLitePCL.pretty.tests
                     @"CREATE TABLE foo (x int, v int);
                       INSERT INTO foo (x, v) VALUES (1, 2);
                       INSERT INTO foo (x, v) VALUES (2, 3);");
-                
 
                 foreach (var row in db.Query("select * from foo"))
                 {
@@ -298,7 +296,7 @@ namespace SQLitePCL.pretty.tests
 
         [Test]
         public void TestBracketOp()
-        { 
+        {
             using (var db = SQLite3.Open(":memory:"))
             {
                 db.ExecuteAll(
@@ -323,7 +321,7 @@ namespace SQLitePCL.pretty.tests
     {
         [Test]
         public void TestRead()
-        { 
+        {
             using (var db = SQLite3.Open(":memory:"))
             {
                 byte[] bytes = new byte[1000];
@@ -367,7 +365,7 @@ namespace SQLitePCL.pretty.tests
                 db.Execute("CREATE TABLE foo (x blob);");
                 db.Execute("INSERT INTO foo (x) VALUES(?);", source);
                 db.Query("SELECT rowid, x FROM foo")
-                    .Select(row => 
+                    .Select(row =>
                         {
                             using (var stream = db.OpenBlob(row[1], row[0].ToInt64(), true))
                             {

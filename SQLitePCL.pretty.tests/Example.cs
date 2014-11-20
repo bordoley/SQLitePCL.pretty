@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2014 David Bordoley
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +14,7 @@
    limitations under the License.
 */
 
+using NUnit.Framework;
 using System;
 using System.IO;
 using System.Linq;
@@ -21,8 +22,6 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using NUnit.Framework;
 
 namespace SQLitePCL.pretty.tests
 {
@@ -76,7 +75,7 @@ namespace SQLitePCL.pretty.tests
 
         [Test]
         public async Task DoExampleAsync()
-        { 
+        {
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream")))
             using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
             {

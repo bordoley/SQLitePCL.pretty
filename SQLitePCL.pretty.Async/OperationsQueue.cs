@@ -32,7 +32,7 @@ using System.Threading.Tasks;
 
 // Based off of https://github.com/akavache/Akavache/blob/master/Akavache/Portable/KeyedOperationQueue.cs
 namespace SQLitePCL.pretty
-{    
+{
     internal sealed class OperationsQueue
     {
         private abstract class Operation
@@ -88,7 +88,7 @@ namespace SQLitePCL.pretty
         internal OperationsQueue()
         {
             resultObs = queuedOps
-                .Select(operation => 
+                .Select(operation =>
                     // Defer Processing of the operation until subscribed to
                     Observable.Defer(() => operation.EvaluateFunc().ToObservable()))
                 .Concat()
@@ -112,7 +112,7 @@ namespace SQLitePCL.pretty
                 queuedOps.OnCompleted();
                 shutdown = resultObs.LastOrDefaultAsync().ToTask();
                 return shutdown;
-            }    
+            }
         }
     }
 
@@ -120,8 +120,8 @@ namespace SQLitePCL.pretty
     {
         public static Task<T> EnqueueOperation<T>(this OperationsQueue This, Func<T> calculationFunc, IScheduler scheduler, CancellationToken cancellationToken)
         {
-            return This.EnqueueOperation(() => 
-                Observable.Start(() => calculationFunc(), scheduler).ToTask(), 
+            return This.EnqueueOperation(() =>
+                Observable.Start(() => calculationFunc(), scheduler).ToTask(),
                 cancellationToken);
         }
     }

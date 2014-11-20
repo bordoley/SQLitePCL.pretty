@@ -14,11 +14,10 @@
    limitations under the License.
 */
 
+using NUnit.Framework;
 using System;
 using System.Linq;
 using System.Text;
-
-using NUnit.Framework;
 
 namespace SQLitePCL.pretty.tests
 {
@@ -43,7 +42,7 @@ namespace SQLitePCL.pretty.tests
             {
                 Assert.IsNull(testBlog);
             }
-            else 
+            else
             {
                 Assert.IsNotNull(testBlog);
                 CollectionAssert.AreEqual(expectedBlob, testBlog);
@@ -107,13 +106,13 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestIntValue()
         {
-            long[] tests = 
-                { 
+            long[] tests =
+                {
                     2147483647, // Max int
                     -2147483648, // Min int
                     9223372036854775807, // Max Long
                     -9223372036854775808, // Min Long
-                    -1234     
+                    -1234
                 };
 
             using (var db = SQLite3.Open(":memory:"))
@@ -137,11 +136,11 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestBlobValue()
         {
-            string[] tests = 
-                { 
-                    "  1234.56", 
-                    " 1234.abasd", 
-                    "abacdd\u10FFFF", 
+            string[] tests =
+                {
+                    "  1234.56",
+                    " 1234.abasd",
+                    "abacdd\u10FFFF",
                     "2147483647", // Max int
                     "-2147483648", // Min int
                     "9223372036854775807", // Max Long
@@ -165,7 +164,7 @@ namespace SQLitePCL.pretty.tests
                     {
                         compare(row.Single(), test.ToSQLiteValue());
                     }
-                    
+
                     db.Execute("DROP TABLE foo;");
                 }
             }
@@ -174,11 +173,11 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestStringValue()
         {
-            string[] tests = 
-                { 
-                    "  1234.56", 
-                    " 1234.abasd", 
-                    "abacdd\u10FFFF", 
+            string[] tests =
+                {
+                    "  1234.56",
+                    " 1234.abasd",
+                    "abacdd\u10FFFF",
                     "2147483647", // Max int
                     "-2147483648", // Min int
                     "9223372036854775807", // Max Long
@@ -187,7 +186,7 @@ namespace SQLitePCL.pretty.tests
                     "-9923372036854775809", // Less than min long
                     "3147483648", // Long
                     "-1234",
-                    // "1111111111111111111111" SQLite's result in this case is undefined                 
+                    // "1111111111111111111111" SQLite's result in this case is undefined
                 };
 
             using (var db = SQLite3.Open(":memory:"))
@@ -202,7 +201,7 @@ namespace SQLitePCL.pretty.tests
                     {
                         compare(row.Single(), test.ToSQLiteValue());
                     }
-                    
+
                     db.Execute("DROP TABLE foo;");
                 }
             }
@@ -265,7 +264,7 @@ namespace SQLitePCL.pretty.tests
 
                     Assert.AreEqual(row[0].ColumnInfo.OriginName, "w");
                     Assert.AreEqual(row[0].ColumnInfo.Name, "mario");
-                }      
+                }
             }
         }
     }

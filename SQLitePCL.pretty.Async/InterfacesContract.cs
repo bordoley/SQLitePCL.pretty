@@ -51,5 +51,4 @@ namespace SQLitePCL.pretty
 
         public abstract void Dispose();
     }
-
 }

@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2014 David Bordoley
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,16 +14,12 @@
    limitations under the License.
 */
 
+using NUnit.Framework;
 using System;
 using System.Reactive.Concurrency;
-using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
-
-using SQLitePCL.pretty;
-
-using NUnit.Framework;
 
 namespace SQLitePCL.pretty.tests
 {

@@ -18,8 +18,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
+using System.Linq;
 
 namespace SQLitePCL.pretty
 {
@@ -105,7 +105,7 @@ namespace SQLitePCL.pretty
 
         internal sqlite3_stmt sqlite3_stmt
         {
-            get 
+            get
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
                 return stmt;
@@ -122,12 +122,12 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public IReadOnlyList<IColumnInfo> Columns 
+        public IReadOnlyList<IColumnInfo> Columns
         {
             get
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-                
+
                 return columns;
             }
         }
@@ -230,7 +230,7 @@ namespace SQLitePCL.pretty
 
         public IBindParameter this[int index]
         {
-            get 
+            get
             {
                 if (index < 0 || index >= this.Count)
                 {
@@ -257,7 +257,7 @@ namespace SQLitePCL.pretty
 
         public int Count
         {
-            get 
+            get
             {
                 return raw.sqlite3_bind_parameter_count(stmt.sqlite3_stmt);
             }
@@ -326,7 +326,7 @@ namespace SQLitePCL.pretty
 
         public string Name
         {
-            get 
+            get
             {
                 return raw.sqlite3_bind_parameter_name(stmt, index + 1);
             }
@@ -386,8 +386,8 @@ namespace SQLitePCL.pretty
 
         public IColumnInfo this[int index]
         {
-            get 
-            { 
+            get
+            {
                 if (index < 0 || index >= this.Count)
                 {
                     throw new ArgumentOutOfRangeException();
@@ -399,7 +399,7 @@ namespace SQLitePCL.pretty
 
         public int Count
         {
-            get 
+            get
             {
                 return raw.sqlite3_column_count(stmt.sqlite3_stmt);
             }
@@ -440,7 +440,7 @@ namespace SQLitePCL.pretty
 
         public string DatabaseName
         {
-            get 
+            get
             {
                 return raw.sqlite3_column_database_name(stmt.sqlite3_stmt, index);
             }
@@ -448,7 +448,7 @@ namespace SQLitePCL.pretty
 
         public string OriginName
         {
-            get 
+            get
             {
                 return raw.sqlite3_column_origin_name(stmt.sqlite3_stmt, index);
             }
@@ -456,7 +456,7 @@ namespace SQLitePCL.pretty
 
         public string TableName
         {
-            get 
+            get
             {
                 return raw.sqlite3_column_table_name(stmt.sqlite3_stmt, index);
             }
@@ -535,35 +535,35 @@ namespace SQLitePCL.pretty
 
         public override bool CanRead
         {
-            get 
+            get
             {
-                return !disposed; 
+                return !disposed;
             }
         }
 
         public override bool CanSeek
         {
-            get 
+            get
             {
-                return false; 
+                return false;
             }
         }
 
         public override bool CanWrite
         {
-            get 
+            get
             {
-                return !disposed && canWrite; 
+                return !disposed && canWrite;
             }
         }
 
         public override long Length
         {
-            get 
+            get
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-                return raw.sqlite3_blob_bytes(blob); 
+                return raw.sqlite3_blob_bytes(blob);
             }
         }
 
@@ -583,11 +583,11 @@ namespace SQLitePCL.pretty
 
             if (disposing)
             {
-                // Free any other managed objects here. 
+                // Free any other managed objects here.
                 blob.Dispose();
             }
 
-            // Free any unmanaged objects here. 
+            // Free any unmanaged objects here.
 
             disposed = true;
             base.Dispose(disposing);
@@ -603,8 +603,8 @@ namespace SQLitePCL.pretty
 
             if (buffer == null) { throw new ArgumentNullException(); }
             if (offset + count > buffer.Length) { new ArgumentException(); }
-            if (offset < 0 ) { throw new ArgumentOutOfRangeException(); }
-            if (count < 0 ) { throw new ArgumentOutOfRangeException(); }
+            if (offset < 0) { throw new ArgumentOutOfRangeException(); }
+            if (count < 0) { throw new ArgumentOutOfRangeException(); }
 
             int numBytes = (int)Math.Min(this.Length - position, count);
             int rc = raw.sqlite3_blob_read(blob, buffer, offset, numBytes, (int)position);
@@ -631,8 +631,8 @@ namespace SQLitePCL.pretty
 
             if (buffer == null) { throw new ArgumentNullException(); }
             if (offset + count > buffer.Length) { new ArgumentException(); }
-            if (offset < 0 ) { throw new ArgumentOutOfRangeException(); }
-            if (count < 0 ) { throw new ArgumentOutOfRangeException(); }
+            if (offset < 0) { throw new ArgumentOutOfRangeException(); }
+            if (count < 0) { throw new ArgumentOutOfRangeException(); }
 
             int numBytes = (int)Math.Min(this.Length - position, count);
 

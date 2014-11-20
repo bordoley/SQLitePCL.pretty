@@ -16,8 +16,6 @@
 */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 #if USE_NUNIT
 

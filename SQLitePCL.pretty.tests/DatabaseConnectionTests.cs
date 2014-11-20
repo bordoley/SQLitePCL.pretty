@@ -15,12 +15,11 @@
    limitations under the License.
 */
 
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
-using NUnit.Framework;
 
 namespace SQLitePCL.pretty.tests
 {
@@ -29,7 +28,7 @@ namespace SQLitePCL.pretty.tests
     {
         [Test]
         public void TestRollbackEvent()
-        {   
+        {
             using (var db = SQLite3.Open(":memory:"))
             {
                 var rollbacks = 0;
@@ -57,7 +56,7 @@ namespace SQLitePCL.pretty.tests
             using (var db = SQLite3.Open(":memory:"))
             {
                 var statement = "CREATE TABLE foo (x int);";
-                db.Profile += (o, e) => 
+                db.Profile += (o, e) =>
                     {
                         Assert.AreEqual(statement, e.Statement);
                         Assert.Less(TimeSpan.MinValue, e.ExecutionTime);
@@ -98,7 +97,7 @@ namespace SQLitePCL.pretty.tests
                         Assert.AreEqual(currentAction, e.Action);
                         Assert.AreEqual("main", e.Database);
                         Assert.AreEqual("foo", e.Table);
-                        Assert.AreEqual(rowid, e.RowId);     
+                        Assert.AreEqual(rowid, e.RowId);
                     };
 
                 currentAction = ActionCode.CreateTable;
@@ -219,7 +218,7 @@ namespace SQLitePCL.pretty.tests
                 db.Execute("INSERT INTO foo (x) VALUES ('e')");
                 db.Execute("INSERT INTO foo (x) VALUES ('f')");
 
-                string top = 
+                string top =
                     db.Query("SELECT x FROM foo ORDER BY x ASC LIMIT 1;")
                         .Select(x => x[0].ToString())
                         .First();
@@ -253,7 +252,6 @@ namespace SQLitePCL.pretty.tests
                 {
                     return true;
                 });
-
 
                 try
                 {

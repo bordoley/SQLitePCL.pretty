@@ -20,8 +20,6 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
@@ -95,96 +93,96 @@ namespace SQLitePCL.pretty
             }
 
             disposed = true;
-            conn.Use( _  =>
+            conn.Use(_ =>
                 {
                     stmt.Dispose();
                 }).Wait();
         }
     }
 
-     internal sealed class StatementWrapper : IStatement
-     {
-         private readonly IStatement stmt;
+    internal sealed class StatementWrapper : IStatement
+    {
+        private readonly IStatement stmt;
 
-         internal StatementWrapper(IStatement stmt)
-         {
-             this.stmt = stmt;
-         }
+        internal StatementWrapper(IStatement stmt)
+        {
+            this.stmt = stmt;
+        }
 
-         public IReadOnlyOrderedDictionary<string, IBindParameter> BindParameters
-         {
-             get 
-             {
-                 return stmt.BindParameters;
-             }
-         }
+        public IReadOnlyOrderedDictionary<string, IBindParameter> BindParameters
+        {
+            get
+            {
+                return stmt.BindParameters;
+            }
+        }
 
-         public IReadOnlyList<IColumnInfo> Columns
-         {
-             get 
-             {
-                 return stmt.Columns;
-             }
-         }
+        public IReadOnlyList<IColumnInfo> Columns
+        {
+            get
+            {
+                return stmt.Columns;
+            }
+        }
 
-         public string SQL
-         {
-             get 
-             {
-                 return stmt.SQL;
-             }
-         }
+        public string SQL
+        {
+            get
+            {
+                return stmt.SQL;
+            }
+        }
 
-         public bool IsReadOnly
-         {
-             get 
-             {
-                 return stmt.IsReadOnly;
-             }
-         }
+        public bool IsReadOnly
+        {
+            get
+            {
+                return stmt.IsReadOnly;
+            }
+        }
 
-         public bool IsBusy
-         {
-             get 
-             {
-                 return stmt.IsBusy;
-             }
-         }
+        public bool IsBusy
+        {
+            get
+            {
+                return stmt.IsBusy;
+            }
+        }
 
-         public void ClearBindings()
-         {
-             stmt.ClearBindings();
-         }
+        public void ClearBindings()
+        {
+            stmt.ClearBindings();
+        }
 
-         public IReadOnlyList<IResultSetValue> Current
-         {
-             get 
-             {
-                 return stmt.Current;
-             }
-         }
+        public IReadOnlyList<IResultSetValue> Current
+        {
+            get
+            {
+                return stmt.Current;
+            }
+        }
 
-         object IEnumerator.Current
-         {
-             get 
-             {
-                 return this.Current;
-             }
-         }
+        object IEnumerator.Current
+        {
+            get
+            {
+                return this.Current;
+            }
+        }
 
-         public bool MoveNext()
-         {
-             return stmt.MoveNext();
-         }
+        public bool MoveNext()
+        {
+            return stmt.MoveNext();
+        }
 
-         public void Reset()
-         {
-             stmt.Reset();
-         }
+        public void Reset()
+        {
+            stmt.Reset();
+        }
 
-         public void Dispose()
-         {
-             // No-op
-         }
-     }
+        public void Dispose()
+        {
+            // No-op
+        }
+    }
 }

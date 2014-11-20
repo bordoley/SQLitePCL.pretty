@@ -70,13 +70,13 @@ namespace SQLitePCL.pretty
 
         public void RegisterCollation(string name, Comparison<string> comparison)
         {
-             Contract.Requires(name != null);
-             Contract.Requires(comparison != null);
+            Contract.Requires(name != null);
+            Contract.Requires(comparison != null);
         }
 
         public void RegisterCommitHook(Func<bool> onCommit)
         {
-             Contract.Requires(onCommit != null);
+            Contract.Requires(onCommit != null);
         }
 
         public void RegisterAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
@@ -91,7 +91,7 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(name != null);
             Contract.Requires(reduce != null);
-            Contract.Requires(nArg >= -1); 
+            Contract.Requires(nArg >= -1);
         }
     }
 

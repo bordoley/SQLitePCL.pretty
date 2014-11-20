@@ -15,8 +15,6 @@
    limitations under the License.
 */
 
-using System;
-
 using NUnit.Framework;
 
 namespace SQLitePCL.pretty.tests

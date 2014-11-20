@@ -64,7 +64,7 @@ namespace SQLitePCL.pretty
         IReadOnlyOrderedDictionary<string, IBindParameter> BindParameters { get; }
 
         IReadOnlyList<IColumnInfo> Columns { get; }
-       
+
         string SQL { get; }
 
         bool IsReadOnly { get; }

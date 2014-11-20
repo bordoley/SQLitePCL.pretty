@@ -17,7 +17,6 @@
 
 using System;
 using System.Diagnostics.Contracts;
-using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -472,8 +471,8 @@ namespace SQLitePCL.pretty
             this.index = index;
         }
 
-        public IColumnInfo ColumnInfo 
-        { 
+        public IColumnInfo ColumnInfo
+        {
             get
             {
                 return new ColumnInfoImpl(stmt, index);

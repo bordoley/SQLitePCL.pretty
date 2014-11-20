@@ -98,7 +98,7 @@ namespace SQLitePCL.pretty
 
         public override bool Equals(object other)
         {
-           return other is SQLiteVersion && this == (SQLiteVersion)other;
+            return other is SQLiteVersion && this == (SQLiteVersion)other;
         }
 
         public int CompareTo(SQLiteVersion other)

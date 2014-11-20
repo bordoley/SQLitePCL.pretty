@@ -43,7 +43,7 @@ namespace SQLitePCL.pretty
 
                     if (typeof(String) == t)
                     {
-                        stmt.BindParameters[i].Bind((string) a[i]);
+                        stmt.BindParameters[i].Bind((string)a[i]);
                     }
                     else if (
                         (typeof(Int32) == t)
@@ -71,12 +71,12 @@ namespace SQLitePCL.pretty
                     else if (a[i] is Stream)
                     {
                         var stream = (Stream)a[i];
-                        if (!stream.CanRead) 
-                        { 
-                            throw new NotSupportedException("Stream in position " + i + " is not readable"); 
+                        if (!stream.CanRead)
+                        {
+                            throw new NotSupportedException("Stream in position " + i + " is not readable");
                         }
-                           
-                        stmt.BindParameters[i].BindZeroBlob((int) stream.Length);
+
+                        stmt.BindParameters[i].BindZeroBlob((int)stream.Length);
                     }
                     else
                     {

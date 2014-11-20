@@ -53,11 +53,11 @@ namespace SQLitePCL.pretty
 
         public override long Length
         {
-            get 
+            get
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-                return length; 
+                return length;
             }
         }
 
@@ -89,7 +89,7 @@ namespace SQLitePCL.pretty
                     }).Wait();
             }
 
-            // Free any unmanaged objects here. 
+            // Free any unmanaged objects here.
 
             disposed = true;
             base.Dispose(disposing);

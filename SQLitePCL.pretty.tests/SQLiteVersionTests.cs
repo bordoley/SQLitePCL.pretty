@@ -1,4 +1,4 @@
-﻿/*
+/*
    Copyright 2014 David Bordoley
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +14,8 @@
    limitations under the License.
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using NUnit.Framework;
+using System;
 
 namespace SQLitePCL.pretty.tests
 {
@@ -29,14 +24,14 @@ namespace SQLitePCL.pretty.tests
     {
         [Test]
         public void TestEquality()
-        { 
+        {
             Assert.True(SQLiteVersion.Of(3080911).Equals(SQLiteVersion.Of(3080911)));
-            Assert.True(SQLiteVersion.Of(3080911).Equals((object) SQLiteVersion.Of(3080911)));
+            Assert.True(SQLiteVersion.Of(3080911).Equals((object)SQLiteVersion.Of(3080911)));
             Assert.True(SQLiteVersion.Of(3080911) == SQLiteVersion.Of(3080911));
             Assert.False(SQLiteVersion.Of(3080911) != SQLiteVersion.Of(3080911));
 
-            SQLiteVersion[] notEqualTests = 
-            { 
+            SQLiteVersion[] notEqualTests =
+            {
                 SQLiteVersion.Of(3080911),
                 SQLiteVersion.Of(2080911),
                 SQLiteVersion.Of(3070911),
@@ -48,7 +43,7 @@ namespace SQLitePCL.pretty.tests
                 for (int j = i + 1; j < notEqualTests.Length; j++)
                 {
                     Assert.False(notEqualTests[i].Equals(notEqualTests[j]));
-                    Assert.False(notEqualTests[i].Equals((object) notEqualTests[j]));
+                    Assert.False(notEqualTests[i].Equals((object)notEqualTests[j]));
                     Assert.False(notEqualTests[i] == notEqualTests[j]);
                     Assert.True(notEqualTests[i] != notEqualTests[j]);
                 }

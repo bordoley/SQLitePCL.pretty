@@ -20,8 +20,8 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Linq;
 using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,8 +31,9 @@ namespace SQLitePCL.pretty
     public static class AsyncDatabaseConnection
     {
         private static IScheduler defaultScheduler = TaskPoolScheduler.Default;
-        public static IScheduler DefaultScheduler 
-        { 
+
+        public static IScheduler DefaultScheduler
+        {
             set
             {
                 defaultScheduler = value;
@@ -58,7 +59,7 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
-            
+
             // FIXME: I think this could actually honor the cancellation token if it was implemented in a way to return an enumerable
             return This.Use(conn =>
             {
@@ -72,8 +73,8 @@ namespace SQLitePCL.pretty
         }
 
         public static Task ExecuteAsync(
-            this IAsyncDatabaseConnection This, 
-            string sql, 
+            this IAsyncDatabaseConnection This,
+            string sql,
             CancellationToken cancellationToken,
             params object[] a)
         {
@@ -123,10 +124,10 @@ namespace SQLitePCL.pretty
         }
 
         public static Task<Stream> OpenBlobAsync(
-            this IAsyncDatabaseConnection This, 
+            this IAsyncDatabaseConnection This,
             string database,
-            string tableName, 
-            string columnName, 
+            string tableName,
+            string columnName,
             long rowId,
             CancellationToken cancellationToken,
             bool canWrite = false)
@@ -181,9 +182,9 @@ namespace SQLitePCL.pretty
         }
 
         public static IObservable<T> Query<T>(
-            this IAsyncDatabaseConnection This, 
-            string sql, 
-            Func<IReadOnlyList<IResultSetValue>, T> selector, 
+            this IAsyncDatabaseConnection This,
+            string sql,
+            Func<IReadOnlyList<IResultSetValue>, T> selector,
             params object[] a)
         {
             Contract.Requires(This != null);
@@ -273,7 +274,7 @@ namespace SQLitePCL.pretty
 
         public IObservable<DatabaseTraceEventArgs> Trace
         {
-            get 
+            get
             {
                 return trace;
             }
@@ -289,7 +290,7 @@ namespace SQLitePCL.pretty
 
         public IObservable<DatabaseUpdateEventArgs> Update
         {
-            get 
+            get
             {
                 return update;
             }
@@ -316,29 +317,29 @@ namespace SQLitePCL.pretty
                     return queue.EnqueueOperation(() =>
                         {
                             var cancellationTokenRegistration = cancellationToken.Register(() => { /* this.conn.Interrupt() */});
-                               
+
                             try
                             {
                                 cancellationToken.ThrowIfCancellationRequested();
 
                                 foreach (var e in f(new DatabaseConnectionWrapper(this.conn)))
-                                {  
+                                {
                                     observer.OnNext(e);
                                     cancellationToken.ThrowIfCancellationRequested();
                                 }
                                 observer.OnCompleted();
-                             }
-                             catch (Exception ex)
-                             {
+                            }
+                            catch (Exception ex)
+                            {
                                 observer.OnError(ex);
-                             }
-                             finally
-                             {
+                            }
+                            finally
+                            {
                                 cancellationTokenRegistration.Dispose();
-                             }
-                             return Unit.Default;
-                       }, scheduler, cancellationToken);
-               });
+                            }
+                            return Unit.Default;
+                        }, scheduler, cancellationToken);
+                });
         }
     }
 
@@ -377,7 +378,7 @@ namespace SQLitePCL.pretty
 
         public bool IsAutoCommit
         {
-            get 
+            get
             {
                 return db.IsAutoCommit;
             }
@@ -398,7 +399,7 @@ namespace SQLitePCL.pretty
 
         public long LastInsertedRowId
         {
-            get 
+            get
             {
                 return db.LastInsertedRowId;
             }
@@ -406,7 +407,7 @@ namespace SQLitePCL.pretty
 
         public IEnumerable<IStatement> Statements
         {
-            get 
+            get
             {
                 return db.Statements;
             }

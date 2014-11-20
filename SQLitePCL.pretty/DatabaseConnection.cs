@@ -196,7 +196,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(db != null);
             Contract.Requires(sql != null);
 
-            object[] empty = {};
+            object[] empty = { };
             return db.Query(sql, empty);
         }
 
