@@ -47,8 +47,6 @@ namespace SQLitePCL.pretty
     {
         public abstract void Dispose();
 
-        public abstract Task DisposeAsync();
-
         public IObservable<T> Use<T>(Func<IStatement, IEnumerable<T>> f)
         {
             Contract.Requires(f != null);
