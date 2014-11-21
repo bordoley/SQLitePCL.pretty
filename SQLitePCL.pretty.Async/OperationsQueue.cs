@@ -129,5 +129,12 @@ namespace SQLitePCL.pretty
                 Observable.Start(() => calculationFunc(), scheduler).ToTask(),
                 cancellationToken);
         }
+
+        public static Task EnqueueOperation(this OperationsQueue This, Action calculationFunc, IScheduler scheduler, CancellationToken cancellationToken)
+        {
+            return This.EnqueueOperation(() =>
+                Observable.Start(() => calculationFunc(), scheduler).ToTask(),
+                cancellationToken);
+        }
     }
 }
