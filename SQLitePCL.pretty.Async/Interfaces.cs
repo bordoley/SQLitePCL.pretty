@@ -38,8 +38,6 @@ namespace SQLitePCL.pretty
     [ContractClass(typeof(IAsyncStatementContract))]
     public interface IAsyncStatement : IDisposable
     {
-        Task DisposeAsync();
-
         IObservable<T> Use<T>(Func<IStatement, IEnumerable<T>> f);
     }
 }

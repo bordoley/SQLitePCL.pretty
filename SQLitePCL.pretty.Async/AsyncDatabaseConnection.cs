@@ -132,9 +132,10 @@ namespace SQLitePCL.pretty
             CancellationToken cancellationToken,
             bool canWrite = false)
         {
-            return This.Use(db =>
+            return This.Use<Stream>(db =>
                 {
-                    return db.OpenBlob(database, tableName, columnName, rowId, canWrite);
+                    var blob = db.OpenBlob(database, tableName, columnName, rowId, canWrite);
+                    return new AsyncBlobStream(blob, This, blob.Length);
                 }, cancellationToken);
         }
 
@@ -306,6 +307,11 @@ namespace SQLitePCL.pretty
 
         public void Dispose()
         {
+            if (disposed)
+            {
+                return;
+            }
+
             this.DisposeAsync().Wait();
         }
 
@@ -323,12 +329,19 @@ namespace SQLitePCL.pretty
                             {
                                 cancellationToken.ThrowIfCancellationRequested();
 
-                                foreach (var e in f(new DatabaseConnectionWrapper(this.conn)))
+                                // Note: Diposing the connection wrapper doesn't dispose the underlying connection
+                                // The intent here is to prevent access to the underlying connection outside of the 
+                                // function call.
+                                using (var db = new DatabaseConnectionWrapper(this.conn))
                                 {
-                                    observer.OnNext(e);
-                                    cancellationToken.ThrowIfCancellationRequested();
+                                    foreach (var e in f(db))
+                                    {
+                                        observer.OnNext(e);
+                                        cancellationToken.ThrowIfCancellationRequested();
+                                    }
+
+                                    observer.OnCompleted();
                                 }
-                                observer.OnCompleted();
                             }
                             catch (Exception ex)
                             {
@@ -338,7 +351,6 @@ namespace SQLitePCL.pretty
                             {
                                 cancellationTokenRegistration.Dispose();
                             }
-                            return Unit.Default;
                         }, scheduler, cancellationToken);
                 });
         }
@@ -347,6 +359,8 @@ namespace SQLitePCL.pretty
     internal sealed class DatabaseConnectionWrapper : IDatabaseConnection
     {
         private readonly IDatabaseConnection db;
+
+        private bool disposed = false;
 
         internal DatabaseConnectionWrapper(IDatabaseConnection db)
         {
@@ -381,6 +395,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
                 return db.IsAutoCommit;
             }
         }
@@ -394,6 +409,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
                 return db.Changes;
             }
         }
@@ -402,6 +418,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
                 return db.LastInsertedRowId;
             }
         }
@@ -410,22 +427,34 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+                // FIXME: If someone keeps a reference to this list it leaks the implementation out
                 return db.Statements;
             }
         }
 
         public bool TryGetFileName(string database, out string filename)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
             return db.TryGetFileName(database, out filename);
         }
 
         public Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+            // FIXME: If someone keeps a reference to this list it leaks the implementation out
+            // On the other hand that is what we actually want for OpenBlobStreamAsync
             return db.OpenBlob(database, tableName, columnName, rowId, canWrite);
         }
 
         public IStatement PrepareStatement(string sql, out string tail)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+            // FIXME: If someone keeps a reference to this list it leaks the implementation out
+            // On the other hand that is what we actually want for PrepareStatementAsync
             return db.PrepareStatement(sql, out tail);
         }
 
@@ -451,7 +480,10 @@ namespace SQLitePCL.pretty
 
         public void Dispose()
         {
-            // No-op
+            // Guard against someone taking a reference to this and trying to use it outside of 
+            // the Use function delegate
+            disposed = true;
+            // We don't actually own the database connection so its not disposed
         }
     }
 }

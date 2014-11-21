@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
@@ -82,10 +83,37 @@ namespace SQLitePCL.pretty
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-            return conn.Use(_ => f(new StatementWrapper(this.stmt)));
+            return Observable.Create((IObserver<T> observer, CancellationToken cancellationToken) =>
+                {
+                    return conn.Use(_ =>
+                        {
+                            try
+                            {
+                                cancellationToken.ThrowIfCancellationRequested();
+
+                                // Note: Diposing the statement wrapper doesn't dispose the underlying statement
+                                // The intent here is to prevent access to the underlying statement outside of the 
+                                // function call.
+                                using (var stmt = new StatementWrapper(this.stmt))
+                                {
+                                    foreach (var e in f(stmt))
+                                    {
+                                        observer.OnNext(e);
+                                        cancellationToken.ThrowIfCancellationRequested();
+                                    }
+                                        
+                                    observer.OnCompleted();
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                observer.OnError(ex);
+                            }
+                        }, cancellationToken);
+                });
         }
 
-        public async Task DisposeAsync()
+        public void Dispose()
         {
             if (disposed)
             {
@@ -93,21 +121,18 @@ namespace SQLitePCL.pretty
             }
 
             disposed = true;
-            await conn.Use(_ =>
+            conn.Use(_ =>
                 {
                     stmt.Dispose();
                 });
-        }
-
-        public void Dispose()
-        {
-            this.DisposeAsync().Wait();
         }
     }
 
     internal sealed class StatementWrapper : IStatement
     {
         private readonly IStatement stmt;
+
+        private bool disposed = false;
 
         internal StatementWrapper(IStatement stmt)
         {
@@ -118,6 +143,9 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+                // FIXME: If someone keeps a reference to this list it leaks the implementation out
                 return stmt.BindParameters;
             }
         }
@@ -126,6 +154,9 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+                // FIXME: If someone keeps a reference to this list it leaks the implementation out
                 return stmt.Columns;
             }
         }
@@ -134,6 +165,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
                 return stmt.SQL;
             }
         }
@@ -142,6 +174,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
                 return stmt.IsReadOnly;
             }
         }
@@ -150,12 +183,14 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
                 return stmt.IsBusy;
             }
         }
 
         public void ClearBindings()
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
             stmt.ClearBindings();
         }
 
@@ -163,6 +198,9 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+                // FIXME: If someone keeps a reference to this list it leaks the implementation out
                 return stmt.Current;
             }
         }
@@ -177,17 +215,22 @@ namespace SQLitePCL.pretty
 
         public bool MoveNext()
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
             return stmt.MoveNext();
         }
 
         public void Reset()
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
             stmt.Reset();
         }
 
         public void Dispose()
         {
-            // No-op
+            // Guard against someone taking a reference to this and trying to use it outside of 
+            // the Use function delegate
+            disposed = true;
+            // We don't actually own the statement so its not disposed
         }
     }
 }

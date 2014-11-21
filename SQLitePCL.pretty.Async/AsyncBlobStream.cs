@@ -86,7 +86,7 @@ namespace SQLitePCL.pretty
                 queue.Use(db =>
                     {
                         blobStream.Dispose();
-                    }).Wait();
+                    });
             }
 
             // Free any unmanaged objects here.
