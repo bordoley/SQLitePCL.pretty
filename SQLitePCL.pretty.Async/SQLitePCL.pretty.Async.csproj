@@ -34,6 +34,7 @@
     <Compile Include="AsyncStatement.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="InterfacesContract.cs" />
+    <Compile Include="ObserverException.cs" />
     <Compile Include="OperationsQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

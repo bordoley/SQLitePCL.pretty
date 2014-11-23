@@ -16,6 +16,8 @@
 
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
@@ -26,38 +28,93 @@ namespace SQLitePCL.pretty.tests
 {
     [TestFixture]
     public class AsyncDatabaseConnectionTests
-    {        
+    {
         [Test]
-        public async Task TestUse()
+        public async Task TestProfileEvent()
         {
             using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
             {
-                Console.WriteLine("root thread:" + Thread.CurrentThread.ManagedThreadId);
-                db.Use(conn =>
+                var statement = "CREATE TABLE foo (x int);";
+                db.Profile.Subscribe(e =>
                     {
-                        Console.WriteLine("excute thread:" + Thread.CurrentThread.ManagedThreadId);
-                        conn.ExecuteAll(
-                            @"CREATE TABLE foo (x int);
-                                INSERT INTO foo (x) VALUES (1);
-                                INSERT INTO foo (x) VALUES (2);
-                                INSERT INTO foo (x) VALUES (3);");
-                    }).Wait();
+                        Assert.AreEqual(statement, e.Statement);
+                        Assert.Less(TimeSpan.MinValue, e.ExecutionTime);
+                    });
 
-                var x = db.Query("SELECT * FROM foo;")
-                            .Select(result =>
-                                {
-                                    Console.WriteLine("x result thread" + Thread.CurrentThread.ManagedThreadId + " " + result[0].ToInt());
-                                    return result[0].ToInt();
-                                });
+                await db.ExecuteAsync(statement);
+            }
+        }
 
-                var y = db.Query("SELECT * FROM foo;")
-                            .Select(result =>
-                                {
-                                    Console.WriteLine("y result thread" + Thread.CurrentThread.ManagedThreadId + " " + result[0].ToInt());
-                                    return result[0].ToInt();
-                                });
+        [Test]
+        public async Task TestTraceEvent()
+        {
+            using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            {
+                var statement = "CREATE TABLE foo (x int);";
+                db.Trace.Subscribe(e =>
+                    {
+                        Assert.AreEqual(statement, e.Statement);
+                    });
 
-                await Task.WhenAll(y.ToTask(), x.ToTask(), y.ToTask(), x.ToTask(), y.ToTask());
+                await db.ExecuteAsync(statement);
+
+                statement = "INSERT INTO foo (x) VALUES (1);";
+                await db.ExecuteAsync(statement);
+            }
+        }
+
+        [Test]
+        public async Task TestUpdateEvent()
+        {
+            using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            {
+                var currentAction = ActionCode.CreateTable;
+                var rowid = 1;
+
+                db.Update.Subscribe(e =>
+                    {
+                        Assert.AreEqual(currentAction, e.Action);
+                        Assert.AreEqual("main", e.Database);
+                        Assert.AreEqual("foo", e.Table);
+                        Assert.AreEqual(rowid, e.RowId);
+                    });
+
+                currentAction = ActionCode.CreateTable;
+                rowid = 1;
+                await db.ExecuteAsync("CREATE TABLE foo (x int);");
+
+                currentAction = ActionCode.Insert;
+                rowid = 1;
+                await db.ExecuteAsync("INSERT INTO foo (x) VALUES (1);");
+
+                currentAction = ActionCode.Insert;
+                rowid = 2;
+                await db.ExecuteAsync("INSERT INTO foo (x) VALUES (2);");
+
+                currentAction = ActionCode.DropTable;
+                rowid = 2;
+                await db.ExecuteAsync("DROP TABLE foo");
+            }
+        }
+
+        [Test]
+        public async Task TestUse()
+        {
+            using (var adb = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            {
+                await adb.Use(db => Enumerable.Range(0, 1000))
+                    .Scan(Tuple.Create<int, int>(-1, -1), (x, y) => Tuple.Create(x.Item1 + 1, y))
+                    .Do(result => 
+                        {
+                            Assert.AreEqual(result.Item2, result.Item1);
+                        });
+
+                var anotherUse = adb.Use(db => Enumerable.Range(0, 1000));
+                
+                adb.Dispose();
+
+                Assert.Throws(typeof(ObjectDisposedException), () => adb.Use(db => Enumerable.Range(0, 1000)));
+                Assert.Throws(typeof(ObjectDisposedException), async () => { await anotherUse; });
             }
         }
     }

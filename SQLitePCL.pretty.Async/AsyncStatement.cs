@@ -85,6 +85,13 @@ namespace SQLitePCL.pretty
 
             return Observable.Create((IObserver<T> observer, CancellationToken cancellationToken) =>
                 {
+                    // Prevent calls to subscribe after the statement is disposed
+                    if (this.disposed)
+                    {
+                        observer.OnError(new ObjectDisposedException(this.GetType().FullName));
+                        return Task.FromResult(Unit.Default);
+                    }
+
                     return conn.Use(_ =>
                         {
                             try
@@ -98,15 +105,21 @@ namespace SQLitePCL.pretty
                                 {
                                     foreach (var e in f(stmt))
                                     {
-                                        observer.OnNext(e);
+                                        observer.OnNextSafe(e);
                                         cancellationToken.ThrowIfCancellationRequested();
                                     }
 
-                                    observer.OnCompleted();
+                                    observer.OnCompletedSafe();
                                 }
                             }
                             catch (Exception ex)
                             {
+                                // Exceptions thrown by OnNext and OnCompleted must not be sent to the OnError handler.
+                                if (ex is ObserverException)
+                                {
+                                    throw ex.InnerException;
+                                }
+
                                 observer.OnError(ex);
                             }
                         }, cancellationToken);
