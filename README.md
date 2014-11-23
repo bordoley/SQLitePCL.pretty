@@ -37,9 +37,9 @@ While the code is well tested, the API is currently in flux. Users should expect
 
 * IStatement - This interface is used to bind parameters and to enumerate the result set of a SQL query. Its a lower level interface that you rarely need to use in practice but is available if needed.
 
-* IBindParameter - This interface is used to bind a parameter to a value when preparing a statement to stepped through. An IStatement provides access to its bind parameters via IReadonlyOrderedDictionary which allows accessing bind parameter by either index or name.
+* IBindParameter - This interface is used to bind a parameter to a value when preparing a statement to be stepped through. An IStatement provides access to its bind parameters via an IReadonlyOrderedDictionary, which allows accessing bind parameters by either index or name.
 
-* IColumnInfo - This interface provides additional info about a column in a result set, such as the database, table and column names of the value.
+* IColumnInfo - This interface provides additional info about a column in the result set, such as the database, table and column names of the value.
 
 * ISQLiteValue - This interface is used to wrap SQLite dynamically typed values which are used in result sets as well as in aggregate and scalar functions. 
 
@@ -52,11 +52,11 @@ While the code is well tested, the API is currently in flux. Users should expect
 * SQLiteVersion - A struct that wraps the SQLite numeric version.
 
 ## Asynchronous API
-* IAsyncDatabaseConnection - A wrapper around an instance of an IDatabaseConnection that provides lock free FIFO scheduling of access to the database connection. Work items can be scheduled on the TaskPool, ThreadPool, SynchronizationContext or any other RX IScheduler. Note that this class is not thread safe, and only provides a way to schedule work on a given database connection in a non-blocking fashion. In addition, this interface provides exposes database events as IObservable instances, and numerous extension methods are provided to asynchronously execute queries against a database connection. 
+* IAsyncDatabaseConnection - A wrapper around an instance of an IDatabaseConnection that provides lock free FIFO scheduling of access to the database connection. Work items can be scheduled on the TaskPool, ThreadPool, SynchronizationContext or any other RX IScheduler. Note that this class is not thread safe, and only provides a way to schedule work on a given database connection in a non-blocking fashion. In addition, this interface exposes database events as IObservable instances, and numerous extension methods are provided to asynchronously execute queries against a database connection. 
 
-* IAsyncStatement - A wrapper around an instance IStatement, that allows asynchronous querying and reuse of a prepared statement. Note that work items scheduled on the async statements queue are run on the same queue as the database connection used to generate the IAsyncStatement.
+  Note: Pay careful attention not to synchronously dispose an IAsyncDatabaseConnection intentionally or implicitly via a function executed on it's work queue. This will cause deadlocks and is not supported. The most common cause of implicit calls to Dispose() is wrapping a connection in a using block that is executed on the Task pool. To explicitly Dispose of the connection, you can call IAsyncDatabaseConnection.DisposeAsync(). For more detail, see comments in [AsyncDatabaseConnection.cs](http://github.com/bordoley/SQLitePCL.pretty/blob/master/SQLitePCL.pretty.Async/AsyncDatabaseConnection.cs#L241-263). This issue does not affect clients awaiting async methods within a using block on an event loop thread.
 
-Note: IAsyncDatabaseConnection and IAsyncStatement are not re-entrant. You may not access them from code running within a work item. Doing so may result in deadlock or other unexpected behavior and is not supported.
+* IAsyncStatement - A wrapper around an IStatement instance, that allows asynchronous querying and reuse of a prepared statement. Note that work items scheduled on the async statements queue are run on the same queue as the database connection used to generate the IAsyncStatement.
 
 # Let me see an example
 ```
@@ -98,35 +98,37 @@ using (var db = SQLite3.Open(":memory:"))
 }
 ```
 
-
 Additionally, you can take a look at the [unit tests](http://github.com/bordoley/SQLitePCL.pretty/tree/master/SQLitePCL.pretty.tests) for more examples.
 
 # Thats great and all, but I'm a writing a mobile app and can't block the UI thread
 
-In that case, be sure to include SQLitePCL.pretty.Async in your project, and checkout the following example
+In that case, be sure to include SQLitePCL.pretty.Async in your project, and checkout the following example:
 
 ```
-using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream")))
 using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream")))
 {
     await db.ExecuteAllAsync(
         @"CREATE TABLE foo (w int, x float, y string, z blob);
-          INSERT INTO foo (w,x,y,z) VALUES (0, 0, '', null);");
+            INSERT INTO foo (w,x,y,z) VALUES (0, 0, '', null);");
 
     await db.ExecuteAsync("INSERT INTO foo (w, x, y, z) VALUES (?, ?, ?, ?)", 1, 1.1, "hello", stream);
 
-    var rowId = await db.Query("SELECT rowid, z FROM foo where y = 'hello'", row => row[0].ToInt64()).FirstAsync();
+    var rowId = await db.Query("SELECT rowid, z FROM foo where y = 'hello'").Select(row => row[0].ToInt64()).FirstAsync();
 
-    var dst = await db.OpenBlobAsync("main", "foo", "z", rowId, true);
+    using (var dst = await db.OpenBlobAsync("main", "foo", "z", rowId, true))
+    {
+        await stream.CopyToAsync(dst);
+    }
 
-    using (dst) { await stream.CopyToAsync(dst); }
-
-    // Observe on the taskpool in order to avoid deadlocking when disposing the database.
-    await db.Query("SELECT rowid, * FROM foo", row =>
-        row[0].ToInt64() + ": " +
-        row[1].ToInt() + ", " +
-        row[2].ToInt64() + ", " +
-        row[3].ToString() + ", " +
-        row[4].ToString()).Do(str => { Console.WriteLine(str); }).ObserveOn(TaskPoolScheduler.Default);
+    await db.Query("SELECT rowid, * FROM foo")
+            .Select(row =>
+                row[0].ToInt64() + ": " +
+                row[1].ToInt() + ", " +
+                row[2].ToInt64() + ", " +
+                row[3].ToString() + ", " +
+                row[4].ToString())
+            .Do(str => { Console.WriteLine(str); });
 }
 ```
+*Note:* The above example will deadlock if run on a Task pool thread (for instance in a unit test runner).
