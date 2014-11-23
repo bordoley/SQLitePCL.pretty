@@ -117,5 +117,62 @@ namespace SQLitePCL.pretty.tests
                 Assert.Throws(typeof(ObjectDisposedException), async () => { await anotherUse; });
             }
         }
+
+        [Test]
+        public async Task TestIDatabaseConnectionDispose()
+        { 
+            using (var adb = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            {
+                await adb.ExecuteAsync("CREATE TABLE foo (x int);");
+
+                await adb.Use(db => {
+                    Assert.DoesNotThrow(() => { var x = db.IsAutoCommit; });
+                    Assert.DoesNotThrow(() => { var x = db.Changes; });
+                    Assert.DoesNotThrow(() => { var x = db.LastInsertedRowId; });
+                    Assert.DoesNotThrow(() => { var x = db.Statements; });
+                    Assert.DoesNotThrow(() => { using (var stmt = db.PrepareStatement("SELECT x FROM foo;")) { } });
+
+                    string filename;
+                    Assert.DoesNotThrow(() => { var x = db.TryGetFileName("main", out filename); });
+ 
+                    db.Dispose();
+
+                    Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.IsAutoCommit; });
+                    Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.Changes; });
+                    Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.LastInsertedRowId; });
+                    Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.Statements; });
+                    Assert.Throws(typeof(ObjectDisposedException), () => db.PrepareStatement("SELECT x FROM foo;"));
+                    Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.TryGetFileName("main", out filename); });
+                });
+
+                await adb.Use(db =>
+                    {
+                        // Assert that the database is not disposed, despite the previous user disposing it's instance.
+                        Assert.DoesNotThrow(() => { var x = db.IsAutoCommit; });
+                    });
+            }
+        }
+
+        [Test]
+        public async Task TestIDatabaseConnectionUnsupportedMethods()
+        {
+            using (var adb = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            {
+                await adb.ExecuteAsync("CREATE TABLE foo (x int);");
+
+                await adb.Use(db => {
+                    Assert.Throws(typeof(NotSupportedException), () => db.Rollback += (o, e) => { });
+                    Assert.Throws(typeof(NotSupportedException), () => db.Trace += (o, e) => { });
+                    Assert.Throws(typeof(NotSupportedException), () => db.Profile += (o, e) => { });
+                    Assert.Throws(typeof(NotSupportedException), () => db.Update += (o, e) => { });
+                    Assert.Throws(typeof(NotSupportedException), () => db.BusyTimeout = TimeSpan.MaxValue);
+
+                    Assert.Throws(typeof(NotSupportedException), () => db.RegisterCollation("test", (a, b) => 1));
+                    Assert.Throws(typeof(NotSupportedException), () => db.RegisterCommitHook(() => false));
+                    Assert.Throws(typeof(NotSupportedException), () => db.RegisterAggregateFunc("test", "", (string a, ISQLiteValue b) => a, a => a.ToSQLiteValue()));
+                    Assert.Throws(typeof(NotSupportedException), () => db.RegisterScalarFunc("test", (a, b) => a));
+                });
+            }
+        }
     }
 }
