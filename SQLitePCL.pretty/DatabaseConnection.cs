@@ -266,7 +266,7 @@ namespace SQLitePCL.pretty
             db.RegisterAggregateFunc(name, -1, seed, func, resultSelector);
         }
 
-        public static void RegisterAggregateFunction<T>(this IDatabaseConnection db, String name, T seed, Func<T, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(db != null);
             Contract.Requires(name != null);
