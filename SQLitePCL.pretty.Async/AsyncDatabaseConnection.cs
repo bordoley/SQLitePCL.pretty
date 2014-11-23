@@ -238,29 +238,6 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(f != null);
 
-            // FIXME: This code can easily caused deadlocks in user code when awaited on a task pool thread.
-            //
-            // Trivial example:
-            //   using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
-            //   {
-            //     await db.Use(_ => { });
-            //   }
-            //
-            // In this case, the task pool immediately schedules the call to Dispose() after the 
-            // Action completes on the same thread. This results in deadlock as the call to Dispose()
-            // is waiting for the queue to indicate its empty, but the current running item on the
-            // queue never completes since its blocked by the Dispose() call.
-            // 
-            // A fix for this is available in .NET 4.5.3, which provides TaskCreationOptions.RunContinuationsAsynchronously
-            // Unfortunately this is not, and will not for the forseable future be available in the PCL profile.
-            // Also the RX implementation of ToTask() does not accept TaskCreationOptions but that could 
-            // be worked around with a custom implementation.
-            //
-            // Another fix considered but abandoned was to provide a variant of this method accepting an
-            // IScheduler that can be used to ObserveOn(). However this would essentially double the 
-            // number of static methods in this class, and would only in practice be 
-            // useful in unit tests, as most client code will typically call these async 
-            // methods from an event loop, which doesn't suffer from this bug.
             return This.Use(conn => new T[] { f(conn) }).ToTask(cancellationToken);
         }
 
@@ -328,14 +305,39 @@ namespace SQLitePCL.pretty
             this.conn.Dispose();
         }
 
-        public void Dispose()
+        // Yes async void is evil and ugly. This is essentially a compromise decision to avoid
+        // common deadlock pitfalls. For instance, if Dispose was implemented as 
+        //
+        //  public void Dispose()
+        //  {
+        //    this.DisposeAsync().Wait();
+        //  }
+        //
+        // then this trivial example would deadlock when run on the task pool:
+        //
+        //   using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+        //   {
+        //     await db.Use(_ => { });
+        //   }
+        //
+        // In this case, the task pool immediately schedules the call to Dispose() after the 
+        // Action completes on the same thread. This results in deadlock as the call to Dispose()
+        // is waiting for the queue to indicate its empty, but the current running item on the
+        // queue never completes since its blocked by the Dispose() call.
+        // 
+        // A fix for this is available in .NET 4.5.3, which provides TaskCreationOptions.RunContinuationsAsynchronously
+        // Unfortunately this is not, and will not for the forseable future be available in the PCL profile.
+        // Also the RX implementation of ToTask() does not accept TaskCreationOptions but that could 
+        // be worked around with a custom implementation.
+        //
+        // Another fix considered but abandoned was to provide variant of Use() accepting an
+        // IScheduler that can be used to ObserveOn(). However this would essentially double the 
+        // number of static methods in this class, and would only in practice be 
+        // useful in unit tests, as most client code will typically call these async 
+        // methods from an event loop, which doesn't suffer from this bug.
+        public async void Dispose()
         {
-            if (disposed)
-            {
-                return;
-            }
-
-            this.DisposeAsync().Wait();
+            await this.DisposeAsync();
         }
 
         public IObservable<T> Use<T>(Func<IDatabaseConnection, IEnumerable<T>> f)

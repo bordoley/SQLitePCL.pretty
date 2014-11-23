@@ -26,58 +26,39 @@ namespace SQLitePCL.pretty.tests
 {
     [TestFixture]
     public class AsyncDatabaseConnectionTests
-    {
-        // The using pattern results in deadlocks when IAsyncDatabaseConnection.Use() is awaited
-        // on a task pool thread. The issue is that the task scheduler will schedule calls to 
-        // Dispose() immediately on the same thread as callback function to Use is run on, 
-        // resulting in Dispose blocking, waiting for the connections internal queue of work to 
-        // complete, which never happens, as Dispose() is blocking completion (ie. deadlock). 
-        // To work around this in unit test we add this synchronous test runner function.
-        //
-        // Note for most user code this isn't actually a problem as await calls made from the 
-        // application event loop always result in the continuation being queued on the callers
-        // eventloop synchronization context by default.
-        internal static void DoAsyncTest(Func<IAsyncDatabaseConnection, Task> f)
+    {        
+        [Test]
+        public async Task TestUse()
         {
             using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
             {
-                f(db).Wait();
+                Console.WriteLine("root thread:" + Thread.CurrentThread.ManagedThreadId);
+                db.Use(conn =>
+                    {
+                        Console.WriteLine("excute thread:" + Thread.CurrentThread.ManagedThreadId);
+                        conn.ExecuteAll(
+                            @"CREATE TABLE foo (x int);
+                                INSERT INTO foo (x) VALUES (1);
+                                INSERT INTO foo (x) VALUES (2);
+                                INSERT INTO foo (x) VALUES (3);");
+                    }).Wait();
+
+                var x = db.Query("SELECT * FROM foo;")
+                            .Select(result =>
+                                {
+                                    Console.WriteLine("x result thread" + Thread.CurrentThread.ManagedThreadId + " " + result[0].ToInt());
+                                    return result[0].ToInt();
+                                });
+
+                var y = db.Query("SELECT * FROM foo;")
+                            .Select(result =>
+                                {
+                                    Console.WriteLine("y result thread" + Thread.CurrentThread.ManagedThreadId + " " + result[0].ToInt());
+                                    return result[0].ToInt();
+                                });
+
+                await Task.WhenAll(y.ToTask(), x.ToTask(), y.ToTask(), x.ToTask(), y.ToTask());
             }
-        }
-
-
-        [Test]
-        public void TestUse()
-        {
-            DoAsyncTest(async db =>
-                {
-                    Console.WriteLine("root thread:" + Thread.CurrentThread.ManagedThreadId);
-                    db.Use(conn =>
-                        {
-                            Console.WriteLine("excute thread:" + Thread.CurrentThread.ManagedThreadId);
-                            conn.ExecuteAll(
-                                @"CREATE TABLE foo (x int);
-                                  INSERT INTO foo (x) VALUES (1);
-                                  INSERT INTO foo (x) VALUES (2);
-                                  INSERT INTO foo (x) VALUES (3);");
-                        }).Wait();
-
-                    var x = db.Query("SELECT * FROM foo;")
-                                .Select(result =>
-                                    {
-                                        Console.WriteLine("x result thread" + Thread.CurrentThread.ManagedThreadId + " " + result[0].ToInt());
-                                        return result[0].ToInt();
-                                    });
-
-                    var y = db.Query("SELECT * FROM foo;")
-                                .Select(result =>
-                                    {
-                                        Console.WriteLine("y result thread" + Thread.CurrentThread.ManagedThreadId + " " + result[0].ToInt());
-                                        return result[0].ToInt();
-                                    });
-
-                    await Task.WhenAll(y.ToTask(), x.ToTask(), y.ToTask(), x.ToTask(), y.ToTask());
-                });
         }
     }
 }

@@ -54,8 +54,6 @@ While the code is well tested, the API is currently in flux. Users should expect
 ## Asynchronous API
 * IAsyncDatabaseConnection - A wrapper around an instance of an IDatabaseConnection that provides lock free FIFO scheduling of access to the database connection. Work items can be scheduled on the TaskPool, ThreadPool, SynchronizationContext or any other RX IScheduler. Note that this class is not thread safe, and only provides a way to schedule work on a given database connection in a non-blocking fashion. In addition, this interface exposes database events as IObservable instances, and numerous extension methods are provided to asynchronously execute queries against a database connection. 
 
-  Note: Pay careful attention not to synchronously dispose an IAsyncDatabaseConnection intentionally or implicitly via a function executed on it's work queue. This will cause deadlocks and is not supported. The most common cause of implicit calls to Dispose() is wrapping a connection in a using block that is executed on the Task pool. To explicitly Dispose of the connection, you can call IAsyncDatabaseConnection.DisposeAsync(). For more detail, see comments in [AsyncDatabaseConnection.cs](http://github.com/bordoley/SQLitePCL.pretty/blob/master/SQLitePCL.pretty.Async/AsyncDatabaseConnection.cs#L241-263). This issue does not affect clients awaiting async methods within a using block on an event loop thread.
-
 * IAsyncStatement - A wrapper around an IStatement instance, that allows asynchronous querying and reuse of a prepared statement. Note that work items scheduled on the async statements queue are run on the same queue as the database connection used to generate the IAsyncStatement.
 
 # Let me see an example
@@ -131,4 +129,3 @@ using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream")
             .Do(str => { Console.WriteLine(str); });
 }
 ```
-*Note:* The above example will deadlock if run on a Task pool thread (for instance in a unit test runner).

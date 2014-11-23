@@ -74,35 +74,33 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Test]
-        public void DoExampleAsync()
+        public async Task DoExampleAsync()
         {
-            AsyncDatabaseConnectionTests.DoAsyncTest(async db =>
+            using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream")))
+            {
+                await db.ExecuteAllAsync(
+                    @"CREATE TABLE foo (w int, x float, y string, z blob);
+                        INSERT INTO foo (w,x,y,z) VALUES (0, 0, '', null);");
+
+                await db.ExecuteAsync("INSERT INTO foo (w, x, y, z) VALUES (?, ?, ?, ?)", 1, 1.1, "hello", stream);
+
+                var rowId = await db.Query("SELECT rowid, z FROM foo where y = 'hello'").Select(row => row[0].ToInt64()).FirstAsync();
+
+                using (var dst = await db.OpenBlobAsync("main", "foo", "z", rowId, true))
                 {
-                    using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream")))
-                    {
-                        await db.ExecuteAllAsync(
-                            @"CREATE TABLE foo (w int, x float, y string, z blob);
-                              INSERT INTO foo (w,x,y,z) VALUES (0, 0, '', null);");
+                    await stream.CopyToAsync(dst);
+                }
 
-                        await db.ExecuteAsync("INSERT INTO foo (w, x, y, z) VALUES (?, ?, ?, ?)", 1, 1.1, "hello", stream);
-
-                        var rowId = await db.Query("SELECT rowid, z FROM foo where y = 'hello'").Select(row => row[0].ToInt64()).FirstAsync();
-
-                        using (var dst = await db.OpenBlobAsync("main", "foo", "z", rowId, true))
-                        {
-                            await stream.CopyToAsync(dst);
-                        }
-
-                        await db.Query("SELECT rowid, * FROM foo")
-                                .Select(row =>
-                                    row[0].ToInt64() + ": " +
-                                    row[1].ToInt() + ", " +
-                                    row[2].ToInt64() + ", " +
-                                    row[3].ToString() + ", " +
-                                    row[4].ToString())
-                                .Do(str => { Console.WriteLine(str); });
-                    }
-                });
+                await db.Query("SELECT rowid, * FROM foo")
+                        .Select(row =>
+                            row[0].ToInt64() + ": " +
+                            row[1].ToInt() + ", " +
+                            row[2].ToInt64() + ", " +
+                            row[3].ToString() + ", " +
+                            row[4].ToString())
+                        .Do(str => { Console.WriteLine(str); });
+            }
         }
     }
 }
