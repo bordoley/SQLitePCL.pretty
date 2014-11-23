@@ -261,7 +261,7 @@ namespace SQLitePCL.pretty
             // number of static methods in this class, and would only in practice be 
             // useful in unit tests, as most client code will typically call these async 
             // methods from an event loop, which doesn't suffer from this bug.
-            return This.Use(conn => Enumerable.Repeat(f(conn), 1)).ToTask(cancellationToken);
+            return This.Use(conn => new T[] { f(conn) }).ToTask(cancellationToken);
         }
 
         public static Task<T> Use<T>(this IAsyncDatabaseConnection This, Func<IDatabaseConnection, T> f)

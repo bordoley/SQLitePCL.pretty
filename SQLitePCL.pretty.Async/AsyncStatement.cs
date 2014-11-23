@@ -57,7 +57,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(f != null);
 
-            return This.Use(conn => Enumerable.Repeat(f(conn), 1)).ToTask(cancellationToken);
+            return This.Use(conn => new T[] { f(conn) }).ToTask(cancellationToken);
         }
 
         public static Task<T> Use<T>(this IAsyncStatement This, Func<IStatement, T> f)
@@ -92,7 +92,7 @@ namespace SQLitePCL.pretty
                                 cancellationToken.ThrowIfCancellationRequested();
 
                                 // Note: Diposing the statement wrapper doesn't dispose the underlying statement
-                                // The intent here is to prevent access to the underlying statement outside of the 
+                                // The intent here is to prevent access to the underlying statement outside of the
                                 // function call.
                                 using (var stmt = new StatementWrapper(this.stmt))
                                 {
@@ -101,7 +101,7 @@ namespace SQLitePCL.pretty
                                         observer.OnNext(e);
                                         cancellationToken.ThrowIfCancellationRequested();
                                     }
-                                        
+
                                     observer.OnCompleted();
                                 }
                             }
@@ -227,7 +227,7 @@ namespace SQLitePCL.pretty
 
         public void Dispose()
         {
-            // Guard against someone taking a reference to this and trying to use it outside of 
+            // Guard against someone taking a reference to this and trying to use it outside of
             // the Use function delegate
             disposed = true;
             // We don't actually own the statement so its not disposed
