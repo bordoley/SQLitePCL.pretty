@@ -92,6 +92,7 @@ namespace SQLitePCL.pretty
         private readonly IReadOnlyList<IResultSetValue> current;
 
         private bool disposed = false;
+        private bool mustReset = false;
 
         internal StatementImpl(sqlite3_stmt stmt, SQLiteDatabaseConnection db)
         {
@@ -189,9 +190,15 @@ namespace SQLitePCL.pretty
 
         public bool MoveNext()
         {
+            if (mustReset)
+            {
+                return false;
+            }
+
             int rc = raw.sqlite3_step(this.sqlite3_stmt);
             if (rc == raw.SQLITE_DONE)
             {
+                mustReset = true;
                 return false;
             }
             else if (rc == raw.SQLITE_ROW)
@@ -208,6 +215,7 @@ namespace SQLitePCL.pretty
 
         public void Reset()
         {
+            mustReset = false;
             int rc = raw.sqlite3_reset(this.sqlite3_stmt);
             SQLiteException.CheckOk(stmt, rc);
         }

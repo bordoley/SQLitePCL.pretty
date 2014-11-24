@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncTests\AsyncDatabaseConnectionTests.cs" />
+    <Compile Include="AsyncTests\AsyncStatementTests.cs" />
     <Compile Include="DatabaseConnectionTests.cs" />
     <Compile Include="Example.cs" />
     <Compile Include="ImplementationTests.cs" />

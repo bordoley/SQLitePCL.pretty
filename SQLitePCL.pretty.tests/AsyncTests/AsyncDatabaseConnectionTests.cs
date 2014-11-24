@@ -110,12 +110,20 @@ namespace SQLitePCL.pretty.tests
                             Assert.AreEqual(result.Item2, result.Item1);
                         });
 
+                int expected = 10;
+                var t = await adb.Use(db =>
+                    {
+                        return db.Query("Select ?", expected).Select(row => row[0].ToInt()).First();
+                    });
+                Assert.AreEqual(t, expected);
+
                 var anotherUse = adb.Use(db => Enumerable.Range(0, 1000));;
                 
                 adb.Dispose();
 
                 Assert.Throws(typeof(ObjectDisposedException), () => adb.Use(db => Enumerable.Range(0, 1000)));
                 Assert.Throws(typeof(ObjectDisposedException), async () => { await anotherUse; });
+                Assert.Throws(typeof(ObjectDisposedException), () => adb.Use(db => { }));
             }
         }
 
@@ -142,6 +150,7 @@ namespace SQLitePCL.pretty.tests
                     Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.Changes; });
                     Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.LastInsertedRowId; });
                     Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.Statements; });
+                    Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.OpenBlob("", "", "", 0, true); });
                     Assert.Throws(typeof(ObjectDisposedException), () => db.PrepareStatement("SELECT x FROM foo;"));
                     Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.TryGetFileName("main", out filename); });
                 });
@@ -173,9 +182,13 @@ namespace SQLitePCL.pretty.tests
 
                 await adb.Use(db => {
                     Assert.Throws(typeof(NotSupportedException), () => db.Rollback += (o, e) => { });
+                    Assert.Throws(typeof(NotSupportedException), () => db.Rollback -= (o, e) => { });
                     Assert.Throws(typeof(NotSupportedException), () => db.Trace += (o, e) => { });
+                    Assert.Throws(typeof(NotSupportedException), () => db.Trace -= (o, e) => { });
                     Assert.Throws(typeof(NotSupportedException), () => db.Profile += (o, e) => { });
+                    Assert.Throws(typeof(NotSupportedException), () => db.Profile -= (o, e) => { });
                     Assert.Throws(typeof(NotSupportedException), () => db.Update += (o, e) => { });
+                    Assert.Throws(typeof(NotSupportedException), () => db.Update -= (o, e) => { });
                     Assert.Throws(typeof(NotSupportedException), () => db.BusyTimeout = TimeSpan.MaxValue);
 
                     Assert.Throws(typeof(NotSupportedException), () => db.RegisterCollation("test", (a, b) => 1));
@@ -197,6 +210,49 @@ namespace SQLitePCL.pretty.tests
 
                 cts = new CancellationTokenSource();
                 Assert.That(async () => await adb.Use(_ => { cts.Cancel(); }, cts.Token), Throws.TypeOf<TaskCanceledException>());
+            }
+        }
+
+        [Test]
+        public async Task TestPrepareAllAsync()
+        {
+            using (var adb = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            {
+                await adb.ExecuteAsync("CREATE TABLE foo (x int);");
+                var stmts = 
+                    await adb.PrepareAllAsync(
+                        "SELECT * FROM foo;" +
+                        "SELECT x FROM foo;" +
+                        "SELECT rowid, x FROM foo;");
+                Assert.AreEqual(stmts.Count, 3);
+
+                var stmt0 = await stmts[0].Use<String>(stmt => stmt.SQL);
+                var stmt1 = await stmts[1].Use<String>(stmt => stmt.SQL);
+                var stmt2 = await stmts[2].Use<String>(stmt => stmt.SQL);
+
+                Assert.AreEqual(stmt0, "SELECT * FROM foo;");
+                Assert.AreEqual(stmt1, "SELECT x FROM foo;");
+                Assert.AreEqual(stmt2, "SELECT rowid, x FROM foo;");
+            }
+        }
+
+        [Test]
+        public async Task TestQuery()
+        {
+            using (var adb = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            {
+                var _0 = "hello";
+                var _1 = 1;
+                var _2 = true;
+
+                var result =
+                    await adb.Query("Select ?, ?, ?", _0, _1, _2)
+                        .Select(row => Tuple.Create(row[0].ToString(), row[1].ToInt(), row[2].ToInt()))
+                        .FirstAsync();
+
+                Assert.AreEqual(result.Item1, _0);
+                Assert.AreEqual(result.Item2, _1);
+                Assert.AreEqual(result.Item3 != 0, _2);
             }
         }
     }
