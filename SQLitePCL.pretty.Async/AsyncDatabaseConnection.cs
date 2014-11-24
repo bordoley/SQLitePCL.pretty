@@ -139,6 +139,41 @@ namespace SQLitePCL.pretty
                 }, cancellationToken);
         }
 
+        public static Task<IReadOnlyList<IAsyncStatement>> PrepareAllAsync(
+           this IAsyncDatabaseConnection This,
+           string sql,
+           CancellationToken cancellationToken)
+        {
+            return Use<IReadOnlyList<IAsyncStatement>>(This, conn =>
+                {
+                    // FIXME: In the ideal world this would be an immutable list
+                    var retval = new List<IAsyncStatement>();
+                 
+                    // Eagerly prepare all the statements. The synchronous version of PrepareAll() 
+                    // is lazy and preparing each statement when MoveNext() is called on the Enumerator.
+                    // Hence an implementation like:
+                    //
+                    //   return conn.PrepareAll(sql).Select(stmt => new AsyncStatementImpl(stmt, This));
+                    //
+                    // would result in unintentional database access not on the operations queue.
+                    // Added bonus of being eager: Callers can retrieve individual statements via 
+                    // the index in the list.
+                    foreach (var stmt in conn.PrepareAll(sql))
+                    {
+                        retval.Add(new AsyncStatementImpl(stmt, This));
+                    }
+                    
+                    return retval;
+                }, cancellationToken);
+        }
+
+        public static Task<IReadOnlyList<IAsyncStatement>> PrepareAllAsync(
+           this IAsyncDatabaseConnection This,
+           string sql)
+        {
+            return PrepareAllAsync(This, sql, CancellationToken.None);
+        }
+
         public static Task<IAsyncStatement> PrepareStatementAsync(
            this IAsyncDatabaseConnection This,
            string sql,
@@ -157,29 +192,6 @@ namespace SQLitePCL.pretty
         public static Task<IAsyncStatement> PrepareStatementAsync(this IAsyncDatabaseConnection This, string sql)
         {
             return PrepareStatementAsync(This, sql, CancellationToken.None);
-        }
-
-        public static Task<Tuple<IAsyncStatement, string>> PrepareStatementWithTailAsync(
-            this IAsyncDatabaseConnection This,
-            string sql,
-            CancellationToken cancellationToken)
-        {
-            Contract.Requires(This != null);
-            Contract.Requires(sql != null);
-
-            return Use(This, conn =>
-                {
-                    string tail = null;
-                    var stmt = conn.PrepareStatement(sql, out tail);
-                    return Tuple.Create<IAsyncStatement, string>(new AsyncStatementImpl(stmt, This), tail);
-                }, cancellationToken);
-        }
-
-        public static Task<Tuple<IAsyncStatement, string>> PrepareStatementWithTailAsync(
-            this IAsyncDatabaseConnection This,
-            string sql)
-        {
-            return PrepareStatementWithTailAsync(This, sql, CancellationToken.None);
         }
 
         public static IObservable<IReadOnlyList<IResultSetValue>> Query(
@@ -368,21 +380,12 @@ namespace SQLitePCL.pretty
                                 {
                                     foreach (var e in f(db))
                                     {
-                                        observer.OnNextSafe(e);
+                                        observer.OnNext(e);
                                         cancellationToken.ThrowIfCancellationRequested();
                                     }
 
-                                    observer.OnCompletedSafe();
+                                    observer.OnCompleted();
                                 }
-                            }
-                            catch (Exception ex)
-                            {
-                                // Exceptions thrown by OnNext and OnCompleted must not be sent to the OnError handler.
-                                if (ex is ObserverException)
-                                {
-                                    throw ex.InnerException;
-                                }
-                                observer.OnError(ex);
                             }
                             finally
                             {

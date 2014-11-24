@@ -110,7 +110,7 @@ namespace SQLitePCL.pretty.tests
                             Assert.AreEqual(result.Item2, result.Item1);
                         });
 
-                var anotherUse = adb.Use(db => Enumerable.Range(0, 1000));
+                var anotherUse = adb.Use(db => Enumerable.Range(0, 1000));;
                 
                 adb.Dispose();
 
@@ -183,6 +183,20 @@ namespace SQLitePCL.pretty.tests
                     Assert.Throws(typeof(NotSupportedException), () => db.RegisterAggregateFunc("test", "", (string a, ISQLiteValue b) => a, a => a.ToSQLiteValue()));
                     Assert.Throws(typeof(NotSupportedException), () => db.RegisterScalarFunc("test", (a, b) => a));
                 });
+            }
+        }
+
+        [Test]
+        public void TestUseCancelled()
+        {
+            using (var adb = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            {
+                var cts = new CancellationTokenSource();
+                cts.Cancel();
+                Assert.That(async () => await adb.Use(_ => { }, cts.Token), Throws.TypeOf<TaskCanceledException>());
+
+                cts = new CancellationTokenSource();
+                Assert.That(async () => await adb.Use(_ => { cts.Cancel(); }, cts.Token), Throws.TypeOf<TaskCanceledException>());
             }
         }
     }

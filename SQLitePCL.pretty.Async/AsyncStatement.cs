@@ -94,33 +94,18 @@ namespace SQLitePCL.pretty
 
                     return conn.Use(_ =>
                         {
-                            try
+                            cancellationToken.ThrowIfCancellationRequested();
+
+                            // Note: Diposing the statement wrapper doesn't dispose the underlying statement
+                            // The intent here is to prevent access to the underlying statement outside of the
+                            // function call.
+                            using (var stmt = new StatementWrapper(this.stmt))
                             {
-                                cancellationToken.ThrowIfCancellationRequested();
-
-                                // Note: Diposing the statement wrapper doesn't dispose the underlying statement
-                                // The intent here is to prevent access to the underlying statement outside of the
-                                // function call.
-                                using (var stmt = new StatementWrapper(this.stmt))
+                                foreach (var e in f(stmt))
                                 {
-                                    foreach (var e in f(stmt))
-                                    {
-                                        observer.OnNextSafe(e);
-                                        cancellationToken.ThrowIfCancellationRequested();
-                                    }
-
-                                    observer.OnCompletedSafe();
+                                    observer.OnNext(e);
+                                    cancellationToken.ThrowIfCancellationRequested();
                                 }
-                            }
-                            catch (Exception ex)
-                            {
-                                // Exceptions thrown by OnNext and OnCompleted must not be sent to the OnError handler.
-                                if (ex is ObserverException)
-                                {
-                                    throw ex.InnerException;
-                                }
-
-                                observer.OnError(ex);
                             }
                         }, cancellationToken);
                 });
