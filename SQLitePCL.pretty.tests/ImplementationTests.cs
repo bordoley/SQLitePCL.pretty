@@ -314,6 +314,21 @@ namespace SQLitePCL.pretty.tests
                 }
             }
         }
+
+        [Test]
+        public void TestColumns()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                foreach (var row in db.Query("SELECT 1 as a, 2 as b")) 
+                {
+                    var columns = row.Columns();
+                    Assert.AreEqual(columns[0].Name, "a");
+                    Assert.AreEqual(columns[1].Name, "b");
+                    Assert.AreEqual(columns.Count, 2);
+                }
+            }
+        }
     }
 
     [TestFixture]
