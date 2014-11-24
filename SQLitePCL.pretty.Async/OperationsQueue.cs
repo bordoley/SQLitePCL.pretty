@@ -33,7 +33,7 @@ using System.Threading.Tasks;
 // Based off of https://github.com/akavache/Akavache/blob/master/Akavache/Portable/KeyedOperationQueue.cs
 namespace SQLitePCL.pretty
 {
-    internal sealed class OperationsQueue : IDisposable
+    internal sealed class OperationsQueue
     {
         private abstract class Operation
         {
@@ -114,22 +114,10 @@ namespace SQLitePCL.pretty
                 return shutdown;
             }
         }
-
-        public void Dispose()
-        {
-            this.DisposeAsync().Wait();
-        }
     }
 
     internal static class OperationsQueueExtensions
     {
-        public static Task<T> EnqueueOperation<T>(this OperationsQueue This, Func<T> calculationFunc, IScheduler scheduler, CancellationToken cancellationToken)
-        {
-            return This.EnqueueOperation(() =>
-                Observable.Start(() => calculationFunc(), scheduler).ToTask(),
-                cancellationToken);
-        }
-
         public static Task EnqueueOperation(this OperationsQueue This, Action calculationFunc, IScheduler scheduler, CancellationToken cancellationToken)
         {
             return This.EnqueueOperation(() =>
