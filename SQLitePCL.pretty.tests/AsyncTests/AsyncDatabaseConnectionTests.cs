@@ -18,6 +18,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
@@ -150,6 +151,16 @@ namespace SQLitePCL.pretty.tests
                         // Assert that the database is not disposed, despite the previous user disposing it's instance.
                         Assert.DoesNotThrow(() => { var x = db.IsAutoCommit; });
                     });
+
+                // Test that subscribe doesn't throw after Dispose() is called.
+                var disposedObservable = adb.Use(db => Enumerable.Empty<Unit>());
+                adb.Dispose();
+                await disposedObservable.Materialize()
+                    .Do(x =>
+                        {
+                            Assert.AreEqual(x.Kind, NotificationKind.OnError);
+                            Assert.IsInstanceOf(typeof(ObjectDisposedException), x.Exception);
+                        });
             }
         }
 
