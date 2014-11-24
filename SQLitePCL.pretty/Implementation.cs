@@ -109,6 +109,7 @@ namespace SQLitePCL.pretty
             get
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
                 return stmt;
             }
         }
@@ -155,6 +156,8 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
                 return raw.sqlite3_sql(this.sqlite3_stmt);
             }
         }
@@ -163,6 +166,8 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
                 return raw.sqlite3_stmt_readonly(this.sqlite3_stmt) == 0 ? false : true;
             }
         }
@@ -171,18 +176,23 @@ namespace SQLitePCL.pretty
         {
             get
             {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
                 return raw.sqlite3_stmt_busy(this.sqlite3_stmt) == 0 ? false : true;
             }
         }
 
         public void ClearBindings()
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             int rc = raw.sqlite3_clear_bindings(this.sqlite3_stmt);
             SQLiteException.CheckOk(this.sqlite3_stmt, rc);
         }
 
         public void Dispose()
         {
+            if (disposed) { return; }
             db.RemoveStatement(this);
             disposed = true;
             stmt.Dispose();
@@ -190,6 +200,8 @@ namespace SQLitePCL.pretty
 
         public bool MoveNext()
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             if (mustReset)
             {
                 return false;
@@ -215,6 +227,8 @@ namespace SQLitePCL.pretty
 
         public void Reset()
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             mustReset = false;
             int rc = raw.sqlite3_reset(this.sqlite3_stmt);
             SQLiteException.CheckOk(stmt, rc);

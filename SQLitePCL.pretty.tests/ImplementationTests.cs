@@ -27,6 +27,29 @@ namespace SQLitePCL.pretty.tests
     public class DatabaseBackupTests
     {
         [Test]
+        public void TestDispose()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                db.Execute("CREATE TABLE foo (x int);");
+                foreach (int i in Enumerable.Range(0, 1000))
+                {
+                    db.Execute("INSERT INTO foo (x) VALUES (?);", i);
+                }
+
+                using (var db2 = SQLite3.Open(":memory:"))
+                {
+                    var backup = db.BackupInit("main", db2, "main");
+                    backup.Dispose();
+
+                    Assert.Throws(typeof(ObjectDisposedException), () => { var x = backup.PageCount; });
+                    Assert.Throws(typeof(ObjectDisposedException), () => { var x = backup.RemainingPages; });
+                    Assert.Throws(typeof(ObjectDisposedException), () => { backup.Step(1); });
+                }
+            }
+        }
+
+        [Test]
         public void TestBackupWithPageStepping()
         {
             using (var db = SQLite3.Open(":memory:"))
@@ -93,6 +116,26 @@ namespace SQLitePCL.pretty.tests
     [TestFixture]
     public class StatementTests
     {
+        [Test]
+        public void TestDispose()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                var stmt = db.PrepareStatement("SELECT 1");
+                stmt.Dispose();
+
+                Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.BindParameters; });
+                Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.Columns; });
+                Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.Current; });
+                Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.SQL; });
+                Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.IsBusy; });
+                Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.IsReadOnly; });
+                Assert.Throws(typeof(ObjectDisposedException), () => { stmt.ClearBindings(); });
+                Assert.Throws(typeof(ObjectDisposedException), () => { stmt.MoveNext(); });
+                Assert.Throws(typeof(ObjectDisposedException), () => { stmt.Reset(); });
+            }
+        }
+
         [Test]
         public void TestBusy()
         {
@@ -196,33 +239,7 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Test]
-        public void TestTryGetBindParameterIndex()
-        {
-            using (var db = SQLite3.Open(":memory:"))
-            {
-                db.Execute("CREATE TABLE foo (x int, v int, t text, d real, b blob, q blob);");
-
-                using (var stmt = db.PrepareStatement("INSERT INTO foo (x,v,t,d,b,q) VALUES (:x,:v,:t,:d,:b,:q)"))
-                {
-                    Action<string> test = (string key) =>
-                        {
-                            var param = stmt.BindParameters[key];
-                            Assert.AreEqual(key, param.Name);
-                        };
-
-                    Assert.Throws(typeof(KeyNotFoundException), () => test(":m"));
-                    test(":x");
-                    test(":v");
-                    test(":t");
-                    test(":d");
-                    test(":b");
-                    test(":q");
-                }
-            }
-        }
-
-        [Test]
-        public void TestGetBindParameterName()
+        public void TestGetBindParameters()
         {
             using (var db = SQLite3.Open(":memory:"))
             {
@@ -236,6 +253,22 @@ namespace SQLitePCL.pretty.tests
                     Assert.AreEqual(stmt.BindParameters[3].Name, ":d");
                     Assert.AreEqual(stmt.BindParameters[4].Name, ":b");
                     Assert.AreEqual(stmt.BindParameters[5].Name, ":q");
+
+                    Assert.AreEqual(stmt.BindParameters[":x"].Name, ":x");
+                    Assert.AreEqual(stmt.BindParameters[":v"].Name, ":v");
+                    Assert.AreEqual(stmt.BindParameters[":t"].Name, ":t");
+                    Assert.AreEqual(stmt.BindParameters[":d"].Name, ":d");
+                    Assert.AreEqual(stmt.BindParameters[":b"].Name, ":b");
+                    Assert.AreEqual(stmt.BindParameters[":q"].Name, ":q");
+
+                    Assert.True(stmt.BindParameters.ContainsKey(":x"));
+                    Assert.False(stmt.BindParameters.ContainsKey(":nope"));
+                    Assert.AreEqual(stmt.BindParameters.Keys.Count(), 6);
+                    Assert.AreEqual(stmt.BindParameters.Values.Count(), 6);
+
+                    Assert.Throws(typeof(KeyNotFoundException), () => { var x = stmt.BindParameters[":nope"]; });
+                    Assert.Throws(typeof(ArgumentOutOfRangeException), () => { var x = stmt.BindParameters[-1]; });
+                    Assert.Throws(typeof(ArgumentOutOfRangeException), () => { var x = stmt.BindParameters[100]; });
                 }
             }
         }
@@ -265,6 +298,26 @@ namespace SQLitePCL.pretty.tests
 
                 Assert.AreEqual(last.Item1, 0);
                 Assert.AreEqual(last.Item2, 0);
+            }
+        }
+
+        [Test]
+        public void TestGetColumns()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                var count = 0;
+                var stmt = db.PrepareStatement("SELECT 1 as a, 2 as a, 3 as a");
+                foreach (var column in stmt.Columns)
+                {
+                    count++;
+                    Assert.AreEqual(column.Name, "a");
+                }
+
+                Assert.Throws(typeof(ArgumentOutOfRangeException), () => { var x = stmt.Columns[-1]; });
+                Assert.Throws(typeof(ArgumentOutOfRangeException), () => { var x = stmt.Columns[3]; });
+
+                Assert.AreEqual(count, stmt.Columns.Count);
             }
         }
     }
@@ -326,6 +379,14 @@ namespace SQLitePCL.pretty.tests
                     Assert.AreEqual(columns[0].Name, "a");
                     Assert.AreEqual(columns[1].Name, "b");
                     Assert.AreEqual(columns.Count, 2);
+
+                    var count = 0;
+                    foreach (var column in row.Columns())
+                    {
+                        count++;
+                    }
+
+                    Assert.AreEqual(count, 2);
                 }
             }
         }
