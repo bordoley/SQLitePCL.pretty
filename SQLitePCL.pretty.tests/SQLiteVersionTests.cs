@@ -81,8 +81,8 @@ namespace SQLitePCL.pretty.tests
             Assert.Less(SQLiteVersion.Of(3080911), SQLiteVersion.Of(3081911));
             Assert.Less(SQLiteVersion.Of(3080911), SQLiteVersion.Of(4080911));
 
-            Assert.Throws(typeof(ArgumentException), () => SQLiteVersion.Of(3080911).CompareTo(null));
-            Assert.Throws(typeof(ArgumentException), () => SQLiteVersion.Of(3080911).CompareTo(""));
+            Assert.Throws<ArgumentException>(() => SQLiteVersion.Of(3080911).CompareTo(null));
+            Assert.Throws<ArgumentException>(() => SQLiteVersion.Of(3080911).CompareTo(""));
         }
 
         [Test]

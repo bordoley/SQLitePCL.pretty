@@ -34,15 +34,15 @@ namespace SQLitePCL.pretty.tests
                 await aStmt.Use(stmt =>
                     {
                         stmt.Dispose();
-                        Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.BindParameters; });
-                        Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.Columns; });
-                        Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.Current; });
-                        Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.SQL; });
-                        Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.IsReadOnly; });
-                        Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.IsBusy; });
-                        Assert.Throws(typeof(ObjectDisposedException), () => { stmt.ClearBindings(); });
-                        Assert.Throws(typeof(ObjectDisposedException), () => { stmt.MoveNext(); });
-                        Assert.Throws(typeof(ObjectDisposedException), () => { stmt.Reset(); });
+                        Assert.Throws<ObjectDisposedException>(() => { var x = stmt.BindParameters; });
+                        Assert.Throws<ObjectDisposedException>(() => { var x = stmt.Columns; });
+                        Assert.Throws<ObjectDisposedException>(() => { var x = stmt.Current; });
+                        Assert.Throws<ObjectDisposedException>(() => { var x = stmt.SQL; });
+                        Assert.Throws<ObjectDisposedException>(() => { var x = stmt.IsReadOnly; });
+                        Assert.Throws<ObjectDisposedException>(() => { var x = stmt.IsBusy; });
+                        Assert.Throws<ObjectDisposedException>(() => { stmt.ClearBindings(); });
+                        Assert.Throws<ObjectDisposedException>(() => { stmt.MoveNext(); });
+                        Assert.Throws<ObjectDisposedException>(() => { stmt.Reset(); });
                     });
 
                 await aStmt.Use(stmt => 
@@ -72,9 +72,9 @@ namespace SQLitePCL.pretty.tests
 
                 aStmt.Dispose();
 
-                Assert.Throws(typeof(ObjectDisposedException), () => aStmt.Use(stmt => Enumerable.Range(0, 1000)));
-                Assert.Throws(typeof(ObjectDisposedException), async () => { await anotherUse; });
-                Assert.Throws(typeof(ObjectDisposedException), () => aStmt.Use(stmt => { }));
+                Assert.Throws<ObjectDisposedException>(() => aStmt.Use(stmt => Enumerable.Range(0, 1000)));
+                Assert.Throws<ObjectDisposedException>(async () => { await anotherUse; });
+                Assert.Throws<ObjectDisposedException>(() => aStmt.Use(stmt => { }));
 
                 var bStmt = await db.PrepareStatementAsync("SELECT 2");
                 int mutable = 0;

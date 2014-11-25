@@ -39,26 +39,26 @@ namespace SQLitePCL.pretty.tests
 
             db.Dispose();
 
-            Assert.Throws(typeof(ObjectDisposedException), () => { stmtEnumerator.MoveNext(); });
+            Assert.Throws<ObjectDisposedException>(() => { stmtEnumerator.MoveNext(); });
 
-            Assert.Throws(typeof(ObjectDisposedException), () => { db.BusyTimeout = TimeSpan.MaxValue; });
-            Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.Changes; });
-            Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.IsAutoCommit; });
-            Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.LastInsertedRowId; });
-            Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.Statements; });
+            Assert.Throws<ObjectDisposedException>(() => { db.BusyTimeout = TimeSpan.MaxValue; });
+            Assert.Throws<ObjectDisposedException>(() => { var x = db.Changes; });
+            Assert.Throws<ObjectDisposedException>(() => { var x = db.IsAutoCommit; });
+            Assert.Throws<ObjectDisposedException>(() => { var x = db.LastInsertedRowId; });
+            Assert.Throws<ObjectDisposedException>(() => { var x = db.Statements; });
 
             using (var db2 = SQLite3.Open(":memory:"))
             {
-                Assert.Throws(typeof(ObjectDisposedException), () => { db.Backup("main", db2, "main"); });
+                Assert.Throws<ObjectDisposedException>(() => { db.Backup("main", db2, "main"); });
             }
 
-            Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.GetFileName("main"); });
-            Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.OpenBlob("db", "tn", "cn", 0, false); });
-            Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.PrepareStatement("SELECT 1"); });
-            Assert.Throws(typeof(ObjectDisposedException), () => { db.RegisterCollation("test", (a, b) => 1); });
-            Assert.Throws(typeof(ObjectDisposedException), () => { db.RegisterCommitHook(() => false); });
-            Assert.Throws(typeof(ObjectDisposedException), () => { db.RegisterAggregateFunc("name", null, (string a, ISQLiteValue b) => a, t => "".ToSQLiteValue()); });
-            Assert.Throws(typeof(ObjectDisposedException), () => { db.RegisterScalarFunc("name", () => "p".ToSQLiteValue()); });
+            Assert.Throws<ObjectDisposedException>(() => { var x = db.GetFileName("main"); });
+            Assert.Throws<ObjectDisposedException>(() => { var x = db.OpenBlob("db", "tn", "cn", 0, false); });
+            Assert.Throws<ObjectDisposedException>(() => { var x = db.PrepareStatement("SELECT 1"); });
+            Assert.Throws<ObjectDisposedException>(() => { db.RegisterCollation("test", (a, b) => 1); });
+            Assert.Throws<ObjectDisposedException>(() => { db.RegisterCommitHook(() => false); });
+            Assert.Throws<ObjectDisposedException>(() => { db.RegisterAggregateFunc("name", null, (string a, ISQLiteValue b) => a, t => "".ToSQLiteValue()); });
+            Assert.Throws<ObjectDisposedException>(() => { db.RegisterScalarFunc("name", () => "p".ToSQLiteValue()); });
         }
 
         [Test]

@@ -89,9 +89,9 @@ namespace SQLitePCL.pretty.tests
                         var expected = row.Single();
                         var result = test.ToSQLiteValue();
 
-                        Assert.Throws(typeof(NotSupportedException), () => { var x = result.Length; });
-                        Assert.Throws(typeof(NotSupportedException), () => { result.ToString(); });
-                        Assert.Throws(typeof(NotSupportedException), () => { result.ToBlob(); });
+                        Assert.Throws<NotSupportedException>(() => { var x = result.Length; });
+                        Assert.Throws<NotSupportedException>(() => { result.ToString(); });
+                        Assert.Throws<NotSupportedException>(() => { result.ToBlob(); });
 
                         Assert.AreEqual(expected.SQLiteType, result.SQLiteType);
                         Assert.AreEqual(expected.ToInt64(), result.ToInt64());

@@ -121,9 +121,9 @@ namespace SQLitePCL.pretty.tests
                 
                 adb.Dispose();
 
-                Assert.Throws(typeof(ObjectDisposedException), () => adb.Use(db => Enumerable.Range(0, 1000)));
-                Assert.Throws(typeof(ObjectDisposedException), async () => { await anotherUse; });
-                Assert.Throws(typeof(ObjectDisposedException), () => adb.Use(db => { }));
+                Assert.Throws<ObjectDisposedException>(() => adb.Use(db => Enumerable.Range(0, 1000)));
+                Assert.Throws<ObjectDisposedException>(async () => { await anotherUse; });
+                Assert.Throws<ObjectDisposedException>(() => adb.Use(db => { }));
             }
         }
 
@@ -146,13 +146,13 @@ namespace SQLitePCL.pretty.tests
  
                     db.Dispose();
 
-                    Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.IsAutoCommit; });
-                    Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.Changes; });
-                    Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.LastInsertedRowId; });
-                    Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.Statements; });
-                    Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.OpenBlob("", "", "", 0, true); });
-                    Assert.Throws(typeof(ObjectDisposedException), () => db.PrepareStatement("SELECT x FROM foo;"));
-                    Assert.Throws(typeof(ObjectDisposedException), () => { var x = db.TryGetFileName("main", out filename); });
+                    Assert.Throws<ObjectDisposedException>(() => { var x = db.IsAutoCommit; });
+                    Assert.Throws<ObjectDisposedException>(() => { var x = db.Changes; });
+                    Assert.Throws<ObjectDisposedException>(() => { var x = db.LastInsertedRowId; });
+                    Assert.Throws<ObjectDisposedException>(() => { var x = db.Statements; });
+                    Assert.Throws<ObjectDisposedException>(() => { var x = db.OpenBlob("", "", "", 0, true); });
+                    Assert.Throws<ObjectDisposedException>(() => db.PrepareStatement("SELECT x FROM foo;"));
+                    Assert.Throws<ObjectDisposedException>(() => { var x = db.TryGetFileName("main", out filename); });
                 });
 
                 await adb.Use(db =>
@@ -168,7 +168,7 @@ namespace SQLitePCL.pretty.tests
                     .Do(x =>
                         {
                             Assert.AreEqual(x.Kind, NotificationKind.OnError);
-                            Assert.IsInstanceOf(typeof(ObjectDisposedException), x.Exception);
+                            Assert.IsInstanceOf<ObjectDisposedException>(x.Exception);
                         });
             }
         }

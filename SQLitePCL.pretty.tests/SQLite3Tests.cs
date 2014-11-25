@@ -60,7 +60,7 @@ namespace SQLitePCL.pretty.tests
 
             using (var db = SQLite3.Open(":memory:", ConnectionFlags.ReadOnly, null))
             {
-                Assert.Throws(typeof(SQLiteException), () => db.Execute("CREATE TABLE foo (x int);"));
+                Assert.Throws<SQLiteException>(() => db.Execute("CREATE TABLE foo (x int);"));
             }
         }
 

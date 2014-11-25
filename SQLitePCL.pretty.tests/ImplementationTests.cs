@@ -42,9 +42,9 @@ namespace SQLitePCL.pretty.tests
                     var backup = db.BackupInit("main", db2, "main");
                     backup.Dispose();
 
-                    Assert.Throws(typeof(ObjectDisposedException), () => { var x = backup.PageCount; });
-                    Assert.Throws(typeof(ObjectDisposedException), () => { var x = backup.RemainingPages; });
-                    Assert.Throws(typeof(ObjectDisposedException), () => { backup.Step(1); });
+                    Assert.Throws<ObjectDisposedException>(() => { var x = backup.PageCount; });
+                    Assert.Throws<ObjectDisposedException>(() => { var x = backup.RemainingPages; });
+                    Assert.Throws<ObjectDisposedException>(() => { backup.Step(1); });
                 }
             }
         }
@@ -124,15 +124,15 @@ namespace SQLitePCL.pretty.tests
                 var stmt = db.PrepareStatement("SELECT 1");
                 stmt.Dispose();
 
-                Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.BindParameters; });
-                Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.Columns; });
-                Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.Current; });
-                Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.SQL; });
-                Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.IsBusy; });
-                Assert.Throws(typeof(ObjectDisposedException), () => { var x = stmt.IsReadOnly; });
-                Assert.Throws(typeof(ObjectDisposedException), () => { stmt.ClearBindings(); });
-                Assert.Throws(typeof(ObjectDisposedException), () => { stmt.MoveNext(); });
-                Assert.Throws(typeof(ObjectDisposedException), () => { stmt.Reset(); });
+                Assert.Throws<ObjectDisposedException>(() => { var x = stmt.BindParameters; });
+                Assert.Throws<ObjectDisposedException>(() => { var x = stmt.Columns; });
+                Assert.Throws<ObjectDisposedException>(() => { var x = stmt.Current; });
+                Assert.Throws<ObjectDisposedException>(() => { var x = stmt.SQL; });
+                Assert.Throws<ObjectDisposedException>(() => { var x = stmt.IsBusy; });
+                Assert.Throws<ObjectDisposedException>(() => { var x = stmt.IsReadOnly; });
+                Assert.Throws<ObjectDisposedException>(() => { stmt.ClearBindings(); });
+                Assert.Throws<ObjectDisposedException>(() => { stmt.MoveNext(); });
+                Assert.Throws<ObjectDisposedException>(() => { stmt.Reset(); });
             }
         }
 
@@ -266,9 +266,9 @@ namespace SQLitePCL.pretty.tests
                     Assert.AreEqual(stmt.BindParameters.Keys.Count(), 6);
                     Assert.AreEqual(stmt.BindParameters.Values.Count(), 6);
 
-                    Assert.Throws(typeof(KeyNotFoundException), () => { var x = stmt.BindParameters[":nope"]; });
-                    Assert.Throws(typeof(ArgumentOutOfRangeException), () => { var x = stmt.BindParameters[-1]; });
-                    Assert.Throws(typeof(ArgumentOutOfRangeException), () => { var x = stmt.BindParameters[100]; });
+                    Assert.Throws<KeyNotFoundException>(() => { var x = stmt.BindParameters[":nope"]; });
+                    Assert.Throws<ArgumentOutOfRangeException>(() => { var x = stmt.BindParameters[-1]; });
+                    Assert.Throws<ArgumentOutOfRangeException>(() => { var x = stmt.BindParameters[100]; });
                 }
             }
         }
@@ -314,8 +314,8 @@ namespace SQLitePCL.pretty.tests
                     Assert.AreEqual(column.Name, "a");
                 }
 
-                Assert.Throws(typeof(ArgumentOutOfRangeException), () => { var x = stmt.Columns[-1]; });
-                Assert.Throws(typeof(ArgumentOutOfRangeException), () => { var x = stmt.Columns[3]; });
+                Assert.Throws<ArgumentOutOfRangeException>(() => { var x = stmt.Columns[-1]; });
+                Assert.Throws<ArgumentOutOfRangeException>(() => { var x = stmt.Columns[3]; });
 
                 Assert.AreEqual(count, stmt.Columns.Count);
             }
@@ -359,8 +359,8 @@ namespace SQLitePCL.pretty.tests
 
                 foreach (var row in db.Query("select * from foo"))
                 {
-                    Assert.Throws(typeof(ArgumentOutOfRangeException), () => { var x = row[-1]; });
-                    Assert.Throws(typeof(ArgumentOutOfRangeException), () => { var x = row[row.Count]; });
+                    Assert.Throws<ArgumentOutOfRangeException>(() => { var x = row[-1]; });
+                    Assert.Throws<ArgumentOutOfRangeException>(() => { var x = row[row.Count]; });
 
                     Assert.AreEqual(row[0].SQLiteType, SQLiteType.Integer);
                     Assert.AreEqual(row[1].SQLiteType, SQLiteType.Integer);
