@@ -637,7 +637,7 @@ namespace SQLitePCL.pretty
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             if (buffer == null) { throw new ArgumentNullException(); }
-            if (offset + count > buffer.Length) { new ArgumentException(); }
+            if (offset + count > buffer.Length) { throw new ArgumentException(); }
             if (offset < 0) { throw new ArgumentOutOfRangeException(); }
             if (count < 0) { throw new ArgumentOutOfRangeException(); }
 
@@ -697,7 +697,7 @@ namespace SQLitePCL.pretty
             if (!canWrite) { throw new NotSupportedException(); }
 
             if (buffer == null) { throw new ArgumentNullException(); }
-            if (offset + count > buffer.Length) { new ArgumentException(); }
+            if (offset + count > buffer.Length) { throw new ArgumentException(); }
             if (offset < 0) { throw new ArgumentOutOfRangeException(); }
             if (count < 0) { throw new ArgumentOutOfRangeException(); }
 

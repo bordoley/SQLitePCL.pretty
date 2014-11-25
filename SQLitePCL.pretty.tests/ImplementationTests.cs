@@ -407,23 +407,32 @@ namespace SQLitePCL.pretty.tests
                 db.Execute("CREATE TABLE foo (x blob);");
                 db.Execute("INSERT INTO foo (x) VALUES(?);", bytes);
 
-                db.Query("SELECT rowid, x FROM foo;")
-                    .Select(row =>
-                        {
-                            using (var stream = db.OpenBlob(row[1], row[0].ToInt64()))
-                            {
-                                Assert.True(stream.CanRead);
-                                Assert.False(stream.CanWrite);
+                var stream = 
+                    db.Query("SELECT rowid, x FROM foo;")
+                        .Select(row => db.OpenBlob(row[1], row[0].ToInt64()))
+                        .First();
 
-                                for (int i = 0; i < stream.Length; i++)
-                                {
-                                    int b = stream.ReadByte();
-                                    Assert.AreEqual(bytes[i], b);
-                                }
-                            }
+                using (stream)
+                {
+                    Assert.True(stream.CanRead);
+                    Assert.False(stream.CanWrite);
+                    Assert.True(stream.CanSeek);
 
-                            return row;
-                        }).First();
+                    for (int i = 0; i < stream.Length; i++)
+                    {
+                        int b = stream.ReadByte();
+                        Assert.AreEqual(bytes[i], b);
+                    }
+
+                    // Test input validation
+                    Assert.Throws<ArgumentNullException>(() => stream.Read(null, 0, 1));
+                    Assert.Throws<ArgumentException>(() => stream.Read(new byte[10], 6, 6));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => stream.Read(new byte[10], -5, 6));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => stream.Read(new byte[10], 5, -4));
+                
+                    // Since this is a read only stream, this is a good chance to test that writing fails
+                    Assert.Throws<NotSupportedException>(() => stream.WriteByte((byte)0));
+                }
             }
         }
 
@@ -440,12 +449,57 @@ namespace SQLitePCL.pretty.tests
                         .First();
                 blob.Dispose();
 
+                // Test double dispose doesn't crash
+                blob.Dispose();
+
                 Assert.Throws<ObjectDisposedException>(() => { var x = blob.Length; });
                 Assert.Throws<ObjectDisposedException>(() => { var x = blob.Position; });
                 Assert.Throws<ObjectDisposedException>(() => { blob.Position = 10; });
                 Assert.Throws<ObjectDisposedException>(() => { blob.Read(new byte[10], 0, 2); });
                 Assert.Throws<ObjectDisposedException>(() => { blob.Write(new byte[10], 0, 1); });
                 Assert.Throws<ObjectDisposedException>(() => { blob.Seek(0, SeekOrigin.Begin); });
+            }
+        }
+
+        [Test]
+        public void TestSeek()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                db.Execute("CREATE TABLE foo (x blob);");
+                db.Execute("INSERT INTO foo (x) VALUES(?);", "data");
+                var blob = 
+                    db.Query("SELECT rowid, x FROM foo")
+                        .Select(row => db.OpenBlob(row[1], row[0].ToInt64(), true))
+                        .First();
+                using (blob)
+                {
+                    Assert.True(blob.CanSeek);
+                    Assert.Throws<NotSupportedException>(() => blob.SetLength(10));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => { blob.Position = -1; });
+                    Assert.DoesNotThrow(() => { blob.Position = 100; });
+
+                    // Test input validation
+                    blob.Position = 5;
+                    Assert.Throws<IOException>(() => blob.Seek(-10, SeekOrigin.Begin));
+                    Assert.AreEqual(blob.Position, 5);
+                    Assert.Throws<IOException>(() => blob.Seek(-10, SeekOrigin.Current));
+                    Assert.AreEqual(blob.Position, 5);
+                    Assert.Throws<IOException>(() => blob.Seek(-100, SeekOrigin.End));
+                    Assert.AreEqual(blob.Position, 5);
+                    Assert.Throws<ArgumentException>(() => blob.Seek(-100, (SeekOrigin) 10));
+                    Assert.AreEqual(blob.Position, 5);
+
+                    blob.Seek(0, SeekOrigin.Begin);
+                    Assert.AreEqual(blob.Position, 0);
+
+                    blob.Seek(0, SeekOrigin.End);
+                    Assert.AreEqual(blob.Position, blob.Length);
+
+                    blob.Position = 5;
+                    blob.Seek(2, SeekOrigin.Current);
+                    Assert.AreEqual(blob.Position, 7);
+                }
             }
         }
 
@@ -462,33 +516,32 @@ namespace SQLitePCL.pretty.tests
 
                 db.Execute("CREATE TABLE foo (x blob);");
                 db.Execute("INSERT INTO foo (x) VALUES(?);", source);
-                db.Query("SELECT rowid, x FROM foo")
-                    .Select(row =>
-                        {
-                            using (var stream = db.OpenBlob(row[1], row[0].ToInt64(), true))
-                            {
-                                Assert.True(stream.CanRead);
-                                Assert.True(stream.CanWrite);
-                                source.CopyTo(stream);
-                            }
-                            return row;
-                        })
-                    .First();
+                
+                var stream =
+                    db.Query("SELECT rowid, x FROM foo")
+                        .Select(row => db.OpenBlob(row[1], row[0].ToInt64(), true))
+                        .First();
 
-                db.Query("SELECT rowid, x FROM foo;")
-                    .Select(row =>
-                        {
-                            using (var stream = db.OpenBlob(row[1], row[0].ToInt64()))
-                            {
-                                for (int i = 0; i < stream.Length; i++)
-                                {
-                                    int b = stream.ReadByte();
-                                    Assert.AreEqual(bytes[i], b);
-                                }
-                            }
+                using (stream)
+                {
+                    // Test input validation
+                    Assert.Throws<ArgumentNullException>(() => stream.Write(null, 1, 1));
+                    Assert.Throws<ArgumentException>(() => stream.Write(new byte[10], 6, 6));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => stream.Write(new byte[10], -5, 6));
+                    Assert.Throws<ArgumentOutOfRangeException>(() => stream.Write(new byte[10], 5, -4));
 
-                            return row;
-                        }).First();
+                    Assert.True(stream.CanRead);
+                    Assert.True(stream.CanWrite);
+                    source.CopyTo(stream);
+
+                    stream.Position = 0;
+
+                    for (int i = 0; i < stream.Length; i++)
+                    {
+                        int b = stream.ReadByte();
+                        Assert.AreEqual(bytes[i], b);
+                    }
+                }
             }
         }
     }
