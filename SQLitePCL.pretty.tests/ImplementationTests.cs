@@ -428,6 +428,28 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Test]
+        public void TestDispose()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                db.Execute("CREATE TABLE foo (x blob);");
+                db.Execute("INSERT INTO foo (x) VALUES(?);", "data");
+                var blob = 
+                    db.Query("SELECT rowid, x FROM foo")
+                        .Select(row => db.OpenBlob(row[1], row[0].ToInt64(), true))
+                        .First();
+                blob.Dispose();
+
+                Assert.Throws<ObjectDisposedException>(() => { var x = blob.Length; });
+                Assert.Throws<ObjectDisposedException>(() => { var x = blob.Position; });
+                Assert.Throws<ObjectDisposedException>(() => { blob.Position = 10; });
+                Assert.Throws<ObjectDisposedException>(() => { blob.Read(new byte[10], 0, 2); });
+                Assert.Throws<ObjectDisposedException>(() => { blob.Write(new byte[10], 0, 1); });
+                Assert.Throws<ObjectDisposedException>(() => { blob.Seek(0, SeekOrigin.Begin); });
+            }
+        }
+
+        [Test]
         public void TestWrite()
         {
             using (var db = SQLite3.Open(":memory:"))

@@ -135,7 +135,7 @@ namespace SQLitePCL.pretty
             return This.Use<Stream>(db =>
                 {
                     var blob = db.OpenBlob(database, tableName, columnName, rowId, canWrite);
-                    return new AsyncBlobStream(blob, This, blob.Length);
+                    return new AsyncBlobStream(blob, This);
                 }, cancellationToken);
         }
 

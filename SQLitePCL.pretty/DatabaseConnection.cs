@@ -613,7 +613,9 @@ namespace SQLitePCL.pretty
             int rc = raw.sqlite3_blob_open(db, database, tableName, columnName, rowId, canWrite ? 1 : 0, out blob);
             SQLiteException.CheckOk(db, rc);
 
-            return new BlobStream(blob, canWrite);
+            var length = raw.sqlite3_blob_bytes(blob);
+
+            return new BlobStream(blob, canWrite, length);
         }
 
         public IStatement PrepareStatement(string sql, out string tail)

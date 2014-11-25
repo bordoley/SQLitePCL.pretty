@@ -545,14 +545,16 @@ namespace SQLitePCL.pretty
 
         private readonly sqlite3_blob blob;
         private readonly bool canWrite;
+        private readonly int length;
 
         private bool disposed = false;
         private long position = 0;
 
-        internal BlobStream(sqlite3_blob blob, bool canWrite)
+        internal BlobStream(sqlite3_blob blob, bool canWrite, int length)
         {
             this.blob = blob;
             this.canWrite = canWrite;
+            this.length = length;
         }
 
         public override bool CanRead
@@ -567,7 +569,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                return false;
+                return !disposed;
             }
         }
 
@@ -585,14 +587,25 @@ namespace SQLitePCL.pretty
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-                return raw.sqlite3_blob_bytes(blob);
+                return length;
             }
         }
 
         public override long Position
         {
-            get { throw new NotSupportedException(); }
-            set { throw new NotSupportedException(); }
+            get 
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                return position;
+            }
+
+            set
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (value < 0) { throw new ArgumentOutOfRangeException("value", "Position cannot be negative"); }
+
+                position = value;
+            }
         }
 
         // http://msdn.microsoft.com/en-us/library/system.idisposable(v=vs.110).aspx
@@ -628,7 +641,10 @@ namespace SQLitePCL.pretty
             if (offset < 0) { throw new ArgumentOutOfRangeException(); }
             if (count < 0) { throw new ArgumentOutOfRangeException(); }
 
-            int numBytes = (int)Math.Min(this.Length - position, count);
+            if (position >= length) { return 0; }
+
+            // At this point we're guaranteed that position is an int between 0 and length
+            int numBytes = Math.Min(length - (int) position, count);
             int rc = raw.sqlite3_blob_read(blob, buffer, offset, numBytes, (int)position);
             CheckOkOrThrowIOException(rc);
 
@@ -638,7 +654,36 @@ namespace SQLitePCL.pretty
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            throw new NotSupportedException();
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+            long newPosition;
+            switch (origin)
+            {
+                case SeekOrigin.Begin:
+                    {
+                        newPosition = offset;
+                        break;
+                    }
+                case SeekOrigin.Current:
+                    {
+                        newPosition = position + offset;
+                        break;
+                    }
+                case SeekOrigin.End:
+                    {
+                        newPosition = length + offset;
+				        break;
+                    }
+                default:
+                    {
+                        throw new ArgumentException ();
+                    }
+			}
+
+            if (newPosition < 0) { throw new IOException(); }
+
+            position = newPosition;
+            return position;
         }
 
         public override void SetLength(long value)
@@ -656,10 +701,12 @@ namespace SQLitePCL.pretty
             if (offset < 0) { throw new ArgumentOutOfRangeException(); }
             if (count < 0) { throw new ArgumentOutOfRangeException(); }
 
-            int numBytes = (int)Math.Min(this.Length - position, count);
+            if (position >= length) { return; }
+
+            // At this point we're guaranteed that position is an int between 0 and length
+            int numBytes = Math.Min(length - (int)position, count);
 
             int rc = raw.sqlite3_blob_write(blob, buffer, offset, numBytes, (int)position);
-
             CheckOkOrThrowIOException(rc);
 
             position += numBytes;

@@ -25,15 +25,13 @@ namespace SQLitePCL.pretty
     {
         private readonly Stream blobStream;
         private readonly IAsyncDatabaseConnection queue;
-        private readonly long length;
 
         private bool disposed = false;
 
-        internal AsyncBlobStream(Stream blobStream, IAsyncDatabaseConnection queue, long length)
+        internal AsyncBlobStream(Stream blobStream, IAsyncDatabaseConnection queue)
         {
             this.blobStream = blobStream;
             this.queue = queue;
-            this.length = length;
         }
 
         public override bool CanRead
@@ -53,24 +51,13 @@ namespace SQLitePCL.pretty
 
         public override long Length
         {
-            get
-            {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-                return length;
-            }
+            get { return blobStream.Length; }
         }
 
         public override long Position
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
+            get { return blobStream.Position; }
+            set { blobStream.Position = value; }
         }
 
         // http://msdn.microsoft.com/en-us/library/system.idisposable(v=vs.110).aspx
@@ -97,12 +84,11 @@ namespace SQLitePCL.pretty
 
         public override void Flush()
         {
+            blobStream.Flush();
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
             var t = this.ReadAsync(buffer, offset, count);
             t.Wait();
             return t.Result;
@@ -125,18 +111,16 @@ namespace SQLitePCL.pretty
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            throw new NotImplementedException();
+            return blobStream.Seek(offset, origin);
         }
 
         public override void SetLength(long value)
         {
-            throw new NotImplementedException();
+            blobStream.SetLength(value);
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
             this.WriteAsync(buffer, offset, count).Wait();
         }
 
