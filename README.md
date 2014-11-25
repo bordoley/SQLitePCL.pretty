@@ -129,3 +129,22 @@ using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream")
             .Do(str => { Console.WriteLine(str); });
 }
 ```
+# How does this compare to...
+## [SQLitePCL.raw](https://github.com/ericsink/SQLitePCL.raw)
+
+SQLitePCL.raw provides a very thin C# wrapper ontop of the SQLite C API. The API exposed by SQLitePCL.raw is downright hostile from an application developer perspective, but is designed for use as a common portable layer upon which friendlier wrappers can be built. SQLitePCL.pretty is one such wrapper. 
+
+## [SQLitePCL](https://sqlitepcl.codeplex.com/)
+
+SQLitePCL is the original PCL library release by MSOpenTech. Stylistically, this library is most similar to SQLitePCL.pretty. There are some key differences though:
+
+* SQLitePCL.pretty is portable to more platforms due to the dependency on SQLitePCL.raw
+* SQLitePCL.pretty support many additional SQLite features such as functions, collation and events.
+* SQLitePCL.pretty has a much nicer well thought out API. This is subjective, of course, but for reference compare SQLitePCL.pretty.IStatement to SQLitePCL.ISQLiteStatement
+* SQLitePCL.pretty supports blob read and writes using a .NET Stream 
+
+## [SQLite-Net](https://github.com/praeclarum/sqlite-net)
+
+SQLite-Net provides a higher level C# API than SQLitePCL.pretty. SQLite-Net includes APIs for creating tables, indexes, etc. and also features a light weight ORM. In contrast SQLitePCL.pretty only provides a wrapper around the SQLite C api. CRUD operations on the underlying database use SQL directly and its the users responsibility to marshall their objects in and out of the database.
+
+It would be an interesting project to port/fork the SQLite-Net ORM ontop of the SQLitePCL.pretty database primitives.
