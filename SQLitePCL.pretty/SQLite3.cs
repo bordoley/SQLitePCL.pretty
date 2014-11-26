@@ -21,6 +21,10 @@ using System.Diagnostics.Contracts;
 
 namespace SQLitePCL.pretty
 {
+    /// <summary>
+    /// Static methods for opening instances of<see cref="IDatabaseConnection"/> 
+    /// and for accessing static SQLite3 properties, and functions.
+    /// </summary>
     public static class SQLite3
     {
         private static IEnumerator<String> compilerOptionsEnumerator()
@@ -42,6 +46,10 @@ namespace SQLitePCL.pretty
         private static readonly IEnumerable<String> compilerOptions =
             new DelegatingEnumerable<String>(() => compilerOptionsEnumerator());
 
+        /// <summary>
+        /// The SQLite compiler options that were defined at compile time.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/compileoption_get.html"/>
         public static IEnumerable<String> CompilerOptions
         {
             get
@@ -52,6 +60,10 @@ namespace SQLitePCL.pretty
 
         private static readonly SQLiteVersion version = SQLiteVersion.Of(raw.sqlite3_libversion_number());
 
+        /// <summary>
+        /// The SQLite version.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/libversion.html"/>
         public static SQLiteVersion Version
         {
             get
@@ -60,6 +72,10 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <summary>
+        /// The SQLite source id.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/libversion.html"/>
         public static string SourceId
         {
             get
@@ -68,6 +84,10 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <summary>
+        /// Returns the number of bytes of memory currently outstanding (malloced but not freed) by SQLite.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/memory_highwater.html"/>
         public static long MemoryUsed
         {
             get
@@ -76,6 +96,10 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <summary>
+        /// Returns the maximum value of <see cref="MemoryUsed"/> since the high-water mark was last reset. 
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/memory_highwater.html"/>
         public static long MemoryHighWater
         {
             get
@@ -84,12 +108,24 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <summary>
+        /// Indicates whether the specified option was defined at compile time.
+        /// </summary>
+        /// <param name="option">The SQLite compile option. The SQLITE_ prefix may be omitted.</param>
+        /// <returns><see langword="true"/> if the compile option is use, otherwise <see langword="false"/></returns>
+        /// <seealso href="https://sqlite.org/c3ref/compileoption_get.html"/>
         public static bool CompileOptionUsed(string option)
         {
             Contract.Requires(option != null);
             return raw.sqlite3_compileoption_used(option) == 0 ? false : true;
         }
 
+        /// <summary>
+        /// Opens a SQLite database.
+        /// </summary>
+        /// <param name="filename">The database filename.</param>
+        /// <returns>A <see cref="SQLiteDatabaseConnection"/> instance.</returns>
+        /// <seealso href="https://sqlite.org/c3ref/open.html"/>
         public static SQLiteDatabaseConnection Open(string filename)
         {
             Contract.Requires(filename != null);
@@ -101,6 +137,18 @@ namespace SQLitePCL.pretty
             return new SQLiteDatabaseConnection(db);
         }
 
+        /// <summary>
+        /// Opens a SQLite database.
+        /// </summary>
+        /// <param name="filename">The database filename.</param>
+        /// <param name="flags"><see cref="ConnectionFlags"/> used to defined if the database is readonly,
+        /// read/write and whether a new database file should be created if it does not already exist.</param>
+        /// <param name="vfs">
+        /// The name of the sqlite3_vfs object that defines the operating system interface 
+        /// that the new database connection should use. If <see langword="null"/>, then 
+        /// the default sqlite3_vfs object is used.</param>
+        /// <returns>A <see cref="SQLiteDatabaseConnection"/> instance.</returns>
+        /// <seealso href="https://sqlite.org/c3ref/open.html"/>
         public static SQLiteDatabaseConnection Open(string filename, ConnectionFlags flags, string vfs)
         {
             Contract.Requires(filename != null);
@@ -112,11 +160,21 @@ namespace SQLitePCL.pretty
             return new SQLiteDatabaseConnection(db);
         }
 
+        /// <summary>
+        /// Reset the memory high-water mark to the current value of <see cref="MemoryUsed"/>.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/memory_highwater.html"/>
         public static void ResetMemoryHighWater()
         {
             raw.sqlite3_memory_highwater(1);
         }
 
+        /// <summary>
+        /// Determines if the text provided forms a complete SQL statement.
+        /// </summary>
+        /// <param name="sql">The text to evaluate.</param>
+        /// <returns><see langword="true"/> if the text forms a complete SQL 
+        /// statement, otherwise <see langword="false"/>.</returns>
         public static bool IsCompleteStatement(string sql)
         {
             Contract.Requires(sql != null);

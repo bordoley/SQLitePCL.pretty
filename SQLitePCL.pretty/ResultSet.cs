@@ -27,6 +27,11 @@ namespace SQLitePCL.pretty
     /// </summary>
     public static class ResultSet
     {
+        /// <summary>
+        /// Returns an <see cref="IReadOnlyList&lt;IColumnInfo&gt;"/> of columns from a result set row.
+        /// </summary>
+        /// <param name="rs">A row in the result set.</param>
+        /// <returns>An <see cref="IReadOnlyList&lt;IColumnInfo&gt;"/> of the result set columns.</returns>
         public static IReadOnlyList<IColumnInfo> Columns(this IReadOnlyList<IResultSetValue> rs)
         {
             Contract.Requires(rs != null);

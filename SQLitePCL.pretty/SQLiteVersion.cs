@@ -19,13 +19,29 @@ using System;
 
 namespace SQLitePCL.pretty
 {
+    /// <summary>
+    /// The SQLite numeric version number.
+    /// </summary>
+    /// <seealso href="https://sqlite.org/c3ref/c_source_id.html"/>
     public struct SQLiteVersion : IEquatable<SQLiteVersion>, IComparable<SQLiteVersion>, IComparable
     {
+        /// <summary>
+        /// Indicates whether the two SQLiteVersion instances are equal to each other.
+        /// </summary>
+        /// <param name="x">A SQLiteVersion instance.</param>
+        /// <param name="y">A SQLiteVersion instance.</param>
+        /// <returns><see langword="true"/> if the two instances are equal to each other; otherwise,  <see langword="false"/>.</returns>
         public static bool operator ==(SQLiteVersion x, SQLiteVersion y)
         {
             return x.Equals(y);
         }
 
+        /// <summary>
+        /// Indicates whether the two SQLiteVersion instances are not equal each other.
+        /// </summary>
+        /// <param name="x">A SQLiteVersion instance.</param>
+        /// <param name="y">A SQLiteVersion instance.</param>
+        /// <returns><see langword="true"/> if the two instances are not equal to each other; otherwise,  <see langword="false"/>.</returns>
         public static bool operator !=(SQLiteVersion x, SQLiteVersion y)
         {
             return !(x == y);
@@ -50,6 +66,9 @@ namespace SQLitePCL.pretty
             this.release = release;
         }
 
+        /// <summary>
+        /// Gets the major version number.
+        /// </summary>
         public int Major
         {
             get
@@ -58,6 +77,9 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <summary>
+        /// Gets the minor version number.
+        /// </summary>
         public int Minor
         {
             get
@@ -66,6 +88,9 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <summary>
+        /// Gets the release version number.
+        /// </summary>
         public int Release
         {
             get
@@ -74,21 +99,28 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <summary>
+        /// Converts the version number as an integer with the value (Major*1000000 + Minor*1000 + Release).
+        /// </summary>
+        /// <returns>The version number as an integer</returns>
         public int ToInt()
         {
             return (this.Major * 1000000 + this.Minor * 1000 + this.Release);
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             return string.Format("{0}.{1}.{2}", major, minor, release);
         }
 
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             return this.ToInt();
         }
 
+        /// <inheritdoc/>
         public bool Equals(SQLiteVersion other)
         {
             return this.Major == other.Major &&
@@ -96,16 +128,19 @@ namespace SQLitePCL.pretty
                 this.Release == other.Release;
         }
 
+        /// <inheritdoc/>
         public override bool Equals(object other)
         {
             return other is SQLiteVersion && this == (SQLiteVersion)other;
         }
 
+        /// <inheritdoc/>
         public int CompareTo(SQLiteVersion other)
         {
             return this.ToInt().CompareTo(other.ToInt());
         }
 
+        /// <inheritdoc/>
         public int CompareTo(object obj)
         {
             if (obj is SQLiteVersion)

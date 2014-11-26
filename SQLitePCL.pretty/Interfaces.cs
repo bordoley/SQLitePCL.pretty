@@ -165,14 +165,14 @@ namespace SQLitePCL.pretty
     public interface IStatement : IEnumerator<IReadOnlyList<IResultSetValue>>
     {
         /// <summary>
-        /// An <see cref="IReadonlyOrderedDictionary"/> of the statement's bind parameters
+        /// An <see cref="IReadOnlyOrderedDictionary&lt;TKey, TValue&gt;"/> of the statement's bind parameters
         /// keyed by the parameter name. Note when accessing by index the first parameter 
         /// is zero-based indexed unlike in the native SQLite APIs that are one-based indexed.
         /// </summary>
         IReadOnlyOrderedDictionary<string, IBindParameter> BindParameters { get; }
 
         /// <summary>
-        /// An <see cref="IReadonlyList"/> of the columns in the statement's resultset.
+        /// An <see cref="IReadOnlyList&lt;T&gt;"/> of the columns in the statement's resultset.
         /// </summary>
         IReadOnlyList<IColumnInfo> Columns { get; }
 
@@ -183,7 +183,7 @@ namespace SQLitePCL.pretty
         string SQL { get; }
 
         /// <summary>
-        /// <see langwords="true"/> if the statement is readonly, otherwise <see langwords="false"/>.
+        /// <see langword="true"/> if the statement is readonly, otherwise <see langword="false"/>.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/stmt_readonly.html"/>
         bool IsReadOnly { get; }
@@ -202,17 +202,22 @@ namespace SQLitePCL.pretty
     }
 
     /// <summary>
-    /// 
+    /// Represents an indexed collection of key/value pairs.
     /// </summary>
-    /// <typeparam name="TKey"></typeparam>
-    /// <typeparam name="TValue"></typeparam>
+    /// <typeparam name="TKey">The type of keys in the read-only dictionary.</typeparam>
+    /// <typeparam name="TValue">The type of values in the read-only dictionary.</typeparam>
     public interface IReadOnlyOrderedDictionary<TKey, TValue> : IReadOnlyDictionary<TKey, TValue>
     {
         /// <summary>
-        ///
+        /// Gets the element at the specified index.
         /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
+        /// <param name="index">The zero-based index of the element to get.</param>
+        /// <returns>The element at the specified index.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="index"/> is less than 0 
+        /// -or- 
+        /// <paramref name="index"/> is equal to or greater than <see cref="IReadOnlyCollection&lt;T&gt;.Count"/>.
+        /// </exception>
         TValue this[int index] { get; }
     }
 

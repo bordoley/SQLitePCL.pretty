@@ -22,10 +22,24 @@ using System.IO;
 namespace SQLitePCL.pretty
 {
     /// <summary>
-    /// Extension methods for instances of <see cref="IStatment"/>.
+    /// Extension methods for instances of <see cref="IStatement"/>.
     /// </summary>
     public static class Statement
     {
+        /// <summary>
+        /// Binds the position indexed values in <paramref name="a"/> to the 
+        /// corresponding bind parameters in <paramref name="stmt"/>.
+        /// </summary>
+        /// <remarks>
+        /// Bind parameters may be <see langword="null"/>, any numeric type, or an instance of <see cref="string"/>,
+        /// byte[], or <see cref="Stream"/>. 
+        /// </remarks>
+        /// <param name="stmt">The statement to bind the values to.</param>
+        /// <param name="a">The position indexed values to bind.</param>
+        /// <exception cref="ArgumentException">
+        /// If the <see cref="Type"/> of the value is not supported 
+        /// -or- 
+        /// A non-readable stream is provided as a value.</exception>
         public static void Bind(this IStatement stmt, params object[] a)
         {
             Contract.Requires(stmt != null);
@@ -76,14 +90,14 @@ namespace SQLitePCL.pretty
                         var stream = (Stream)a[i];
                         if (!stream.CanRead)
                         {
-                            throw new NotSupportedException("Stream in position " + i + " is not readable");
+                            throw new ArgumentException("Stream in position " + i + " is not readable");
                         }
 
                         stmt.BindParameters[i].BindZeroBlob((int)stream.Length);
                     }
                     else
                     {
-                        throw new NotSupportedException("Invalid type conversion" + t);
+                        throw new ArgumentException("Invalid type conversion" + t);
                     }
                 }
             }

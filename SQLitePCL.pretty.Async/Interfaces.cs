@@ -21,25 +21,28 @@ using System.Threading.Tasks;
 
 namespace SQLitePCL.pretty
 {
+    /// <summary>
+    /// An interface for scheduling asynchronous access to an <see cref="IDatabaseConnection"/> in FIFO manner.
+    /// </summary>
     [ContractClass(typeof(IAsyncDatabaseConnectionContract))]
     public interface IAsyncDatabaseConnection : IDisposable
     {
         /// <summary>
-        /// A hot <see cref="IObservable"/> of this connection's SQLite trace events.
+        /// A hot <see cref="IObservable&lt;DatabaseTraceEventArgs&gt;"/> of this connection's SQLite trace events.
         /// </summary>
         /// <seealso cref="IDatabaseConnection.Trace"/>
         /// <seealso href="https://sqlite.org/c3ref/profile.html"/>
         IObservable<DatabaseTraceEventArgs> Trace { get; }
 
         /// <summary>
-        /// A hot <see cref="IObservable"/> of this connection's SQLite profile events.
+        /// A hot <see cref="IObservable&lt;DatabaseProfileEventArgs&gt;"/> of this connection's SQLite profile events.
         /// </summary>
         /// /// <seealso cref="IDatabaseConnection.Profile"/>
         /// <seealso href="https://sqlite.org/c3ref/profile.html"/>
         IObservable<DatabaseProfileEventArgs> Profile { get; }
 
         /// <summary>
-        /// A hot <see cref="IObservable"/> of this connection's SQLite update events.
+        /// A hot <see cref="IObservable&lt;DatabaseUpdateEventArgs&gt;"/> of this connection's SQLite update events.
         /// </summary>
         /// /// <seealso cref="IDatabaseConnection.Update"/>
         /// <seealso href="https://sqlite.org/c3ref/update_hook.html"/>
@@ -76,6 +79,9 @@ namespace SQLitePCL.pretty
         IObservable<T> Use<T>(Func<IDatabaseConnection, IEnumerable<T>> f);
     }
 
+    /// <summary>
+    /// An interface for scheduling asynchronous access to an <see cref="IStatement"/> in FIFO manner.
+    /// </summary>
     [ContractClass(typeof(IAsyncStatementContract))]
     public interface IAsyncStatement : IDisposable
     {

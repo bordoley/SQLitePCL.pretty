@@ -19,6 +19,10 @@ using System;
 
 namespace SQLitePCL.pretty
 {
+    /// <summary>
+    /// Exception class that wraps the SQLite result codes.
+    /// </summary>
+    /// <seealso href="https://sqlite.org/rescode.html"/>
     public sealed class SQLiteException : Exception
     {
         internal static void CheckOk(int rc)
@@ -71,6 +75,9 @@ namespace SQLitePCL.pretty
             errmsg = msg;
         }
 
+        /// <summary>
+        /// Gets the SQLite error code associated with the exception.
+        /// </summary>
         public ErrorCode ErrorCode
         {
             get
@@ -79,6 +86,9 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <summary>
+        /// Gets the SQLite extend error code associated with the exception.
+        /// </summary>
         public ErrorCode ExtendedErrorCode
         {
             get
