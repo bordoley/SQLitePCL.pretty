@@ -22,6 +22,8 @@ While the code is well tested, the API is currently in flux. Users should expect
 
 # API Overview
 
+Complete (more or less...) API documentation is available [here](http://bordoley.github.io/SQLitePCL.pretty.Documentation/Help/html/N_SQLitePCL_pretty.htm).
+
 ## Synchronous API
 
 * SQLite3 - This is the main static class you use to obtain database connections. It also provides APIs for obtaining the SQLite version, compile options used, and information about SQLite memory use.
