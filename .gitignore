@@ -4,6 +4,7 @@ obj
 packages
 Components
 TestResults
+Help
 .DS_Store
 _ReSharper.*
 *.csproj.user
