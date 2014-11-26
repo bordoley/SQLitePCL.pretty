@@ -21,8 +21,8 @@ namespace SQLitePCL.pretty
 {
     /// <summary>
     /// SQLite fundamental datatypes.
-    /// <see href="https://sqlite.org/c3ref/c_blob.html"/>
     /// </summary>
+    /// <seealso href="https://sqlite.org/c3ref/c_blob.html"/>
     public enum SQLiteType
     {
         /// <summary>
@@ -53,8 +53,8 @@ namespace SQLitePCL.pretty
 
     /// <summary>
     /// Flags For File Open Operations
-    /// <see href="https://sqlite.org/c3ref/c_open_autoproxy.html"/>
     /// </summary>
+    /// <seealso  href="https://sqlite.org/c3ref/c_open_autoproxy.html"/>
     [Flags]
     public enum ConnectionFlags
     {
@@ -109,8 +109,8 @@ namespace SQLitePCL.pretty
 
     /// <summary>
     /// SQLite Action Codes
-    /// <see href="https://sqlite.org/c3ref/c_alter_table.html"/>
     /// </summary>
+    /// <seealso href="https://sqlite.org/c3ref/c_alter_table.html"/>
     public enum ActionCode
     {
         CreateIndex = raw.SQLITE_CREATE_INDEX,
@@ -151,8 +151,8 @@ namespace SQLitePCL.pretty
 
     /// <summary>
     /// SQLite Result and Error Codes
-    /// <see cref="https://sqlite.org/rescode.html"/>
     /// </summary>
+    /// <seealso href="https://sqlite.org/rescode.html"/>
     public enum ErrorCode
     {
         /// <summary>

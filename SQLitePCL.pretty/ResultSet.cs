@@ -22,6 +22,9 @@ using System.Linq;
 
 namespace SQLitePCL.pretty
 {
+    /// <summary>
+    /// Extensions methods for <see cref="IStatement"/> result set rows.
+    /// </summary>
     public static class ResultSet
     {
         public static IReadOnlyList<IColumnInfo> Columns(this IReadOnlyList<IResultSetValue> rs)

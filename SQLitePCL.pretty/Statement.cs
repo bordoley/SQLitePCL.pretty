@@ -21,6 +21,9 @@ using System.IO;
 
 namespace SQLitePCL.pretty
 {
+    /// <summary>
+    /// Extension methods for instances of <see cref="IStatment"/>.
+    /// </summary>
     public static class Statement
     {
         public static void Bind(this IStatement stmt, params object[] a)

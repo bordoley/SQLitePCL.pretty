@@ -24,58 +24,58 @@ namespace SQLitePCL.pretty
 {
     /// <summary>
     /// A connection to a SQLite database.
-    /// <see href="https://sqlite.org/c3ref/sqlite3.html"/>
     /// </summary>
+    /// <seealso href="https://sqlite.org/c3ref/sqlite3.html"/>
     [ContractClass(typeof(IDatabaseConnectionContract))]
     public interface IDatabaseConnection : IDisposable
     {
         /// <summary>
         /// Occurs whenever a transaction is rolled back on the database connection.
-        /// <see href="https://sqlite.org/c3ref/commit_hook.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/commit_hook.html"/>
         event EventHandler Rollback;
 
         /// <summary>
         /// Tracing event that occurs at various times when <see cref="IStatement"/>is running.
-        /// <see href="https://sqlite.org/c3ref/profile.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/profile.html"/>
         event EventHandler<DatabaseTraceEventArgs> Trace;
 
         /// <summary>
         /// Profiling event that occurs when a <see cref="IStatement"/> finishes.
-        /// <see href="https://sqlite.org/c3ref/profile.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/profile.html"/>
         event EventHandler<DatabaseProfileEventArgs> Profile;
 
         /// <summary>
         /// Occurs whenever a row is updated, inserted or deleted in a rowid table. 
-        /// <see href="https://sqlite.org/c3ref/update_hook.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/update_hook.html"/>
         event EventHandler<DatabaseUpdateEventArgs> Update;
 
         /// <summary>
         /// Returns true if the given database connection is in autocommit mode,
-        /// <see href="https://sqlite.org/c3ref/get_autocommit.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/get_autocommit.html"/>
         bool IsAutoCommit { get; }
 
         /// <summary>
         /// Sets the connection busy timeout when waiting for a locked table.
-        /// <see href="https://sqlite.org/c3ref/busy_timeout.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/busy_timeout.html"/>
         TimeSpan BusyTimeout { set; }
 
         /// <summary>
         /// Returns the number of database rows that were changed, inserted 
         /// or deleted by the most recently completed <see cref="IStatement"/>.
-        /// <see href="https://sqlite.org/c3ref/changes.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/changes.html"/>
         int Changes { get; }
 
         /// <summary>
         /// Returns the rowid of the most recent successful INSERT into a rowid or virtual table.
-        /// <see href="https://sqlite.org/c3ref/last_insert_rowid.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/last_insert_rowid.html"/>
         long LastInsertedRowId { get; }
 
         /// <summary>
@@ -85,8 +85,8 @@ namespace SQLitePCL.pretty
 
         /// <summary>
         /// Returns the filename associated with the database if available.
-        /// <see href="https://sqlite.org/c3ref/db_filename.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/db_filename.html"/>
         /// <param name="database">The database name. The main database file has the name "main".</param>
         /// <param name="filename">When this method returns, contains the filename if there is an
         /// attached database that is not temporary or in memory. Otherwise null. 
@@ -97,8 +97,8 @@ namespace SQLitePCL.pretty
 
         /// <summary>
         /// Opens the blob located by the a database, table, column, and rowid for incremental I/O as a <see cref="System.IO.Stream"/>.
-        /// <see href="https://sqlite.org/c3ref/blob_open.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/blob_open.html"/>
         /// <param name="database"></param>
         /// <param name="tableName"></param>
         /// <param name="columnName"></param>
@@ -112,8 +112,8 @@ namespace SQLitePCL.pretty
 
         /// <summary>
         /// Compiles a SQL statement into an <see cref="IStatement"/>.
-        /// <see href="https://sqlite.org/c3ref/prepare.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/prepare.html"/>
         /// <param name="sql">The statement to compiled.</param>
         /// <param name="tail">Additional text beyond past the end of the first SQL statement.</param>
         /// <returns>The compiled <see cref="IStatement"/></returns>
@@ -121,16 +121,16 @@ namespace SQLitePCL.pretty
 
         /// <summary>
         /// Add or modify a collation function to the connection.
-        /// <see href="https://sqlite.org/c3ref/create_collation.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/create_collation.html"/>
         /// <param name="name">The function name.</param>
         /// <param name="comparison">A string comparison function.</param>
         void RegisterCollation(string name, Comparison<string> comparison);
 
         /// <summary>
         /// A callback function to be invoked whenever a transaction is committed.
-        /// <see href="https://sqlite.org/c3ref/commit_hook.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/commit_hook.html"/>
         /// <param name="onCommit">A function that returns <see langwords="true"/> 
         /// if the commit should be rolled back, otherwise <see langwords="false"/></param>
         void RegisterCommitHook(Func<bool> onCommit);
@@ -149,8 +149,8 @@ namespace SQLitePCL.pretty
 
         /// <summary>
         /// Registers a scalar function.
-        /// <see href="https://sqlite.org/c3ref/create_function.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/create_function.html"/>
         /// <param name="name">The function name.</param>
         /// <param name="nArg">The number of arguments the function takes or -1 if it may take any number of arguments.</param>
         /// <param name="reduce">A reduction function.</param>
@@ -159,8 +159,8 @@ namespace SQLitePCL.pretty
 
     /// <summary>
     /// Represents a single SQL statement.
-    /// <see href="https://sqlite.org/c3ref/stmt.html"/>
     /// </summary>
+    /// <seealso href="https://sqlite.org/c3ref/stmt.html"/>
     [ContractClass(typeof(IStatementContract))]
     public interface IStatement : IEnumerator<IReadOnlyList<IResultSetValue>>
     {
@@ -178,26 +178,26 @@ namespace SQLitePCL.pretty
 
         /// <summary>
         /// The text string used to prepare the statement.
-        /// <see href="https://sqlite.org/c3ref/sql.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/sql.html"/>
         string SQL { get; }
 
         /// <summary>
         /// <see langwords="true"/> if the statement is readonly, otherwise <see langwords="false"/>.
-        /// <see href="https://sqlite.org/c3ref/stmt_readonly.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/stmt_readonly.html"/>
         bool IsReadOnly { get; }
 
         /// <summary>
         /// <see langwords="true"/> if the statement is busy, otherwise <see langwords="false"/>.
-        /// <see href="https://sqlite.org/c3ref/stmt_busy.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/stmt_busy.html"/>
         bool IsBusy { get; }
         
         /// <summary>
         /// Resets this statements bindings to <see cref="SQLiteValue.Null"/>.
-        /// <see href="https://sqlite.org/c3ref/clear_bindings.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/clear_bindings.html"/>
         void ClearBindings();
     }
 
@@ -224,57 +224,57 @@ namespace SQLitePCL.pretty
     {
         /// <summary>
         /// The bind paramter name.
-        /// <see href="https://sqlite.org/c3ref/bind_parameter_name.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/bind_parameter_name.html"/>
         string Name { get; }
 
         /// <summary>
         /// Binds the parameter to a byte array.
-        /// <see href="https://sqlite.org/c3ref/bind_blob.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/bind_blob.html"/>
         /// <param name="blob">The byte array to bind.</param>
         void Bind(byte[] blob);
 
         /// <summary>
         /// Binds the parameter to a double.
-        /// <see href="https://sqlite.org/c3ref/bind_blob.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/bind_blob.html"/>
         /// <param name="val">The double to bind.</param>
         void Bind(double val);
 
         /// <summary>
         /// Binds the parameter to an int.
-        /// <see href="https://sqlite.org/c3ref/bind_blob.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/bind_blob.html"/>
         /// <param name="val">The int to bind.</param>
         void Bind(int val);
 
         /// <summary>
         /// Binds the parameter to a long.
-        /// <see href="https://sqlite.org/c3ref/bind_blob.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/bind_blob.html"/>
         /// <param name="val">The long to bind.</param>
         void Bind(long val);
 
         /// <summary>
         /// Binds the parameter to a string.
-        /// <see href="https://sqlite.org/c3ref/bind_blob.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/bind_blob.html"/>
         /// <param name="text">The text to bind.</param>
         void Bind(string text);
 
         /// <summary>
         /// Binds the parameter to null.
-        /// <see href="https://sqlite.org/c3ref/bind_blob.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/bind_blob.html"/>
         void BindNull();
 
         /// <summary>
         /// Binds the parameter to a blob of length N that is filled with zeroes.
         /// Zeroblobs are intended to serve as placeholders for BLOBs whose 
         /// content is later written using <see cref="IDatabaseConnection.OpenBlob"/>. 
-        /// <see href="https://sqlite.org/c3ref/bind_blob.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/bind_blob.html"/>
         /// <param name="size">The length of the blob in bytes.</param>
         void BindZeroBlob(int size);
     }
@@ -286,33 +286,33 @@ namespace SQLitePCL.pretty
     {
         /// <summary>
         /// The column name.
-        /// <see href="https://sqlite.org/c3ref/column_name.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/column_name.html"/>
         string Name { get; }
 
         /// <summary>
         /// The database that is the origin of this particular result column.
-        /// <see href="https://sqlite.org/c3ref/column_database_name.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/column_database_name.html"/>
         string DatabaseName { get; }
 
         /// <summary>
         /// The column that is the origin of this particular result column.
-        /// <see href="https://sqlite.org/c3ref/column_database_name.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/column_database_name.html"/>
         string OriginName { get; }
 
         /// <summary>
         ///  The table that is the origin of this particular result column.
-        /// <see href="https://sqlite.org/c3ref/column_database_name.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/column_database_name.html"/>
         string TableName { get; }
     }
 
     /// <summary>
     /// SQLite dynamically type value.
-    /// <see href="https://sqlite.org/c3ref/value.html"/>
     /// </summary>
+    /// <seealso href="https://sqlite.org/c3ref/value.html"/>
     public interface ISQLiteValue
     {
         /// <summary>
@@ -322,8 +322,8 @@ namespace SQLitePCL.pretty
 
         /// <summary>
         /// The length of the value subject to SQLite value casting rules.
-        /// <see href="https://sqlite.org/c3ref/column_blob.html"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/column_blob.html"/>
         int Length { get; }
 
         /// <summary>
@@ -365,27 +365,27 @@ namespace SQLitePCL.pretty
 
     /// <summary>
     /// Interface to the SQLite backup api.
-    /// <see href="https://sqlite.org/c3ref/backup.html"/>
     /// </summary>
+    /// <seealso href="https://sqlite.org/c3ref/backup.html"/>
     public interface IDatabaseBackup : IDisposable
     {
         /// <summary>
         /// The total number of pages in the source database file.
-        /// <see href="https://sqlite.org/c3ref/backup_finish.html#sqlite3backuppagecount"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/backup_finish.html#sqlite3backuppagecount"/>
         int PageCount { get; }
 
         /// <summary>
         /// The number of pages still to be backed up.
-        /// <see href="https://sqlite.org/c3ref/backup_finish.html#sqlite3backupremaining"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/backup_finish.html#sqlite3backupremaining"/>
         int RemainingPages { get; }
 
         /// <summary>
         /// Copies up to nPage  between the source and destination databases. 
         /// If nPages is negative, all remaining source pages are copied.
-        /// <see href="https://sqlite.org/c3ref/backup_finish.html#sqlite3backupstep"/>
         /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/backup_finish.html#sqlite3backupstep"/>
         /// <param name="nPages"></param>
         /// <returns></returns>
         bool Step(int nPages);

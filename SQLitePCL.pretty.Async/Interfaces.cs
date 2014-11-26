@@ -26,20 +26,23 @@ namespace SQLitePCL.pretty
     {
         /// <summary>
         /// A hot <see cref="IObservable"/> of this connection's SQLite trace events.
-        /// <see href="https://sqlite.org/c3ref/profile.html"/>
         /// </summary>
+        /// <seealso cref="IDatabaseConnection.Trace"/>
+        /// <seealso href="https://sqlite.org/c3ref/profile.html"/>
         IObservable<DatabaseTraceEventArgs> Trace { get; }
 
         /// <summary>
         /// A hot <see cref="IObservable"/> of this connection's SQLite profile events.
-        /// <see href="https://sqlite.org/c3ref/profile.html"/>
         /// </summary>
+        /// /// <seealso cref="IDatabaseConnection.Profile"/>
+        /// <seealso href="https://sqlite.org/c3ref/profile.html"/>
         IObservable<DatabaseProfileEventArgs> Profile { get; }
 
         /// <summary>
         /// A hot <see cref="IObservable"/> of this connection's SQLite update events.
-        /// <see href="https://sqlite.org/c3ref/update_hook.html"/>
         /// </summary>
+        /// /// <seealso cref="IDatabaseConnection.Update"/>
+        /// <seealso href="https://sqlite.org/c3ref/update_hook.html"/>
         IObservable<DatabaseUpdateEventArgs> Update { get; }
 
         /// <summary>

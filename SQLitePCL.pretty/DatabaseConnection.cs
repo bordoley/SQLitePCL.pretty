@@ -137,6 +137,9 @@ namespace SQLitePCL.pretty
         }
     }
 
+    /// <summary>
+    /// Extensions methods for instances of <see cref="IDatabaseConnection"/>
+    /// </summary>
     public static class DatabaseConnection
     {
         public static void Execute(this IDatabaseConnection db, string sql)
@@ -467,6 +470,7 @@ namespace SQLitePCL.pretty
         }
     }
 
+    /// <inheritdoc/>
     public sealed class SQLiteDatabaseConnection : IDatabaseConnection
     {
         private readonly sqlite3 db;
@@ -503,14 +507,20 @@ namespace SQLitePCL.pretty
         // See: http://blogs.msdn.com/b/ericlippert/archive/2009/04/29/events-and-races.aspx
         // FIXME: One could argue that we really shouldn't initialized the callbacks
         // with sqlite3 until we actually have listeners. not sure how much it matters though
+        
+        /// <inheritdoc/>
         public event EventHandler Rollback = (o, e) => { };
 
+        /// <inheritdoc/>
         public event EventHandler<DatabaseProfileEventArgs> Profile = (o, e) => { };
 
+        /// <inheritdoc/>
         public event EventHandler<DatabaseTraceEventArgs> Trace = (o, e) => { };
 
+        /// <inheritdoc/>
         public event EventHandler<DatabaseUpdateEventArgs> Update = (obj, args) => { };
 
+        /// <inheritdoc/>
         public TimeSpan BusyTimeout
         {
             set
@@ -522,6 +532,7 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <inheritdoc/>
         public int Changes
         {
             get
@@ -532,6 +543,7 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <inheritdoc/>
         public bool IsAutoCommit
         {
             get
@@ -542,6 +554,7 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <inheritdoc/>
         public long LastInsertedRowId
         {
             get
@@ -552,6 +565,7 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <inheritdoc/>
         public IEnumerable<IStatement> Statements
         {
             get
@@ -582,6 +596,15 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <summary>
+        /// Initializes a backup of database to a destination database.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/backup_finish.html"/>
+        /// <param name="dbName">The name of the database to backup.</param>
+        /// <param name="destConn">The destination database connection.</param>
+        /// <param name="destDbName">The destination database name</param>
+        /// <returns>An <see cref="IDatabaseBackup"/> instance that can be used to
+        /// perform the backup operation.</returns>
         public IDatabaseBackup BackupInit(string dbName, SQLiteDatabaseConnection destConn, string destDbName)
         {
             Contract.Requires(dbName != null);
@@ -594,6 +617,7 @@ namespace SQLitePCL.pretty
             return new DatabaseBackupImpl(backup);
         }
 
+        /// <inheritdoc/>
         public bool TryGetFileName(string database, out string filename)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
@@ -605,6 +629,7 @@ namespace SQLitePCL.pretty
             return !String.IsNullOrEmpty(filename);
         }
 
+        /// <inheritdoc/>
         public Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
@@ -618,6 +643,7 @@ namespace SQLitePCL.pretty
             return new BlobStream(blob, canWrite, length);
         }
 
+        /// <inheritdoc/>
         public IStatement PrepareStatement(string sql, out string tail)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
@@ -636,6 +662,7 @@ namespace SQLitePCL.pretty
             statements.Remove(stmt.sqlite3_stmt);
         }
 
+        /// <inheritdoc/>
         public void RegisterCollation(string name, Comparison<string> comparison)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
@@ -644,6 +671,7 @@ namespace SQLitePCL.pretty
             SQLiteException.CheckOk(db, rc);
         }
 
+        /// <inheritdoc/>
         public void RegisterCommitHook(Func<bool> onCommit)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
@@ -651,6 +679,7 @@ namespace SQLitePCL.pretty
             raw.sqlite3_commit_hook(db, v => onCommit() ? 1 : 0, null);
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             disposed = true;
@@ -675,6 +704,7 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <inheritdoc/>
         public void RegisterAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
@@ -748,6 +778,7 @@ namespace SQLitePCL.pretty
             SQLiteException.CheckOk(rc);
         }
 
+        /// <inheritdoc/>
         public void RegisterScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }

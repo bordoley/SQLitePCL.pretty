@@ -87,6 +87,7 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             return string.Format("{0}: {1}\r\n{2}", errorCode, errmsg, base.ToString());

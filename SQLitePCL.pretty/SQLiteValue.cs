@@ -22,10 +22,16 @@ using System.Text.RegularExpressions;
 
 namespace SQLitePCL.pretty
 {
+    /// <summary>
+    /// Extensions methods for creating instances of <see cref="ISQLiteValue"/>.
+    /// </summary>
     public static class SQLiteValue
     {
         private static readonly ISQLiteValue _null = new NullValue();
 
+        /// <summary>
+        /// The SQLite null value.
+        /// </summary>
         public static ISQLiteValue Null
         {
             get
