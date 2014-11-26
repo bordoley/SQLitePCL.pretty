@@ -25,19 +25,19 @@ namespace SQLitePCL.pretty
     public interface IAsyncDatabaseConnection : IDisposable
     {
         /// <summary>
-        /// A hot <a cref="IObservable"/> of this connection's SQLite trace events.
+        /// A hot <see cref="IObservable"/> of this connection's SQLite trace events.
         /// <see href="https://sqlite.org/c3ref/profile.html"/>
         /// </summary>
         IObservable<DatabaseTraceEventArgs> Trace { get; }
 
         /// <summary>
-        /// A hot <a cref="IObservable"/> of this connection's SQLite profile events.
+        /// A hot <see cref="IObservable"/> of this connection's SQLite profile events.
         /// <see href="https://sqlite.org/c3ref/profile.html"/>
         /// </summary>
         IObservable<DatabaseProfileEventArgs> Profile { get; }
 
         /// <summary>
-        /// A hot <a cref="IObservable"/> of this connection's SQLite update events.
+        /// A hot <see cref="IObservable"/> of this connection's SQLite update events.
         /// <see href="https://sqlite.org/c3ref/update_hook.html"/>
         /// </summary>
         IObservable<DatabaseUpdateEventArgs> Update { get; }
