@@ -316,74 +316,75 @@ namespace SQLitePCL.pretty
     public interface ISQLiteValue
     {
         /// <summary>
-        /// 
+        /// The underlying <see cref="SQLiteType"/>  of the value.
         /// </summary>
         SQLiteType SQLiteType { get; }
 
         /// <summary>
-        /// 
+        /// The length of the value subject to SQLite value casting rules.
+        /// <see href="https://sqlite.org/c3ref/column_blob.html"/>
         /// </summary>
         int Length { get; }
 
         /// <summary>
-        /// 
+        /// Returns the SQLiteValue as a byte array. Casting if necessary.
         /// </summary>
-        /// <returns></returns>
         byte[] ToBlob();
 
         /// <summary>
-        /// 
+        /// Returns the SQLiteValue as a double. Casting if necessary.
         /// </summary>
-        /// <returns></returns>
         double ToDouble();
 
         /// <summary>
-        /// 
+        /// Returns the SQLiteValue as an int. Casting if necessary.
         /// </summary>
-        /// <returns></returns>
         int ToInt();
 
         /// <summary>
-        /// 
+        /// Returns the SQLiteValue as a long. Casting if necessary.
         /// </summary>
-        /// <returns></returns>
         long ToInt64();
 
         /// <summary>
-        ///
+        /// Returns the SQLiteValue as a string. Casting if necessary.
         /// </summary>
-        /// <returns></returns>
         string ToString();
     }
 
     /// <summary>
-    /// 
+    /// An <see cref="ISQLiteValue"/> that includes <see cref="IColumnInfo"/> about the value.
     /// </summary>
     public interface IResultSetValue : ISQLiteValue
     {
         /// <summary>
-        /// 
+        /// The value's column info.
         /// </summary>
         IColumnInfo ColumnInfo { get; }
     }
 
     /// <summary>
-    /// 
+    /// Interface to the SQLite backup api.
+    /// <see href="https://sqlite.org/c3ref/backup.html"/>
     /// </summary>
     public interface IDatabaseBackup : IDisposable
     {
         /// <summary>
-        /// 
+        /// The total number of pages in the source database file.
+        /// <see href="https://sqlite.org/c3ref/backup_finish.html#sqlite3backuppagecount"/>
         /// </summary>
         int PageCount { get; }
 
         /// <summary>
-        /// 
+        /// The number of pages still to be backed up.
+        /// <see href="https://sqlite.org/c3ref/backup_finish.html#sqlite3backupremaining"/>
         /// </summary>
         int RemainingPages { get; }
 
         /// <summary>
-        /// 
+        /// Copies up to nPage  between the source and destination databases. 
+        /// If nPages is negative, all remaining source pages are copied.
+        /// <see href="https://sqlite.org/c3ref/backup_finish.html#sqlite3backupstep"/>
         /// </summary>
         /// <param name="nPages"></param>
         /// <returns></returns>
