@@ -23,8 +23,17 @@ using System.Linq;
 
 namespace SQLitePCL.pretty
 {
+    /// <summary>
+    /// Provides data for <see cref="IDatabaseConnection"/> <see cref="IDatabaseConnection.Profile"/> events.
+    /// </summary>
     public sealed class DatabaseProfileEventArgs : EventArgs
     {
+        /// <summary>
+        /// Creates an instance.
+        /// </summary>
+        /// <param name="statement">The sql statement.</param>
+        /// <param name="executionTime">The execution time of the sql statement.</param>
+        /// <returns>An <see cref="DatabaseProfileEventArgs"/> instance.</returns>
         public static DatabaseProfileEventArgs Create(string statement, TimeSpan executionTime)
         {
             Contract.Requires(statement != null);
@@ -40,6 +49,9 @@ namespace SQLitePCL.pretty
             this.executionTime = executionTime;
         }
 
+        /// <summary>
+        /// The SQL statement being profiled.
+        /// </summary>
         public string Statement
         {
             get
@@ -48,6 +60,9 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <summary>
+        /// The execution time of the statement.
+        /// </summary>
         public TimeSpan ExecutionTime
         {
             get
@@ -57,6 +72,9 @@ namespace SQLitePCL.pretty
         }
     }
 
+    /// <summary>
+    /// Provides data for <see cref="IDatabaseConnection"/> <see cref="IDatabaseConnection.Trace"/> events.
+    /// </summary>
     public sealed class DatabaseTraceEventArgs : EventArgs
     {
         public static DatabaseTraceEventArgs Create(string statement)
@@ -72,6 +90,9 @@ namespace SQLitePCL.pretty
             this.statement = statement;
         }
 
+        /// <summary>
+        /// The SQL statement text as the statement first begins executing which caused the trace event.
+        /// </summary>
         public string Statement
         {
             get
@@ -81,6 +102,9 @@ namespace SQLitePCL.pretty
         }
     }
 
+    /// <summary>
+    /// Provides data for <see cref="IDatabaseConnection"/> <see cref="IDatabaseConnection.Update"/> events.
+    /// </summary>
     public sealed class DatabaseUpdateEventArgs : EventArgs
     {
         public static DatabaseUpdateEventArgs Create(ActionCode action, String database, string table, long rowId)
@@ -104,6 +128,9 @@ namespace SQLitePCL.pretty
             this.rowId = rowId;
         }
 
+        /// <summary>
+        /// The SQL operation that caused the update event.
+        /// </summary>
         public ActionCode Action
         {
             get
@@ -112,6 +139,9 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <summary>
+        /// The database containing the affected row.
+        /// </summary>
         public String Database
         {
             get
@@ -120,6 +150,9 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <summary>
+        /// The table name containing the affected row.
+        /// </summary>
         public String Table
         {
             get
@@ -128,6 +161,9 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <summary>
+        /// The rowid of the row updated.
+        /// </summary>
         public long RowId
         {
             get
@@ -470,7 +506,10 @@ namespace SQLitePCL.pretty
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// An implementation of IDatabaseConnection that wraps a raw SQLite database connection.
+    /// </summary>
+    /// <remarks>The sole purpose of using this implementation directly is to initiate database backups.</remarks>
     public sealed class SQLiteDatabaseConnection : IDatabaseConnection
     {
         private readonly sqlite3 db;

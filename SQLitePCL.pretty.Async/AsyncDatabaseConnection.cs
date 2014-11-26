@@ -28,10 +28,23 @@ using System.Threading.Tasks;
 
 namespace SQLitePCL.pretty
 {
+    /// <summary>
+    /// Extensions methods for <see cref="IAsyncDatabaseConnection"/>.
+    /// </summary>
     public static class AsyncDatabaseConnection
     {
         private static IScheduler defaultScheduler = TaskPoolScheduler.Default;
 
+        /// <summary>
+        /// Allows an application to set a default scheduler for <see cref="IAsyncDatabaseConnection"/>
+        /// instances created with <see cref="AsyncDatabaseConnection.AsAsyncDatabaseConnection(IDatabaseConnection)"/>.
+        /// </summary>
+        /// <remarks>This is a convenience feature that allows an application to set a global 
+        /// <see cref="IScheduler"/> instance, instead of supplying it with each call to 
+        /// <see cref="AsyncDatabaseConnection.AsAsyncDatabaseConnection(IDatabaseConnection)"/>. 
+        /// </remarks>
+        /// <threadsafety static="false">This setter sets global state and should not be 
+        /// used after application initialization.</threadsafety>
         public static IScheduler DefaultScheduler
         {
             set

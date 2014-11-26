@@ -22,7 +22,7 @@ using System.Diagnostics.Contracts;
 namespace SQLitePCL.pretty
 {
     /// <summary>
-    /// Static methods for opening instances of<see cref="IDatabaseConnection"/> 
+    /// Static methods for opening instances of <see cref="IDatabaseConnection"/> 
     /// and for accessing static SQLite3 properties, and functions.
     /// </summary>
     public static class SQLite3

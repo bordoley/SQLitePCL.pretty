@@ -27,6 +27,9 @@ using System.Threading.Tasks;
 
 namespace SQLitePCL.pretty
 {
+    /// <summary>
+    /// Extensions methods for <see cref="IAsyncStatement"/>.
+    /// </summary>
     public static class AsyncStatement
     {
         public static Task Use(
