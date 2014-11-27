@@ -116,6 +116,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="BindParameter.cs" />
+    <Compile Include="ColumnInfo.cs" />
     <Compile Include="InterfacesContract.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SQLiteException.cs" />

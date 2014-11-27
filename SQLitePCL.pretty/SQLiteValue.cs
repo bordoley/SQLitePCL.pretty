@@ -527,11 +527,11 @@ namespace SQLitePCL.pretty
             this.index = index;
         }
 
-        public IColumnInfo ColumnInfo
+        public ColumnInfo ColumnInfo
         {
             get
             {
-                return new ColumnInfoImpl(stmt, index);
+                return ColumnInfo.Create(stmt, index);
             }
         }
 

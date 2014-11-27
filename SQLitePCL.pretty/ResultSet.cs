@@ -32,14 +32,14 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <param name="This">A row in the result set.</param>
         /// <returns>An <see cref="IReadOnlyList&lt;IColumnInfo&gt;"/> of the result set columns.</returns>
-        public static IReadOnlyList<IColumnInfo> Columns(this IReadOnlyList<IResultSetValue> This)
+        public static IReadOnlyList<ColumnInfo> Columns(this IReadOnlyList<IResultSetValue> This)
         {
             Contract.Requires(This != null);
 
             return new ResultSetColumnsListImpl(This);
         }
 
-        internal sealed class ResultSetColumnsListImpl : IReadOnlyList<IColumnInfo>
+        internal sealed class ResultSetColumnsListImpl : IReadOnlyList<ColumnInfo>
         {
             private readonly IReadOnlyList<IResultSetValue> rs;
 
@@ -48,7 +48,7 @@ namespace SQLitePCL.pretty
                 this.rs = rs;
             }
 
-            public IColumnInfo this[int index]
+            public ColumnInfo this[int index]
             {
                 get
                 {
@@ -64,7 +64,7 @@ namespace SQLitePCL.pretty
                 }
             }
 
-            public IEnumerator<IColumnInfo> GetEnumerator()
+            public IEnumerator<ColumnInfo> GetEnumerator()
             {
                 return rs.Select(val => val.ColumnInfo).GetEnumerator();
             }

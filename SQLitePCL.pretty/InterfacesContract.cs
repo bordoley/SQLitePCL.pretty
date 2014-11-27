@@ -104,7 +104,7 @@ namespace SQLitePCL.pretty
 
         public abstract bool IsReadOnly { get; }
 
-        public abstract IReadOnlyList<IColumnInfo> Columns { get; }
+        public abstract IReadOnlyList<ColumnInfo> Columns { get; }
 
         public abstract IReadOnlyList<IResultSetValue> Current { get; }
 

@@ -103,7 +103,7 @@ namespace SQLitePCL.pretty
         /// <param name="cancellationToken">Cancellation token that can be used to cancel the task.</param>
         /// <param name="values">The position indexed values to bind.</param>
         /// <returns>A <see cref="Task"/> that completes when the statement is executed.</returns>
-        internal static Task ExecuteAsync(
+        public static Task ExecuteAsync(
             this IAsyncStatement This, 
             CancellationToken cancellationToken,
             params object[] values)
@@ -117,7 +117,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The async statement.</param>
         /// <param name="values">The position indexed values to bind.</param>
         /// <returns>A <see cref="Task"/> that completes when the statement is executed.</returns>
-        internal static Task ExecuteAsync(
+        public static Task ExecuteAsync(
             this IAsyncStatement This,
             params object[] values)
         {
@@ -207,7 +207,7 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public IReadOnlyList<IColumnInfo> Columns
+        public IReadOnlyList<ColumnInfo> Columns
         {
             get
             {

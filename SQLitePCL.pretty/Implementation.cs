@@ -88,7 +88,7 @@ namespace SQLitePCL.pretty
         private readonly sqlite3_stmt stmt;
         private readonly SQLiteDatabaseConnection db;
         private readonly IReadOnlyOrderedDictionary<string, IBindParameter> bindParameters;
-        private readonly IReadOnlyList<IColumnInfo> columns;
+        private readonly IReadOnlyList<ColumnInfo> columns;
         private readonly IReadOnlyList<IResultSetValue> current;
 
         private bool disposed = false;
@@ -124,7 +124,7 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public IReadOnlyList<IColumnInfo> Columns
+        public IReadOnlyList<ColumnInfo> Columns
         {
             get
             {
@@ -397,7 +397,7 @@ namespace SQLitePCL.pretty
         }
     }
 
-    internal sealed class ColumnsListImpl : IReadOnlyList<IColumnInfo>
+    internal sealed class ColumnsListImpl : IReadOnlyList<ColumnInfo>
     {
         private readonly StatementImpl stmt;
 
@@ -406,7 +406,7 @@ namespace SQLitePCL.pretty
             this.stmt = stmt;
         }
 
-        public IColumnInfo this[int index]
+        public ColumnInfo this[int index]
         {
             get
             {
@@ -415,7 +415,7 @@ namespace SQLitePCL.pretty
                     throw new ArgumentOutOfRangeException();
                 }
 
-                return new ColumnInfoImpl(stmt, index);
+                return ColumnInfo.Create(stmt, index);
             }
         }
 
@@ -427,7 +427,7 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public IEnumerator<IColumnInfo> GetEnumerator()
+        public IEnumerator<ColumnInfo> GetEnumerator()
         {
             for (int i = 0; i < this.Count; i++)
             {
@@ -438,50 +438,6 @@ namespace SQLitePCL.pretty
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
-        }
-    }
-
-    internal sealed class ColumnInfoImpl : IColumnInfo
-    {
-        private readonly StatementImpl stmt;
-        private readonly int index;
-
-        internal ColumnInfoImpl(StatementImpl stmt, int index)
-        {
-            this.stmt = stmt;
-            this.index = index;
-        }
-
-        public string Name
-        {
-            get
-            {
-                return raw.sqlite3_column_name(stmt.sqlite3_stmt, index);
-            }
-        }
-
-        public string DatabaseName
-        {
-            get
-            {
-                return raw.sqlite3_column_database_name(stmt.sqlite3_stmt, index);
-            }
-        }
-
-        public string OriginName
-        {
-            get
-            {
-                return raw.sqlite3_column_origin_name(stmt.sqlite3_stmt, index);
-            }
-        }
-
-        public string TableName
-        {
-            get
-            {
-                return raw.sqlite3_column_table_name(stmt.sqlite3_stmt, index);
-            }
         }
     }
 

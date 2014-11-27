@@ -696,17 +696,17 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Opens the blob located by the <see cref="IColumnInfo"/> and rowid for incremental I/O as a <see cref="System.IO.Stream"/>.
+        /// Opens the blob located by the <see cref="ColumnInfo"/> and rowid for incremental I/O as a <see cref="System.IO.Stream"/>.
         /// </summary>
         /// <param name="This">The database connection.</param>
-        /// <param name="columnInfo">The IColumnInfo of the blob value.</param>
+        /// <param name="columnInfo">The ColumnInfo of the blob value.</param>
         /// <param name="rowId">The row containing the blob.</param>
         /// <param name="canWrite">
         ///     <see langwords="true"/> if the Stream should be open for both read and write operations. 
         ///     <see langwords="false"/> if the Stream should be open oly for read operations. 
         /// </param>
         /// <returns>A <see cref="System.IO.Stream"/> that can be used to synchronously write and read to and from blob.</returns>
-        public static Stream OpenBlob(this IDatabaseConnection This, IColumnInfo columnInfo, long rowId, bool canWrite)
+        public static Stream OpenBlob(this IDatabaseConnection This, ColumnInfo columnInfo, long rowId, bool canWrite)
         {
             Contract.Requires(This != null);
             Contract.Requires(columnInfo != null);

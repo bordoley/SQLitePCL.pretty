@@ -260,6 +260,55 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
+        ///  Opens the blob located by the a database, table, column, and rowid for incremental asynchronous I/O as a <see cref="System.IO.Stream"/>.
+        /// </summary>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="columnInfo">The ColumnInfo of the blob value.</param>
+        /// <param name="rowId">The row containing the blob.</param>
+        /// <param name="canWrite">
+        ///     <see langwords="true"/> if the Stream should be open for both read and write operations. 
+        ///     <see langwords="false"/> if the Stream should be open oly for read operations. 
+        /// </param>
+        /// <param name="cancellationToken">Cancellation token that can be used to cancel the task.</param>
+        /// <returns>A <see cref="Task"/> that completes with a <see cref="System.IO.Stream"/> that can be used to asynchronously write and read to and from blob.</returns>
+        public static Task<Stream> OpenBlobAsync(
+            this IAsyncDatabaseConnection This,
+            ColumnInfo columnInfo,
+            long rowId,
+            bool canWrite,
+            CancellationToken cancellationToken)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(columnInfo != null);
+
+            return This.Use<Stream>(db =>
+            {
+                var blob = db.OpenBlob(columnInfo, rowId, canWrite);
+                return new AsyncBlobStream(blob, This);
+            }, cancellationToken);
+        }
+
+        /// <summary>
+        ///  Opens the blob located by the a database, table, column, and rowid for incremental asynchronous I/O as a <see cref="System.IO.Stream"/>.
+        /// </summary>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="columnInfo">The ColumnInfo of the blob value.</param>
+        /// <param name="rowId">The row containing the blob.</param>
+        /// <param name="canWrite">
+        ///     <see langwords="true"/> if the Stream should be open for both read and write operations. 
+        ///     <see langwords="false"/> if the Stream should be open oly for read operations. 
+        /// </param>
+        /// <returns>A <see cref="Task"/> that completes with a <see cref="System.IO.Stream"/> that can be used to asynchronously write and read to and from blob.</returns>
+        public static Task<Stream> OpenBlobAsync(
+            this IAsyncDatabaseConnection This,
+            ColumnInfo columnInfo,
+            long rowId,
+            bool canWrite = false)
+        {
+            return This.OpenBlobAsync(columnInfo, rowId, canWrite, CancellationToken.None);
+        }
+
+        /// <summary>
         /// Compiles one or more SQL statements.
         /// </summary>
         /// <param name="This">The asynchronous database connection.</param>

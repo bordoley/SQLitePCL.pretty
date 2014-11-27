@@ -81,7 +81,7 @@ namespace SQLitePCL.pretty
         /// binding the new values and executing the statement.</remarks>
         /// <param name="This">The statements.</param>
         /// <param name="values">The position indexed values to bind.</param>
-        internal static void Execute(this IStatement This, params object[] values)
+        public static void Execute(this IStatement This, params object[] values)
         {
             Contract.Requires(This != null);
             Contract.Requires(values != null);

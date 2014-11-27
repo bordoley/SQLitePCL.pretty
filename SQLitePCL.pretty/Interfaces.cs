@@ -174,7 +174,7 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// An <see cref="IReadOnlyList&lt;T&gt;"/> of the columns in the statement's resultset.
         /// </summary>
-        IReadOnlyList<IColumnInfo> Columns { get; }
+        IReadOnlyList<ColumnInfo> Columns { get; }
 
         /// <summary>
         /// The text string used to prepare the statement.
@@ -285,36 +285,6 @@ namespace SQLitePCL.pretty
     }
 
     /// <summary>
-    /// Represents information about a single column in <see cref="IStatement"/> result set.
-    /// </summary>
-    public interface IColumnInfo
-    {
-        /// <summary>
-        /// The column name.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/column_name.html"/>
-        string Name { get; }
-
-        /// <summary>
-        /// The database that is the origin of this particular result column.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/column_database_name.html"/>
-        string DatabaseName { get; }
-
-        /// <summary>
-        /// The column that is the origin of this particular result column.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/column_database_name.html"/>
-        string OriginName { get; }
-
-        /// <summary>
-        ///  The table that is the origin of this particular result column.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/column_database_name.html"/>
-        string TableName { get; }
-    }
-
-    /// <summary>
     /// SQLite dynamically type value.
     /// </summary>
     /// <seealso href="https://sqlite.org/c3ref/value.html"/>
@@ -365,7 +335,7 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// The value's column info.
         /// </summary>
-        IColumnInfo ColumnInfo { get; }
+        ColumnInfo ColumnInfo { get; }
     }
 
     /// <summary>
