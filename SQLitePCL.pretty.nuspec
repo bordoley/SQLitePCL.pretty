@@ -20,5 +20,6 @@ For asynchronous query support, an additional companion API is available. See: S
   </metadata>
   <files>
     <file src="SQLitePCL.pretty\bin\Release\SQLitePCL.pretty.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10" />
+    <file src="SQLitePCL.pretty\bin\Release\SQLitePCL.pretty.xml" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10" />
   </files>
 </package>

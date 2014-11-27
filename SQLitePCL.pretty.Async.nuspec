@@ -18,5 +18,6 @@
   </metadata>
   <files>
     <file src="SQLitePCL.pretty.Async\bin\Release\SQLitePCL.pretty.Async.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10" />
+    <file src="SQLitePCL.pretty.Async\bin\Release\SQLitePCL.pretty.Async.xml" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10" />
   </files>
 </package>
