@@ -328,7 +328,7 @@ namespace SQLitePCL.pretty
     }
 
     /// <summary>
-    /// An <see cref="ISQLiteValue"/> that includes <see cref="IColumnInfo"/> about the value.
+    /// An <see cref="ISQLiteValue"/> that includes <see cref="ColumnInfo"/> about the value.
     /// </summary>
     public interface IResultSetValue : ISQLiteValue
     {
