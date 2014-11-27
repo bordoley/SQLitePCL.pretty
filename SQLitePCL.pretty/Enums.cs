@@ -113,39 +113,174 @@ namespace SQLitePCL.pretty
     /// <seealso href="https://sqlite.org/c3ref/c_alter_table.html"/>
     public enum ActionCode
     {
+        /// <summary>
+        /// 
+        /// </summary>
         CreateIndex = raw.SQLITE_CREATE_INDEX,
+
+        /// <summary>
+        /// 
+        /// </summary>
         CreateTable = raw.SQLITE_CREATE_TABLE,
+
+        /// <summary>
+        /// 
+        /// </summary>
         CreateTempIndex = raw.SQLITE_CREATE_TEMP_INDEX,
+
+        /// <summary>
+        /// 
+        /// </summary>
         CreateTempTable = raw.SQLITE_CREATE_TEMP_TABLE,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         CreateTempTrigger = raw.SQLITE_CREATE_TEMP_TRIGGER,
+
+        /// <summary>
+        /// 
+        /// </summary>
         CreateTempView = raw.SQLITE_CREATE_TEMP_VIEW,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         CreateTrigger = raw.SQLITE_CREATE_TRIGGER,
+
+        /// <summary>
+        /// 
+        /// </summary>
         CreateView = raw.SQLITE_CREATE_VIEW,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         Delete = raw.SQLITE_DELETE,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         DropIndex = raw.SQLITE_DROP_INDEX,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         DropTable = raw.SQLITE_DROP_TABLE,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         DropTempIndex = raw.SQLITE_DROP_TEMP_INDEX,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         DropTempTable = raw.SQLITE_DROP_TEMP_TABLE,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         DropTempTrigger = raw.SQLITE_DROP_TEMP_TRIGGER,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         DropTempView = raw.SQLITE_DROP_TEMP_VIEW,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         DropTrigger = raw.SQLITE_DROP_TRIGGER,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         DropView = raw.SQLITE_DROP_VIEW,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         Insert = raw.SQLITE_INSERT,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         Pragma = raw.SQLITE_PRAGMA,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         Read = raw.SQLITE_READ,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         Select = raw.SQLITE_SELECT,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         Transaction = raw.SQLITE_TRANSACTION,
+        
+        /// <summary>
+        /// 
+        /// </summary>
         Update = raw.SQLITE_UPDATE,
+
+        /// <summary>
+        /// 
+        /// </summary>
         Attach = raw.SQLITE_ATTACH,
+
+        /// <summary>
+        /// 
+        /// </summary>
         Detach = raw.SQLITE_DETACH,
+
+        /// <summary>
+        /// 
+        /// </summary>
         AlterTable = raw.SQLITE_ALTER_TABLE,
+
+        /// <summary>
+        /// 
+        /// </summary>
         ReIndex = raw.SQLITE_REINDEX,
+
+        /// <summary>
+        /// 
+        /// </summary>
         Analyze = raw.SQLITE_ANALYZE,
+
+        /// <summary>
+        /// 
+        /// </summary>
         CreateVTable = raw.SQLITE_CREATE_VTABLE,
+
+        /// <summary>
+        /// 
+        /// </summary>
         DropVTable = raw.SQLITE_DROP_VTABLE,
+
+        /// <summary>
+        /// 
+        /// </summary>
         Function = raw.SQLITE_FUNCTION,
+
+        /// <summary>
+        /// 
+        /// </summary>
         SavePoint = raw.SQLITE_SAVEPOINT,
+
+        /// <summary>
+        /// 
+        /// </summary>
         Copy = raw.SQLITE_COPY,
+
+        /// <summary>
+        /// 
+        /// </summary>
         Recursive = raw.SQLITE_RECURSIVE
     }
 

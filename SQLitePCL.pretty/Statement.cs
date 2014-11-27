@@ -28,54 +28,68 @@ namespace SQLitePCL.pretty
     public static class Statement
     {
         /// <summary>
-        /// Binds the position indexed values in <paramref name="a"/> to the 
-        /// corresponding bind parameters in <paramref name="stmt"/>.
+        /// Binds the position indexed values in <paramref name="values"/> to the 
+        /// corresponding bind parameters in <paramref name="This"/>.
         /// </summary>
         /// <remarks>
         /// Bind parameters may be <see langword="null"/>, any numeric type, or an instance of <see cref="string"/>,
         /// byte[], or <see cref="Stream"/>. 
         /// </remarks>
-        /// <param name="stmt">The statement to bind the values to.</param>
-        /// <param name="a">The position indexed values to bind.</param>
+        /// <param name="This">The statement.</param>
+        /// <param name="values">The position indexed values to bind.</param>
         /// <exception cref="ArgumentException">
         /// If the <see cref="Type"/> of the value is not supported 
         /// -or- 
         /// A non-readable stream is provided as a value.</exception>
-        public static void Bind(this IStatement stmt, params object[] a)
+        public static void Bind(this IStatement This, params object[] values)
         {
-            Contract.Requires(stmt != null);
-            Contract.Requires(a != null);
-            Contract.Requires(stmt.BindParameters.Count == a.Length);
+            Contract.Requires(This != null);
+            Contract.Requires(values != null);
+            Contract.Requires(This.BindParameters.Count == values.Length);
 
-            var count = a.Length;
+            var count = values.Length;
             for (int i = 0; i < count; i++)
             {
-                stmt.BindParameters[i].Bind(a[i]);
+                This.BindParameters[i].Bind(values[i]);
             }
         }
 
-        // FIXME: Make public
-        internal static void Bind(this IStatement stmt, IEnumerable<KeyValuePair<string,object>> pairs)
+        /// <summary>
+        /// Bind the statement parameters to the key-value pairs in <paramref name="pairs"/>.
+        /// </summary>
+        /// <remarks>
+        /// Bind parameters may be <see langword="null"/>, any numeric type, or an instance of <see cref="string"/>,
+        /// byte[], or <see cref="Stream"/>. 
+        /// </remarks>
+        /// <param name="This">The statement.</param>
+        /// <param name="pairs">An enumerable of keyvalue pairs keyed by bind parameter name.</param>
+        internal static void Bind(this IStatement This, IEnumerable<KeyValuePair<string,object>> pairs)
         {
-            Contract.Requires(stmt != null);
+            Contract.Requires(This != null);
             Contract.Requires(pairs != null);
 
             foreach (var kvp in pairs)
             {
-                stmt.BindParameters[kvp.Key].Bind(kvp.Value);
+                This.BindParameters[kvp.Key].Bind(kvp.Value);
             }
         }
 
-        // FIXME: Make public
-        internal static void Execute(this IStatement stmt, params object[] a)
+        /// <summary>
+        /// Executes the <see cref="IStatement"/> with provided bind parameter values.
+        /// </summary>
+        /// <remarks>Note that this method resets and clears the existing bindings, before
+        /// binding the new values and executing the statement.</remarks>
+        /// <param name="This">The statements.</param>
+        /// <param name="values">The position indexed values to bind.</param>
+        internal static void Execute(this IStatement This, params object[] values)
         {
-            Contract.Requires(stmt != null);
-            Contract.Requires(a != null);
+            Contract.Requires(This != null);
+            Contract.Requires(values != null);
 
-            stmt.Reset();
-            stmt.ClearBindings();
-            stmt.Bind(a);
-            stmt.MoveNext();
+            This.Reset();
+            This.ClearBindings();
+            This.Bind(values);
+            This.MoveNext();
         }
     }
 }

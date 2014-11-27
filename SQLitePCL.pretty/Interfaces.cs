@@ -99,10 +99,10 @@ namespace SQLitePCL.pretty
         /// Opens the blob located by the a database, table, column, and rowid for incremental I/O as a <see cref="System.IO.Stream"/>.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/blob_open.html"/>
-        /// <param name="database"></param>
-        /// <param name="tableName"></param>
-        /// <param name="columnName"></param>
-        /// <param name="rowId"></param>
+        /// <param name="database">The database containing the blob.</param>
+        /// <param name="tableName">The table containing the blob.</param>
+        /// <param name="columnName">The column containing the blob.</param>
+        /// <param name="rowId">The row containing the blob.</param>
         /// <param name="canWrite">
         ///     <see langwords="true"/> if the Stream should be open for both read and write operations. 
         ///     <see langwords="false"/> if the Stream should be open oly for read operations. 
@@ -137,11 +137,11 @@ namespace SQLitePCL.pretty
 
         /// <summary>
         /// Registers an aggregate function.
-        /// <see href="https://sqlite.org/c3ref/create_function.html"/>
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <see href="https://sqlite.org/c3ref/create_function.html"/>
+        /// <typeparam name="T">The type of the accumulator value.</typeparam>
         /// <param name="name">The function name.</param>
-        /// <param name="nArg">The number of arguments the function takes or -1 if it may take any number of arguments.</param>
+        /// <param name="nArg">The number of <see cref="ISQLiteValue"/> instances the function takes or -1 if it may take any number of arguments.</param>
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>

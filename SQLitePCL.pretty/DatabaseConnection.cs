@@ -28,13 +28,7 @@ namespace SQLitePCL.pretty
     /// </summary>
     public sealed class DatabaseProfileEventArgs : EventArgs
     {
-        /// <summary>
-        /// Creates an instance.
-        /// </summary>
-        /// <param name="statement">The sql statement.</param>
-        /// <param name="executionTime">The execution time of the sql statement.</param>
-        /// <returns>An <see cref="DatabaseProfileEventArgs"/> instance.</returns>
-        public static DatabaseProfileEventArgs Create(string statement, TimeSpan executionTime)
+        internal static DatabaseProfileEventArgs Create(string statement, TimeSpan executionTime)
         {
             Contract.Requires(statement != null);
             return new DatabaseProfileEventArgs(statement, executionTime);
@@ -77,7 +71,7 @@ namespace SQLitePCL.pretty
     /// </summary>
     public sealed class DatabaseTraceEventArgs : EventArgs
     {
-        public static DatabaseTraceEventArgs Create(string statement)
+        internal static DatabaseTraceEventArgs Create(string statement)
         {
             Contract.Requires(statement != null);
             return new DatabaseTraceEventArgs(statement);
@@ -107,7 +101,7 @@ namespace SQLitePCL.pretty
     /// </summary>
     public sealed class DatabaseUpdateEventArgs : EventArgs
     {
-        public static DatabaseUpdateEventArgs Create(ActionCode action, String database, string table, long rowId)
+        internal static DatabaseUpdateEventArgs Create(ActionCode action, String database, string table, long rowId)
         {
             Contract.Requires(database != null);
             Contract.Requires(table != null);
@@ -178,36 +172,52 @@ namespace SQLitePCL.pretty
     /// </summary>
     public static class DatabaseConnection
     {
-        public static void Execute(this IDatabaseConnection db, string sql)
+        /// <summary>
+        /// Compiles and executes a SQL statement.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="sql">The SQL statement to compile and execute.</param>
+        public static void Execute(this IDatabaseConnection This, string sql)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
-            using (var stmt = db.PrepareStatement(sql))
+            using (var stmt = This.PrepareStatement(sql))
             {
                 stmt.MoveNext();
             }
         }
 
-        // allows only one statement in the sql string
-        public static void Execute(this IDatabaseConnection db, string sql, params object[] a)
+        /// <summary>
+        /// Compiles and executes a SQL statement with the provided bind parameter values.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="sql">The SQL statement to compile and execute.</param>
+        /// <param name="values">The bind parameter values.</param>
+        public static void Execute(this IDatabaseConnection This, string sql, params object[] values)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(sql != null);
-            Contract.Requires(a != null);
+            Contract.Requires(values != null);
 
-            using (var stmt = db.PrepareStatement(sql, a))
+            using (var stmt = This.PrepareStatement(sql))
             {
+                stmt.Bind(values);
                 stmt.MoveNext();
             }
         }
 
-        public static void ExecuteAll(this IDatabaseConnection db, String sql)
+        /// <summary>
+        /// Compiles and executes multiple SQL statements.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="sql">One or more semicolon delimited SQL statements.</param>
+        public static void ExecuteAll(this IDatabaseConnection This, String sql)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
-            var statements = db.PrepareAll(sql);
+            var statements = This.PrepareAll(sql);
             foreach (var stmt in statements)
             {
                 using (stmt)
@@ -217,66 +227,104 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public static void Backup(this SQLiteDatabaseConnection db, string dbName, SQLiteDatabaseConnection destConn, string destDbName)
+        /// <summary>
+        /// Performs a full backup from <paramref name="This"/> to <paramref name="destConn"/>.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="dbName">The name of the database to backup.</param>
+        /// <param name="destConn">The destination database connection.</param>
+        /// <param name="destDbName">The destination database name.</param>
+        public static void Backup(this SQLiteDatabaseConnection This, string dbName, SQLiteDatabaseConnection destConn, string destDbName)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(dbName != null);
             Contract.Requires(destConn != null);
             Contract.Requires(destDbName != null);
 
-            using (var backup = db.BackupInit(dbName, destConn, destDbName))
+            using (var backup = This.BackupInit(dbName, destConn, destDbName))
             {
                 backup.Step(-1);
             }
         }
 
-        public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(this IDatabaseConnection db, string sql)
+        /// <summary>
+        /// Compiles a SQL statement, returning the an <see cref="IEnumerable&lt;T&gt;"/> of rows in the result set. 
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="sql">The SQL statement to compile and Query.</param>
+        /// <returns>An <see cref="IEnumerable&lt;T&gt;"/> of rows in the result set.</returns>
+        public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(
+            this IDatabaseConnection This, string sql)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
             object[] empty = { };
-            return db.Query(sql, empty);
+            return This.Query(sql, empty);
         }
 
-        public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(this IDatabaseConnection db, string sql, params object[] a)
+        /// <summary>
+        ///  Compiles a SQL statement with provided bind parameter values,
+        ///  returning the an <see cref="IEnumerable&lt;T&gt;"/> of rows in the result set. 
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="sql">The SQL statement to compile and Query.</param>
+        /// <param name="values">The bind parameter values.</param>
+        /// <returns>An <see cref="IEnumerable&lt;T&gt;"/> of rows in the result set.</returns>
+        public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(
+            this IDatabaseConnection This, string sql, params object[] values)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(sql != null);
-            Contract.Requires(a != null);
+            Contract.Requires(values != null);
 
-            return new DelegatingEnumerable<IReadOnlyList<IResultSetValue>>(() => db.PrepareStatement(sql, a));
+            return new DelegatingEnumerable<IReadOnlyList<IResultSetValue>>(() =>
+                {
+                    var stmt = This.PrepareStatement(sql);
+                    stmt.Bind(values);
+                    return stmt;
+                });
         }
 
-        private static IEnumerator<IStatement> PrepareAllEnumerator(this IDatabaseConnection db, string sql)
+        private static IEnumerator<IStatement> PrepareAllEnumerator(this IDatabaseConnection This, string sql)
         {
-            Contract.Requires(db != null);
-            Contract.Requires(sql != null);
-
             for (var next = sql; next != null; )
             {
                 string tail = null;
-                IStatement stmt = db.PrepareStatement(next, out tail);
+                IStatement stmt = This.PrepareStatement(next, out tail);
                 next = tail;
                 yield return stmt;
             }
         }
 
-        public static IEnumerable<IStatement> PrepareAll(this IDatabaseConnection db, string sql)
+        /// <summary>
+        /// Compiles one or more SQL statements.
+        /// </summary>
+        /// <param name="This">The database connection</param>
+        /// <param name="sql">One or more semicolon delimited SQL statements.</param>
+        /// <returns>A lazily evaluated <see cref="IEnumerable&lt;IStatement&gt;"/>.
+        /// </returns>
+        public static IEnumerable<IStatement> PrepareAll(this IDatabaseConnection This, string sql)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
-            return new DelegatingEnumerable<IStatement>(() => db.PrepareAllEnumerator(sql));
+            return new DelegatingEnumerable<IStatement>(() => This.PrepareAllEnumerator(sql));
         }
 
-        public static IStatement PrepareStatement(this IDatabaseConnection db, string sql)
+        /// <summary>
+        /// Compiles a SQL statement.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="sql">The SQL statement to compile.</param>
+        /// <returns>The compiled statement.</returns>
+        public static IStatement PrepareStatement(this IDatabaseConnection This, string sql)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
             string tail = null;
-            IStatement retval = db.PrepareStatement(sql, out tail);
+            IStatement retval = This.PrepareStatement(sql, out tail);
             if (tail != null)
             {
                 throw new ArgumentException("SQL contains more than one statment");
@@ -284,215 +332,362 @@ namespace SQLitePCL.pretty
             return retval;
         }
 
-        public static IStatement PrepareStatement(this IDatabaseConnection db, string sql, params object[] a)
+        /// <summary>
+        /// Register an aggregate function that can accept any number of <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <typeparam name="T">The type of the accumulator value.</typeparam>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="seed">The initial accumulator value.</param>
+        /// <param name="func">An accumulator function to be invoked on each element.</param>
+        /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            Contract.Requires(db != null);
-            Contract.Requires(sql != null);
-            Contract.Requires(a != null);
-
-            var stmt = db.PrepareStatement(sql);
-            stmt.Bind(a);
-            return stmt;
-        }
-
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
-        {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(func != null);
             Contract.Requires(resultSelector != null);
 
-            db.RegisterAggregateFunc(name, -1, seed, func, resultSelector);
+            This.RegisterAggregateFunc(name, -1, seed, func, resultSelector);
         }
 
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, T> func, Func<T, ISQLiteValue> resultSelector)
+        /// <summary>
+        /// Register an aggregate function that accepts no <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <typeparam name="T">The type of the accumulator value.</typeparam>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="seed">The initial accumulator value.</param>
+        /// <param name="func">An accumulator function to be invoked on each element.</param>
+        /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(func != null);
             Contract.Requires(resultSelector != null);
 
-            db.RegisterAggregateFunc(name, 0, seed, (t, _) => func(t), resultSelector);
+            This.RegisterAggregateFunc(name, 0, seed, (t, _) => func(t), resultSelector);
         }
 
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        /// <summary>
+        /// Register an aggregate function that accepts 1 <see href="ISQLiteValue"/> instance.
+        /// </summary>
+        /// <typeparam name="T">The type of the accumulator value.</typeparam>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="seed">The initial accumulator value.</param>
+        /// <param name="func">An accumulator function to be invoked on each element.</param>
+        /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(func != null);
             Contract.Requires(resultSelector != null);
 
-            db.RegisterAggregateFunc(name, 1, seed, (t, val) => func(t, val[0]), resultSelector);
+            This.RegisterAggregateFunc(name, 1, seed, (t, val) => func(t, val[0]), resultSelector);
         }
 
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        /// <summary>
+        /// Register an aggregate function that accepts 2 <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <typeparam name="T">The type of the accumulator value.</typeparam>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="seed">The initial accumulator value.</param>
+        /// <param name="func">An accumulator function to be invoked on each element.</param>
+        /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(func != null);
             Contract.Requires(resultSelector != null);
 
-            db.RegisterAggregateFunc(name, 2, seed, (t, val) => func(t, val[0], val[1]), resultSelector);
+            This.RegisterAggregateFunc(name, 2, seed, (t, val) => func(t, val[0], val[1]), resultSelector);
         }
 
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        /// <summary>
+        /// Register an aggregate function that accepts 3 <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <typeparam name="T">The type of the accumulator value.</typeparam>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="seed">The initial accumulator value.</param>
+        /// <param name="func">An accumulator function to be invoked on each element.</param>
+        /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(func != null);
             Contract.Requires(resultSelector != null);
 
-            db.RegisterAggregateFunc(name, 3, seed, (t, val) => func(t, val[0], val[1], val[2]), resultSelector);
+            This.RegisterAggregateFunc(name, 3, seed, (t, val) => func(t, val[0], val[1], val[2]), resultSelector);
         }
 
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        /// <summary>
+        /// Register an aggregate function that accepts 4 <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <typeparam name="T">The type of the accumulator value.</typeparam>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="seed">The initial accumulator value.</param>
+        /// <param name="func">An accumulator function to be invoked on each element.</param>
+        /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(func != null);
             Contract.Requires(resultSelector != null);
 
-            db.RegisterAggregateFunc(name, 4, seed, (t, val) => func(t, val[0], val[1], val[2], val[3]), resultSelector);
+            This.RegisterAggregateFunc(name, 4, seed, (t, val) => func(t, val[0], val[1], val[2], val[3]), resultSelector);
         }
 
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        /// <summary>
+        /// Register an aggregate function that accepts 5 <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <typeparam name="T">The type of the accumulator value.</typeparam>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="seed">The initial accumulator value.</param>
+        /// <param name="func">An accumulator function to be invoked on each element.</param>
+        /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(func != null);
             Contract.Requires(resultSelector != null);
 
-            db.RegisterAggregateFunc(name, 5, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4]), resultSelector);
+            This.RegisterAggregateFunc(name, 5, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4]), resultSelector);
         }
 
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        /// <summary>
+        /// Register an aggregate function that accepts 6 <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <typeparam name="T">The type of the accumulator value.</typeparam>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="seed">The initial accumulator value.</param>
+        /// <param name="func">An accumulator function to be invoked on each element.</param>
+        /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(func != null);
             Contract.Requires(resultSelector != null);
 
-            db.RegisterAggregateFunc(name, 6, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5]), resultSelector);
+            This.RegisterAggregateFunc(name, 6, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5]), resultSelector);
         }
 
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        /// <summary>
+        /// Register an aggregate function that accepts 7 <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <typeparam name="T">The type of the accumulator value.</typeparam>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="seed">The initial accumulator value.</param>
+        /// <param name="func">An accumulator function to be invoked on each element.</param>
+        /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(func != null);
             Contract.Requires(resultSelector != null);
 
-            db.RegisterAggregateFunc(name, 7, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5], val[6]), resultSelector);
+            This.RegisterAggregateFunc(name, 7, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5], val[6]), resultSelector);
         }
 
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection db, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        /// <summary>
+        /// Register an aggregate function that accepts 8 <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <typeparam name="T">The type of the accumulator value.</typeparam>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="seed">The initial accumulator value.</param>
+        /// <param name="func">An accumulator function to be invoked on each element.</param>
+        /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
+        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(func != null);
             Contract.Requires(resultSelector != null);
 
-            db.RegisterAggregateFunc(name, 8, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]), resultSelector);
+            This.RegisterAggregateFunc(name, 8, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]), resultSelector);
         }
 
-        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
+        /// <summary>
+        /// Registers a scalar function that can accept any number of <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="reduce">A reduction function.</param>
+        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(reduce != null);
 
-            db.RegisterScalarFunc(name, -1, val => reduce(val));
+            This.RegisterScalarFunc(name, -1, val => reduce(val));
         }
 
-        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue> reduce)
+        /// <summary>
+        /// Registers a scalar function that accepts 0 <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="reduce">A reduction function.</param>
+        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue> reduce)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(reduce != null);
 
-            db.RegisterScalarFunc(name, 0, _ => reduce());
+            This.RegisterScalarFunc(name, 0, _ => reduce());
         }
 
-        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue> reduce)
+
+        /// <summary>
+        /// Registers a scalar function that accepts 1 <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="reduce">A reduction function.</param>
+        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue> reduce)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(reduce != null);
 
-            db.RegisterScalarFunc(name, 1, val => reduce(val[0]));
+            This.RegisterScalarFunc(name, 1, val => reduce(val[0]));
         }
 
-        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        /// <summary>
+        /// Registers a scalar function that accepts 2 <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="reduce">A reduction function.</param>
+        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(reduce != null);
 
-            db.RegisterScalarFunc(name, 2, val => reduce(val[0], val[1]));
+            This.RegisterScalarFunc(name, 2, val => reduce(val[0], val[1]));
         }
 
-        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        /// <summary>
+        /// Registers a scalar function that accepts 3 <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="reduce">A reduction function.</param>
+        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(reduce != null);
 
-            db.RegisterScalarFunc(name, 3, val => reduce(val[0], val[1], val[2]));
+            This.RegisterScalarFunc(name, 3, val => reduce(val[0], val[1], val[2]));
         }
 
-        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        /// <summary>
+        /// Registers a scalar function that accepts 4 <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="reduce">A reduction function.</param>
+        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(reduce != null);
 
-            db.RegisterScalarFunc(name, 4, val => reduce(val[0], val[1], val[2], val[3]));
+            This.RegisterScalarFunc(name, 4, val => reduce(val[0], val[1], val[2], val[3]));
         }
 
-        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        /// <summary>
+        /// Registers a scalar function that accepts 5 <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="reduce">A reduction function.</param>
+        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(reduce != null);
 
-            db.RegisterScalarFunc(name, 5, val => reduce(val[0], val[1], val[2], val[3], val[4]));
+            This.RegisterScalarFunc(name, 5, val => reduce(val[0], val[1], val[2], val[3], val[4]));
         }
 
-        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        /// <summary>
+        /// Registers a scalar function that accepts 6 <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="reduce">A reduction function.</param>
+        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(reduce != null);
 
-            db.RegisterScalarFunc(name, 6, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5]));
+            This.RegisterScalarFunc(name, 6, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5]));
         }
 
-        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        /// <summary>
+        /// Registers a scalar function that accepts 7 <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="reduce">A reduction function.</param>
+        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(reduce != null);
 
-            db.RegisterScalarFunc(name, 7, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6]));
+            This.RegisterScalarFunc(name, 7, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6]));
         }
 
-        public static void RegisterScalarFunc(this IDatabaseConnection db, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        /// <summary>
+        /// Registers a scalar function that accepts 8 <see href="ISQLiteValue"/> instances.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="name">The function name.</param>
+        /// <param name="reduce">A reduction function.</param>
+        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(name != null);
             Contract.Requires(reduce != null);
 
-            db.RegisterScalarFunc(name, 8, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]));
+            This.RegisterScalarFunc(name, 8, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]));
         }
 
-        public static string GetFileName(this IDatabaseConnection db, string database)
+        /// <summary>
+        /// Returns the filename associated with the database.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="database">The database name. The main database file has the name "main".</param>
+        /// <returns>The attached database's filename.</returns>
+        /// <exception cref="InvalidOperationException">If the database is not attached, temporary, or in memory.</exception>
+        public static string GetFileName(this IDatabaseConnection This, string database)
         {
-            Contract.Requires(db != null);
+            Contract.Requires(This != null);
             Contract.Requires(database != null);
 
             string filename = null;
 
-            if (db.TryGetFileName(database, out filename))
+            if (This.TryGetFileName(database, out filename))
             {
                 return filename;
             }
@@ -500,9 +695,20 @@ namespace SQLitePCL.pretty
             throw new InvalidOperationException("Database is either not attached, temporary or in memory");
         }
 
-        public static Stream OpenBlob(this IDatabaseConnection db, IResultSetValue value, long rowId, bool canWrite = false)
+        /// <summary>
+        /// Opens the blob located by the <see cref="IColumnInfo"/> and rowid for incremental I/O as a <see cref="System.IO.Stream"/>.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="columnInfo">The IColumnInfo of the blob value.</param>
+        /// <param name="rowId">The row containing the blob.</param>
+        /// <param name="canWrite">
+        ///     <see langwords="true"/> if the Stream should be open for both read and write operations. 
+        ///     <see langwords="false"/> if the Stream should be open oly for read operations. 
+        /// </param>
+        /// <returns>A <see cref="System.IO.Stream"/> that can be used to synchronously write and read to and from blob.</returns>
+        public static Stream OpenBlob(this IDatabaseConnection This, IColumnInfo columnInfo, long rowId, bool canWrite)
         {
-            return db.OpenBlob(value.ColumnInfo.DatabaseName, value.ColumnInfo.TableName, value.ColumnInfo.OriginName, rowId, canWrite);
+            return This.OpenBlob(columnInfo.DatabaseName, columnInfo.TableName, columnInfo.OriginName, rowId, canWrite);
         }
     }
 

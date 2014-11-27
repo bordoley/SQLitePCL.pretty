@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 namespace SQLitePCL.pretty
 {
     /// <summary>
-    /// An interface for scheduling asynchronous access to an <see cref="IDatabaseConnection"/> in FIFO manner.
+    /// An interface for scheduling asynchronous access to an <see cref="IDatabaseConnection"/> in FIFO order.
     /// </summary>
     [ContractClass(typeof(IAsyncDatabaseConnectionContract))]
     public interface IAsyncDatabaseConnection : IDisposable
@@ -80,7 +80,7 @@ namespace SQLitePCL.pretty
     }
 
     /// <summary>
-    /// An interface for scheduling asynchronous access to an <see cref="IStatement"/> in FIFO manner.
+    /// An interface for scheduling asynchronous access to an <see cref="IStatement"/> in FIFO order.
     /// </summary>
     [ContractClass(typeof(IAsyncStatementContract))]
     public interface IAsyncStatement : IDisposable

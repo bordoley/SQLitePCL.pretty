@@ -32,6 +32,13 @@ namespace SQLitePCL.pretty
     /// </summary>
     public static class AsyncStatement
     {
+        /// <summary>
+        /// Schedules the <see cref="Action"/> <paramref name="f"/> on the statement's operations queue.
+        /// </summary>
+        /// <param name="This">The async statement.</param>
+        /// <param name="f">The action.</param>
+        /// <param name="cancellationToken">Cancellation token that can be used to cancel the task.</param>
+        /// <returns>A task that completes when <paramref name="f"/> returns.</returns>
         public static Task Use(
             this IAsyncStatement This,
             Action<IStatement> f,
@@ -47,11 +54,25 @@ namespace SQLitePCL.pretty
             }, cancellationToken);
         }
 
+        /// <summary>
+        /// Schedules the <see cref="Action"/> <paramref name="f"/> on the statement's operations queue.
+        /// </summary>
+        /// <param name="This">The async statement.</param>
+        /// <param name="f">The action.</param>
+        /// <returns>A task that completes when <paramref name="f"/> returns.</returns>
         public static Task Use(this IAsyncStatement This, Action<IStatement> f)
         {
             return Use(This, f, CancellationToken.None);
         }
 
+        /// <summary>
+        /// Schedules the <see cref="Func&lt;T,TResult&gt;"/> <paramref name="f"/> on the statement's operations queue.
+        /// </summary>
+        /// <typeparam name="T">The result type.</typeparam>
+        /// <param name="This">The async statement.</param>
+        /// <param name="f">A function from <see cref="IAsyncStatement"/> to <typeparamref name="T"/>.</param>
+        /// <param name="cancellationToken">Cancellation token that can be used to cancel the task.</param>
+        /// <returns>A task that completes with the result of <paramref name="f"/>.</returns>
         public static Task<T> Use<T>(
             this IAsyncStatement This,
             Func<IStatement, T> f,
@@ -63,26 +84,44 @@ namespace SQLitePCL.pretty
             return This.Use(conn => new T[] { f(conn) }).ToTask(cancellationToken);
         }
 
+        /// <summary>
+        /// Schedules the <see cref="Func&lt;T,TResult&gt;"/> <paramref name="f"/> on the statement's operations queue.
+        /// </summary>
+        /// <typeparam name="T">The result type.</typeparam>
+        /// <param name="This">The async statement.</param>
+        /// <param name="f">A function from <see cref="IAsyncStatement"/> to <typeparamref name="T"/>.</param>
+        /// <returns>A task that completes with the result of <paramref name="f"/>.</returns>
         public static Task<T> Use<T>(this IAsyncStatement This, Func<IStatement, T> f)
         {
             return Use(This, f, CancellationToken.None);
         }
 
-        // FIXME: Make public
+        /// <summary>
+        /// Executes the <see cref="IStatement"/> with provided bind parameter values.
+        /// </summary>
+        /// <param name="This">The async statement.</param>
+        /// <param name="cancellationToken">Cancellation token that can be used to cancel the task.</param>
+        /// <param name="values">The position indexed values to bind.</param>
+        /// <returns>A <see cref="Task"/> that completes when the statement is executed.</returns>
         internal static Task ExecuteAsync(
             this IAsyncStatement This, 
             CancellationToken cancellationToken,
-            params object[] a)
+            params object[] values)
         {
-            return This.Use(stmt => { stmt.Execute(a); }, cancellationToken);
+            return This.Use(stmt => { stmt.Execute(values); }, cancellationToken);
         }
 
-        // FIXME: Make public
+        /// <summary>
+        /// Executes the <see cref="IStatement"/> with provided bind parameter values.
+        /// </summary>
+        /// <param name="This">The async statement.</param>
+        /// <param name="values">The position indexed values to bind.</param>
+        /// <returns>A <see cref="Task"/> that completes when the statement is executed.</returns>
         internal static Task ExecuteAsync(
             this IAsyncStatement This,
-            params object[] a)
+            params object[] values)
         {
-            return This.Use(stmt => { stmt.Execute(a); }, CancellationToken.None);
+            return This.Use(stmt => { stmt.Execute(values); }, CancellationToken.None);
         }
     }
 

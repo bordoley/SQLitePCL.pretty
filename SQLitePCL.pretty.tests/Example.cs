@@ -41,7 +41,7 @@ namespace SQLitePCL.pretty.tests
                 db.Execute("INSERT INTO foo (w, x, y, z) VALUES (?, ?, ?, ?)", 1, 1.1, "hello", stream);
 
                 var dst = db.Query("SELECT rowid, z FROM foo where rowid = ?", db.LastInsertedRowId)
-                            .Select(row => db.OpenBlob(row[1], row[0].ToInt64(), true))
+                            .Select(row => db.OpenBlob(row[1].ColumnInfo, row[0].ToInt64(), true))
                             .First();
 
                 using (dst) { stream.CopyTo(dst); }
@@ -60,7 +60,7 @@ namespace SQLitePCL.pretty.tests
                         continue;
                     }
 
-                    using (var blob = db.OpenBlob(row[4], row[0].ToInt64()))
+                    using (var blob = db.OpenBlob(row[4].ColumnInfo, row[0].ToInt64(), false))
                     {
                         var str = new StreamReader(blob).ReadToEnd();
                         Console.Write(str + "\n");

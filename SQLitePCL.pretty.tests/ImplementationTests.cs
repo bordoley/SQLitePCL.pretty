@@ -409,7 +409,7 @@ namespace SQLitePCL.pretty.tests
 
                 var stream = 
                     db.Query("SELECT rowid, x FROM foo;")
-                        .Select(row => db.OpenBlob(row[1], row[0].ToInt64()))
+                        .Select(row => db.OpenBlob(row[1].ColumnInfo, row[0].ToInt64(), false))
                         .First();
 
                 using (stream)
@@ -445,7 +445,7 @@ namespace SQLitePCL.pretty.tests
                 db.Execute("INSERT INTO foo (x) VALUES(?);", "data");
                 var blob = 
                     db.Query("SELECT rowid, x FROM foo")
-                        .Select(row => db.OpenBlob(row[1], row[0].ToInt64(), true))
+                        .Select(row => db.OpenBlob(row[1].ColumnInfo, row[0].ToInt64(), true))
                         .First();
                 blob.Dispose();
 
@@ -470,7 +470,7 @@ namespace SQLitePCL.pretty.tests
                 db.Execute("INSERT INTO foo (x) VALUES(?);", "data");
                 var blob = 
                     db.Query("SELECT rowid, x FROM foo")
-                        .Select(row => db.OpenBlob(row[1], row[0].ToInt64(), true))
+                        .Select(row => db.OpenBlob(row[1].ColumnInfo, row[0].ToInt64(), true))
                         .First();
                 using (blob)
                 {
@@ -519,7 +519,7 @@ namespace SQLitePCL.pretty.tests
                 
                 var stream =
                     db.Query("SELECT rowid, x FROM foo")
-                        .Select(row => db.OpenBlob(row[1], row[0].ToInt64(), true))
+                        .Select(row => db.OpenBlob(row[1].ColumnInfo, row[0].ToInt64(), true))
                         .First();
 
                 using (stream)

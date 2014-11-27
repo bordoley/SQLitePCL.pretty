@@ -43,113 +43,113 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Converts an <see cref="int"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
-        /// <param name="value">the value to convert</param>
+        /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this int value)
+        public static ISQLiteValue ToSQLiteValue(this int This)
         {
-            return ToSQLiteValue((long)value);
+            return ToSQLiteValue((long)This);
         }
 
         /// <summary>
         /// Converts a <see cref="bool"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
-        /// <param name="value">the value to convert</param>
+        /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this bool value)
+        public static ISQLiteValue ToSQLiteValue(this bool This)
         {
-            return ToSQLiteValue((long)(Convert.ChangeType(value, typeof(long))));
+            return ToSQLiteValue((long)(Convert.ChangeType(This, typeof(long))));
         }
 
         /// <summary>
         /// Converts a <see cref="byte"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
-        /// <param name="value">the value to convert</param>
+        /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this byte value)
+        public static ISQLiteValue ToSQLiteValue(this byte This)
         {
-            return ToSQLiteValue((long)(Convert.ChangeType(value, typeof(long))));
+            return ToSQLiteValue((long)(Convert.ChangeType(This, typeof(long))));
         }
 
         /// <summary>
         /// Converts a <see cref="char"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
-        /// <param name="value">the value to convert</param>
+        /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this char value)
+        public static ISQLiteValue ToSQLiteValue(this char This)
         {
-            return ToSQLiteValue((long)(Convert.ChangeType(value, typeof(long))));
+            return ToSQLiteValue((long)(Convert.ChangeType(This, typeof(long))));
         }
 
         /// <summary>
         /// Converts a <see cref="sbyte"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
-        /// <param name="value">the value to convert</param>
+        /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this sbyte value)
+        public static ISQLiteValue ToSQLiteValue(this sbyte This)
         {
-            return ToSQLiteValue((long)(Convert.ChangeType(value, typeof(long))));
+            return ToSQLiteValue((long)(Convert.ChangeType(This, typeof(long))));
         }
 
         /// <summary>
         /// Converts a <see cref="UInt32"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
-        /// <param name="value">the value to convert</param>
+        /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this UInt32 value)
+        public static ISQLiteValue ToSQLiteValue(this UInt32 This)
         {
-            return ToSQLiteValue((long)(Convert.ChangeType(value, typeof(long))));
+            return ToSQLiteValue((long)(Convert.ChangeType(This, typeof(long))));
         }
 
         /// <summary>
         /// Converts a <see cref="long"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
-        /// <param name="value">the value to convert</param>
+        /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this long value)
+        public static ISQLiteValue ToSQLiteValue(this long This)
         {
-            return new IntValue(value);
+            return new IntValue(This);
         }
 
         /// <summary>
         /// Converts a <see cref="double"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
-        /// <param name="value">the value to convert</param>
+        /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this double value)
+        public static ISQLiteValue ToSQLiteValue(this double This)
         {
-            return new FloatValue(value);
+            return new FloatValue(This);
         }
 
         /// <summary>
         /// Converts a <see cref="string"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
-        /// <param name="value">the value to convert</param>
+        /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this string value)
+        public static ISQLiteValue ToSQLiteValue(this string This)
         {
-            Contract.Requires(value != null);
-            return new StringValue(value);
+            Contract.Requires(This != null);
+            return new StringValue(This);
         }
 
         /// <summary>
         /// Converts a byte array to an <see cref="ISQLiteValue"/>.
         /// </summary>
-        /// <param name="blob">the value to convert</param>
+        /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the blob.</returns>
-        public static ISQLiteValue ToSQLiteValue(this byte[] blob)
+        public static ISQLiteValue ToSQLiteValue(this byte[] This)
         {
-            Contract.Requires(blob != null);
-            return new BlobValue(blob);
+            Contract.Requires(This != null);
+            return new BlobValue(This);
         }
 
-        internal static ISQLiteValue ToSQLiteValue(this sqlite3_value value)
+        internal static ISQLiteValue ToSQLiteValue(this sqlite3_value This)
         {
-            return new NativeValue(value);
+            return new NativeValue(This);
         }
 
-        internal static IResultSetValue ResultSetValueAt(this StatementImpl stmt, int index)
+        internal static IResultSetValue ResultSetValueAt(this StatementImpl This, int index)
         {
-            return new ResultSetValueImpl(stmt, index);
+            return new ResultSetValueImpl(This, index);
         }
     }
 

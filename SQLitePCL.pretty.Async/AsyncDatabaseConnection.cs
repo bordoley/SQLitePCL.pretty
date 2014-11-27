@@ -53,6 +53,16 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <summary>
+        /// Returns an <see cref="IAsyncDatabaseConnection"/> instance that delegates database requests
+        /// to the provided <see cref="IDatabaseConnection"/>.
+        /// </summary>
+        /// <remarks>Note, once this method is called the provided <see cref="IDatabaseConnection"/>
+        /// is owned by the returned <see cref="IAsyncDatabaseConnection"/>, and may no longer be
+        /// safely used directly.</remarks>
+        /// <param name="This">The database connection.</param>
+        /// <param name="scheduler">A scheduler used to schedule asynchronous database use on.</param>
+        /// <returns>An <see cref="IAsyncDatabaseConnection"/> instance.</returns>
         public static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this IDatabaseConnection This, IScheduler scheduler)
         {
             Contract.Requires(This != null);
@@ -60,11 +70,27 @@ namespace SQLitePCL.pretty
             return new AsyncDatabaseConnectionImpl(This, scheduler);
         }
 
+        /// <summary>
+        /// Returns an <see cref="IAsyncDatabaseConnection"/> instance that delegates database requests
+        /// to the provided <see cref="IDatabaseConnection"/>.
+        /// </summary>
+        /// <remarks>Note, once this method is called the provided <see cref="IDatabaseConnection"/>
+        /// is owned by the returned <see cref="IAsyncDatabaseConnection"/>, and may no longer be
+        /// safely used directly.</remarks>
+        /// <param name="This">The database connection.</param>
+        /// <returns>An <see cref="IAsyncDatabaseConnection"/> instance.</returns>
         public static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this IDatabaseConnection This)
         {
             return AsAsyncDatabaseConnection(This, defaultScheduler);
         }
 
+        /// <summary>
+        /// Compiles and executes multiple SQL statements.
+        /// </summary>
+        /// <param name="This">An asynchronous database connection.</param>
+        /// <param name="sql">One or more semicolon delimited SQL statements.</param>
+        /// <param name="cancellationToken">Cancellation token that can be used to cancel the task.</param>
+        /// <returns>A task that completes when all statements have been executed.</returns>
         public static Task ExecuteAllAsync(
             this IAsyncDatabaseConnection This,
             string sql,
@@ -73,39 +99,66 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
-            // FIXME: I think this could actually honor the cancellation token if it was implemented in a way to return an enumerable
             return This.Use(conn =>
             {
                 conn.ExecuteAll(sql);
             }, cancellationToken);
         }
 
+        /// <summary>
+        /// Compiles and executes multiple SQL statements.
+        /// </summary>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="sql">One or more semicolon delimited SQL statements.</param>
+        /// <returns>A task that completes when all statements have been executed.</returns>
         public static Task ExecuteAllAsync(this IAsyncDatabaseConnection This, string sql)
         {
             return ExecuteAllAsync(This, sql, CancellationToken.None);
         }
 
+        /// <summary>
+        /// Compiles and executes a SQL statement with the provided bind parameter values.
+        /// </summary>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="sql">The SQL statement to compile and execute.</param>
+        /// <param name="cancellationToken">Cancellation token that can be used to cancel the task.</param>
+        /// <param name="values">The bind parameter values.</param>
+        /// <returns>A task that completes when the statement has been executed.</returns>
         public static Task ExecuteAsync(
             this IAsyncDatabaseConnection This,
             string sql,
             CancellationToken cancellationToken,
-            params object[] a)
+            params object[] values)
         {
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
-            Contract.Requires(a != null);
+            Contract.Requires(values != null);
 
             return This.Use(conn =>
                 {
-                    conn.Execute(sql, a);
+                    conn.Execute(sql, values);
                 }, cancellationToken);
         }
 
-        public static Task ExecuteAsync(this IAsyncDatabaseConnection This, string sql, params object[] a)
+        /// <summary>
+        /// Compiles and executes a SQL statement with the provided bind parameter values.
+        /// </summary>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="sql">The SQL statement to compile and execute.</param>
+        /// <param name="values">The bind parameter values.</param>
+        /// <returns>A task that completes when the statement has been executed.</returns>
+        public static Task ExecuteAsync(this IAsyncDatabaseConnection This, string sql, params object[] values)
         {
-            return ExecuteAsync(This, sql, CancellationToken.None, a);
+            return ExecuteAsync(This, sql, CancellationToken.None, values);
         }
 
+        /// <summary>
+        /// Compiles and executes a SQL statement.
+        /// </summary>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="sql">The SQL statement to compile and execute.</param>
+        /// <param name="cancellationToken">Cancellation token that can be used to cancel the task.</param>
+        /// <returns>A task that completes when the statement has been executed.</returns>
         public static Task ExecuteAsync(
             this IAsyncDatabaseConnection This,
             string sql,
@@ -120,11 +173,30 @@ namespace SQLitePCL.pretty
             }, cancellationToken);
         }
 
+        /// <summary>
+        /// Compiles and executes a SQL statement.
+        /// </summary>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="sql">The SQL statement to compile and execute.</param>
+        /// <returns>A task that completes when the statement has been executed.</returns>
         public static Task ExecuteAsync(this IAsyncDatabaseConnection This, string sql)
         {
             return ExecuteAsync(This, sql, CancellationToken.None);
         }
 
+        /// <summary>
+        /// Opens the blob located by the a database, table, column, and rowid for incremental asynchronous I/O as a <see cref="System.IO.Stream"/>.
+        /// </summary>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="database">The database containing the blob.</param>
+        /// <param name="tableName">The table containing the blob.</param>
+        /// <param name="columnName">The column containing the blob.</param>
+        /// <param name="rowId">The row containing the blob.</param>
+        /// <param name="canWrite">
+        ///     <see langwords="true"/> if the Stream should be open for both read and write operations. 
+        ///     <see langwords="false"/> if the Stream should be open oly for read operations. 
+        /// </param>
+        /// <returns>A <see cref="Task"/> that completes with a <see cref="System.IO.Stream"/> that can be used to asynchronously write and read to and from blob.</returns>
         public static Task<Stream> OpenBlobAsync(
             this IAsyncDatabaseConnection This,
             string database,
@@ -133,17 +205,31 @@ namespace SQLitePCL.pretty
             long rowId,
             bool canWrite = false)
         {
-            return OpenBlobAsync(This, database, tableName, columnName, rowId, CancellationToken.None, canWrite);
+            return OpenBlobAsync(This, database, tableName, columnName, rowId, canWrite, CancellationToken.None);
         }
 
+        /// <summary>
+        /// Opens the blob located by the a database, table, column, and rowid for incremental asynchronous I/O as a <see cref="System.IO.Stream"/>.
+        /// </summary>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="database">The database containing the blob.</param>
+        /// <param name="tableName">The table containing the blob.</param>
+        /// <param name="columnName">The column containing the blob.</param>
+        /// <param name="rowId">The row containing the blob.</param>
+        /// <param name="canWrite">
+        ///     <see langwords="true"/> if the Stream should be open for both read and write operations. 
+        ///     <see langwords="false"/> if the Stream should be open oly for read operations. 
+        /// </param>
+        /// <param name="cancellationToken">Cancellation token that can be used to cancel the task.</param>
+        /// <returns>A <see cref="Task"/> that completes with a <see cref="System.IO.Stream"/> that can be used to asynchronously write and read to and from blob.</returns>
         public static Task<Stream> OpenBlobAsync(
             this IAsyncDatabaseConnection This,
             string database,
             string tableName,
             string columnName,
             long rowId,
-            CancellationToken cancellationToken,
-            bool canWrite = false)
+            bool canWrite,
+            CancellationToken cancellationToken)
         {
             return This.Use<Stream>(db =>
                 {
@@ -152,18 +238,23 @@ namespace SQLitePCL.pretty
                 }, cancellationToken);
         }
 
+        /// <summary>
+        /// Compiles one or more SQL statements.
+        /// </summary>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="sql">One or more semicolon delimited SQL statements.</param>
+        /// <param name="cancellationToken">Cancellation token that can be used to cancel the task.</param>
+        /// <returns>A <see cref="Task"/> that completes with a <see cref="IReadOnlyList&lt;T&gt;"/> 
+        /// of the compiled <see cref="IAsyncStatement"/>instances.</returns>
         public static Task<IReadOnlyList<IAsyncStatement>> PrepareAllAsync(
            this IAsyncDatabaseConnection This,
            string sql,
            CancellationToken cancellationToken)
         {
             return Use<IReadOnlyList<IAsyncStatement>>(This, conn =>
-                {
-                    // FIXME: In the ideal world this would be an immutable list
-                    var retval = new List<IAsyncStatement>();
-                 
+                {                 
                     // Eagerly prepare all the statements. The synchronous version of PrepareAll() 
-                    // is lazy and preparing each statement when MoveNext() is called on the Enumerator.
+                    // is lazy, preparing each statement when MoveNext() is called on the Enumerator.
                     // Hence an implementation like:
                     //
                     //   return conn.PrepareAll(sql).Select(stmt => new AsyncStatementImpl(stmt, This));
@@ -171,15 +262,17 @@ namespace SQLitePCL.pretty
                     // would result in unintentional database access not on the operations queue.
                     // Added bonus of being eager: Callers can retrieve individual statements via 
                     // the index in the list.
-                    foreach (var stmt in conn.PrepareAll(sql))
-                    {
-                        retval.Add(new AsyncStatementImpl(stmt, This));
-                    }
-                    
-                    return retval;
+                    return conn.PrepareAll(sql).Select(stmt => new AsyncStatementImpl(stmt, This)).ToList();
                 }, cancellationToken);
         }
 
+        /// <summary>
+        /// Compiles one or more SQL statements.
+        /// </summary>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="sql">One or more semicolon delimited SQL statements.</param>
+        /// <returns>A <see cref="Task"/> that completes with a <see cref="IReadOnlyList&lt;T&gt;"/> 
+        /// of the compiled <see cref="IAsyncStatement"/>instances.</returns>
         public static Task<IReadOnlyList<IAsyncStatement>> PrepareAllAsync(
            this IAsyncDatabaseConnection This,
            string sql)
@@ -187,6 +280,14 @@ namespace SQLitePCL.pretty
             return PrepareAllAsync(This, sql, CancellationToken.None);
         }
 
+        /// <summary>
+        /// Compiles a SQL statement.
+        /// </summary>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="sql">The SQL statement to compile.</param>
+        /// <param name="cancellationToken">Cancellation token that can be used to cancel the task.</param>
+        /// <returns>Task that completes with a <see cref="IAsyncStatement"/> that
+        /// can be used to query the result set asynchronously.</returns>
         public static Task<IAsyncStatement> PrepareStatementAsync(
            this IAsyncDatabaseConnection This,
            string sql,
@@ -202,26 +303,49 @@ namespace SQLitePCL.pretty
             }, cancellationToken);
         }
 
+        /// <summary>
+        /// Compiles a SQL statement.
+        /// </summary>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="sql">The SQL statement to compile.</param>
+        /// <returns>Task that completes with a <see cref="IAsyncStatement"/> that
+        /// can be used to query the result set asynchronously.</returns>
         public static Task<IAsyncStatement> PrepareStatementAsync(this IAsyncDatabaseConnection This, string sql)
         {
             return PrepareStatementAsync(This, sql, CancellationToken.None);
         }
 
+        /// <summary>
+        /// Returns a cold observable that compiles a SQL statement with 
+        /// provided bind parameter values, that publishes the rows in the result 
+        /// set for each subscription.
+        /// </summary>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="sql">The SQL statement to compile and Query.</param>
+        /// <param name="values">The bind parameter values.</param>
+        /// <returns>A cold observable of rows in the result set.</returns>
         public static IObservable<IReadOnlyList<IResultSetValue>> Query(
             this IAsyncDatabaseConnection This,
             string sql,
-            params object[] a)
+            params object[] values)
         {
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
-            Contract.Requires(a != null);
+            Contract.Requires(values != null);
 
             return This.Use(conn =>
             {
-                return conn.Query(sql, a);
+                return conn.Query(sql, values);
             });
         }
 
+        /// <summary>
+        /// Returns a cold observable that compiles a SQL statement 
+        /// that publishes the rows in the result set for each subscription.
+        /// </summary>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="sql">The SQL statement to compile and Query.</param>
+        /// <returns>A cold observable of rows in the result set.</returns>
         public static IObservable<IReadOnlyList<IResultSetValue>> Query(
             this IAsyncDatabaseConnection This,
             string sql)
@@ -235,6 +359,13 @@ namespace SQLitePCL.pretty
             });
         }
 
+        /// <summary>
+        /// Schedules the <see cref="Action"/> <paramref name="f"/> on the database operations queue.
+        /// </summary>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="f">The action.</param>
+        /// <param name="cancellationToken">Cancellation token that can be used to cancel the task.</param>
+        /// <returns>A task that completes when <paramref name="f"/> returns.</returns>
         public static Task Use(
             this IAsyncDatabaseConnection This,
             Action<IDatabaseConnection> f,
@@ -250,11 +381,25 @@ namespace SQLitePCL.pretty
             }, cancellationToken);
         }
 
+        /// <summary>
+        /// Schedules the <see cref="Action"/> <paramref name="f"/> on the database operations queue.
+        /// </summary>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="f">The action.</param>
+        /// <returns>A task that completes when <paramref name="f"/> returns.</returns>
         public static Task Use(this IAsyncDatabaseConnection This, Action<IDatabaseConnection> f)
         {
             return Use(This, f, CancellationToken.None);
         }
 
+        /// <summary>
+        /// Schedules the <see cref="Func&lt;T,TResult&gt;"/> <paramref name="f"/> on the database operations queue.
+        /// </summary>
+        /// <typeparam name="T">The result type.</typeparam>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="f">A function from <see cref="IDatabaseConnection"/> to <typeparamref name="T"/>.</param>
+        /// <param name="cancellationToken">Cancellation token that can be used to cancel the task.</param>
+        /// <returns>A task that completes with the result of <paramref name="f"/>.</returns>
         public static Task<T> Use<T>(
             this IAsyncDatabaseConnection This,
             Func<IDatabaseConnection, T> f,
@@ -266,6 +411,13 @@ namespace SQLitePCL.pretty
             return This.Use(conn => new T[] { f(conn) }).ToTask(cancellationToken);
         }
 
+        /// <summary>
+        /// Schedules the <see cref="Func&lt;T,TResult&gt;"/> <paramref name="f"/> on the database operations queue.
+        /// </summary>
+        /// <typeparam name="T">The result type.</typeparam>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="f">A function from <see cref="IDatabaseConnection"/> to <typeparamref name="T"/>.</param>
+        /// <returns>A task that completes with the result of <paramref name="f"/>.</returns>
         public static Task<T> Use<T>(this IAsyncDatabaseConnection This, Func<IDatabaseConnection, T> f)
         {
             return Use(This, f, CancellationToken.None);
