@@ -708,6 +708,8 @@ namespace SQLitePCL.pretty
         /// <returns>A <see cref="System.IO.Stream"/> that can be used to synchronously write and read to and from blob.</returns>
         public static Stream OpenBlob(this IDatabaseConnection This, IColumnInfo columnInfo, long rowId, bool canWrite)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(columnInfo != null);
             return This.OpenBlob(columnInfo.DatabaseName, columnInfo.TableName, columnInfo.OriginName, rowId, canWrite);
         }
     }
