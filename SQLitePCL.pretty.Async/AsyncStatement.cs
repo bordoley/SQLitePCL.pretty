@@ -67,6 +67,23 @@ namespace SQLitePCL.pretty
         {
             return Use(This, f, CancellationToken.None);
         }
+
+        // FIXME: Make public
+        internal static Task ExecuteAsync(
+            this IAsyncStatement This, 
+            CancellationToken cancellationToken,
+            params object[] a)
+        {
+            return This.Use(stmt => { stmt.Execute(a); }, cancellationToken);
+        }
+
+        // FIXME: Make public
+        internal static Task ExecuteAsync(
+            this IAsyncStatement This,
+            params object[] a)
+        {
+            return This.Use(stmt => { stmt.Execute(a); }, CancellationToken.None);
+        }
     }
 
     internal class AsyncStatementImpl : IAsyncStatement

@@ -16,6 +16,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 
@@ -49,58 +50,32 @@ namespace SQLitePCL.pretty
             var count = a.Length;
             for (int i = 0; i < count; i++)
             {
-                // I miss F# pattern matching
-                if (a[i] == null)
-                {
-                    stmt.BindParameters[i].BindNull();
-                }
-                else
-                {
-                    Type t = a[i].GetType();
-
-                    if (typeof(String) == t)
-                    {
-                        stmt.BindParameters[i].Bind((string)a[i]);
-                    }
-                    else if (
-                        (typeof(Int32) == t)
-                        || (typeof(Boolean) == t)
-                        || (typeof(Byte) == t)
-                        || (typeof(UInt16) == t)
-                        || (typeof(Int16) == t)
-                        || (typeof(sbyte) == t)
-                        || (typeof(Int64) == t)
-                        || (typeof(UInt32) == t))
-                    {
-                        stmt.BindParameters[i].Bind((long)(Convert.ChangeType(a[i], typeof(long))));
-                    }
-                    else if (
-                        (typeof(double) == t)
-                        || (typeof(float) == t)
-                        || (typeof(decimal) == t))
-                    {
-                        stmt.BindParameters[i].Bind((double)(Convert.ChangeType(a[i], typeof(double))));
-                    }
-                    else if (typeof(byte[]) == t)
-                    {
-                        stmt.BindParameters[i].Bind((byte[])a[i]);
-                    }
-                    else if (a[i] is Stream)
-                    {
-                        var stream = (Stream)a[i];
-                        if (!stream.CanRead)
-                        {
-                            throw new ArgumentException("Stream in position " + i + " is not readable");
-                        }
-
-                        stmt.BindParameters[i].BindZeroBlob((int)stream.Length);
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Invalid type conversion" + t);
-                    }
-                }
+                stmt.BindParameters[i].Bind(a[i]);
             }
+        }
+
+        // FIXME: Make public
+        internal static void Bind(this IStatement stmt, IEnumerable<KeyValuePair<string,object>> pairs)
+        {
+            Contract.Requires(stmt != null);
+            Contract.Requires(pairs != null);
+
+            foreach (var kvp in pairs)
+            {
+                stmt.BindParameters[kvp.Key].Bind(kvp.Value);
+            }
+        }
+
+        // FIXME: Make public
+        internal static void Execute(this IStatement stmt, params object[] a)
+        {
+            Contract.Requires(stmt != null);
+            Contract.Requires(a != null);
+
+            stmt.Reset();
+            stmt.ClearBindings();
+            stmt.Bind(a);
+            stmt.MoveNext();
         }
     }
 }
