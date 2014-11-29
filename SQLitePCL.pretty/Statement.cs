@@ -54,6 +54,7 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /*
         /// <summary>
         /// Bind the statement parameters to the key-value pairs in <paramref name="pairs"/>.
         /// </summary>
@@ -72,7 +73,7 @@ namespace SQLitePCL.pretty
             {
                 This.BindParameters[kvp.Key].Bind(kvp.Value);
             }
-        }
+        }*/
 
         /// <summary>
         /// Executes the <see cref="IStatement"/> with provided bind parameter values.

@@ -24,7 +24,7 @@ namespace SQLitePCL.pretty
     /// <summary>
     /// Extension methods for instances of <see cref="IBindParameter"/>.
     /// </summary>
-    internal static class BindParameter
+    public static class BindParameter
     {
         /// <summary>
         /// Bind the parameter to a value based upon its runtime type.

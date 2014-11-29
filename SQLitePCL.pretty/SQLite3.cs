@@ -132,7 +132,7 @@ namespace SQLitePCL.pretty
 
             sqlite3 db;
             int rc = raw.sqlite3_open(filename, out db);
-            SQLiteException.CheckOk(rc);
+            SQLiteException.CheckOk(db, rc);
 
             return new SQLiteDatabaseConnection(db);
         }

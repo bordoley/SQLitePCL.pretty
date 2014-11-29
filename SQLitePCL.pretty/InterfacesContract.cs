@@ -36,7 +36,13 @@ namespace SQLitePCL.pretty
 
         public abstract bool IsAutoCommit { get; }
 
-        public abstract TimeSpan BusyTimeout { set; }
+        public TimeSpan BusyTimeout 
+        {
+            set
+            {
+                Contract.Requires(value.TotalMilliseconds <= Int32.MaxValue);
+            }
+        }
 
         public abstract int Changes { get; }
 

@@ -124,6 +124,9 @@ namespace SQLitePCL.pretty.tests
                 var stmt = db.PrepareStatement("SELECT 1");
                 stmt.Dispose();
 
+                // Test double dispose
+                stmt.Dispose();
+
                 Assert.Throws<ObjectDisposedException>(() => { var x = stmt.BindParameters; });
                 Assert.Throws<ObjectDisposedException>(() => { var x = stmt.Columns; });
                 Assert.Throws<ObjectDisposedException>(() => { var x = stmt.Current; });
@@ -274,6 +277,28 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Test]
+        public void TestExecute()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                db.Execute("CREATE TABLE foo (v int);");
+                using (var stmt = db.PrepareStatement("INSERT INTO foo (v) VALUES (?)"))
+                {
+                    foreach (var i in Enumerable.Range(0, 100))
+                    {
+                        stmt.Execute(i);
+                    }
+                }
+
+                foreach (var result in db.Query("SELECT v FROM foo ORDER BY 1").Select((v, index) => Tuple.Create(index, v[0].ToInt())))
+                {
+                    Assert.AreEqual(result.Item1, result.Item2);
+                }     
+   
+            }
+        }
+
+        [Test]
         public void TestClearBindings()
         {
             using (var db = SQLite3.Open(":memory:"))
@@ -318,6 +343,27 @@ namespace SQLitePCL.pretty.tests
                 Assert.Throws<ArgumentOutOfRangeException>(() => { var x = stmt.Columns[3]; });
 
                 Assert.AreEqual(count, stmt.Columns.Count);
+            }
+        }
+    }
+
+    [TestFixture]
+    public class BindParameters
+    {
+        [Test]
+        public void TestBindObject()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                db.Execute("CREATE TABLE foo (v int);");
+                using (var stmt = db.PrepareStatement("INSERT INTO foo (v) VALUES (?)"))
+                {
+                    var stream = new MemoryStream();
+                    stream.Dispose();
+                    Assert.Throws<ArgumentException>(() => stmt.BindParameters[0].Bind(stream));
+                    Assert.Throws<ArgumentException>(() => stmt.BindParameters[0].Bind(new object()));
+
+                }
             }
         }
     }
@@ -536,6 +582,17 @@ namespace SQLitePCL.pretty.tests
 
                     stream.Position = 0;
 
+                    for (int i = 0; i < stream.Length; i++)
+                    {
+                        int b = stream.ReadByte();
+                        Assert.AreEqual(bytes[i], b);
+                    }
+
+                    // Test writing after the end of the stream
+                    // Assert that nothing changes.
+                    stream.Position = stream.Length;
+                    stream.Write(new byte[10], 0, 10);
+                    stream.Position = 0;
                     for (int i = 0; i < stream.Length; i++)
                     {
                         int b = stream.ReadByte();

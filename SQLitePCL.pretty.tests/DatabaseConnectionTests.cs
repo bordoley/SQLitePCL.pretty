@@ -186,6 +186,17 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Test]
+        public void TestSetBusyTimeout()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                // FIXME: Not the best test without Asserts.
+                db.BusyTimeout = TimeSpan.MinValue;
+                db.BusyTimeout = new TimeSpan(100);
+            }
+        }
+
+        [Test]
         public void TestStatements()
         {
             using (var db = SQLite3.Open(":memory:"))

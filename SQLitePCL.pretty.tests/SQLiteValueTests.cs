@@ -50,6 +50,26 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Test]
+        public void TestToSQLiteValue()
+        {
+            Assert.AreEqual(false.ToSQLiteValue().ToInt(), 0);
+            Assert.AreNotEqual(true.ToSQLiteValue().ToInt(), 0);
+
+            byte b = 8;
+            Assert.AreEqual(b.ToSQLiteValue().ToInt(), b);
+
+            char c = 'c';
+            Assert.AreEqual(c.ToSQLiteValue().ToInt(), c);
+
+            sbyte sb = 8;
+            Assert.AreEqual(sb.ToSQLiteValue().ToInt(), sb);
+
+            uint u = 8;
+            Assert.AreEqual(u.ToSQLiteValue().ToInt(), u);
+        }
+
+
+        [Test]
         public void TestNullValue()
         {
             using (var db = SQLite3.Open(":memory:"))

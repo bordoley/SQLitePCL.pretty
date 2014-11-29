@@ -1022,7 +1022,7 @@ namespace SQLitePCL.pretty
                 };
 
             int rc = raw.sqlite3_create_function(db, name, nArg, null, funcStep, funcFinal);
-            SQLiteException.CheckOk(rc);
+            SQLiteException.CheckOk(db, rc);
         }
 
         /// <inheritdoc/>
@@ -1066,7 +1066,7 @@ namespace SQLitePCL.pretty
                         raw.sqlite3_result_error(ctx, e.Message);
                     }
                 });
-            SQLiteException.CheckOk(rc);
+            SQLiteException.CheckOk(db, rc);
         }
     }
 }
