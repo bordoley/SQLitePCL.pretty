@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,8 +9,7 @@ namespace SQLitePCL.pretty
     /// <summary>
     /// Represents information about a single column in <see cref="IStatement"/> result set.
     /// </summary>
-    // FIXME: Implement IComparable
-    public struct ColumnInfo : IEquatable<ColumnInfo> //IComparable<ColumnInfo>, IComparable
+    public struct ColumnInfo : IEquatable<ColumnInfo>, IComparable<ColumnInfo>, IComparable
     {
         /// <summary>
         /// Indicates whether the two ColumnInfo instances are equal to each other.
@@ -45,8 +44,8 @@ namespace SQLitePCL.pretty
 
         private readonly string name;
         private readonly string databaseName;
-        private readonly string originName;
         private readonly string tableName;
+        private readonly string originName;
 
         internal ColumnInfo(string name, string databaseName, string originName, string tableName)
         {
@@ -104,6 +103,34 @@ namespace SQLitePCL.pretty
             hash = hash * 31 + this.OriginName.GetHashCode();
             hash = hash * 31 + this.TableName.GetHashCode();
             return hash;
+        }
+
+        /// <inheritdoc/>
+        public int CompareTo(ColumnInfo other)
+        {
+            if (other != null)
+            {
+                var result = this.Name.CompareTo(other.Name);
+                if (result != 0) { return result; }
+                
+                result = this.DatabaseName.CompareTo(other.DatabaseName);
+                if (result != 0) { return result; }
+
+                result = this.TableName.CompareTo(other.TableName);
+                if (result != 0) { return result; }
+
+                return this.OriginName.CompareTo(other.OriginName);
+            }
+            else 
+            {
+                return 1;
+            }
+        }
+
+        /// <inheritdoc/>
+        int IComparable.CompareTo(object obj)
+        {
+            return this.CompareTo((ColumnInfo)obj);
         }
     }
 }
