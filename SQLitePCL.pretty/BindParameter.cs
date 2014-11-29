@@ -41,8 +41,6 @@ namespace SQLitePCL.pretty
         /// </exception>
         public static void Bind(this IBindParameter This, object obj)
         {
-            Contract.Requires(This != null);
-
             // I miss F# pattern matching
             if (obj == null)
             {
