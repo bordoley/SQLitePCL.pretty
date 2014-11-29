@@ -72,6 +72,9 @@ namespace SQLitePCL.pretty.tests
 
                 aStmt.Dispose();
 
+                // Test double dispose
+                aStmt.Dispose();
+
                 Assert.Throws<ObjectDisposedException>(() => aStmt.Use(stmt => Enumerable.Range(0, 1000)));
                 Assert.Throws<ObjectDisposedException>(async () => { await anotherUse; });
                 Assert.Throws<ObjectDisposedException>(() => aStmt.Use(stmt => { }));
@@ -178,6 +181,23 @@ namespace SQLitePCL.pretty.tests
                         Assert.AreEqual(stmt.Columns[1].Name, "b");
                         Assert.AreEqual(stmt.Columns[2].Name, "c");
                     });
+            }
+        }
+
+        [Test]
+        public async Task TestExecuteAsync()
+        {
+            using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            {
+                await db.ExecuteAsync("CREATE TABLE foo (x int)");
+                var aStmt = await db.PrepareStatementAsync("INSERT INTO foo (x) VALUES (?)");
+                for (int i = 0; i < 100; i++)
+                {
+                    await aStmt.ExecuteAsync(i);
+                }
+
+                var count = await db.Query("SELECT COUNT(*) from foo").Select(row => row[0].ToInt()).FirstAsync();
+                Assert.AreEqual(count, 100);
             }
         }
     }

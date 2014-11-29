@@ -993,16 +993,7 @@ namespace SQLitePCL.pretty
 
             delegate_function_aggregate_final funcFinal = (ctx, user_data) =>
                 {
-                    CtxState<T> state;
-                    if (ctx.state == null)
-                    {
-                        state = new CtxState<T>(seed);
-                        ctx.state = state;
-                    }
-                    else
-                    {
-                        state = (CtxState<T>)ctx.state;
-                    }
+                    CtxState<T> state = (CtxState<T>)ctx.state;
 
                     // FIXME: Is catching the exception really the right thing to do?
                     try

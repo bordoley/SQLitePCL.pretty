@@ -109,7 +109,21 @@ namespace SQLitePCL.pretty.tests
                         Assert.IsTrue(backup.PageCount > 0);
                     }
                 }
-            }
+
+                using (var db3 = SQLite3.Open(":memory:"))
+                {
+                    db.Backup("main", db3, "main");
+                    var backupResults = Enumerable.Zip(
+                        db.Query("SELECT x FROM foo"),
+                        db3.Query("SELECT x FROM foo"),
+                        (x,y) => Tuple.Create(x,y));
+
+                    foreach (var pair in backupResults)
+                    {
+                        Assert.AreEqual(pair.Item1[0].ToInt(), pair.Item2[0].ToInt());
+                    }
+                }
+            }            
         }
     }
 

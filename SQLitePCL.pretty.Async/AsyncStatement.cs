@@ -121,7 +121,7 @@ namespace SQLitePCL.pretty
             this IAsyncStatement This,
             params object[] values)
         {
-            return This.Use(stmt => { stmt.Execute(values); }, CancellationToken.None);
+            return This.ExecuteAsync(CancellationToken.None, values);
         }
     }
 

@@ -36,28 +36,51 @@ namespace SQLitePCL.pretty
 
         public override bool CanRead
         {
-            get { return blobStream.CanRead; }
+            get 
+            {
+                return !disposed;
+            }
         }
 
         public override bool CanSeek
         {
-            get { return blobStream.CanSeek; }
+            get 
+            {
+                return !disposed;
+            }
         }
 
         public override bool CanWrite
         {
-            get { return blobStream.CanWrite; }
+            get 
+            { 
+                return !disposed && blobStream.CanWrite; 
+            }
         }
 
         public override long Length
         {
-            get { return blobStream.Length; }
+            get 
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+                return blobStream.Length; 
+            }
         }
 
         public override long Position
         {
-            get { return blobStream.Position; }
-            set { blobStream.Position = value; }
+            get 
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                return blobStream.Position; 
+            }
+
+            set 
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                blobStream.Position = value; 
+            }
         }
 
         // http://msdn.microsoft.com/en-us/library/system.idisposable(v=vs.110).aspx
@@ -99,7 +122,7 @@ namespace SQLitePCL.pretty
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             if (buffer == null) { throw new ArgumentNullException(); }
-            if (offset + count > buffer.Length) { new ArgumentException(); }
+            if (offset + count > buffer.Length) { throw new ArgumentException(); }
             if (offset < 0) { throw new ArgumentOutOfRangeException(); }
             if (count < 0) { throw new ArgumentOutOfRangeException(); }
 
@@ -111,12 +134,14 @@ namespace SQLitePCL.pretty
 
         public override long Seek(long offset, SeekOrigin origin)
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             return blobStream.Seek(offset, origin);
         }
 
         public override void SetLength(long value)
         {
-            blobStream.SetLength(value);
+            throw new NotSupportedException();
         }
 
         public override void Write(byte[] buffer, int offset, int count)
@@ -130,7 +155,7 @@ namespace SQLitePCL.pretty
             if (!this.CanWrite) { throw new NotSupportedException(); }
 
             if (buffer == null) { throw new ArgumentNullException(); }
-            if (offset + count > buffer.Length) { new ArgumentException(); }
+            if (offset + count > buffer.Length) { throw new ArgumentException(); }
             if (offset < 0) { throw new ArgumentOutOfRangeException(); }
             if (count < 0) { throw new ArgumentOutOfRangeException(); }
 

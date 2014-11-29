@@ -121,6 +121,9 @@ namespace SQLitePCL.pretty.tests
                 
                 adb.Dispose();
 
+                // Test double dispose
+                adb.Dispose();
+
                 Assert.Throws<ObjectDisposedException>(() => adb.Use(db => Enumerable.Range(0, 1000)));
                 Assert.Throws<ObjectDisposedException>(async () => { await anotherUse; });
                 Assert.Throws<ObjectDisposedException>(() => adb.Use(db => { }));

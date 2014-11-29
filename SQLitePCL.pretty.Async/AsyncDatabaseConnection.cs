@@ -281,11 +281,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(columnInfo != null);
 
-            return This.Use<Stream>(db =>
-            {
-                var blob = db.OpenBlob(columnInfo, rowId, canWrite);
-                return new AsyncBlobStream(blob, This);
-            }, cancellationToken);
+            return This.OpenBlobAsync(columnInfo.DatabaseName, columnInfo.TableName, columnInfo.OriginName, rowId, canWrite, cancellationToken);
         }
 
         /// <summary>
