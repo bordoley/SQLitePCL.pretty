@@ -168,9 +168,9 @@ namespace SQLitePCL.pretty
     }
 
     /// <summary>
-    /// Extensions methods for instances of <see cref="IDatabaseConnection"/>
+    /// Extensions methods for <see cref="IDatabaseConnection"/>
     /// </summary>
-    public static class DatabaseConnection
+    public static partial class DatabaseConnection
     {
         /// <summary>
         /// Compiles and executes a SQL statement.

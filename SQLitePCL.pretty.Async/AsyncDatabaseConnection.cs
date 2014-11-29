@@ -29,19 +29,19 @@ using System.Threading.Tasks;
 namespace SQLitePCL.pretty
 {
     /// <summary>
-    /// Extensions methods for <see cref="IAsyncDatabaseConnection"/>.
+    /// Extensions methods for <see cref="IDatabaseConnection"/>
     /// </summary>
-    public static class AsyncDatabaseConnection
+    public static partial class DatabaseConnection
     {
         private static IScheduler defaultScheduler = TaskPoolScheduler.Default;
 
         /// <summary>
         /// Allows an application to set a default scheduler for <see cref="IAsyncDatabaseConnection"/>
-        /// instances created with <see cref="AsyncDatabaseConnection.AsAsyncDatabaseConnection(IDatabaseConnection)"/>.
+        /// instances created with <see cref="DatabaseConnection.AsAsyncDatabaseConnection(IDatabaseConnection)"/>.
         /// </summary>
         /// <remarks>This is a convenience feature that allows an application to set a global 
         /// <see cref="IScheduler"/> instance, instead of supplying it with each call to 
-        /// <see cref="AsyncDatabaseConnection.AsAsyncDatabaseConnection(IDatabaseConnection)"/>. 
+        /// <see cref="DatabaseConnection.AsAsyncDatabaseConnection(IDatabaseConnection)"/>. 
         /// </remarks>
         /// <threadsafety static="false">This setter sets global state and should not be 
         /// used after application initialization.</threadsafety>
@@ -85,7 +85,13 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             return AsAsyncDatabaseConnection(This, defaultScheduler);
         }
+    }
 
+    /// <summary>
+    /// Extensions methods for <see cref="IAsyncDatabaseConnection"/>.
+    /// </summary>
+    public static class AsyncDatabaseConnection
+    {
         /// <summary>
         /// Compiles and executes multiple SQL statements.
         /// </summary>
