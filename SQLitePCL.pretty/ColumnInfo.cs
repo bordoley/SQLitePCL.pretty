@@ -10,7 +10,7 @@ namespace SQLitePCL.pretty
     /// Represents information about a single column in <see cref="IStatement"/> result set.
     /// </summary>
     // FIXME: Implement IComparable
-    public sealed class ColumnInfo : IEquatable<ColumnInfo> //IComparable<ColumnInfo>, IComparable
+    public struct ColumnInfo : IEquatable<ColumnInfo> //IComparable<ColumnInfo>, IComparable
     {
         /// <summary>
         /// Indicates whether the two ColumnInfo instances are equal to each other.
