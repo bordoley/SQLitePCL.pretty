@@ -192,9 +192,12 @@ namespace SQLitePCL.pretty.tests
                     Assert.Throws(typeof(NotSupportedException), () => db.BusyTimeout = TimeSpan.MaxValue);
 
                     Assert.Throws(typeof(NotSupportedException), () => db.RegisterCollation("test", (a, b) => 1));
+                    Assert.Throws(typeof(NotSupportedException), () => db.RemoveCollation("test"));
                     Assert.Throws(typeof(NotSupportedException), () => db.RegisterCommitHook(() => false));
+                    Assert.Throws(typeof(NotSupportedException), () => db.RemoveCommitHook());
                     Assert.Throws(typeof(NotSupportedException), () => db.RegisterAggregateFunc("test", "", (string a, ISQLiteValue b) => a, a => a.ToSQLiteValue()));
                     Assert.Throws(typeof(NotSupportedException), () => db.RegisterScalarFunc("test", (a, b) => a));
+                    Assert.Throws(typeof(NotSupportedException), () => db.RemoveFunc("test", 2));
                 });
             }
         }

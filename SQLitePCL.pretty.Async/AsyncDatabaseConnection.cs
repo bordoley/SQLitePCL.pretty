@@ -753,7 +753,17 @@ namespace SQLitePCL.pretty
             throw new NotSupportedException();
         }
 
+        public void RemoveCollation(string name)
+        {
+            throw new NotSupportedException();
+        }
+
         public void RegisterCommitHook(Func<bool> onCommit)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void RemoveCommitHook()
         {
             throw new NotSupportedException();
         }
@@ -764,6 +774,11 @@ namespace SQLitePCL.pretty
         }
 
         public void RegisterScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void RemoveFunc(string name, int nArg)
         {
             throw new NotSupportedException();
         }

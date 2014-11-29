@@ -919,11 +919,27 @@ namespace SQLitePCL.pretty
         }
 
         /// <inheritdoc/>
+        public void RemoveCollation(string name)
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            int rc = raw.sqlite3_create_collation(db, name, null, null);
+            SQLiteException.CheckOk(db, rc);
+        }
+
+        /// <inheritdoc/>
         public void RegisterCommitHook(Func<bool> onCommit)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             raw.sqlite3_commit_hook(db, v => onCommit() ? 1 : 0, null);
+        }
+
+        /// <inheritdoc/>
+        public void RemoveCommitHook()
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+            raw.sqlite3_commit_hook(db, null, null);
         }
 
         /// <inheritdoc/>
@@ -1066,6 +1082,15 @@ namespace SQLitePCL.pretty
                         raw.sqlite3_result_error(ctx, e.Message);
                     }
                 });
+            SQLiteException.CheckOk(db, rc);
+        }
+
+        /// <inheritdoc/>
+        public void RemoveFunc(string name, int nArg)
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+            int rc = raw.sqlite3_create_function(db, name, nArg, null, null);
             SQLiteException.CheckOk(db, rc);
         }
     }

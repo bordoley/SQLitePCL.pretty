@@ -128,6 +128,12 @@ namespace SQLitePCL.pretty
         void RegisterCollation(string name, Comparison<string> comparison);
 
         /// <summary>
+        /// Remove the collation function identified by <paramref name="name"/>.
+        /// </summary>
+        /// <param name="name">The function name.</param>
+        void RemoveCollation(string name);
+
+        /// <summary>
         /// A callback function to be invoked whenever a transaction is committed.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/commit_hook.html"/>
@@ -136,9 +142,14 @@ namespace SQLitePCL.pretty
         void RegisterCommitHook(Func<bool> onCommit);
 
         /// <summary>
+        /// Removes any registered commit hook.
+        /// </summary>
+        void RemoveCommitHook();
+
+        /// <summary>
         /// Registers an aggregate function.
         /// </summary>
-        /// <see href="https://sqlite.org/c3ref/create_function.html"/>
+        /// <seealso href="https://sqlite.org/c3ref/create_function.html"/>
         /// <typeparam name="T">The type of the accumulator value.</typeparam>
         /// <param name="name">The function name.</param>
         /// <param name="nArg">The number of <see cref="ISQLiteValue"/> instances the function takes or -1 if it may take any number of arguments.</param>
@@ -155,6 +166,13 @@ namespace SQLitePCL.pretty
         /// <param name="nArg">The number of arguments the function takes or -1 if it may take any number of arguments.</param>
         /// <param name="reduce">A reduction function.</param>
         void RegisterScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce);
+
+        /// <summary>
+        /// Removes the scalar or aggregat function identified by <paramref name="name"/> and <paramref name="nArg"/>.
+        /// </summary>
+        /// <param name="name">The function name.</param>
+        /// <param name="nArg">The number of arguments the function takes or -1 if it may take any number of arguments.</param>
+        void RemoveFunc(string name, int nArg);
     }
 
     /// <summary>

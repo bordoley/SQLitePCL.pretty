@@ -80,9 +80,18 @@ namespace SQLitePCL.pretty
             Contract.Requires(comparison != null);
         }
 
+        public void RemoveCollation(string name)
+        {
+            Contract.Requires(name != null);
+        }
+
         public void RegisterCommitHook(Func<bool> onCommit)
         {
             Contract.Requires(onCommit != null);
+        }
+
+        public void RemoveCommitHook()
+        { 
         }
 
         public void RegisterAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
@@ -97,6 +106,12 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(name != null);
             Contract.Requires(reduce != null);
+            Contract.Requires(nArg >= -1);
+        }
+
+        public void RemoveFunc(string name, int nArg)
+        {
+            Contract.Requires(name != null);
             Contract.Requires(nArg >= -1);
         }
     }

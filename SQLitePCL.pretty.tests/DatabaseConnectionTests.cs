@@ -56,9 +56,12 @@ namespace SQLitePCL.pretty.tests
             Assert.Throws<ObjectDisposedException>(() => { var x = db.OpenBlob("db", "tn", "cn", 0, false); });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.PrepareStatement("SELECT 1"); });
             Assert.Throws<ObjectDisposedException>(() => { db.RegisterCollation("test", (a, b) => 1); });
+            Assert.Throws<ObjectDisposedException>(() => { db.RemoveCollation("test"); });
             Assert.Throws<ObjectDisposedException>(() => { db.RegisterCommitHook(() => false); });
+            Assert.Throws<ObjectDisposedException>(() => { db.RemoveCommitHook(); });
             Assert.Throws<ObjectDisposedException>(() => { db.RegisterAggregateFunc("name", null, (string a, ISQLiteValue b) => a, t => "".ToSQLiteValue()); });
             Assert.Throws<ObjectDisposedException>(() => { db.RegisterScalarFunc("name", () => "p".ToSQLiteValue()); });
+            Assert.Throws<ObjectDisposedException>(() => { db.RemoveFunc("name", 0); });
         }
 
         [Test]
@@ -270,6 +273,9 @@ namespace SQLitePCL.pretty.tests
                         .First();
 
                 Assert.AreEqual(top, "e");
+
+                db.RemoveCollation("e2a");
+                Assert.Throws<SQLiteException>(() => db.Execute("CREATE TABLE bar (x text COLLATE e2a);"));
             }
         }
 
@@ -288,6 +294,10 @@ namespace SQLitePCL.pretty.tests
                 db.Execute("CREATE TABLE foo (x int);");
                 db.Execute("INSERT INTO foo (x) VALUES (1);");
 
+                Assert.AreEqual(2, commits);
+
+                db.RemoveCommitHook();
+                db.Execute("INSERT INTO foo (x) VALUES (1);");
                 Assert.AreEqual(2, commits);
             }
 
@@ -325,6 +335,7 @@ namespace SQLitePCL.pretty.tests
                 db.RegisterAggregateFunc<Tuple<long, long>>("sum_plus_count", Tuple.Create(0L, 0L),
                     (Tuple<long, long> acc, ISQLiteValue arg) => Tuple.Create(acc.Item1 + arg.ToInt64(), acc.Item2 + 1L),
                     (Tuple<long, long> acc) => (acc.Item1 + acc.Item2).ToSQLiteValue());
+                
                 db.Execute("CREATE TABLE foo (x int);");
                 for (int i = 0; i < 5; i++)
                 {
@@ -332,6 +343,12 @@ namespace SQLitePCL.pretty.tests
                 }
                 long c = db.Query("SELECT sum_plus_count(x) FROM foo;").Select(row => row[0].ToInt64()).First();
                 Assert.AreEqual(c, (0 + 1 + 2 + 3 + 4) + 5);
+
+                db.RemoveFunc("sum_plus_count", 1);
+                Assert.Throws<SQLiteException>(() => 
+                    db.Query("SELECT sum_plus_count(x) FROM foo;")
+                        .Select(row => row[0].ToInt64())
+                        .First());
             }
         }
 
@@ -347,6 +364,12 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(0, db.Query("SELECT count_nulls();").Select(v => v[0].ToInt()).First());
                 Assert.AreEqual(1, db.Query("SELECT count_nulls(null);").Select(v => v[0].ToInt()).First());
                 Assert.AreEqual(2, db.Query("SELECT count_nulls(1,null,3,null,5);").Select(v => v[0].ToInt()).First());
+
+                db.RemoveFunc("count_nulls", -1);
+                Assert.Throws<SQLiteException>(() =>
+                    db.Query("SELECT count_nulls(1,2,3,4,5,6,7,8);")
+                        .Select(row => row[0].ToInt64())
+                        .First());
             }
 
             using (var db = SQLite3.Open(":memory:"))
