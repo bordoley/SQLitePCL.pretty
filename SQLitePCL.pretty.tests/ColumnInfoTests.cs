@@ -34,8 +34,8 @@ namespace SQLitePCL.pretty.tests
                     Tuple.Create("name","db", "table", "column"),
                 };
 
-            Assert.False(new ColumnInfo().Equals(null));
-            Assert.False(new ColumnInfo().Equals(new Object()));
+            Assert.False(new ColumnInfo("", "", "", "").Equals(null));
+            Assert.False(new ColumnInfo("", "", "", "").Equals(new Object()));
 
             for (int i = 0; i < tests.Length; i++)
             {
@@ -46,6 +46,8 @@ namespace SQLitePCL.pretty.tests
 
                     if (i == j)
                     {
+                        Assert.True(fst.Equals(fst));
+                        Assert.True(snd.Equals(snd));
                         Assert.AreEqual(fst, snd);
                         Assert.True(fst == snd);
                         Assert.False(fst != snd);
@@ -101,20 +103,40 @@ namespace SQLitePCL.pretty.tests
                     {
                         Assert.Less(tests[i].CompareTo(tests[j]), 0);
                         Assert.Less(((IComparable)tests[i]).CompareTo(tests[j]), 0);
+
+                        Assert.True(tests[i] < tests[j]);
+                        Assert.True(tests[i] <= tests[j]);
+                        Assert.False(tests[i] > tests[j]);
+                        Assert.False(tests[i] >= tests[j]);
                     }
                     else if (i == j)
                     {
                         Assert.AreEqual(tests[i].CompareTo(tests[j]), 0);
                         Assert.AreEqual(((IComparable)tests[i]).CompareTo(tests[j]), 0);
+
+                        Assert.True(tests[i] >= tests[j]);
+                        Assert.True(tests[i] <= tests[j]);
+                        Assert.False(tests[i] > tests[j]);
+                        Assert.False(tests[i] < tests[j]);
                     }
                     else
                     {
                         Assert.Greater(tests[i].CompareTo(tests[j]), 0);
                         Assert.Greater(((IComparable)tests[i]).CompareTo(tests[j]), 0);
+
+                        Assert.True(tests[i] > tests[j]);
+                        Assert.True(tests[i] >= tests[j]);
+                        Assert.False(tests[i] < tests[j]);
+                        Assert.False(tests[i] <= tests[j]);
                     }
                 }
             }
-                
+
+            ColumnInfo nullColumnInfo = null;
+            Assert.AreEqual(new ColumnInfo("", "", "", "").CompareTo(nullColumnInfo), 1);
+
+            object nullObj = null;
+            Assert.AreEqual(((IComparable) new ColumnInfo("", "", "", "")).CompareTo(nullObj), 1); 
         }
     }
 }

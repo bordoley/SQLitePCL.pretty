@@ -9,7 +9,7 @@ namespace SQLitePCL.pretty
     /// <summary>
     /// Represents information about a single column in <see cref="IStatement"/> result set.
     /// </summary>
-    public struct ColumnInfo : IEquatable<ColumnInfo>, IComparable<ColumnInfo>, IComparable
+    public sealed class ColumnInfo : IEquatable<ColumnInfo>, IComparable<ColumnInfo>, IComparable
     {
         /// <summary>
         /// Indicates whether the two ColumnInfo instances are equal to each other.
@@ -31,6 +31,74 @@ namespace SQLitePCL.pretty
         public static bool operator !=(ColumnInfo x, ColumnInfo y)
         {
             return !(x == y);
+        }
+
+        /// <summary>
+        /// Indicates if the the first ColumnInfo is greater than or equal to the second.
+        /// </summary>
+        /// <param name="x">A ColumnInfo instance.</param>
+        /// <param name="y">A ColumnInfo instance.</param>
+        /// <returns><see langword="true"/> if the the first ColumnInfo is greater than or equal to the second; otherwise, <see langword="false"/>.</returns>
+        public static bool operator >=(ColumnInfo x, ColumnInfo y)
+        {
+            switch (x.CompareTo(y))
+            {
+                case -1:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+
+        /// <summary>
+        /// Indicates if the the first ColumnInfo is greater than the second.
+        /// </summary>
+        /// <param name="x">A ColumnInfo instance.</param>
+        /// <param name="y">A ColumnInfo instance.</param>
+        /// <returns><see langword="true"/> if the the first ColumnInfo is greater than the second; otherwise, <see langword="false"/>.</returns>
+        public static bool operator >(ColumnInfo x, ColumnInfo y)
+        {
+            switch (x.CompareTo(y))
+            {
+                case 1:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Indicates if the the first ColumnInfo is less than or equal to the second.
+        /// </summary>
+        /// <param name="x">A ColumnInfo instance.</param>
+        /// <param name="y">A ColumnInfo instance.</param>
+        /// <returns><see langword="true"/> if the the first ColumnInfo is less than or equal to the second; otherwise, <see langword="false"/>.</returns>
+        public static bool operator <=(ColumnInfo x, ColumnInfo y)
+        {
+            switch (x.CompareTo(y))
+            {
+                case 1:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+
+        /// <summary>
+        /// Indicates if the the first SQLiteVersion is less than the second.
+        /// </summary>
+        /// <param name="x">A SQLiteVersion instance.</param>
+        /// <param name="y">A SQLiteVersion instance.</param>
+        /// <returns><see langword="true"/> if the the first SQLiteVersion is less than the second; otherwise, <see langword="false"/>.</returns>
+        public static bool operator <(ColumnInfo x, ColumnInfo y)
+        {
+            switch (x.CompareTo(y))
+            {
+                case -1:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         internal static ColumnInfo Create(StatementImpl stmt, int index)
@@ -82,6 +150,16 @@ namespace SQLitePCL.pretty
         /// <inheritdoc/>
         public bool Equals(ColumnInfo other)
         {
+            if (Object.ReferenceEquals(other, null))
+            {
+                return false;
+            }
+
+            if (Object.ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return this.Name == other.Name &&
                 this.DatabaseName == other.DatabaseName &&
                 this.OriginName == other.OriginName &&
@@ -108,7 +186,7 @@ namespace SQLitePCL.pretty
         /// <inheritdoc/>
         public int CompareTo(ColumnInfo other)
         {
-            if (other != null)
+            if (!Object.ReferenceEquals(other, null))
             {
                 var result = this.Name.CompareTo(other.Name);
                 if (result != 0) { return result; }
@@ -130,6 +208,11 @@ namespace SQLitePCL.pretty
         /// <inheritdoc/>
         int IComparable.CompareTo(object obj)
         {
+            if (System.Object.ReferenceEquals(obj, null))
+            {
+                return 1;
+            }
+
             return this.CompareTo((ColumnInfo)obj);
         }
     }
