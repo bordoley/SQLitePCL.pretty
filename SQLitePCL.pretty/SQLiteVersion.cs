@@ -49,21 +49,15 @@ namespace SQLitePCL.pretty
 
         internal static SQLiteVersion Of(int version)
         {
-            int release = version % 1000;
-            int minor = (version / 1000) % 1000;
-            int major = version / 1000000;
-            return new SQLiteVersion(major, minor, release);
+            // FIXME: If made public in the future, add contracts on the version number.
+            return new SQLiteVersion(version);
         }
 
-        private readonly int major;
-        private readonly int minor;
-        private readonly int release;
+        private readonly int version;
 
-        private SQLiteVersion(int major, int minor, int release)
+        private SQLiteVersion(int version)
         {
-            this.major = major;
-            this.minor = minor;
-            this.release = release;
+            this.version = version;
         }
 
         /// <summary>
@@ -73,7 +67,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                return major;
+                return version / 1000000;
             }
         }
 
@@ -84,7 +78,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                return minor;
+                return (version / 1000) % 1000;
             }
         }
 
@@ -95,7 +89,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                return release;
+                return version % 1000;
             }
         }
 
@@ -105,27 +99,25 @@ namespace SQLitePCL.pretty
         /// <returns>The version number as an integer</returns>
         public int ToInt()
         {
-            return (this.Major * 1000000 + this.Minor * 1000 + this.Release);
+            return version;
         }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("{0}.{1}.{2}", major, minor, release);
+            return string.Format("{0}.{1}.{2}", this.Major, this.Minor, this.Release);
         }
 
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return this.ToInt();
+            return version;
         }
 
         /// <inheritdoc/>
         public bool Equals(SQLiteVersion other)
         {
-            return this.Major == other.Major &&
-                this.Minor == other.Minor &&
-                this.Release == other.Release;
+            return this.version == other.version;
         }
 
         /// <inheritdoc/>
@@ -137,7 +129,7 @@ namespace SQLitePCL.pretty
         /// <inheritdoc/>
         public int CompareTo(SQLiteVersion other)
         {
-            return this.ToInt().CompareTo(other.ToInt());
+            return this.version.CompareTo(other.version);
         }
 
         /// <inheritdoc/>
