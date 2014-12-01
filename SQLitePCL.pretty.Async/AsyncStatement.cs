@@ -183,111 +183,111 @@ namespace SQLitePCL.pretty
                     stmt.Dispose();
                 });
         }
-    }
 
-    internal sealed class StatementWrapper : IStatement
-    {
-        private readonly IStatement stmt;
-
-        private bool disposed = false;
-
-        internal StatementWrapper(IStatement stmt)
+        private sealed class StatementWrapper : IStatement
         {
-            this.stmt = stmt;
-        }
+            private readonly IStatement stmt;
 
-        public IReadOnlyOrderedDictionary<string, IBindParameter> BindParameters
-        {
-            get
+            private bool disposed = false;
+
+            internal StatementWrapper(IStatement stmt)
+            {
+                this.stmt = stmt;
+            }
+
+            public IReadOnlyOrderedDictionary<string, IBindParameter> BindParameters
+            {
+                get
+                {
+                    if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+                    // FIXME: If someone keeps a reference to this list it leaks the implementation out
+                    return stmt.BindParameters;
+                }
+            }
+
+            public IReadOnlyList<ColumnInfo> Columns
+            {
+                get
+                {
+                    if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+                    // FIXME: If someone keeps a reference to this list it leaks the implementation out
+                    return stmt.Columns;
+                }
+            }
+
+            public string SQL
+            {
+                get
+                {
+                    if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                    return stmt.SQL;
+                }
+            }
+
+            public bool IsReadOnly
+            {
+                get
+                {
+                    if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                    return stmt.IsReadOnly;
+                }
+            }
+
+            public bool IsBusy
+            {
+                get
+                {
+                    if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                    return stmt.IsBusy;
+                }
+            }
+
+            public void ClearBindings()
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-                // FIXME: If someone keeps a reference to this list it leaks the implementation out
-                return stmt.BindParameters;
+                stmt.ClearBindings();
             }
-        }
 
-        public IReadOnlyList<ColumnInfo> Columns
-        {
-            get
+            public IReadOnlyList<IResultSetValue> Current
+            {
+                get
+                {
+                    if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+                    // FIXME: If someone keeps a reference to this list it leaks the implementation out
+                    return stmt.Current;
+                }
+            }
+
+            object IEnumerator.Current
+            {
+                get
+                {
+                    return this.Current;
+                }
+            }
+
+            public bool MoveNext()
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-                // FIXME: If someone keeps a reference to this list it leaks the implementation out
-                return stmt.Columns;
+                return stmt.MoveNext();
             }
-        }
 
-        public string SQL
-        {
-            get
+            public void Reset()
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-                return stmt.SQL;
+                stmt.Reset();
             }
-        }
 
-        public bool IsReadOnly
-        {
-            get
+            public void Dispose()
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-                return stmt.IsReadOnly;
+                // Guard against someone taking a reference to this and trying to use it outside of
+                // the Use function delegate
+                disposed = true;
+                // We don't actually own the statement so its not disposed
             }
-        }
-
-        public bool IsBusy
-        {
-            get
-            {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-                return stmt.IsBusy;
-            }
-        }
-
-        public void ClearBindings()
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-            stmt.ClearBindings();
-        }
-
-        public IReadOnlyList<IResultSetValue> Current
-        {
-            get
-            {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-                // FIXME: If someone keeps a reference to this list it leaks the implementation out
-                return stmt.Current;
-            }
-        }
-
-        object IEnumerator.Current
-        {
-            get
-            {
-                return this.Current;
-            }
-        }
-
-        public bool MoveNext()
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-            return stmt.MoveNext();
-        }
-
-        public void Reset()
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-            stmt.Reset();
-        }
-
-        public void Dispose()
-        {
-            // Guard against someone taking a reference to this and trying to use it outside of
-            // the Use function delegate
-            disposed = true;
-            // We don't actually own the statement so its not disposed
         }
     }
 }

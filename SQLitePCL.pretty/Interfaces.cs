@@ -60,12 +60,6 @@ namespace SQLitePCL.pretty
         bool IsAutoCommit { get; }
 
         /// <summary>
-        /// Sets the connection busy timeout when waiting for a locked table.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/busy_timeout.html"/>
-        TimeSpan BusyTimeout { set; }
-
-        /// <summary>
         /// Returns the number of database rows that were changed, inserted 
         /// or deleted by the most recently completed <see cref="IStatement"/>.
         /// </summary>
@@ -82,18 +76,6 @@ namespace SQLitePCL.pretty
         /// An enumeration of the connection's currently opened statements in the order they were prepared.
         /// </summary>
         IEnumerable<IStatement> Statements { get; }
-
-        /// <summary>
-        /// Returns the filename associated with the database if available.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/db_filename.html"/>
-        /// <param name="database">The database name. The main database file has the name "main".</param>
-        /// <param name="filename">When this method returns, contains the filename if there is an
-        /// attached database that is not temporary or in memory. Otherwise null. 
-        /// This parameter is passed uninitialized.</param>
-        /// <returns><see langword="true"/> if the database has a filename, otherwise <see langword="false"/>.
-        /// </returns>
-        bool TryGetFileName(string database, out string filename);
 
         /// <summary>
         /// Opens the blob located by the a database, table, column, and rowid for incremental I/O as a <see cref="System.IO.Stream"/>.
@@ -118,61 +100,6 @@ namespace SQLitePCL.pretty
         /// <param name="tail">Additional text beyond past the end of the first SQL statement.</param>
         /// <returns>The compiled <see cref="IStatement"/></returns>
         IStatement PrepareStatement(string sql, out string tail);
-
-        /// <summary>
-        /// Add or modify a collation function to the connection.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/create_collation.html"/>
-        /// <param name="name">The function name.</param>
-        /// <param name="comparison">A string comparison function.</param>
-        void RegisterCollation(string name, Comparison<string> comparison);
-
-        /// <summary>
-        /// Remove the collation function identified by <paramref name="name"/>.
-        /// </summary>
-        /// <param name="name">The function name.</param>
-        void RemoveCollation(string name);
-
-        /// <summary>
-        /// A callback function to be invoked whenever a transaction is committed.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/commit_hook.html"/>
-        /// <param name="onCommit">A function that returns <see langwords="true"/> 
-        /// if the commit should be rolled back, otherwise <see langwords="false"/></param>
-        void RegisterCommitHook(Func<bool> onCommit);
-
-        /// <summary>
-        /// Removes any registered commit hook.
-        /// </summary>
-        void RemoveCommitHook();
-
-        /// <summary>
-        /// Registers an aggregate function.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/create_function.html"/>
-        /// <typeparam name="T">The type of the accumulator value.</typeparam>
-        /// <param name="name">The function name.</param>
-        /// <param name="nArg">The number of <see cref="ISQLiteValue"/> instances the function takes or -1 if it may take any number of arguments.</param>
-        /// <param name="seed">The initial accumulator value.</param>
-        /// <param name="func">An accumulator function to be invoked on each element.</param>
-        /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        void RegisterAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector);
-
-        /// <summary>
-        /// Registers a scalar function.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/create_function.html"/>
-        /// <param name="name">The function name.</param>
-        /// <param name="nArg">The number of arguments the function takes or -1 if it may take any number of arguments.</param>
-        /// <param name="reduce">A reduction function.</param>
-        void RegisterScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce);
-
-        /// <summary>
-        /// Removes the scalar or aggregat function identified by <paramref name="name"/> and <paramref name="nArg"/>.
-        /// </summary>
-        /// <param name="name">The function name.</param>
-        /// <param name="nArg">The number of arguments the function takes or -1 if it may take any number of arguments.</param>
-        void RemoveFunc(string name, int nArg);
     }
 
     /// <summary>

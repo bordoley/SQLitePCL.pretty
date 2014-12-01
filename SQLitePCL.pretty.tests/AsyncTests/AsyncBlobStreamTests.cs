@@ -21,7 +21,7 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 
-namespace SQLitePCL.pretty.tests.AsyncTests
+namespace SQLitePCL.pretty.tests
 {
     [TestFixture]
     public class AsyncBlobStreamTests

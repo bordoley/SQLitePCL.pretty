@@ -131,22 +131,128 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Test]
+        public async Task TestIDatabaseConnectionStatements()
+        {
+            using (var adb = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            {
+                await adb.ExecuteAsync("CREATE TABLE foo (x int);");
+                var someStatements = await adb.PrepareAllAsync(
+                    @"INSERT INTO foo (x) VALUES (1);
+                      BEGIN TRANSACTION;
+                      INSERT INTO foo (x) VALUES (2);
+                      ROLLBACK TRANSACTION;
+                      BEGIN TRANSACTION;
+                      INSERT INTO foo (x) VALUES (2);
+                      COMMIT;");
+
+                await adb.Use(db =>
+                {
+                    var stmt1 = db.PrepareStatement("INSERT INTO foo (x) VALUES (?);");
+                    var stmt2 = db.PrepareStatement("SELECT * FROM foo");
+                    var stmt3 = db.PrepareStatement("SELECT rowid, x FROM foo");
+                    
+                    var stmts = new HashSet<IStatement>();
+                    stmts.Add(stmt1);
+                    stmts.Add(stmt2);
+                    stmts.Add(stmt3);
+
+                    int count = 0;
+                    foreach (var stmt in db.Statements)
+                    {
+                        count++;
+                        Assert.True(stmts.Contains(stmt));
+                    }
+
+                    Assert.AreEqual(count, stmts.Count);
+                });
+            }
+        }
+
+        [Test]
+        public async Task TestIDatabaseConnectionEvents()
+        {
+            using (var adb = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            {
+                bool expectEvent = true;
+
+                await adb.Use(db => 
+                {
+                    bool profile = false;
+                    bool trace = false;
+                    bool rollback = false;
+                    bool update = false;
+
+                    db.Profile += (o, e) => 
+                        {
+                            profile = true;
+                            Assert.True(expectEvent);
+                        };
+
+                    db.Trace += (o, e) => 
+                        {
+                            trace = true;
+                            Assert.True(expectEvent);
+                        };
+
+                    db.Rollback += (o, e) => 
+                        {
+                            rollback = true;
+                            Assert.True(expectEvent);
+                        };
+
+                    db.Update += (o, e) =>
+                        {
+                            update = true;
+                            Assert.True(expectEvent);
+                        };
+
+                    db.ExecuteAll(
+                      @"CREATE TABLE foo (x int);
+                        INSERT INTO foo (x) VALUES (1);
+                        BEGIN TRANSACTION;
+                        INSERT INTO foo (x) VALUES (2);
+                        ROLLBACK TRANSACTION;
+                        BEGIN TRANSACTION;
+                        INSERT INTO foo (x) VALUES (2);
+                        COMMIT;");
+
+                    Assert.True(profile);
+                    Assert.True(trace);
+                    Assert.True(rollback);
+                    Assert.True(update);
+                });
+
+                // Test to ensure the event handlers are not called.
+                expectEvent = false;
+                await adb.Use(db =>
+                {
+                    db.ExecuteAll(
+                      @"INSERT INTO foo (x) VALUES (1);
+                        BEGIN TRANSACTION;
+                        INSERT INTO foo (x) VALUES (2);
+                        ROLLBACK TRANSACTION;
+                        BEGIN TRANSACTION;
+                        INSERT INTO foo (x) VALUES (2);
+                        COMMIT;");
+                });
+            }
+        }
+
+        [Test]
         public async Task TestIDatabaseConnectionDispose()
         { 
             using (var adb = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
             {
                 await adb.ExecuteAsync("CREATE TABLE foo (x int);");
 
-                await adb.Use(db => {
+                await adb.Use(db => 
+                {
                     Assert.DoesNotThrow(() => { var x = db.IsAutoCommit; });
                     Assert.DoesNotThrow(() => { var x = db.Changes; });
                     Assert.DoesNotThrow(() => { var x = db.LastInsertedRowId; });
                     Assert.DoesNotThrow(() => { var x = db.Statements; });
                     Assert.DoesNotThrow(() => { using (var stmt = db.PrepareStatement("SELECT x FROM foo;")) { } });
 
-                    string filename;
-                    Assert.DoesNotThrow(() => { var x = db.TryGetFileName("main", out filename); });
- 
                     db.Dispose();
 
                     Assert.Throws<ObjectDisposedException>(() => { var x = db.IsAutoCommit; });
@@ -155,7 +261,6 @@ namespace SQLitePCL.pretty.tests
                     Assert.Throws<ObjectDisposedException>(() => { var x = db.Statements; });
                     Assert.Throws<ObjectDisposedException>(() => { var x = db.OpenBlob("", "", "", 0, true); });
                     Assert.Throws<ObjectDisposedException>(() => db.PrepareStatement("SELECT x FROM foo;"));
-                    Assert.Throws<ObjectDisposedException>(() => { var x = db.TryGetFileName("main", out filename); });
                 });
 
                 await adb.Use(db =>
@@ -173,35 +278,6 @@ namespace SQLitePCL.pretty.tests
                             Assert.AreEqual(x.Kind, NotificationKind.OnError);
                             Assert.IsInstanceOf<ObjectDisposedException>(x.Exception);
                         });
-            }
-        }
-
-        [Test]
-        public async Task TestIDatabaseConnectionUnsupportedMethods()
-        {
-            using (var adb = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
-            {
-                await adb.ExecuteAsync("CREATE TABLE foo (x int);");
-
-                await adb.Use(db => {
-                    Assert.Throws(typeof(NotSupportedException), () => db.Rollback += (o, e) => { });
-                    Assert.Throws(typeof(NotSupportedException), () => db.Rollback -= (o, e) => { });
-                    Assert.Throws(typeof(NotSupportedException), () => db.Trace += (o, e) => { });
-                    Assert.Throws(typeof(NotSupportedException), () => db.Trace -= (o, e) => { });
-                    Assert.Throws(typeof(NotSupportedException), () => db.Profile += (o, e) => { });
-                    Assert.Throws(typeof(NotSupportedException), () => db.Profile -= (o, e) => { });
-                    Assert.Throws(typeof(NotSupportedException), () => db.Update += (o, e) => { });
-                    Assert.Throws(typeof(NotSupportedException), () => db.Update -= (o, e) => { });
-                    Assert.Throws(typeof(NotSupportedException), () => db.BusyTimeout = TimeSpan.MaxValue);
-
-                    Assert.Throws(typeof(NotSupportedException), () => db.RegisterCollation("test", (a, b) => 1));
-                    Assert.Throws(typeof(NotSupportedException), () => db.RemoveCollation("test"));
-                    Assert.Throws(typeof(NotSupportedException), () => db.RegisterCommitHook(() => false));
-                    Assert.Throws(typeof(NotSupportedException), () => db.RemoveCommitHook());
-                    Assert.Throws(typeof(NotSupportedException), () => db.RegisterAggregateFunc("test", "", (string a, ISQLiteValue b) => a, a => a.ToSQLiteValue()));
-                    Assert.Throws(typeof(NotSupportedException), () => db.RegisterScalarFunc("test", (a, b) => a));
-                    Assert.Throws(typeof(NotSupportedException), () => db.RemoveFunc("test", 2));
-                });
             }
         }
 

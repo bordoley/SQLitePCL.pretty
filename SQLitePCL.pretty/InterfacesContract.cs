@@ -36,14 +36,6 @@ namespace SQLitePCL.pretty
 
         public abstract bool IsAutoCommit { get; }
 
-        public TimeSpan BusyTimeout 
-        {
-            set
-            {
-                Contract.Requires(value.TotalMilliseconds <= Int32.MaxValue);
-            }
-        }
-
         public abstract int Changes { get; }
 
         public abstract long LastInsertedRowId { get; }
@@ -51,13 +43,6 @@ namespace SQLitePCL.pretty
         public abstract IEnumerable<IStatement> Statements { get; }
 
         public abstract void Dispose();
-
-        public bool TryGetFileName(string database, out string filename)
-        {
-            Contract.Requires(database != null);
-            filename = default(string);
-            return default(bool);
-        }
 
         public Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite)
         {
@@ -72,47 +57,6 @@ namespace SQLitePCL.pretty
             Contract.Requires(sql != null);
             tail = default(string);
             return default(IStatement);
-        }
-
-        public void RegisterCollation(string name, Comparison<string> comparison)
-        {
-            Contract.Requires(name != null);
-            Contract.Requires(comparison != null);
-        }
-
-        public void RemoveCollation(string name)
-        {
-            Contract.Requires(name != null);
-        }
-
-        public void RegisterCommitHook(Func<bool> onCommit)
-        {
-            Contract.Requires(onCommit != null);
-        }
-
-        public void RemoveCommitHook()
-        { 
-        }
-
-        public void RegisterAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
-        {
-            Contract.Requires(name != null);
-            Contract.Requires(func != null);
-            Contract.Requires(resultSelector != null);
-            Contract.Requires(nArg >= -1);
-        }
-
-        public void RegisterScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
-        {
-            Contract.Requires(name != null);
-            Contract.Requires(reduce != null);
-            Contract.Requires(nArg >= -1);
-        }
-
-        public void RemoveFunc(string name, int nArg)
-        {
-            Contract.Requires(name != null);
-            Contract.Requires(nArg >= -1);
         }
     }
 

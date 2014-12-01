@@ -69,9 +69,8 @@ namespace SQLitePCL.pretty
         /// The returned IEnumerable may block. This allows the IEnumerable to provide the results of
         /// enumerating a SQLite prepared statement for instance.
         /// <note type="implement">
-        /// The IDatabaseConnection instance that f is called with is readonly. IDatabaseConnection events, setters and methods which
-        /// mutate the IDatabaseConnection throw <see cref="NotSupportedException"/>. The IDatabaseConnection may be used to prepare 
-        /// statements and open database blobs, but these must not be captured or otherwise externally referenced unless their use is 
+        /// The IDatabaseConnection may be used to prepare statements and open database blobs, 
+        /// but these must not be captured or otherwise externally referenced unless their use is 
         /// scheduled on the connections's operation queue via future calls to <see cref="Use"/>. 
         /// </note>
         /// </param>

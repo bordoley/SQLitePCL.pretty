@@ -341,7 +341,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -360,7 +360,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -379,7 +379,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -398,7 +398,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -417,7 +417,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -436,7 +436,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -455,7 +455,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -474,7 +474,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -493,7 +493,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -512,7 +512,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this IDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -528,7 +528,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
-        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this SQLiteDatabaseConnection This, string name, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -543,7 +543,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
-        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this SQLiteDatabaseConnection This, string name, Func<ISQLiteValue> reduce)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -559,7 +559,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
-        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this SQLiteDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -574,7 +574,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
-        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this SQLiteDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -589,7 +589,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
-        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this SQLiteDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -604,7 +604,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
-        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this SQLiteDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -619,7 +619,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
-        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this SQLiteDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -634,7 +634,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
-        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this SQLiteDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -649,7 +649,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
-        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this SQLiteDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -664,7 +664,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
-        public static void RegisterScalarFunc(this IDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public static void RegisterScalarFunc(this SQLiteDatabaseConnection This, string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -680,7 +680,7 @@ namespace SQLitePCL.pretty
         /// <param name="database">The database name. The main database file has the name "main".</param>
         /// <returns>The attached database's filename.</returns>
         /// <exception cref="InvalidOperationException">If the database is not attached, temporary, or in memory.</exception>
-        public static string GetFileName(this IDatabaseConnection This, string database)
+        public static string GetFileName(this SQLiteDatabaseConnection This, string database)
         {
             Contract.Requires(This != null);
             Contract.Requires(database != null);
@@ -717,7 +717,6 @@ namespace SQLitePCL.pretty
     /// <summary>
     /// An implementation of IDatabaseConnection that wraps a raw SQLite database connection.
     /// </summary>
-    /// <remarks>The sole purpose of using this implementation directly is to initiate database backups.</remarks>
     public sealed class SQLiteDatabaseConnection : IDatabaseConnection
     {
         private readonly sqlite3 db;
@@ -767,11 +766,16 @@ namespace SQLitePCL.pretty
         /// <inheritdoc/>
         public event EventHandler<DatabaseUpdateEventArgs> Update = (obj, args) => { };
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Sets the connection busy timeout when waiting for a locked table.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/busy_timeout.html"/>
         public TimeSpan BusyTimeout
         {
             set
             {
+                Contract.Requires(value.TotalMilliseconds <= Int32.MaxValue);
+
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
                 int rc = raw.sqlite3_busy_timeout(db, (int)value.TotalMilliseconds);
@@ -864,9 +868,20 @@ namespace SQLitePCL.pretty
             return new DatabaseBackupImpl(backup);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Returns the filename associated with the database if available.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/db_filename.html"/>
+        /// <param name="database">The database name. The main database file has the name "main".</param>
+        /// <param name="filename">When this method returns, contains the filename if there is an
+        /// attached database that is not temporary or in memory. Otherwise null. 
+        /// This parameter is passed uninitialized.</param>
+        /// <returns><see langword="true"/> if the database has a filename, otherwise <see langword="false"/>.
+        /// </returns>
         public bool TryGetFileName(string database, out string filename)
         {
+            Contract.Requires(database != null);
+
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             filename = raw.sqlite3_db_filename(db, database);
@@ -909,32 +924,55 @@ namespace SQLitePCL.pretty
             statements.Remove(stmt.sqlite3_stmt);
         }
 
-        /// <inheritdoc/>
+
+        /// <summary>
+        /// Add or modify a collation function to the connection.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/create_collation.html"/>
+        /// <param name="name">The function name.</param>
+        /// <param name="comparison">A string comparison function.</param>
         public void RegisterCollation(string name, Comparison<string> comparison)
         {
+            Contract.Requires(name != null);
+            Contract.Requires(comparison != null);
+
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             int rc = raw.sqlite3_create_collation(db, name, null, (v, s1, s2) => comparison(s1, s2));
             SQLiteException.CheckOk(db, rc);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Remove the collation function identified by <paramref name="name"/>.
+        /// </summary>
+        /// <param name="name">The function name.</param>
         public void RemoveCollation(string name)
         {
+            Contract.Requires(name != null);
+
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
             int rc = raw.sqlite3_create_collation(db, name, null, null);
             SQLiteException.CheckOk(db, rc);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// A callback function to be invoked whenever a transaction is committed.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/commit_hook.html"/>
+        /// <param name="onCommit">A function that returns <see langwords="true"/> 
+        /// if the commit should be rolled back, otherwise <see langwords="false"/></param>
         public void RegisterCommitHook(Func<bool> onCommit)
         {
+            Contract.Requires(onCommit != null);
+
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             raw.sqlite3_commit_hook(db, v => onCommit() ? 1 : 0, null);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Removes any registered commit hook.
+        /// </summary>
         public void RemoveCommitHook()
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
@@ -967,9 +1005,23 @@ namespace SQLitePCL.pretty
             }
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Registers an aggregate function.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/create_function.html"/>
+        /// <typeparam name="T">The type of the accumulator value.</typeparam>
+        /// <param name="name">The function name.</param>
+        /// <param name="nArg">The number of <see cref="ISQLiteValue"/> instances the function takes or -1 if it may take any number of arguments.</param>
+        /// <param name="seed">The initial accumulator value.</param>
+        /// <param name="func">An accumulator function to be invoked on each element.</param>
+        /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         public void RegisterAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
         {
+            Contract.Requires(name != null);
+            Contract.Requires(func != null);
+            Contract.Requires(resultSelector != null);
+            Contract.Requires(nArg >= -1);
+
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             delegate_function_aggregate_step funcStep = (ctx, user_data, args) =>
@@ -1032,9 +1084,19 @@ namespace SQLitePCL.pretty
             SQLiteException.CheckOk(db, rc);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Registers a scalar function.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/create_function.html"/>
+        /// <param name="name">The function name.</param>
+        /// <param name="nArg">The number of arguments the function takes or -1 if it may take any number of arguments.</param>
+        /// <param name="reduce">A reduction function.</param>
         public void RegisterScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
         {
+            Contract.Requires(name != null);
+            Contract.Requires(reduce != null);
+            Contract.Requires(nArg >= -1);
+
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             int rc = raw.sqlite3_create_function(db, name, nArg, null, (ctx, ud, args) =>
@@ -1076,9 +1138,16 @@ namespace SQLitePCL.pretty
             SQLiteException.CheckOk(db, rc);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Removes the scalar or aggregate function identified by <paramref name="name"/> and <paramref name="nArg"/>.
+        /// </summary>
+        /// <param name="name">The function name.</param>
+        /// <param name="nArg">The number of arguments the function takes or -1 if it may take any number of arguments.</param>
         public void RemoveFunc(string name, int nArg)
         {
+            Contract.Requires(name != null);
+            Contract.Requires(nArg >= -1);
+
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             int rc = raw.sqlite3_create_function(db, name, nArg, null, null);

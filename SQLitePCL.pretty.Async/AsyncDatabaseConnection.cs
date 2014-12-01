@@ -37,11 +37,11 @@ namespace SQLitePCL.pretty
 
         /// <summary>
         /// Allows an application to set a default scheduler for <see cref="IAsyncDatabaseConnection"/>
-        /// instances created with <see cref="DatabaseConnection.AsAsyncDatabaseConnection(IDatabaseConnection)"/>.
+        /// instances created with <see cref="DatabaseConnection.AsAsyncDatabaseConnection(SQLiteDatabaseConnection)"/>.
         /// </summary>
         /// <remarks>This is a convenience feature that allows an application to set a global 
         /// <see cref="IScheduler"/> instance, instead of supplying it with each call to 
-        /// <see cref="DatabaseConnection.AsAsyncDatabaseConnection(IDatabaseConnection)"/>. 
+        /// <see cref="DatabaseConnection.AsAsyncDatabaseConnection(SQLiteDatabaseConnection)"/>. 
         /// </remarks>
         /// <threadsafety static="false">This setter sets global state and should not be 
         /// used after application initialization.</threadsafety>
@@ -64,7 +64,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="scheduler">A scheduler used to schedule asynchronous database use on.</param>
         /// <returns>An <see cref="IAsyncDatabaseConnection"/> instance.</returns>
-        public static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this IDatabaseConnection This, IScheduler scheduler)
+        public static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this SQLiteDatabaseConnection This, IScheduler scheduler)
         {
             Contract.Requires(This != null);
             Contract.Requires(scheduler != null);
@@ -80,7 +80,7 @@ namespace SQLitePCL.pretty
         /// safely used directly.</remarks>
         /// <param name="This">The database connection.</param>
         /// <returns>An <see cref="IAsyncDatabaseConnection"/> instance.</returns>
-        public static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this IDatabaseConnection This)
+        public static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this SQLiteDatabaseConnection This)
         {
             Contract.Requires(This != null);
             return AsAsyncDatabaseConnection(This, defaultScheduler);
@@ -646,151 +646,204 @@ namespace SQLitePCL.pretty
                         }, scheduler, cancellationToken);
                 });
         }
-    }
 
-    internal sealed class DatabaseConnectionWrapper : IDatabaseConnection
-    {
-        private readonly IDatabaseConnection db;
-
-        private bool disposed = false;
-
-        internal DatabaseConnectionWrapper(IDatabaseConnection db)
+        private sealed class DatabaseConnectionWrapper : IDatabaseConnection
         {
-            this.db = db;
-        }
+            private readonly IDatabaseConnection db;
+            private readonly Dictionary<IStatement, StatementWrapper> statements = new Dictionary<IStatement, StatementWrapper>();
+            private readonly IEnumerable<IStatement> statementsEnumerable;
 
-        public event EventHandler Rollback
-        {
-            add { throw new NotSupportedException(); }
-            remove { throw new NotSupportedException(); }
-        }
+            private readonly EventHandler rollback;
+            private readonly EventHandler<DatabaseTraceEventArgs> trace;
+            private readonly EventHandler<DatabaseProfileEventArgs> profile;
+            private readonly EventHandler<DatabaseUpdateEventArgs> update;
 
-        public event EventHandler<DatabaseTraceEventArgs> Trace
-        {
-            add { throw new NotSupportedException(); }
-            remove { throw new NotSupportedException(); }
-        }
+            private bool disposed = false;
 
-        public event EventHandler<DatabaseProfileEventArgs> Profile
-        {
-            add { throw new NotSupportedException(); }
-            remove { throw new NotSupportedException(); }
-        }
+            internal DatabaseConnectionWrapper(IDatabaseConnection db)
+            {
+                this.db = db;
 
-        public event EventHandler<DatabaseUpdateEventArgs> Update
-        {
-            add { throw new NotSupportedException(); }
-            remove { throw new NotSupportedException(); }
-        }
+                this.rollback = (o, e) => this.Rollback(this, e);
+                this.trace = (o, e) => this.Trace(this, e);
+                this.profile = (o, e) => this.Profile(this, e);
+                this.update = (o, e) => this.Update(this, e);
 
-        public bool IsAutoCommit
-        {
-            get
+                db.Rollback += rollback;
+                db.Trace += trace;
+                db.Profile += profile;
+                db.Update += update;
+
+                this.statementsEnumerable = new DelegatingEnumerable<IStatement>(() => StatementsEnumerator());
+            }
+
+            public event EventHandler Rollback = (o, e) => { };
+
+            public event EventHandler<DatabaseTraceEventArgs> Trace = (o, e) => { };
+
+            public event EventHandler<DatabaseProfileEventArgs> Profile = (o, e) => { };
+
+            public event EventHandler<DatabaseUpdateEventArgs> Update = (o, e) => { };
+
+            public bool IsAutoCommit
+            {
+                get
+                {
+                    if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                    return db.IsAutoCommit;
+                }
+            }
+
+            public int Changes
+            {
+                get
+                {
+                    if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                    return db.Changes;
+                }
+            }
+
+            public long LastInsertedRowId
+            {
+                get
+                {
+                    if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                    return db.LastInsertedRowId;
+                }
+            }
+
+            public IEnumerable<IStatement> Statements
+            {
+                get
+                {
+                    if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+                    return this.statementsEnumerable;
+                }
+            }
+
+            private IEnumerator<IStatement> StatementsEnumerator()
+            {
+                foreach (var stmt in db.Statements)
+                {
+                    StatementWrapper result;
+                    if (this.statements.TryGetValue(stmt, out result))
+                    {
+                        yield return result;
+                    }
+                }
+            }
+
+            internal void RemoveStatement(StatementWrapper stmt)
+            {
+                statements.Remove(stmt.stmt);
+            }
+
+            public Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite)
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-                return db.IsAutoCommit;
+                return db.OpenBlob(database, tableName, columnName, rowId, canWrite);
+            }
+
+            public IStatement PrepareStatement(string sql, out string tail)
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+                var stmt = db.PrepareStatement(sql, out tail);
+                var retval = new StatementWrapper(stmt, this);
+                this.statements.Add(stmt, retval);
+                return retval;
+            }
+
+            public void Dispose()
+            {
+                db.Rollback -= rollback;
+                db.Trace -= trace;
+                db.Profile -= profile;
+                db.Update -= update;
+
+                // Guard against someone taking a reference to this and trying to use it outside of 
+                // the Use function delegate
+                disposed = true;
+                // We don't actually own the database connection so its not disposed
             }
         }
 
-        public TimeSpan BusyTimeout
+        private class StatementWrapper : IStatement
         {
-            set { throw new NotSupportedException(); }
-        }
+            internal readonly IStatement stmt;
+            private readonly WeakReference<DatabaseConnectionWrapper> db;
 
-        public int Changes
-        {
-            get
+            internal StatementWrapper(IStatement stmt, DatabaseConnectionWrapper db)
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-                return db.Changes;
-            }
-        }
+                this.stmt = stmt;
 
-        public long LastInsertedRowId
-        {
-            get
+                // The statement may outlive the connection wrapper.
+                // This is ok as long as the statement is disposed prior to disposing
+                // The actual underlying database connection.
+                this.db = new WeakReference<DatabaseConnectionWrapper>(db);
+            }
+
+            public IReadOnlyOrderedDictionary<string, IBindParameter> BindParameters
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-                return db.LastInsertedRowId;
+                get { return stmt.BindParameters; }
             }
-        }
 
-        public IEnumerable<IStatement> Statements
-        {
-            get
+            public IReadOnlyList<ColumnInfo> Columns
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-                // FIXME: If someone keeps a reference to this list it leaks the implementation out
-                return db.Statements;
+                get { return stmt.Columns; }
             }
-        }
 
-        public bool TryGetFileName(string database, out string filename)
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-            return db.TryGetFileName(database, out filename);
-        }
+            public string SQL
+            {
+                get { return stmt.SQL; }
+            }
 
-        public Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite)
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            public bool IsReadOnly
+            {
+                get { return stmt.IsReadOnly; }
+            }
 
-            // FIXME: If someone keeps a reference to this list it leaks the implementation out
-            // On the other hand that is what we actually want for OpenBlobStreamAsync
-            return db.OpenBlob(database, tableName, columnName, rowId, canWrite);
-        }
+            public bool IsBusy
+            {
+                get { return stmt.IsBusy; }
+            }
 
-        public IStatement PrepareStatement(string sql, out string tail)
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            public void ClearBindings()
+            {
+                stmt.ClearBindings();
+            }
 
-            // FIXME: If someone keeps a reference to this list it leaks the implementation out
-            // On the other hand that is what we actually want for PrepareStatementAsync
-            return db.PrepareStatement(sql, out tail);
-        }
+            public IReadOnlyList<IResultSetValue> Current
+            {
+                get { return stmt.Current; }
+            }
 
-        public void RegisterCollation(string name, Comparison<string> comparison)
-        {
-            throw new NotSupportedException();
-        }
+            object System.Collections.IEnumerator.Current
+            {
+                get { return stmt.Current; }
+            }
 
-        public void RemoveCollation(string name)
-        {
-            throw new NotSupportedException();
-        }
+            public bool MoveNext()
+            {
+                return stmt.MoveNext();
+            }
 
-        public void RegisterCommitHook(Func<bool> onCommit)
-        {
-            throw new NotSupportedException();
-        }
+            public void Reset()
+            {
+                stmt.Reset();
+            }
 
-        public void RemoveCommitHook()
-        {
-            throw new NotSupportedException();
-        }
+            public void Dispose()
+            {
+                DatabaseConnectionWrapper conn;
+                if (db.TryGetTarget(out conn))
+                {
+                    conn.RemoveStatement(this);
+                }
 
-        public void RegisterAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
-        {
-            throw new NotSupportedException();
-        }
-
-        public void RegisterScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
-        {
-            throw new NotSupportedException();
-        }
-
-        public void RemoveFunc(string name, int nArg)
-        {
-            throw new NotSupportedException();
-        }
-
-        public void Dispose()
-        {
-            // Guard against someone taking a reference to this and trying to use it outside of 
-            // the Use function delegate
-            disposed = true;
-            // We don't actually own the database connection so its not disposed
+                stmt.Dispose();
+            }
         }
     }
 }
