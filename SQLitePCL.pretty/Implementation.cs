@@ -454,7 +454,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                return raw.sqlite3_column_count(stmt.sqlite3_stmt);
+                return raw.sqlite3_data_count(stmt.sqlite3_stmt);
             }
         }
 

@@ -76,6 +76,7 @@ namespace SQLitePCL.pretty.tests
             {
                 using (var stmt = db.PrepareStatement("SELECT null;"))
                 {
+                    stmt.MoveNext();
                     var expected = stmt.Current.First();
                     compare(expected, SQLiteValue.Null);
                 }

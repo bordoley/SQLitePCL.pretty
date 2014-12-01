@@ -25,24 +25,25 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestEquality()
         {
-            Tuple<string, string, string, string>[] tests =
+            Tuple<string, string, string, string, string>[] tests =
                 {
-                    Tuple.Create("", "", "", ""),
-                    Tuple.Create("name","", "",""),
-                    Tuple.Create("name","db", "", ""),
-                    Tuple.Create("name","db", "table", ""),
-                    Tuple.Create("name","db", "table", "column"),
+                    Tuple.Create("", "", "", "", ""),
+                    Tuple.Create("name","", "","", ""),
+                    Tuple.Create("name","db", "", "", ""),
+                    Tuple.Create("name","db", "table", "", ""),
+                    Tuple.Create("name","db", "table", "column", ""),
+                    Tuple.Create("name","db", "table", "column", "Variant"),
                 };
 
-            Assert.False(new ColumnInfo("", "", "", "").Equals(null));
-            Assert.False(new ColumnInfo("", "", "", "").Equals(new Object()));
+            Assert.False(new ColumnInfo("", "", "", "", "").Equals(null));
+            Assert.False(new ColumnInfo("", "", "", "", "").Equals(new Object()));
 
             for (int i = 0; i < tests.Length; i++)
             {
                 for (int j = 0; j < tests.Length; j++)
                 {
-                    var fst = new ColumnInfo(tests[i].Item1, tests[i].Item2, tests[i].Item3, tests[i].Item4);
-                    var snd = new ColumnInfo(tests[j].Item1, tests[j].Item2, tests[j].Item3, tests[j].Item4);
+                    var fst = new ColumnInfo(tests[i].Item1, tests[i].Item2, tests[i].Item3, tests[i].Item4, tests[i].Item5);
+                    var snd = new ColumnInfo(tests[j].Item1, tests[j].Item2, tests[j].Item3, tests[j].Item4, tests[j].Item5);
 
                     if (i == j)
                     {
@@ -65,19 +66,20 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestGetHashcode()
         {
-            Tuple<string, string, string, string>[] tests =
+            Tuple<string, string, string, string, string>[] tests =
                 {
-                    Tuple.Create("", "", "", ""),
-                    Tuple.Create("name","", "",""),
-                    Tuple.Create("name","db", "", ""),
-                    Tuple.Create("name","db", "table", ""),
-                    Tuple.Create("name","db", "table", "column"),
+                    Tuple.Create("", "", "", "", ""),
+                    Tuple.Create("name","", "", "", ""),
+                    Tuple.Create("name","db", "", "", ""),
+                    Tuple.Create("name","db", "table", "", ""),
+                    Tuple.Create("name","db", "table", "column", ""),
+                    Tuple.Create("name","db", "table", "column", "Variant"),
                 };
 
             for (int i = 0; i < tests.Length; i++)
             {
-                var fst =  new ColumnInfo(tests[i].Item1, tests[i].Item2, tests[i].Item3, tests[i].Item4);
-                var snd = new ColumnInfo(tests[i].Item1, tests[i].Item2, tests[i].Item3, tests[i].Item4);
+                var fst = new ColumnInfo(tests[i].Item1, tests[i].Item2, tests[i].Item3, tests[i].Item4, tests[i].Item5);
+                var snd = new ColumnInfo(tests[i].Item1, tests[i].Item2, tests[i].Item3, tests[i].Item4, tests[i].Item5);
 
                 Assert.AreEqual(fst.GetHashCode(), snd.GetHashCode());
             }
@@ -88,11 +90,12 @@ namespace SQLitePCL.pretty.tests
         {
             ColumnInfo[] tests =
                 {
-                    new ColumnInfo("","", "",""),
-                    new ColumnInfo("name","", "",""),
-                    new ColumnInfo("name","db", "", ""),
-                    new ColumnInfo("name","db", "table", ""),
-                    new ColumnInfo("name","db", "table", "column"),
+                    new ColumnInfo("","", "","", ""),
+                    new ColumnInfo("name","", "", "", ""),
+                    new ColumnInfo("name","db", "", "", ""),
+                    new ColumnInfo("name","db", "table", "", ""),
+                    new ColumnInfo("name","db", "table", "column", ""),
+                    new ColumnInfo("name","db", "table", "column", "Variant"),
                 };
 
             for (int i = 0; i < tests.Length; i++)
@@ -133,10 +136,10 @@ namespace SQLitePCL.pretty.tests
             }
 
             ColumnInfo nullColumnInfo = null;
-            Assert.AreEqual(new ColumnInfo("", "", "", "").CompareTo(nullColumnInfo), 1);
+            Assert.AreEqual(new ColumnInfo("", "", "", "", "").CompareTo(nullColumnInfo), 1);
 
             object nullObj = null;
-            Assert.AreEqual(((IComparable) new ColumnInfo("", "", "", "")).CompareTo(nullObj), 1); 
+            Assert.AreEqual(((IComparable) new ColumnInfo("", "", "", "", "")).CompareTo(nullObj), 1); 
         }
     }
 }

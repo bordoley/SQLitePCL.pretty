@@ -107,20 +107,23 @@ namespace SQLitePCL.pretty
                 raw.sqlite3_column_name(stmt.sqlite3_stmt, index),
                 raw.sqlite3_column_database_name(stmt.sqlite3_stmt, index),
                 raw.sqlite3_column_origin_name(stmt.sqlite3_stmt, index),
-                raw.sqlite3_column_table_name(stmt.sqlite3_stmt, index));
+                raw.sqlite3_column_table_name(stmt.sqlite3_stmt, index),
+                raw.sqlite3_column_decltype(stmt.sqlite3_stmt, index));
         }
 
         private readonly string name;
         private readonly string databaseName;
         private readonly string tableName;
         private readonly string originName;
+        private readonly string declaredType;
 
-        internal ColumnInfo(string name, string databaseName, string originName, string tableName)
+        internal ColumnInfo(string name, string databaseName, string originName, string tableName, string declaredType)
         {
             this.name = name;
             this.databaseName = databaseName;
             this.originName = originName;
             this.tableName = tableName;
+            this.declaredType = declaredType;
         }
 
         /// <summary>
@@ -147,6 +150,12 @@ namespace SQLitePCL.pretty
         /// <seealso href="https://sqlite.org/c3ref/column_database_name.html"/>
         public string TableName { get { return tableName; }}
 
+        /// <summary>
+        /// Returns the declared type of a column in a result set or null if no type is declared.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/column_decltype.html"/>
+        public string DeclaredType { get { return declaredType; } }
+
         /// <inheritdoc/>
         public bool Equals(ColumnInfo other)
         {
@@ -163,7 +172,8 @@ namespace SQLitePCL.pretty
             return this.Name == other.Name &&
                 this.DatabaseName == other.DatabaseName &&
                 this.OriginName == other.OriginName &&
-                this.TableName == other.TableName;
+                this.TableName == other.TableName &&
+                this.DeclaredType == other.DeclaredType;
         }
 
         /// <inheritdoc/>
@@ -180,6 +190,7 @@ namespace SQLitePCL.pretty
             hash = hash * 31 + this.DatabaseName.GetHashCode();
             hash = hash * 31 + this.OriginName.GetHashCode();
             hash = hash * 31 + this.TableName.GetHashCode();
+            hash = hash * 32 + this.DeclaredType.GetHashCode();
             return hash;
         }
 
@@ -197,7 +208,10 @@ namespace SQLitePCL.pretty
                 result = this.TableName.CompareTo(other.TableName);
                 if (result != 0) { return result; }
 
-                return this.OriginName.CompareTo(other.OriginName);
+                result = this.OriginName.CompareTo(other.OriginName);
+                if (result != 0) { return result; }
+
+                return this.DeclaredType.CompareTo(other.DeclaredType);
             }
             else 
             {
