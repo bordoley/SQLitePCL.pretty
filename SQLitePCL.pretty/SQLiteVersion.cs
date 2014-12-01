@@ -47,6 +47,50 @@ namespace SQLitePCL.pretty
             return !(x == y);
         }
 
+        /// <summary>
+        /// Indicates if the the first SQLiteVersion is greater than or equal to the second.
+        /// </summary>
+        /// <param name="x">A SQLiteVersion instance.</param>
+        /// <param name="y">A SQLiteVersion instance.</param>
+        /// <returns><see langword="true"/>if the the first SQLiteVersion is greater than or equal to the second; otherwise, <see langword="false"/>.</returns>
+        public static bool operator >=(SQLiteVersion x, SQLiteVersion y)
+        {
+            return x.version >= y.version;
+        }
+
+        /// <summary>
+        /// Indicates if the the first SQLiteVersion is greater than the second.
+        /// </summary>
+        /// <param name="x">A SQLiteVersion instance.</param>
+        /// <param name="y">A SQLiteVersion instance.</param>
+        /// <returns><see langword="true"/>if the the first SQLiteVersion is greater than the second; otherwise, <see langword="false"/>.</returns>
+        public static bool operator >(SQLiteVersion x, SQLiteVersion y)
+        {
+            return x.version > y.version;
+        }
+
+        /// <summary>
+        /// Indicates if the the first SQLiteVersion is less than or equal to the second.
+        /// </summary>
+        /// <param name="x">A SQLiteVersion instance.</param>
+        /// <param name="y">A SQLiteVersion instance.</param>
+        /// <returns><see langword="true"/>if the the first SQLiteVersion is less than or equal to the second; otherwise, <see langword="false"/>.</returns>
+        public static bool operator <=(SQLiteVersion x, SQLiteVersion y)
+        {
+            return x.version <= y.version;
+        }
+
+        /// <summary>
+        /// Indicates if the the first SQLiteVersion is less than the second.
+        /// </summary>
+        /// <param name="x">A SQLiteVersion instance.</param>
+        /// <param name="y">A SQLiteVersion instance.</param>
+        /// <returns><see langword="true"/>if the the first SQLiteVersion is less than the second; otherwise, <see langword="false"/>.</returns>
+        public static bool operator <(SQLiteVersion x, SQLiteVersion y)
+        {
+            return x.version < y.version;
+        }
+
         internal static SQLiteVersion Of(int version)
         {
             // FIXME: If made public in the future, add contracts on the version number.

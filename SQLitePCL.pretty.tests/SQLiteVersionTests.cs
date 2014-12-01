@@ -83,6 +83,20 @@ namespace SQLitePCL.pretty.tests
 
             Assert.Throws<ArgumentException>(() => SQLiteVersion.Of(3080911).CompareTo(null));
             Assert.Throws<ArgumentException>(() => SQLiteVersion.Of(3080911).CompareTo(""));
+
+            Assert.True(SQLiteVersion.Of(3080911) > SQLiteVersion.Of(3080910));
+            Assert.True(SQLiteVersion.Of(3080911) >= SQLiteVersion.Of(3080911));
+            Assert.True(SQLiteVersion.Of(3080911) >= SQLiteVersion.Of(3080910));
+
+            Assert.False(SQLiteVersion.Of(3080911) < SQLiteVersion.Of(3080910));
+            Assert.True(SQLiteVersion.Of(3080911) <= SQLiteVersion.Of(3080911));
+            Assert.False(SQLiteVersion.Of(3080911) < SQLiteVersion.Of(3080910));
+        }
+
+        [Test]
+        public void TestToInt()
+        {
+            Assert.AreEqual(SQLiteVersion.Of(3080911).ToInt(), 3080911);
         }
 
         [Test]
