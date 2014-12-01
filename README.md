@@ -65,7 +65,7 @@ using (var db = SQLite3.Open(":memory:"))
 {
     db.ExecuteAll(
         @"CREATE TABLE foo (w int, x float, y string, z blob);
-          INSERT INTO foo (w,x,y,z) VALUES (0, 0, '', null);");
+            INSERT INTO foo (w,x,y,z) VALUES (0, 0, '', null);");
 
     db.Execute("INSERT INTO foo (w, x, y, z) VALUES (?, ?, ?, ?)", 1, 1.1, "hello", stream);
 
@@ -110,13 +110,18 @@ using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream")
 {
     await db.ExecuteAllAsync(
         @"CREATE TABLE foo (w int, x float, y string, z blob);
-            INSERT INTO foo (w,x,y,z) VALUES (0, 0, '', null);");
+          INSERT INTO foo (w,x,y,z) VALUES (0, 0, '', null);");
 
     await db.ExecuteAsync("INSERT INTO foo (w, x, y, z) VALUES (?, ?, ?, ?)", 1, 1.1, "hello", stream);
 
-    var rowId = await db.Query("SELECT rowid, z FROM foo where y = 'hello'").Select(row => row[0].ToInt64()).FirstAsync();
+    var dst =
+        await db.Query("SELECT rowid, z FROM foo where y = 'hello'")
+                .Select(row => db.OpenBlobAsync(row[1].ColumnInfo, row[0].ToInt64(), true))
+                .FirstAsync()
+                .ToTask()
+                .Unwrap();
 
-    using (var dst = await db.OpenBlobAsync("main", "foo", "z", rowId, true))
+    using (dst)
     {
         await stream.CopyToAsync(dst);
     }
