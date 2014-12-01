@@ -22,41 +22,8 @@ While the code is well tested, the API is currently in flux. Users should expect
 
 # API Overview
 
-Complete (more or less...) API documentation is available [here](http://bordoley.github.io/SQLitePCL.pretty.Documentation/Help/html/N_SQLitePCL_pretty.htm).
+[Complete (more or less...) API documentation] (http://bordoley.github.io/SQLitePCL.pretty.Documentation/Help/html/N_SQLitePCL_pretty.htm).
 
-## Synchronous API
-
-* SQLite3 - This is the main static class you use to obtain database connections. It also provides APIs for obtaining the SQLite version, compile options used, and information about SQLite memory use.
-
-* IDatabaseConnection - The main interface for interacting with a SQLite database. You use this class to prepare and execute SQL statements. In addition, numerous extension methods are provided to make writing queries easier. This class also supports several advance SQLite features:
-  * Registering collation, aggregate and scalar functions written in managed code.
-  * Rollback and update event tracking using C# events.
-  * Trace and profiling events.
-  * The ability to register a commit hook.
-  * Support for streaming data to and from SQLite using the .NET Stream interface.
-   
-* SQLiteDatabaseConnection - A concrete implementation of IDatabaseConnection exposed in the API in order to enable database backups. 
-
-* IStatement - This interface is used to bind parameters and to enumerate the result set of a SQL query. Its a lower level interface that you rarely need to use in practice but is available if needed.
-
-* IBindParameter - This interface is used to bind a parameter to a value when preparing a statement to be stepped through. An IStatement provides access to its bind parameters via an IReadonlyOrderedDictionary, which allows accessing bind parameters by either index or name.
-
-* IColumnInfo - This interface provides additional info about a column in the result set, such as the database, table and column names of the value.
-
-* ISQLiteValue - This interface is used to wrap SQLite dynamically typed values which are used in result sets as well as in aggregate and scalar functions. 
-
-* IResultSetValue - A subclass of ISQLiteValue that includes the IColumnInfo associated with the value.
-
-* IDatabaseBackup - Interface to SQLite's backup API.
-
-* SQLiteException - An exception wrapper around SQLite's error codes.
-
-* SQLiteVersion - A struct that wraps the SQLite numeric version.
-
-## Asynchronous API
-* IAsyncDatabaseConnection - A wrapper around an instance of an IDatabaseConnection that provides lock free FIFO scheduling of access to the database connection. Work items can be scheduled on the TaskPool, ThreadPool, SynchronizationContext or any other RX IScheduler. Note that this class is not thread safe, and only provides a way to schedule work on a given database connection in a non-blocking fashion. In addition, this interface exposes database events as IObservable instances, and numerous extension methods are provided to asynchronously execute queries against a database connection. 
-
-* IAsyncStatement - A wrapper around an IStatement instance, that allows asynchronous querying and reuse of a prepared statement. Note that work items scheduled on the async statements queue are run on the same queue as the database connection used to generate the IAsyncStatement.
 
 # Let me see an example
 ```
