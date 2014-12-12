@@ -650,7 +650,7 @@ namespace SQLitePCL.pretty
 
         public double ToDouble()
         {
-            return this.ToBlob().ToSQLiteValue().ToDouble();
+            return 0;
         }
 
         public int ToInt()
