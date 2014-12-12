@@ -1051,28 +1051,7 @@ namespace SQLitePCL.pretty
                     try
                     {
                         ISQLiteValue result = resultSelector(state.Value);
-                        switch (result.SQLiteType)
-                        {
-                            case SQLiteType.Blob:
-                                raw.sqlite3_result_blob(ctx, result.ToBlob());
-                                return;
-
-                            case SQLiteType.Null:
-                                raw.sqlite3_result_null(ctx);
-                                return;
-
-                            case SQLiteType.Text:
-                                raw.sqlite3_result_text(ctx, result.ToString());
-                                return;
-
-                            case SQLiteType.Float:
-                                raw.sqlite3_result_double(ctx, result.ToDouble());
-                                return;
-
-                            case SQLiteType.Integer:
-                                raw.sqlite3_result_int64(ctx, result.ToInt64());
-                                return;
-                        }
+                        ctx.SetResult(result);
                     }
                     catch (Exception e)
                     {
@@ -1107,28 +1086,7 @@ namespace SQLitePCL.pretty
                     try
                     {
                         ISQLiteValue result = reduce(iArgs);
-                        switch (result.SQLiteType)
-                        {
-                            case SQLiteType.Blob:
-                                raw.sqlite3_result_blob(ctx, result.ToBlob());
-                                return;
-
-                            case SQLiteType.Null:
-                                raw.sqlite3_result_null(ctx);
-                                return;
-
-                            case SQLiteType.Text:
-                                raw.sqlite3_result_text(ctx, result.ToString());
-                                return;
-
-                            case SQLiteType.Float:
-                                raw.sqlite3_result_double(ctx, result.ToDouble());
-                                return;
-
-                            case SQLiteType.Integer:
-                                raw.sqlite3_result_int64(ctx, result.ToInt64());
-                                return;
-                        }
+                        ctx.SetResult(result);
                     }
                     catch (Exception e)
                     {

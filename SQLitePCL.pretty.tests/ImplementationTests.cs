@@ -376,7 +376,51 @@ namespace SQLitePCL.pretty.tests
                     stream.Dispose();
                     Assert.Throws<ArgumentException>(() => stmt.BindParameters[0].Bind(stream));
                     Assert.Throws<ArgumentException>(() => stmt.BindParameters[0].Bind(new object()));
+                }
+            }
+        }
 
+        [Test]
+        public void TestBindSQLiteValue()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                db.Execute("CREATE TABLE foo (v int);");
+                using (var stmt = db.PrepareStatement("SELECT ?"))
+                {
+                    var param = stmt.BindParameters[0];
+                    param.Bind(SQLiteValue.Null);
+                    stmt.MoveNext();
+                    var result = stmt.Current.First();
+                    Assert.AreEqual(result.SQLiteType, SQLiteType.Null);
+
+                    stmt.Reset();
+                    param.Bind(new byte[0].ToSQLiteValue());
+                    stmt.MoveNext();
+                    result = stmt.Current.First();
+                    Assert.AreEqual(result.SQLiteType, SQLiteType.Blob);
+                    CollectionAssert.AreEqual(result.ToBlob(), new Byte[0]);
+
+                    stmt.Reset();
+                    param.Bind("test".ToSQLiteValue());
+                    stmt.MoveNext();
+                    result = stmt.Current.First();
+                    Assert.AreEqual(result.SQLiteType, SQLiteType.Text);
+                    Assert.AreEqual(result.ToString(), "test");
+
+                    stmt.Reset();
+                    param.Bind((1).ToSQLiteValue());
+                    stmt.MoveNext();
+                    result = stmt.Current.First();
+                    Assert.AreEqual(result.SQLiteType, SQLiteType.Integer);
+                    Assert.AreEqual(result.ToInt64(), 1);
+
+                    stmt.Reset();
+                    param.Bind((0.0).ToSQLiteValue());
+                    stmt.MoveNext();
+                    result = stmt.Current.First();
+                    Assert.AreEqual(result.SQLiteType, SQLiteType.Float);
+                    Assert.AreEqual(result.ToInt(), 0);
                 }
             }
         }

@@ -16,6 +16,7 @@
 
 using NUnit.Framework;
 using System;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -34,19 +35,7 @@ namespace SQLitePCL.pretty.tests
             Assert.AreEqual(expected.ToInt64(), test.ToInt64());
             Assert.AreEqual(expected.ToInt(), test.ToInt());
             Assert.AreEqual(expected.ToString(), test.ToString());
-
-            var expectedBlob = expected.ToBlob();
-            var testBlog = test.ToBlob();
-
-            if (expectedBlob == null)
-            {
-                Assert.IsNull(testBlog);
-            }
-            else
-            {
-                Assert.IsNotNull(testBlog);
-                CollectionAssert.AreEqual(expectedBlob, testBlog);
-            }
+            CollectionAssert.AreEqual(expected.ToBlob(), test.ToBlob());
         }
 
         [Test]
@@ -159,6 +148,7 @@ namespace SQLitePCL.pretty.tests
         {
             string[] tests =
                 {
+                    "",
                     "  1234.56",
                     " 1234.abasd",
                     "abacdd\u10FFFF",
@@ -188,6 +178,27 @@ namespace SQLitePCL.pretty.tests
 
                     db.Execute("DROP TABLE foo;");
                 }
+            }
+        }
+
+        [Test]
+        public void TestZeroBlob()
+        {
+            int[] tests = {0, 1, 2, 10};
+
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                foreach (var test in tests.Select(SQLiteValue.ZeroBlob))
+                {
+                    db.Execute("CREATE TABLE foo (x blob);");
+                    db.Execute("INSERT INTO foo (x) VALUES (?)", test);
+
+                    foreach (var row  in db.Query("SELECT x FROM foo;"))
+                    {
+                        compare(row.First(), test);
+                    }
+                    db.Execute("DROP TABLE foo;");
+                }               
             }
         }
 

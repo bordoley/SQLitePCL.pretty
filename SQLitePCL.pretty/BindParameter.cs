@@ -18,6 +18,8 @@
 using System;
 using System.Diagnostics.Contracts;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 
 namespace SQLitePCL.pretty
 {
@@ -32,7 +34,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The bind parameter.</param>
         /// <param name="obj">
         /// An object that is either <see langword="null"/> or any numeric type, <see cref="string"/>,
-        /// byte[], or <see cref="Stream"/>. 
+        /// byte[], <see cref="ISQLiteValue"/> or <see cref="Stream"/>. 
         /// </param>
         /// <exception cref="ArgumentException">
         /// If the <see cref="Type"/> of the value is not supported 
@@ -41,6 +43,8 @@ namespace SQLitePCL.pretty
         /// </exception>
         public static void Bind(this IBindParameter This, object obj)
         {
+            Contract.Requires(This != null);
+
             // I miss F# pattern matching
             if (obj == null)
             {
@@ -77,6 +81,10 @@ namespace SQLitePCL.pretty
             {
                 This.Bind((byte[])obj);
             }
+            else if (t.GetTypeInfo().ImplementedInterfaces.Contains(typeof(ISQLiteValue)))
+            {
+                This.Bind((ISQLiteValue)obj);
+            }
             else if (obj is Stream)
             {
                 var stream = (Stream)obj;
@@ -90,6 +98,47 @@ namespace SQLitePCL.pretty
             else
             {
                 throw new ArgumentException("Invalid type conversion" + t);
+            }
+        }
+
+        /// <summary>
+        /// Bind the parameter to an <see cref="ISQLiteValue"/>.
+        /// </summary>
+        /// <param name="This">The bind parameter.</param>
+        /// <param name="value">A <see cref="ISQLiteValue"/>.</param>
+        public static void Bind(this IBindParameter This, ISQLiteValue value)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(value != null);
+
+            switch (value.SQLiteType)
+            {
+                case SQLiteType.Blob:
+                    if (value is ZeroBlob)
+                    {
+                        This.BindZeroBlob(value.Length);
+                    }
+                    else
+                    {
+                        This.Bind(value.ToBlob());
+                    }
+                    return;
+
+                case SQLiteType.Null:
+                    This.BindNull();
+                    return;
+
+                case SQLiteType.Text:
+                    This.Bind(value.ToString());
+                    return;
+
+                case SQLiteType.Float:
+                    This.Bind(value.ToDouble());
+                    return;
+
+                case SQLiteType.Integer:
+                    This.Bind(value.ToInt64());
+                    return;
             }
         }
     }

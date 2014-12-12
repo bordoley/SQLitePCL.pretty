@@ -41,6 +41,19 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
+        /// Create a SQLite zeroblob of the specified length.
+        /// </summary>
+        /// <remarks>This method does not allocate any memory, 
+        /// therefore the zero blobs can safely be of arbitrary length.</remarks>
+        /// <param name="length">The length of the zero blob</param>
+        /// <returns>An ISQLiteValue representing the zero blob.</returns>
+        public static ISQLiteValue ZeroBlob(int length)
+        {
+            Contract.Requires(length >= 0);
+            return new ZeroBlob(length);
+        }
+
+        /// <summary>
         /// Converts an <see cref="int"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
@@ -151,6 +164,40 @@ namespace SQLitePCL.pretty
         {
             return new ResultSetValueImpl(This, index);
         }
+
+        internal static void SetResult(this sqlite3_context ctx , ISQLiteValue value)
+        {
+            switch (value.SQLiteType)
+            {
+                case SQLiteType.Blob:
+                    if (value is ZeroBlob)
+                    {
+                        //raw.sqlite3_result_zeroblob(ctx, result.Length);
+                        raw.sqlite3_result_blob(ctx, value.ToBlob());
+                    }
+                    else
+                    {
+                        raw.sqlite3_result_blob(ctx, value.ToBlob());
+                    }
+                    return;
+
+                case SQLiteType.Null:
+                    raw.sqlite3_result_null(ctx);
+                    return;
+
+                case SQLiteType.Text:
+                    raw.sqlite3_result_text(ctx, value.ToString());
+                    return;
+
+                case SQLiteType.Float:
+                    raw.sqlite3_result_double(ctx, value.ToDouble());
+                    return;
+
+                case SQLiteType.Integer:
+                    raw.sqlite3_result_int64(ctx, value.ToInt64());
+                    return;
+            }
+        }
     }
 
     internal sealed class NativeValue : ISQLiteValue
@@ -180,7 +227,7 @@ namespace SQLitePCL.pretty
 
         public byte[] ToBlob()
         {
-            return raw.sqlite3_value_blob(value);
+            return raw.sqlite3_value_blob(value) ?? new byte[0];
         }
 
         public double ToDouble()
@@ -200,7 +247,7 @@ namespace SQLitePCL.pretty
 
         public override string ToString()
         {
-            return raw.sqlite3_value_text(value);
+            return raw.sqlite3_value_text(value) ?? "";
         }
     }
 
@@ -226,7 +273,7 @@ namespace SQLitePCL.pretty
 
         public byte[] ToBlob()
         {
-            return null;
+            return new byte[0];
         }
 
         public double ToDouble()
@@ -246,7 +293,7 @@ namespace SQLitePCL.pretty
 
         public override string ToString()
         {
-            return null;
+            return "";
         }
     }
 
@@ -553,7 +600,7 @@ namespace SQLitePCL.pretty
 
         public byte[] ToBlob()
         {
-            return raw.sqlite3_column_blob(stmt.sqlite3_stmt, index);
+            return raw.sqlite3_column_blob(stmt.sqlite3_stmt, index) ?? new byte[0];
         }
 
         public double ToDouble()
@@ -573,7 +620,52 @@ namespace SQLitePCL.pretty
 
         public override string ToString()
         {
-            return raw.sqlite3_column_text(stmt.sqlite3_stmt, index);
+            return raw.sqlite3_column_text(stmt.sqlite3_stmt, index) ?? "";
+        }
+    }
+
+    internal class ZeroBlob : ISQLiteValue
+    {
+        private readonly int length;
+
+        internal ZeroBlob(int length)
+        {
+            this.length = length;
+        }
+
+        public SQLiteType SQLiteType
+        {
+            get { return SQLiteType.Blob; }
+        }
+
+        public int Length
+        {
+            get { return length; }
+        }
+
+        public byte[] ToBlob()
+        {
+            return new byte[length];
+        }
+
+        public double ToDouble()
+        {
+            return this.ToBlob().ToSQLiteValue().ToDouble();
+        }
+
+        public int ToInt()
+        {
+            return 0;
+        }
+
+        public long ToInt64()
+        {
+            return 0;
+        }
+
+        public override string ToString()
+        {
+            return ""; 
         }
     }
 }
