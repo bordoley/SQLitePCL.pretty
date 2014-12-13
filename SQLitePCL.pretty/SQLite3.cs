@@ -61,6 +61,21 @@ namespace SQLitePCL.pretty
         private static readonly SQLiteVersion version = SQLiteVersion.Of(raw.sqlite3_libversion_number());
 
         /// <summary>
+        /// Enables or disables the sharing of the database cache and schema data structures
+        /// between connections to the same database.
+        /// </summary>
+        /// <seealso href="https://www.sqlite.org/c3ref/enable_shared_cache.html"/>
+        public static bool SharedCacheEnabled
+        {
+            set
+            {
+                //int rc = raw.sqlite3_enable_shared_cache(value ? 1 : 0);
+                //SQLiteException.CheckOk(rc);
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
         /// The SQLite version.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/libversion.html"/>
