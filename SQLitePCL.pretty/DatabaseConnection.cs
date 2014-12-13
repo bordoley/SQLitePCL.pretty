@@ -795,6 +795,17 @@ namespace SQLitePCL.pretty
         }
 
         /// <inheritdoc/>
+        public int TotalChanges
+        {
+            get
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                //return raw.sqlite3_total_changes(db);
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <inheritdoc/>
         public bool IsAutoCommit
         {
             get
@@ -825,6 +836,14 @@ namespace SQLitePCL.pretty
 
                 return this.statementsEnumerable;
             }
+        }
+
+        /// <inheritdoc/>
+        public bool IsReadOnly(string dbName)
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            //return raw.sqlite3_db_readonly(db, dbName) != 0;
+            throw new NotImplementedException();
         }
 
         private IEnumerator<IStatement> StatementsEnumerator()
@@ -924,6 +943,15 @@ namespace SQLitePCL.pretty
             statements.Remove(stmt.sqlite3_stmt);
         }
 
+        /// <summary>
+        ///  Causes any pending database operation to abort and return at its earliest opportunity. 
+        /// </summary>
+        /// <seealso href="https://www.sqlite.org/c3ref/interrupt.html"/>
+        public void Interrupt()
+        {
+            throw new NotImplementedException();
+            //raw.sqlite3_interrupt(db)
+        }
 
         /// <summary>
         /// Add or modify a collation function to the connection.

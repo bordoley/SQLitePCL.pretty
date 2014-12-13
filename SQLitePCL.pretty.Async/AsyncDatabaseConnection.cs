@@ -652,6 +652,7 @@ namespace SQLitePCL.pretty
             private readonly IDatabaseConnection db;
             private readonly Dictionary<IStatement, StatementWrapper> statements = new Dictionary<IStatement, StatementWrapper>();
             private readonly IEnumerable<IStatement> statementsEnumerable;
+            private readonly int initialTotalChanges;
 
             private readonly EventHandler rollback;
             private readonly EventHandler<DatabaseTraceEventArgs> trace;
@@ -673,6 +674,8 @@ namespace SQLitePCL.pretty
                 db.Trace += trace;
                 db.Profile += profile;
                 db.Update += update;
+
+                this.initialTotalChanges = db.TotalChanges;
 
                 this.statementsEnumerable = new DelegatingEnumerable<IStatement>(() => StatementsEnumerator());
             }
@@ -703,6 +706,15 @@ namespace SQLitePCL.pretty
                 }
             }
 
+            public int TotalChanges
+            {
+                get
+                {
+                    if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                    return db.TotalChanges - initialTotalChanges;
+                }
+            }
+
             public long LastInsertedRowId
             {
                 get
@@ -720,6 +732,12 @@ namespace SQLitePCL.pretty
 
                     return this.statementsEnumerable;
                 }
+            }
+
+            public bool IsReadOnly(string dbName)
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                return db.IsReadOnly(dbName);
             }
 
             private IEnumerator<IStatement> StatementsEnumerator()

@@ -38,9 +38,17 @@ namespace SQLitePCL.pretty
 
         public abstract int Changes { get; }
 
+        public abstract int TotalChanges { get; }
+
         public abstract long LastInsertedRowId { get; }
 
         public abstract IEnumerable<IStatement> Statements { get; }
+
+        public bool IsReadOnly(string dbName)
+        {
+            Contract.Requires(dbName != null);
+            return default(bool);
+        }
 
         public abstract void Dispose();
 

@@ -67,6 +67,13 @@ namespace SQLitePCL.pretty
         int Changes { get; }
 
         /// <summary>
+        /// Returns the number of row changes caused by INSERT, 
+        /// UPDATE or DELETE statements since the database connection was opened. 
+        /// </summary>
+        /// <seealso href="https://www.sqlite.org/c3ref/total_changes.html"/>
+        int TotalChanges { get; }
+
+        /// <summary>
         /// Returns the rowid of the most recent successful INSERT into a rowid or virtual table.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/last_insert_rowid.html"/>
@@ -76,6 +83,14 @@ namespace SQLitePCL.pretty
         /// An enumeration of the connection's currently opened statements in the order they were prepared.
         /// </summary>
         IEnumerable<IStatement> Statements { get; }
+
+        /// <summary>
+        /// Determine whether a database is readonly.
+        /// </summary>
+        /// <seealso href="https://www.sqlite.org/c3ref/db_readonly.html"/>
+        /// <param name="dbName">The database name.</param>
+        /// <returns><see langword="true"/> if the database is readonly, otherwise <see langword="false"/>.</returns>
+        bool IsReadOnly(string dbName);
 
         /// <summary>
         /// Opens the blob located by the a database, table, column, and rowid for incremental I/O as a <see cref="System.IO.Stream"/>.
