@@ -71,7 +71,7 @@ namespace SQLitePCL.pretty
         /// <note type="implement">
         /// The IDatabaseConnection may be used to prepare statements and open database blobs, 
         /// but these must not be captured or otherwise externally referenced unless their use is 
-        /// scheduled on the connections's operation queue via future calls to <see cref="Use"/>. 
+        /// scheduled on the connections's operation queue via future calls to <see cref="Use&lt;T&gt;"/>. 
         /// </note>
         /// </param>
         /// <returns>A cold observable of the values produced by the function f.</returns>

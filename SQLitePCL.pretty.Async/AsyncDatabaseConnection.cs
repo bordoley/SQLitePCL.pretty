@@ -414,10 +414,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(sql != null);
             Contract.Requires(values != null);
 
-            return This.Use(conn =>
-            {
-                return conn.Query(sql, values);
-            });
+            return This.Use(conn => conn.Query(sql, values));
         }
 
         /// <summary>
@@ -434,10 +431,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
-            return This.Use(conn =>
-            {
-                return conn.Query(sql);
-            });
+            return This.Use(conn => conn.Query(sql));
         }
 
         /// <summary>
@@ -492,7 +486,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(f != null);
 
-            return This.Use(conn => new T[] { f(conn) }).ToTask(cancellationToken);
+            return This.Use(conn => new [] { f(conn) }).ToTask(cancellationToken);
         }
 
         /// <summary>
@@ -677,7 +671,7 @@ namespace SQLitePCL.pretty
 
                 this.initialTotalChanges = db.TotalChanges;
 
-                this.statementsEnumerable = new DelegatingEnumerable<IStatement>(() => StatementsEnumerator());
+                this.statementsEnumerable = new DelegatingEnumerable<IStatement>(StatementsEnumerator);
             }
 
             public event EventHandler Rollback = (o, e) => { };

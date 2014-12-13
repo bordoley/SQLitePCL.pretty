@@ -321,7 +321,7 @@ namespace SQLitePCL.pretty
         {
             for (var next = sql; next != null; )
             {
-                string tail = null;
+                string tail;
                 IStatement stmt = This.PrepareStatement(next, out tail);
                 next = tail;
                 yield return stmt;
@@ -354,7 +354,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
-            string tail = null;
+            string tail;
             IStatement retval = This.PrepareStatement(sql, out tail);
             if (tail != null)
             {
@@ -565,7 +565,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(name != null);
             Contract.Requires(reduce != null);
 
-            This.RegisterScalarFunc(name, -1, val => reduce(val));
+            This.RegisterScalarFunc(name, -1, reduce);
         }
 
         /// <summary>
@@ -716,7 +716,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(database != null);
 
-            string filename = null;
+            string filename;
 
             if (This.TryGetFileName(database, out filename))
             {
@@ -773,7 +773,7 @@ namespace SQLitePCL.pretty
         internal SQLiteDatabaseConnection(sqlite3 db)
         {
             this.db = db;
-            this.statementsEnumerable = new DelegatingEnumerable<IStatement>(() => StatementsEnumerator());
+            this.statementsEnumerable = new DelegatingEnumerable<IStatement>(StatementsEnumerator);
 
             // FIXME: Could argue that the shouldn't be setup until the first subscriber to the events
             raw.sqlite3_rollback_hook(db, v => Rollback(this, EventArgs.Empty), null);
@@ -857,7 +857,7 @@ namespace SQLitePCL.pretty
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-                return raw.sqlite3_get_autocommit(db) == 0 ? false : true;
+                return raw.sqlite3_get_autocommit(db) != 0;
             }
         }
 
@@ -1149,7 +1149,7 @@ namespace SQLitePCL.pretty
 
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-            delegate_function_aggregate_step funcStep = (ctx, user_data, args) =>
+            delegate_function_aggregate_step funcStep = (ctx, _, args) =>
                 {
                     CtxState<T> state;
                     if (ctx.state == null)
@@ -1168,7 +1168,7 @@ namespace SQLitePCL.pretty
                     ctx.state = new CtxState<T>(next);
                 };
 
-            delegate_function_aggregate_final funcFinal = (ctx, user_data) =>
+            delegate_function_aggregate_final funcFinal = (ctx, _) =>
                 {
                     CtxState<T> state = (CtxState<T>)ctx.state;
 

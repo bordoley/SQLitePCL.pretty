@@ -415,9 +415,9 @@ namespace SQLitePCL.pretty
 
     internal class StringValue : ISQLiteValue
     {
-        private static Regex isNegative = new Regex("^[ ]*[-]");
-        private static Regex stringToDoubleCast = new Regex("^[ ]*([-]?)[0-9]+([.][0-9]+)?");
-        private static Regex stringToLongCast = new Regex("^[ ]*([-]?)[0-9]+");
+        private static readonly Regex isNegative = new Regex("^[ ]*[-]");
+        private static readonly Regex stringToDoubleCast = new Regex("^[ ]*([-]?)[0-9]+([.][0-9]+)?");
+        private static readonly Regex stringToLongCast = new Regex("^[ ]*([-]?)[0-9]+");
 
         private readonly string value;
 

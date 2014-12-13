@@ -39,9 +39,6 @@ namespace SQLitePCL.pretty.tests
             {
                 db.Execute("CREATE TABLE foo (x int);");
 
-                long memory_used = SQLite3.MemoryUsed;
-                long memory_highwater = SQLite3.MemoryHighWater;
-
                 Assert.IsTrue(SQLite3.MemoryUsed > 0);
                 Assert.IsTrue(SQLite3.MemoryHighWater >= SQLite3.MemoryUsed);
 

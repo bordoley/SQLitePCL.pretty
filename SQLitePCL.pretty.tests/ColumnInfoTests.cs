@@ -76,10 +76,10 @@ namespace SQLitePCL.pretty.tests
                     Tuple.Create("name","db", "table", "column", "Variant"),
                 };
 
-            for (int i = 0; i < tests.Length; i++)
+            foreach (var test in  tests)
             {
-                var fst = new ColumnInfo(tests[i].Item1, tests[i].Item2, tests[i].Item3, tests[i].Item4, tests[i].Item5);
-                var snd = new ColumnInfo(tests[i].Item1, tests[i].Item2, tests[i].Item3, tests[i].Item4, tests[i].Item5);
+                var fst = new ColumnInfo(test.Item1, test.Item2, test.Item3, test.Item4, test.Item5);
+                var snd = new ColumnInfo(test.Item1, test.Item2, test.Item3, test.Item4, test.Item5);
 
                 Assert.AreEqual(fst.GetHashCode(), snd.GetHashCode());
             }

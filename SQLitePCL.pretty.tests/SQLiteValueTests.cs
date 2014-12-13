@@ -16,7 +16,6 @@
 
 using NUnit.Framework;
 using System;
-using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -280,7 +279,7 @@ namespace SQLitePCL.pretty.tests
                     Assert.AreEqual(row[3].ColumnInfo.OriginName, "z");
                     Assert.AreEqual(row[3].ColumnInfo.Name, "z");
                     Assert.AreEqual(row[3].SQLiteType, SQLiteType.Blob);
-                    Assert.That(Enumerable.SequenceEqual(row[3].ToBlob(), blob));
+                    CollectionAssert.AreEqual(row[3].ToBlob(), blob);
 
                     Assert.AreEqual(row[4].ColumnInfo.DatabaseName, "main");
                     Assert.AreEqual(row[4].ColumnInfo.TableName, "foo");

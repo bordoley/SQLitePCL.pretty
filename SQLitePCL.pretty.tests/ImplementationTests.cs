@@ -116,7 +116,7 @@ namespace SQLitePCL.pretty.tests
                     var backupResults = Enumerable.Zip(
                         db.Query("SELECT x FROM foo"),
                         db3.Query("SELECT x FROM foo"),
-                        (x,y) => Tuple.Create(x,y));
+                        Tuple.Create);
 
                     foreach (var pair in backupResults)
                     {
@@ -484,11 +484,7 @@ namespace SQLitePCL.pretty.tests
                     Assert.AreEqual(columns[1].Name, "b");
                     Assert.AreEqual(columns.Count, 2);
 
-                    var count = 0;
-                    foreach (var column in row.Columns())
-                    {
-                        count++;
-                    }
+                    var count = row.Columns().Count();
 
                     Assert.AreEqual(count, 2);
                 }
@@ -535,7 +531,7 @@ namespace SQLitePCL.pretty.tests
                     Assert.Throws<ArgumentOutOfRangeException>(() => stream.Read(new byte[10], 5, -4));
                 
                     // Since this is a read only stream, this is a good chance to test that writing fails
-                    Assert.Throws<NotSupportedException>(() => stream.WriteByte((byte)0));
+                    Assert.Throws<NotSupportedException>(() => stream.WriteByte(0));
                 }
             }
         }

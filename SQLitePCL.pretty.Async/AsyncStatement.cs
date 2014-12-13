@@ -81,7 +81,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(f != null);
 
-            return This.Use(conn => new T[] { f(conn) }).ToTask(cancellationToken);
+            return This.Use(conn => new [] { f(conn) }).ToTask(cancellationToken);
         }
 
         /// <summary>

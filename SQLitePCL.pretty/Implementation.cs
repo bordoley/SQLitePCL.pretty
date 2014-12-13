@@ -168,7 +168,7 @@ namespace SQLitePCL.pretty
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-                return raw.sqlite3_stmt_readonly(this.sqlite3_stmt) == 0 ? false : true;
+                return raw.sqlite3_stmt_readonly(this.sqlite3_stmt) != 0;
             }
         }
 
@@ -178,7 +178,7 @@ namespace SQLitePCL.pretty
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-                return raw.sqlite3_stmt_busy(this.sqlite3_stmt) == 0 ? false : true;
+                return raw.sqlite3_stmt_busy(this.sqlite3_stmt) != 0;
             }
         }
 
@@ -267,7 +267,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                IBindParameter value = null;
+                IBindParameter value;
                 if (this.TryGetValue(key, out value))
                 {
                     return value;
@@ -323,7 +323,7 @@ namespace SQLitePCL.pretty
 
         public bool TryGetValue(string key, out IBindParameter value)
         {
-            int i = 0;
+            int i;
             if (this.TryGetBindParameterIndex(key, out i))
             {
                 value = this[i];

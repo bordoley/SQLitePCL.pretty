@@ -19,9 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -104,7 +102,7 @@ namespace SQLitePCL.pretty.tests
             using (var adb = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
             {
                 await adb.Use(db => Enumerable.Range(0, 1000))
-                    .Scan(Tuple.Create<int, int>(-1, -1), (x, y) => Tuple.Create(x.Item1 + 1, y))
+                    .Scan(Tuple.Create(-1, -1), (x, y) => Tuple.Create(x.Item1 + 1, y))
                     .Do(result => 
                         {
                             Assert.AreEqual(result.Item2, result.Item1);
@@ -117,7 +115,7 @@ namespace SQLitePCL.pretty.tests
                     });
                 Assert.AreEqual(t, expected);
 
-                var anotherUse = adb.Use(db => Enumerable.Range(0, 1000));;
+                var anotherUse = adb.Use(db => Enumerable.Range(0, 1000));
                 
                 adb.Dispose();
 
@@ -150,11 +148,8 @@ namespace SQLitePCL.pretty.tests
                     var stmt1 = db.PrepareStatement("INSERT INTO foo (x) VALUES (?);");
                     var stmt2 = db.PrepareStatement("SELECT * FROM foo");
                     var stmt3 = db.PrepareStatement("SELECT rowid, x FROM foo");
-                    
-                    var stmts = new HashSet<IStatement>();
-                    stmts.Add(stmt1);
-                    stmts.Add(stmt2);
-                    stmts.Add(stmt3);
+
+                    var stmts = new HashSet<IStatement>() {stmt1, stmt2, stmt3};
 
                     int count = 0;
                     foreach (var stmt in db.Statements)
@@ -308,9 +303,9 @@ namespace SQLitePCL.pretty.tests
                         "SELECT rowid, x FROM foo;");
                 Assert.AreEqual(stmts.Count, 3);
 
-                var stmt0 = await stmts[0].Use<String>(stmt => stmt.SQL);
-                var stmt1 = await stmts[1].Use<String>(stmt => stmt.SQL);
-                var stmt2 = await stmts[2].Use<String>(stmt => stmt.SQL);
+                var stmt0 = await stmts[0].Use(stmt => stmt.SQL);
+                var stmt1 = await stmts[1].Use(stmt => stmt.SQL);
+                var stmt2 = await stmts[2].Use(stmt => stmt.SQL);
 
                 Assert.AreEqual(stmt0, "SELECT * FROM foo;");
                 Assert.AreEqual(stmt1, "SELECT x FROM foo;");

@@ -260,7 +260,7 @@ namespace SQLitePCL.pretty.tests
                 {
                     s1 = s1.Replace('e', 'a');
                     s2 = s2.Replace('e', 'a');
-                    return string.Compare(s1, s2);
+                    return String.CompareOrdinal(s1, s2);
                 });
 
                 db.Execute("CREATE TABLE foo (x text COLLATE e2a);");
@@ -307,10 +307,7 @@ namespace SQLitePCL.pretty.tests
             using (var db = SQLite3.Open(":memory:"))
             {
                 db.Execute("CREATE TABLE foo (x int);");
-                db.RegisterCommitHook(() =>
-                {
-                    return true;
-                });
+                db.RegisterCommitHook(() => true);
 
                 try
                 {
@@ -414,7 +411,7 @@ namespace SQLitePCL.pretty.tests
             using (var db = SQLite3.Open(":memory:"))
             {
                 db.RegisterScalarFunc("count_nulls", (IReadOnlyList<ISQLiteValue> vals) =>
-                    vals.Where(val => val.SQLiteType == SQLiteType.Null).Count().ToSQLiteValue());
+                    vals.Count(val => val.SQLiteType == SQLiteType.Null).ToSQLiteValue());
 
                 Assert.AreEqual(0, db.Query("SELECT count_nulls(1,2,3,4,5,6,7,8);").Select(v => v[0].ToInt()).First());
                 Assert.AreEqual(0, db.Query("SELECT count_nulls();").Select(v => v[0].ToInt()).First());

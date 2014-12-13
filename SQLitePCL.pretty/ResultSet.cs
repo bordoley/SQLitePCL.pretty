@@ -39,7 +39,7 @@ namespace SQLitePCL.pretty
             return new ResultSetColumnsListImpl(This);
         }
 
-        internal sealed class ResultSetColumnsListImpl : IReadOnlyList<ColumnInfo>
+        private sealed class ResultSetColumnsListImpl : IReadOnlyList<ColumnInfo>
         {
             private readonly IReadOnlyList<IResultSetValue> rs;
 

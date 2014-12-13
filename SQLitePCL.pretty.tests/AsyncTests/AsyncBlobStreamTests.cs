@@ -65,7 +65,7 @@ namespace SQLitePCL.pretty.tests
 
                 var stream =
                     await db.Query("SELECT rowid, x FROM foo;")
-                        .Select(row => db.OpenBlobAsync(row[1].ColumnInfo, row[0].ToInt64(), false))
+                        .Select(row => db.OpenBlobAsync(row[1].ColumnInfo, row[0].ToInt64()))
                         .FirstAsync().ToTask().Unwrap();
 
                 using (stream)
@@ -88,7 +88,7 @@ namespace SQLitePCL.pretty.tests
                     Assert.Throws<ArgumentOutOfRangeException>(() => stream.Read(new byte[10], 5, -4));
 
                     // Since this is a read only stream, this is a good chance to test that writing fails
-                    Assert.Throws<NotSupportedException>(() => stream.WriteByte((byte)0));
+                    Assert.Throws<NotSupportedException>(() => stream.WriteByte(0));
                 }
             }
         }

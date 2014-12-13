@@ -44,7 +44,7 @@ namespace SQLitePCL.pretty
         }
 
         private static readonly IEnumerable<String> compilerOptions =
-            new DelegatingEnumerable<String>(() => compilerOptionsEnumerator());
+            new DelegatingEnumerable<String>(compilerOptionsEnumerator);
 
         /// <summary>
         /// The SQLite compiler options that were defined at compile time.
@@ -132,7 +132,7 @@ namespace SQLitePCL.pretty
         public static bool CompileOptionUsed(string option)
         {
             Contract.Requires(option != null);
-            return raw.sqlite3_compileoption_used(option) == 0 ? false : true;
+            return raw.sqlite3_compileoption_used(option) != 0;
         }
 
         /// <summary>
@@ -193,7 +193,7 @@ namespace SQLitePCL.pretty
         public static bool IsCompleteStatement(string sql)
         {
             Contract.Requires(sql != null);
-            return raw.sqlite3_complete(sql) == 0 ? false : true;
+            return raw.sqlite3_complete(sql) != 0;
         }
     }
 }

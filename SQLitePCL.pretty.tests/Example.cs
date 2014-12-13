@@ -18,7 +18,6 @@ using NUnit.Framework;
 using System;
 using System.IO;
 using System.Linq;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Text;
@@ -105,7 +104,7 @@ namespace SQLitePCL.pretty.tests
                             row[2].ToInt64() + ", " +
                             row[3].ToString() + ", " +
                             row[4].ToString())
-                        .Do(str => { Console.WriteLine(str); });
+                        .Do(Console.WriteLine);
             }
         }
     }

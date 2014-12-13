@@ -126,10 +126,7 @@ namespace SQLitePCL.pretty
             if (offset < 0) { throw new ArgumentOutOfRangeException(); }
             if (count < 0) { throw new ArgumentOutOfRangeException(); }
 
-            return queue.Use(db =>
-                {
-                    return blobStream.Read(buffer, offset, count);
-                }, cancellationToken);
+            return queue.Use(db => blobStream.Read(buffer, offset, count), cancellationToken);
         }
 
         public override long Seek(long offset, SeekOrigin origin)
