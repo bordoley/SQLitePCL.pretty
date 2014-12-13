@@ -173,6 +173,37 @@ namespace SQLitePCL.pretty
     public static partial class DatabaseConnection
     {
         /// <summary>
+        /// Checkpoint the database name <paramref name="dbName"/>.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="dbName">The name of the database.</param>
+        /// <seealso href="https://www.sqlite.org/c3ref/wal_checkpoint.html"/>
+        public static void WalCheckPoint(this IDatabaseConnection This, string dbName)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(dbName != null);
+
+            int nLog;
+            int nCkpt;
+
+            This.WalCheckPoint(dbName, WalCheckPointMode.Passive, out nLog, out nCkpt);
+        }
+
+        /// <summary>
+        /// Runs a checkpoint on all databases on the connection.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <seealso href="https://www.sqlite.org/c3ref/wal_checkpoint.html"/>
+        public static void WalCheckPointAll(this IDatabaseConnection This)
+        {
+            Contract.Requires(This != null);
+
+            int nLog;
+            int nCkpt;
+            This.WalCheckPoint(null, WalCheckPointMode.Passive, out nLog, out nCkpt);
+        }
+
+        /// <summary>
         /// Compiles and executes a SQL statement.
         /// </summary>
         /// <param name="This">The database connection.</param>
@@ -846,6 +877,15 @@ namespace SQLitePCL.pretty
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc/>
+        public void WalCheckPoint(string dbName, WalCheckPointMode mode, out int nLog, out int nCkpt)
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            //int rc = raw.sqlite3_wal_checkpoint_v2(db, dbName, (int) mode, out nLog, out nCkpt);
+            //SQLiteException.CheckOk(db, rc);l
+            throw new NotImplementedException();
+        }
+
         private IEnumerator<IStatement> StatementsEnumerator()
         {
             sqlite3_stmt next = null;
@@ -941,6 +981,33 @@ namespace SQLitePCL.pretty
         internal void RemoveStatement(StatementImpl stmt)
         {
             statements.Remove(stmt.sqlite3_stmt);
+        }
+
+        /// <summary>
+        /// Causes any database on the database connection to automatically checkpoint 
+        /// after committing a transaction if there are <paramref name="n"/> or 
+        /// more frames in the write-ahead log file.
+        /// </summary>
+        /// <param name="n">The number of frames in the write-ahead log that should trigger a checkpoint.</param>
+        /// <seealso href="https://www.sqlite.org/c3ref/wal_autocheckpoint.html"/>
+        public void EnableAutoCheckPoint(int n)
+        {
+            Contract.Requires(n > 0);
+
+            //int rc = raw.sqlite3_wal_autocheckpoint(db, n);
+            //SQLiteException.CheckOk(db, rc);
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Disables automatic checkpoints entirely.
+        /// </summary>
+        /// <seealso href="https://www.sqlite.org/c3ref/wal_autocheckpoint.html"/>
+        public void DisableAutoCheckPoint()
+        {
+            //int rc = raw.sqlite3_wal_autocheckpoint(db, -1);
+            //SQLiteException.CheckOk(db, rc);
+            throw new NotImplementedException();
         }
 
         /// <summary>

@@ -93,6 +93,16 @@ namespace SQLitePCL.pretty
         bool IsReadOnly(string dbName);
 
         /// <summary>
+        /// Run a checkpoint operation on a WAL database on the connection. The specific operation 
+        /// is determined by the value of the <paramref name="mode"/> parameter.
+        /// </summary>
+        /// <param name="dbName">The database name.</param>
+        /// <param name="mode">The checkpoint mode to use.</param>
+        /// <param name="nLog">Returns the total number of frames in the log file before returning.</param>
+        /// <param name="nCkpt">Return the total number of checkpointed frames.</param>
+        void WalCheckPoint(string dbName, WalCheckPointMode mode, out int nLog, out int nCkpt);
+
+        /// <summary>
         /// Opens the blob located by the a database, table, column, and rowid for incremental I/O as a <see cref="System.IO.Stream"/>.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/blob_open.html"/>

@@ -734,6 +734,12 @@ namespace SQLitePCL.pretty
                 }
             }
 
+            public void WalCheckPoint(string dbName, WalCheckPointMode mode, out int nLog, out int nCkpt)
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                db.WalCheckPoint(dbName, mode, out nLog, out nCkpt);
+            }
+
             public bool IsReadOnly(string dbName)
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }

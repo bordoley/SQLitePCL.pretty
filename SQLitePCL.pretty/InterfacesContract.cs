@@ -44,6 +44,13 @@ namespace SQLitePCL.pretty
 
         public abstract IEnumerable<IStatement> Statements { get; }
 
+        public void WalCheckPoint(string dbName, WalCheckPointMode mode, out int nLog, out int nCkpt)
+        {
+            Contract.Requires(dbName != null);
+            nLog = default(int);
+            nCkpt = default(int);
+        }
+
         public bool IsReadOnly(string dbName)
         {
             Contract.Requires(dbName != null);
