@@ -53,13 +53,7 @@ namespace SQLitePCL.pretty
         /// <returns><see langword="true"/> if the the first TableColumnMetadata is greater than or equal to the second; otherwise, <see langword="false"/>.</returns>
         public static bool operator >=(TableColumnMetadata x, TableColumnMetadata y)
         {
-            switch (x.CompareTo(y))
-            {
-                case -1:
-                    return false;
-                default:
-                    return true;
-            }
+            return x.CompareTo(y) >= 0;
         }
 
         /// <summary>
@@ -70,13 +64,7 @@ namespace SQLitePCL.pretty
         /// <returns><see langword="true"/> if the the first TableColumnMetadata is greater than the second; otherwise, <see langword="false"/>.</returns>
         public static bool operator >(TableColumnMetadata x, TableColumnMetadata y)
         {
-            switch (x.CompareTo(y))
-            {
-                case 1:
-                    return true;
-                default:
-                    return false;
-            }
+            return x.CompareTo(y) > 0;
         }
 
         /// <summary>
@@ -87,13 +75,7 @@ namespace SQLitePCL.pretty
         /// <returns><see langword="true"/> if the the first TableColumnMetadata is less than or equal to the second; otherwise, <see langword="false"/>.</returns>
         public static bool operator <=(TableColumnMetadata x, TableColumnMetadata y)
         {
-            switch (x.CompareTo(y))
-            {
-                case 1:
-                    return false;
-                default:
-                    return true;
-            }
+            return x.CompareTo(y) <= 0;
         }
 
         /// <summary>
@@ -104,13 +86,7 @@ namespace SQLitePCL.pretty
         /// <returns><see langword="true"/> if the the first TableColumnMetadata is less than the second; otherwise, <see langword="false"/>.</returns>
         public static bool operator <(TableColumnMetadata x, TableColumnMetadata y)
         {
-            switch (x.CompareTo(y))
-            {
-                case -1:
-                    return true;
-                default:
-                    return false;
-            }
+            return x.CompareTo(y) < 0;
         }
 
         private readonly string declaredType;
@@ -201,10 +177,10 @@ namespace SQLitePCL.pretty
         {
             if (!Object.ReferenceEquals(other, null))
             {
-                var result = this.DeclaredType.CompareTo(other.DeclaredType);
+                var result = String.CompareOrdinal(this.DeclaredType, other.DeclaredType);
                 if (result != 0) { return result; }
 
-                result = this.CollationSequence.CompareTo(other.CollationSequence);
+                result = String.CompareOrdinal(this.CollationSequence, other.CollationSequence);
                 if (result != 0) { return result; }
 
                 result = this.HasNotNullConstraint.CompareTo(other.HasNotNullConstraint);

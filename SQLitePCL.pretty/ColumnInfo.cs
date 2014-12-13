@@ -41,13 +41,7 @@ namespace SQLitePCL.pretty
         /// <returns><see langword="true"/> if the the first ColumnInfo is greater than or equal to the second; otherwise, <see langword="false"/>.</returns>
         public static bool operator >=(ColumnInfo x, ColumnInfo y)
         {
-            switch (x.CompareTo(y))
-            {
-                case -1:
-                    return false;
-                default:
-                    return true;
-            }
+            return x.CompareTo(y) >= 0;
         }
 
         /// <summary>
@@ -58,13 +52,7 @@ namespace SQLitePCL.pretty
         /// <returns><see langword="true"/> if the the first ColumnInfo is greater than the second; otherwise, <see langword="false"/>.</returns>
         public static bool operator >(ColumnInfo x, ColumnInfo y)
         {
-            switch (x.CompareTo(y))
-            {
-                case 1:
-                    return true;
-                default:
-                    return false;
-            }
+            return x.CompareTo(y) > 0;
         }
 
         /// <summary>
@@ -75,13 +63,7 @@ namespace SQLitePCL.pretty
         /// <returns><see langword="true"/> if the the first ColumnInfo is less than or equal to the second; otherwise, <see langword="false"/>.</returns>
         public static bool operator <=(ColumnInfo x, ColumnInfo y)
         {
-            switch (x.CompareTo(y))
-            {
-                case 1:
-                    return false;
-                default:
-                    return true;
-            }
+            return x.CompareTo(y) <= 0;
         }
 
         /// <summary>
@@ -92,13 +74,7 @@ namespace SQLitePCL.pretty
         /// <returns><see langword="true"/> if the the first ColumnInfo is less than the second; otherwise, <see langword="false"/>.</returns>
         public static bool operator <(ColumnInfo x, ColumnInfo y)
         {
-            switch (x.CompareTo(y))
-            {
-                case -1:
-                    return true;
-                default:
-                    return false;
-            }
+            return x.CompareTo(y) < 0;
         }
 
         internal static ColumnInfo Create(StatementImpl stmt, int index)
@@ -199,19 +175,19 @@ namespace SQLitePCL.pretty
         {
             if (!Object.ReferenceEquals(other, null))
             {
-                var result = this.Name.CompareTo(other.Name);
-                if (result != 0) { return result; }
-                
-                result = this.DatabaseName.CompareTo(other.DatabaseName);
+                var result = String.CompareOrdinal(this.Name, other.Name);
                 if (result != 0) { return result; }
 
-                result = this.TableName.CompareTo(other.TableName);
+                result = String.CompareOrdinal(this.DatabaseName, other.DatabaseName);
                 if (result != 0) { return result; }
 
-                result = this.OriginName.CompareTo(other.OriginName);
+                result = String.CompareOrdinal(this.TableName, other.TableName);
                 if (result != 0) { return result; }
 
-                return this.DeclaredType.CompareTo(other.DeclaredType);
+                result = String.CompareOrdinal(this.OriginName, other.OriginName);
+                if (result != 0) { return result; }
+
+                return String.CompareOrdinal(this.DeclaredType, other.DeclaredType);
             }
             else 
             {
