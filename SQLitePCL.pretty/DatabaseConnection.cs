@@ -1139,5 +1139,30 @@ namespace SQLitePCL.pretty
             int rc = raw.sqlite3_create_function(db, name, nArg, null, null);
             SQLiteException.CheckOk(db, rc);
         }
+
+        /// <summary>
+        /// Registers a callback function to be invoked periodically during 
+        /// database operations, providing a mechanism to interrupt the current operation.
+        /// </summary>
+        /// <param name="instructions">The approximate number of virtual machine instructions that are evaluated between successive invocations of the callback.</param>
+        /// <param name="handler">A callback function that returns true if the current operation should
+        /// be cancelled, otherwise false.</param>
+        public void RegisterProgressHandler(int instructions, Func<bool> handler)
+        {
+            Contract.Requires(instructions > 0);
+            Contract.Requires(handler != null);
+
+            throw new NotImplementedException();
+            //raw.sqlite3_progress_handler(db, instructions, _ => handler() ? 1 : 0, null);
+        }
+
+        /// <summary>
+        /// Removes the registered progress handler.
+        /// </summary>
+        public void RemoveProgressHandler()
+        {
+            throw new NotImplementedException();
+            // raw.sqlite3_progress_handler(db, 0, null, null);
+        }
     }
 }
