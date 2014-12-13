@@ -549,7 +549,7 @@ namespace SQLitePCL.pretty
 
         public override long Position
         {
-            get 
+            get
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
                 return position;
@@ -600,7 +600,7 @@ namespace SQLitePCL.pretty
             if (position >= length) { return 0; }
 
             // At this point we're guaranteed that position is an int between 0 and length
-            int numBytes = Math.Min(length - (int) position, count);
+            int numBytes = Math.Min(length - (int)position, count);
             int rc = raw.sqlite3_blob_read(blob, buffer, offset, numBytes, (int)position);
             CheckOkOrThrowIOException(rc);
 
@@ -628,13 +628,13 @@ namespace SQLitePCL.pretty
                 case SeekOrigin.End:
                     {
                         newPosition = length + offset;
-				        break;
+                        break;
                     }
                 default:
                     {
-                        throw new ArgumentException ();
+                        throw new ArgumentException();
                     }
-			}
+            }
 
             if (newPosition < 0) { throw new IOException(); }
 

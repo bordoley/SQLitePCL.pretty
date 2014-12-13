@@ -34,11 +34,11 @@ namespace SQLitePCL.pretty
         /// <param name="This">The bind parameter.</param>
         /// <param name="obj">
         /// An object that is either <see langword="null"/> or any numeric type, <see cref="string"/>,
-        /// byte[], <see cref="ISQLiteValue"/> or <see cref="Stream"/>. 
+        /// byte[], <see cref="ISQLiteValue"/> or <see cref="Stream"/>.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// If the <see cref="Type"/> of the value is not supported 
-        /// -or- 
+        /// If the <see cref="Type"/> of the value is not supported
+        /// -or-
         /// A non-readable stream is provided as a value.
         /// </exception>
         public static void Bind(this IBindParameter This, object obj)

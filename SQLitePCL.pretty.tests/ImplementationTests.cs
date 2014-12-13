@@ -123,7 +123,7 @@ namespace SQLitePCL.pretty.tests
                         Assert.AreEqual(pair.Item1[0].ToInt(), pair.Item2[0].ToInt());
                     }
                 }
-            }            
+            }
         }
     }
 
@@ -307,8 +307,7 @@ namespace SQLitePCL.pretty.tests
                 foreach (var result in db.Query("SELECT v FROM foo ORDER BY 1").Select((v, index) => Tuple.Create(index, v[0].ToInt())))
                 {
                     Assert.AreEqual(result.Item1, result.Item2);
-                }     
-   
+                }
             }
         }
 
@@ -477,7 +476,7 @@ namespace SQLitePCL.pretty.tests
         {
             using (var db = SQLite3.Open(":memory:"))
             {
-                foreach (var row in db.Query("SELECT 1 as a, 2 as b")) 
+                foreach (var row in db.Query("SELECT 1 as a, 2 as b"))
                 {
                     var columns = row.Columns();
                     Assert.AreEqual(columns[0].Name, "a");
@@ -507,7 +506,7 @@ namespace SQLitePCL.pretty.tests
                 db.Execute("CREATE TABLE foo (x blob);");
                 db.Execute("INSERT INTO foo (x) VALUES(?);", bytes);
 
-                var stream = 
+                var stream =
                     db.Query("SELECT rowid, x FROM foo;")
                         .Select(row => db.OpenBlob(row[1].ColumnInfo, row[0].ToInt64(), false))
                         .First();
@@ -529,7 +528,7 @@ namespace SQLitePCL.pretty.tests
                     Assert.Throws<ArgumentException>(() => stream.Read(new byte[10], 6, 6));
                     Assert.Throws<ArgumentOutOfRangeException>(() => stream.Read(new byte[10], -5, 6));
                     Assert.Throws<ArgumentOutOfRangeException>(() => stream.Read(new byte[10], 5, -4));
-                
+
                     // Since this is a read only stream, this is a good chance to test that writing fails
                     Assert.Throws<NotSupportedException>(() => stream.WriteByte(0));
                 }
@@ -543,7 +542,7 @@ namespace SQLitePCL.pretty.tests
             {
                 db.Execute("CREATE TABLE foo (x blob);");
                 db.Execute("INSERT INTO foo (x) VALUES(?);", "data");
-                var blob = 
+                var blob =
                     db.Query("SELECT rowid, x FROM foo")
                         .Select(row => db.OpenBlob(row[1].ColumnInfo, row[0].ToInt64(), true))
                         .First();
@@ -568,7 +567,7 @@ namespace SQLitePCL.pretty.tests
             {
                 db.Execute("CREATE TABLE foo (x blob);");
                 db.Execute("INSERT INTO foo (x) VALUES(?);", "data");
-                var blob = 
+                var blob =
                     db.Query("SELECT rowid, x FROM foo")
                         .Select(row => db.OpenBlob(row[1].ColumnInfo, row[0].ToInt64(), true))
                         .First();
@@ -587,7 +586,7 @@ namespace SQLitePCL.pretty.tests
                     Assert.AreEqual(blob.Position, 5);
                     Assert.Throws<IOException>(() => blob.Seek(-100, SeekOrigin.End));
                     Assert.AreEqual(blob.Position, 5);
-                    Assert.Throws<ArgumentException>(() => blob.Seek(-100, (SeekOrigin) 10));
+                    Assert.Throws<ArgumentException>(() => blob.Seek(-100, (SeekOrigin)10));
                     Assert.AreEqual(blob.Position, 5);
 
                     blob.Seek(0, SeekOrigin.Begin);
@@ -616,7 +615,7 @@ namespace SQLitePCL.pretty.tests
 
                 db.Execute("CREATE TABLE foo (x blob);");
                 db.Execute("INSERT INTO foo (x) VALUES(?);", source);
-                
+
                 var stream =
                     db.Query("SELECT rowid, x FROM foo")
                         .Select(row => db.OpenBlob(row[1].ColumnInfo, row[0].ToInt64(), true))

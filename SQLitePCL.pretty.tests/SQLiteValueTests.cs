@@ -56,7 +56,6 @@ namespace SQLitePCL.pretty.tests
             Assert.AreEqual(u.ToSQLiteValue().ToInt(), u);
         }
 
-
         [Test]
         public void TestNullValue()
         {
@@ -183,7 +182,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestZeroBlob()
         {
-            int[] tests = {0, 1, 2, 10};
+            int[] tests = { 0, 1, 2, 10 };
 
             using (var db = SQLite3.Open(":memory:"))
             {
@@ -192,12 +191,12 @@ namespace SQLitePCL.pretty.tests
                     db.Execute("CREATE TABLE foo (x blob);");
                     db.Execute("INSERT INTO foo (x) VALUES (?)", test);
 
-                    foreach (var row  in db.Query("SELECT x FROM foo;"))
+                    foreach (var row in db.Query("SELECT x FROM foo;"))
                     {
                         compare(row.First(), test);
                     }
                     db.Execute("DROP TABLE foo;");
-                }               
+                }
             }
         }
 

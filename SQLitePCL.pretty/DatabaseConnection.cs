@@ -279,7 +279,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Compiles a SQL statement, returning the an <see cref="IEnumerable&lt;T&gt;"/> of rows in the result set. 
+        /// Compiles a SQL statement, returning the an <see cref="IEnumerable&lt;T&gt;"/> of rows in the result set.
         /// </summary>
         /// <param name="This">The database connection.</param>
         /// <param name="sql">The SQL statement to compile and Query.</param>
@@ -296,7 +296,7 @@ namespace SQLitePCL.pretty
 
         /// <summary>
         ///  Compiles a SQL statement with provided bind parameter values,
-        ///  returning the an <see cref="IEnumerable&lt;T&gt;"/> of rows in the result set. 
+        ///  returning the an <see cref="IEnumerable&lt;T&gt;"/> of rows in the result set.
         /// </summary>
         /// <param name="This">The database connection.</param>
         /// <param name="sql">The SQL statement to compile and Query.</param>
@@ -583,7 +583,6 @@ namespace SQLitePCL.pretty
             This.RegisterScalarFunc(name, 0, _ => reduce());
         }
 
-
         /// <summary>
         /// Registers a scalar function that accepts 1 <see href="ISQLiteValue"/> instances.
         /// </summary>
@@ -733,8 +732,8 @@ namespace SQLitePCL.pretty
         /// <param name="columnInfo">The ColumnInfo of the blob value.</param>
         /// <param name="rowId">The row containing the blob.</param>
         /// <param name="canWrite">
-        ///     <see langwords="true"/> if the Stream should be open for both read and write operations. 
-        ///     <see langwords="false"/> if the Stream should be open oly for read operations. 
+        ///     <see langwords="true"/> if the Stream should be open for both read and write operations.
+        ///     <see langwords="false"/> if the Stream should be open oly for read operations.
         /// </param>
         /// <returns>A <see cref="System.IO.Stream"/> that can be used to synchronously write and read to and from blob.</returns>
         public static Stream OpenBlob(this IDatabaseConnection This, ColumnInfo columnInfo, long rowId, bool canWrite)
@@ -798,7 +797,7 @@ namespace SQLitePCL.pretty
         // See: http://blogs.msdn.com/b/ericlippert/archive/2009/04/29/events-and-races.aspx
         // FIXME: One could argue that we really shouldn't initialized the callbacks
         // with sqlite3 until we actually have listeners. not sure how much it matters though
-        
+
         /// <inheritdoc/>
         public event EventHandler Rollback = (o, e) => { };
 
@@ -947,7 +946,7 @@ namespace SQLitePCL.pretty
         /// <seealso href="https://sqlite.org/c3ref/db_filename.html"/>
         /// <param name="database">The database name. The main database file has the name "main".</param>
         /// <param name="filename">When this method returns, contains the filename if there is an
-        /// attached database that is not temporary or in memory. Otherwise null. 
+        /// attached database that is not temporary or in memory. Otherwise null.
         /// This parameter is passed uninitialized.</param>
         /// <returns><see langword="true"/> if the database has a filename, otherwise <see langword="false"/>.
         /// </returns>
@@ -998,8 +997,8 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Causes any database on the database connection to automatically checkpoint 
-        /// after committing a transaction if there are <paramref name="n"/> or 
+        /// Causes any database on the database connection to automatically checkpoint
+        /// after committing a transaction if there are <paramref name="n"/> or
         /// more frames in the write-ahead log file.
         /// </summary>
         /// <param name="n">The number of frames in the write-ahead log that should trigger a checkpoint.</param>
@@ -1041,7 +1040,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        ///  Causes any pending database operation to abort and return at its earliest opportunity. 
+        ///  Causes any pending database operation to abort and return at its earliest opportunity.
         /// </summary>
         /// <seealso href="https://www.sqlite.org/c3ref/interrupt.html"/>
         public void Interrupt()
@@ -1084,7 +1083,7 @@ namespace SQLitePCL.pretty
         /// A callback function to be invoked whenever a transaction is committed.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/commit_hook.html"/>
-        /// <param name="onCommit">A function that returns <see langwords="true"/> 
+        /// <param name="onCommit">A function that returns <see langwords="true"/>
         /// if the commit should be rolled back, otherwise <see langwords="false"/></param>
         public void RegisterCommitHook(Func<bool> onCommit)
         {
@@ -1238,7 +1237,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Registers a callback function to be invoked periodically during 
+        /// Registers a callback function to be invoked periodically during
         /// database operations, providing a mechanism to interrupt the current operation.
         /// </summary>
         /// <param name="instructions">The approximate number of virtual machine instructions that are evaluated between successive invocations of the callback.</param>

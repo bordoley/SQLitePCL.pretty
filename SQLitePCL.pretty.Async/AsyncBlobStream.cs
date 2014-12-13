@@ -36,7 +36,7 @@ namespace SQLitePCL.pretty
 
         public override bool CanRead
         {
-            get 
+            get
             {
                 return !disposed;
             }
@@ -44,7 +44,7 @@ namespace SQLitePCL.pretty
 
         public override bool CanSeek
         {
-            get 
+            get
             {
                 return !disposed;
             }
@@ -52,34 +52,34 @@ namespace SQLitePCL.pretty
 
         public override bool CanWrite
         {
-            get 
-            { 
-                return !disposed && blobStream.CanWrite; 
+            get
+            {
+                return !disposed && blobStream.CanWrite;
             }
         }
 
         public override long Length
         {
-            get 
+            get
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-                return blobStream.Length; 
+                return blobStream.Length;
             }
         }
 
         public override long Position
         {
-            get 
+            get
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-                return blobStream.Position; 
+                return blobStream.Position;
             }
 
-            set 
+            set
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-                blobStream.Position = value; 
+                blobStream.Position = value;
             }
         }
 

@@ -48,7 +48,7 @@ namespace SQLitePCL.pretty
         event EventHandler<DatabaseProfileEventArgs> Profile;
 
         /// <summary>
-        /// Occurs whenever a row is updated, inserted or deleted in a rowid table. 
+        /// Occurs whenever a row is updated, inserted or deleted in a rowid table.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/update_hook.html"/>
         event EventHandler<DatabaseUpdateEventArgs> Update;
@@ -60,15 +60,15 @@ namespace SQLitePCL.pretty
         bool IsAutoCommit { get; }
 
         /// <summary>
-        /// Returns the number of database rows that were changed, inserted 
+        /// Returns the number of database rows that were changed, inserted
         /// or deleted by the most recently completed <see cref="IStatement"/>.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/changes.html"/>
         int Changes { get; }
 
         /// <summary>
-        /// Returns the number of row changes caused by INSERT, 
-        /// UPDATE or DELETE statements since the database connection was opened. 
+        /// Returns the number of row changes caused by INSERT,
+        /// UPDATE or DELETE statements since the database connection was opened.
         /// </summary>
         /// <seealso href="https://www.sqlite.org/c3ref/total_changes.html"/>
         int TotalChanges { get; }
@@ -103,7 +103,7 @@ namespace SQLitePCL.pretty
         bool IsReadOnly(string dbName);
 
         /// <summary>
-        /// Run a checkpoint operation on a WAL database on the connection. The specific operation 
+        /// Run a checkpoint operation on a WAL database on the connection. The specific operation
         /// is determined by the value of the <paramref name="mode"/> parameter.
         /// </summary>
         /// <param name="dbName">The database name.</param>
@@ -121,8 +121,8 @@ namespace SQLitePCL.pretty
         /// <param name="columnName">The column containing the blob.</param>
         /// <param name="rowId">The row containing the blob.</param>
         /// <param name="canWrite">
-        ///     <see langwords="true"/> if the Stream should be open for both read and write operations. 
-        ///     <see langwords="false"/> if the Stream should be open oly for read operations. 
+        ///     <see langwords="true"/> if the Stream should be open for both read and write operations.
+        ///     <see langwords="false"/> if the Stream should be open oly for read operations.
         /// </param>
         /// <returns>A <see cref="System.IO.Stream"/> that can be used to synchronously write and read to and from blob.</returns>
         Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite);
@@ -146,7 +146,7 @@ namespace SQLitePCL.pretty
     {
         /// <summary>
         /// An <see cref="IReadOnlyOrderedDictionary&lt;TKey, TValue&gt;"/> of the statement's bind parameters
-        /// keyed by the parameter name. Note when accessing by index the first parameter 
+        /// keyed by the parameter name. Note when accessing by index the first parameter
         /// is zero-based indexed unlike in the native SQLite APIs that are one-based indexed.
         /// </summary>
         IReadOnlyOrderedDictionary<string, IBindParameter> BindParameters { get; }
@@ -173,7 +173,7 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/stmt_busy.html"/>
         bool IsBusy { get; }
-        
+
         /// <summary>
         /// Resets this statements bindings to <see cref="SQLiteValue.Null"/>.
         /// </summary>
@@ -194,8 +194,8 @@ namespace SQLitePCL.pretty
         /// <param name="index">The zero-based index of the element to get.</param>
         /// <returns>The element at the specified index.</returns>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// <paramref name="index"/> is less than 0 
-        /// -or- 
+        /// <paramref name="index"/> is less than 0
+        /// -or-
         /// <paramref name="index"/> is equal to or greater than <see cref="IReadOnlyCollection&lt;T&gt;.Count"/>.
         /// </exception>
         TValue this[int index] { get; }
@@ -256,8 +256,8 @@ namespace SQLitePCL.pretty
 
         /// <summary>
         /// Binds the parameter to a blob of length N that is filled with zeroes.
-        /// Zeroblobs are intended to serve as placeholders for BLOBs whose 
-        /// content is later written using <see cref="IDatabaseConnection.OpenBlob"/>. 
+        /// Zeroblobs are intended to serve as placeholders for BLOBs whose
+        /// content is later written using <see cref="IDatabaseConnection.OpenBlob"/>.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/bind_blob.html"/>
         /// <param name="size">The length of the blob in bytes.</param>
@@ -337,7 +337,7 @@ namespace SQLitePCL.pretty
         int RemainingPages { get; }
 
         /// <summary>
-        /// Copies up to nPage  between the source and destination databases. 
+        /// Copies up to nPage  between the source and destination databases.
         /// If nPages is negative, all remaining source pages are copied.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/backup_finish.html#sqlite3backupstep"/>

@@ -81,7 +81,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(f != null);
 
-            return This.Use(conn => new [] { f(conn) }).ToTask(cancellationToken);
+            return This.Use(conn => new[] { f(conn) }).ToTask(cancellationToken);
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace SQLitePCL.pretty
         /// <param name="values">The position indexed values to bind.</param>
         /// <returns>A <see cref="Task"/> that completes when the statement is executed.</returns>
         public static Task ExecuteAsync(
-            this IAsyncStatement This, 
+            this IAsyncStatement This,
             CancellationToken cancellationToken,
             params object[] values)
         {

@@ -76,7 +76,7 @@ namespace SQLitePCL.pretty.tests
                     Tuple.Create("name","db", "table", "column", "Variant"),
                 };
 
-            foreach (var test in  tests)
+            foreach (var test in tests)
             {
                 var fst = new ColumnInfo(test.Item1, test.Item2, test.Item3, test.Item4, test.Item5);
                 var snd = new ColumnInfo(test.Item1, test.Item2, test.Item3, test.Item4, test.Item5);
@@ -100,7 +100,7 @@ namespace SQLitePCL.pretty.tests
 
             for (int i = 0; i < tests.Length; i++)
             {
-                for(int j = 0; j < tests.Length; j++)
+                for (int j = 0; j < tests.Length; j++)
                 {
                     if (i < j)
                     {
@@ -139,7 +139,7 @@ namespace SQLitePCL.pretty.tests
             Assert.AreEqual(new ColumnInfo("", "", "", "", "").CompareTo(nullColumnInfo), 1);
 
             object nullObj = null;
-            Assert.AreEqual(((IComparable) new ColumnInfo("", "", "", "", "")).CompareTo(nullObj), 1); 
+            Assert.AreEqual(((IComparable)new ColumnInfo("", "", "", "", "")).CompareTo(nullObj), 1);
         }
     }
 }

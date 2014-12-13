@@ -22,7 +22,7 @@ using System.Diagnostics.Contracts;
 namespace SQLitePCL.pretty
 {
     /// <summary>
-    /// Static methods for opening instances of <see cref="IDatabaseConnection"/> 
+    /// Static methods for opening instances of <see cref="IDatabaseConnection"/>
     /// and for accessing static SQLite3 properties, and functions.
     /// </summary>
     public static class SQLite3
@@ -112,7 +112,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Returns the maximum value of <see cref="MemoryUsed"/> since the high-water mark was last reset. 
+        /// Returns the maximum value of <see cref="MemoryUsed"/> since the high-water mark was last reset.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/memory_highwater.html"/>
         public static long MemoryHighWater
@@ -159,8 +159,8 @@ namespace SQLitePCL.pretty
         /// <param name="flags"><see cref="ConnectionFlags"/> used to defined if the database is readonly,
         /// read/write and whether a new database file should be created if it does not already exist.</param>
         /// <param name="vfs">
-        /// The name of the sqlite3_vfs object that defines the operating system interface 
-        /// that the new database connection should use. If <see langword="null"/>, then 
+        /// The name of the sqlite3_vfs object that defines the operating system interface
+        /// that the new database connection should use. If <see langword="null"/>, then
         /// the default sqlite3_vfs object is used.</param>
         /// <returns>A <see cref="SQLiteDatabaseConnection"/> instance.</returns>
         /// <seealso href="https://sqlite.org/c3ref/open.html"/>
@@ -188,7 +188,7 @@ namespace SQLitePCL.pretty
         /// Determines if the text provided forms a complete SQL statement.
         /// </summary>
         /// <param name="sql">The text to evaluate.</param>
-        /// <returns><see langword="true"/> if the text forms a complete SQL 
+        /// <returns><see langword="true"/> if the text forms a complete SQL
         /// statement, otherwise <see langword="false"/>.</returns>
         public static bool IsCompleteStatement(string sql)
         {

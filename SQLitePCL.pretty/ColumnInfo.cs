@@ -130,13 +130,13 @@ namespace SQLitePCL.pretty
         /// The column that is the origin of this particular result column.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/column_database_name.html"/>
-        public string OriginName { get { return originName; }}
+        public string OriginName { get { return originName; } }
 
         /// <summary>
         ///  The table that is the origin of this particular result column.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/column_database_name.html"/>
-        public string TableName { get { return tableName; }}
+        public string TableName { get { return tableName; } }
 
         /// <summary>
         /// Returns the declared type of a column in a result set or null if no type is declared.
@@ -201,7 +201,7 @@ namespace SQLitePCL.pretty
 
                 return String.CompareOrdinal(this.DeclaredType, other.DeclaredType);
             }
-            else 
+            else
             {
                 return 1;
             }

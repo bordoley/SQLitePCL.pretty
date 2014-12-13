@@ -103,7 +103,7 @@ namespace SQLitePCL.pretty.tests
             {
                 await adb.Use(db => Enumerable.Range(0, 1000))
                     .Scan(Tuple.Create(-1, -1), (x, y) => Tuple.Create(x.Item1 + 1, y))
-                    .Do(result => 
+                    .Do(result =>
                         {
                             Assert.AreEqual(result.Item2, result.Item1);
                         });
@@ -116,7 +116,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(t, expected);
 
                 var anotherUse = adb.Use(db => Enumerable.Range(0, 1000));
-                
+
                 adb.Dispose();
 
                 // Test double dispose
@@ -149,7 +149,7 @@ namespace SQLitePCL.pretty.tests
                     var stmt2 = db.PrepareStatement("SELECT * FROM foo");
                     var stmt3 = db.PrepareStatement("SELECT rowid, x FROM foo");
 
-                    var stmts = new HashSet<IStatement>() {stmt1, stmt2, stmt3};
+                    var stmts = new HashSet<IStatement>() { stmt1, stmt2, stmt3 };
 
                     int count = 0;
                     foreach (var stmt in db.Statements)
@@ -170,26 +170,26 @@ namespace SQLitePCL.pretty.tests
             {
                 bool expectEvent = true;
 
-                await adb.Use(db => 
+                await adb.Use(db =>
                 {
                     bool profile = false;
                     bool trace = false;
                     bool rollback = false;
                     bool update = false;
 
-                    db.Profile += (o, e) => 
+                    db.Profile += (o, e) =>
                         {
                             profile = true;
                             Assert.True(expectEvent);
                         };
 
-                    db.Trace += (o, e) => 
+                    db.Trace += (o, e) =>
                         {
                             trace = true;
                             Assert.True(expectEvent);
                         };
 
-                    db.Rollback += (o, e) => 
+                    db.Rollback += (o, e) =>
                         {
                             rollback = true;
                             Assert.True(expectEvent);
@@ -235,12 +235,12 @@ namespace SQLitePCL.pretty.tests
 
         [Test]
         public async Task TestIDatabaseConnectionDispose()
-        { 
+        {
             using (var adb = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
             {
                 await adb.ExecuteAsync("CREATE TABLE foo (x int);");
 
-                await adb.Use(db => 
+                await adb.Use(db =>
                 {
                     Assert.DoesNotThrow(() => { var x = db.IsAutoCommit; });
                     Assert.DoesNotThrow(() => { var x = db.Changes; });
@@ -296,7 +296,7 @@ namespace SQLitePCL.pretty.tests
             using (var adb = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
             {
                 await adb.ExecuteAsync("CREATE TABLE foo (x int);");
-                var stmts = 
+                var stmts =
                     await adb.PrepareAllAsync(
                         "SELECT * FROM foo;" +
                         "SELECT x FROM foo;" +

@@ -45,7 +45,7 @@ namespace SQLitePCL.pretty.tests
                         Assert.Throws<ObjectDisposedException>(() => { stmt.Reset(); });
                     });
 
-                await aStmt.Use(stmt => 
+                await aStmt.Use(stmt =>
                     {
                         // Assert that the statement is not disposed, despite the previous user disposing it's instance.
                         Assert.DoesNotThrow(() => { var x = stmt.IsReadOnly; });
@@ -100,7 +100,7 @@ namespace SQLitePCL.pretty.tests
                       INSERT INTO foo (x, y, z) VALUES (1, 2, 3);");
 
                 var aStmt = await db.PrepareStatementAsync("SELECT x, y, z from foo");
-                await aStmt.Use(stmt => 
+                await aStmt.Use(stmt =>
                     {
                         Assert.True(stmt.MoveNext());
                         var row = stmt.Current;
@@ -175,7 +175,7 @@ namespace SQLitePCL.pretty.tests
             using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
             {
                 var aStmt = await db.PrepareStatementAsync("SELECT :a as a, :b as b, :c as c");
-                await aStmt.Use(stmt => 
+                await aStmt.Use(stmt =>
                     {
                         Assert.AreEqual(stmt.Columns[0].Name, "a");
                         Assert.AreEqual(stmt.Columns[1].Name, "b");

@@ -43,7 +43,7 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Create a SQLite zeroblob of the specified length.
         /// </summary>
-        /// <remarks>This method does not allocate any memory, 
+        /// <remarks>This method does not allocate any memory,
         /// therefore the zero blobs can safely be of arbitrary length.</remarks>
         /// <param name="length">The length of the zero blob</param>
         /// <returns>An ISQLiteValue representing the zero blob.</returns>
@@ -165,7 +165,7 @@ namespace SQLitePCL.pretty
             return new ResultSetValueImpl(This, index);
         }
 
-        internal static void SetResult(this sqlite3_context ctx , ISQLiteValue value)
+        internal static void SetResult(this sqlite3_context ctx, ISQLiteValue value)
         {
             switch (value.SQLiteType)
             {
@@ -665,7 +665,7 @@ namespace SQLitePCL.pretty
 
         public override string ToString()
         {
-            return ""; 
+            return "";
         }
     }
 }

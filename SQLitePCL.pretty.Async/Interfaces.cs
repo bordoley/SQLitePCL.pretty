@@ -65,13 +65,13 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <param name="f">
         /// A function that may synchronously use the provided IDatabaseConnection and returns
-        /// an IEnumerable of produced values that are published to the subscribed IObserver. 
+        /// an IEnumerable of produced values that are published to the subscribed IObserver.
         /// The returned IEnumerable may block. This allows the IEnumerable to provide the results of
         /// enumerating a SQLite prepared statement for instance.
         /// <note type="implement">
-        /// The IDatabaseConnection may be used to prepare statements and open database blobs, 
-        /// but these must not be captured or otherwise externally referenced unless their use is 
-        /// scheduled on the connections's operation queue via future calls to <see cref="Use&lt;T&gt;"/>. 
+        /// The IDatabaseConnection may be used to prepare statements and open database blobs,
+        /// but these must not be captured or otherwise externally referenced unless their use is
+        /// scheduled on the connections's operation queue via future calls to <see cref="Use&lt;T&gt;"/>.
         /// </note>
         /// </param>
         /// <returns>A cold observable of the values produced by the function f.</returns>
@@ -90,8 +90,8 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <param name="f">
         /// A function that may synchronously use the provided IStatement and returns
-        /// an IEnumerable of produced values that are published to the subscribed IObserver. 
-        /// The returned IEnumerable may block. This allows the IEnumerable to provide the results of 
+        /// an IEnumerable of produced values that are published to the subscribed IObserver.
+        /// The returned IEnumerable may block. This allows the IEnumerable to provide the results of
         /// enumerating the prepared statement for instance.
         /// </param>
         /// <returns>A cold observable of the values produced by the function f.</returns>

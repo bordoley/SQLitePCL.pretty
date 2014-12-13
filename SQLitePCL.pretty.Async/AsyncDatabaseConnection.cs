@@ -39,11 +39,11 @@ namespace SQLitePCL.pretty
         /// Allows an application to set a default scheduler for <see cref="IAsyncDatabaseConnection"/>
         /// instances created with <see cref="DatabaseConnection.AsAsyncDatabaseConnection(SQLiteDatabaseConnection)"/>.
         /// </summary>
-        /// <remarks>This is a convenience feature that allows an application to set a global 
-        /// <see cref="IScheduler"/> instance, instead of supplying it with each call to 
-        /// <see cref="DatabaseConnection.AsAsyncDatabaseConnection(SQLiteDatabaseConnection)"/>. 
+        /// <remarks>This is a convenience feature that allows an application to set a global
+        /// <see cref="IScheduler"/> instance, instead of supplying it with each call to
+        /// <see cref="DatabaseConnection.AsAsyncDatabaseConnection(SQLiteDatabaseConnection)"/>.
         /// </remarks>
-        /// <threadsafety static="false">This setter sets global state and should not be 
+        /// <threadsafety static="false">This setter sets global state and should not be
         /// used after application initialization.</threadsafety>
         public static IScheduler DefaultScheduler
         {
@@ -210,8 +210,8 @@ namespace SQLitePCL.pretty
         /// <param name="columnName">The column containing the blob.</param>
         /// <param name="rowId">The row containing the blob.</param>
         /// <param name="canWrite">
-        ///     <see langwords="true"/> if the Stream should be open for both read and write operations. 
-        ///     <see langwords="false"/> if the Stream should be open oly for read operations. 
+        ///     <see langwords="true"/> if the Stream should be open for both read and write operations.
+        ///     <see langwords="false"/> if the Stream should be open oly for read operations.
         /// </param>
         /// <returns>A <see cref="Task"/> that completes with a <see cref="System.IO.Stream"/> that can be used to asynchronously write and read to and from blob.</returns>
         public static Task<Stream> OpenBlobAsync(
@@ -239,8 +239,8 @@ namespace SQLitePCL.pretty
         /// <param name="columnName">The column containing the blob.</param>
         /// <param name="rowId">The row containing the blob.</param>
         /// <param name="canWrite">
-        ///     <see langwords="true"/> if the Stream should be open for both read and write operations. 
-        ///     <see langwords="false"/> if the Stream should be open oly for read operations. 
+        ///     <see langwords="true"/> if the Stream should be open for both read and write operations.
+        ///     <see langwords="false"/> if the Stream should be open oly for read operations.
         /// </param>
         /// <param name="cancellationToken">Cancellation token that can be used to cancel the task.</param>
         /// <returns>A <see cref="Task"/> that completes with a <see cref="System.IO.Stream"/> that can be used to asynchronously write and read to and from blob.</returns>
@@ -272,8 +272,8 @@ namespace SQLitePCL.pretty
         /// <param name="columnInfo">The ColumnInfo of the blob value.</param>
         /// <param name="rowId">The row containing the blob.</param>
         /// <param name="canWrite">
-        ///     <see langwords="true"/> if the Stream should be open for both read and write operations. 
-        ///     <see langwords="false"/> if the Stream should be open oly for read operations. 
+        ///     <see langwords="true"/> if the Stream should be open for both read and write operations.
+        ///     <see langwords="false"/> if the Stream should be open oly for read operations.
         /// </param>
         /// <param name="cancellationToken">Cancellation token that can be used to cancel the task.</param>
         /// <returns>A <see cref="Task"/> that completes with a <see cref="System.IO.Stream"/> that can be used to asynchronously write and read to and from blob.</returns>
@@ -297,8 +297,8 @@ namespace SQLitePCL.pretty
         /// <param name="columnInfo">The ColumnInfo of the blob value.</param>
         /// <param name="rowId">The row containing the blob.</param>
         /// <param name="canWrite">
-        ///     <see langwords="true"/> if the Stream should be open for both read and write operations. 
-        ///     <see langwords="false"/> if the Stream should be open oly for read operations. 
+        ///     <see langwords="true"/> if the Stream should be open for both read and write operations.
+        ///     <see langwords="false"/> if the Stream should be open oly for read operations.
         /// </param>
         /// <returns>A <see cref="Task"/> that completes with a <see cref="System.IO.Stream"/> that can be used to asynchronously write and read to and from blob.</returns>
         public static Task<Stream> OpenBlobAsync(
@@ -316,7 +316,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The asynchronous database connection.</param>
         /// <param name="sql">One or more semicolon delimited SQL statements.</param>
         /// <param name="cancellationToken">Cancellation token that can be used to cancel the task.</param>
-        /// <returns>A <see cref="Task"/> that completes with a <see cref="IReadOnlyList&lt;T&gt;"/> 
+        /// <returns>A <see cref="Task"/> that completes with a <see cref="IReadOnlyList&lt;T&gt;"/>
         /// of the compiled <see cref="IAsyncStatement"/>instances.</returns>
         public static Task<IReadOnlyList<IAsyncStatement>> PrepareAllAsync(
            this IAsyncDatabaseConnection This,
@@ -327,15 +327,15 @@ namespace SQLitePCL.pretty
             Contract.Requires(sql != null);
 
             return Use<IReadOnlyList<IAsyncStatement>>(This, conn =>
-                {                 
-                    // Eagerly prepare all the statements. The synchronous version of PrepareAll() 
+                {
+                    // Eagerly prepare all the statements. The synchronous version of PrepareAll()
                     // is lazy, preparing each statement when MoveNext() is called on the Enumerator.
                     // Hence an implementation like:
                     //
                     //   return conn.PrepareAll(sql).Select(stmt => new AsyncStatementImpl(stmt, This));
                     //
                     // would result in unintentional database access not on the operations queue.
-                    // Added bonus of being eager: Callers can retrieve individual statements via 
+                    // Added bonus of being eager: Callers can retrieve individual statements via
                     // the index in the list.
                     return conn.PrepareAll(sql).Select(stmt => new AsyncStatementImpl(stmt, This)).ToList();
                 }, cancellationToken);
@@ -346,7 +346,7 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <param name="This">The asynchronous database connection.</param>
         /// <param name="sql">One or more semicolon delimited SQL statements.</param>
-        /// <returns>A <see cref="Task"/> that completes with a <see cref="IReadOnlyList&lt;T&gt;"/> 
+        /// <returns>A <see cref="Task"/> that completes with a <see cref="IReadOnlyList&lt;T&gt;"/>
         /// of the compiled <see cref="IAsyncStatement"/>instances.</returns>
         public static Task<IReadOnlyList<IAsyncStatement>> PrepareAllAsync(
            this IAsyncDatabaseConnection This,
@@ -397,8 +397,8 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Returns a cold observable that compiles a SQL statement with 
-        /// provided bind parameter values, that publishes the rows in the result 
+        /// Returns a cold observable that compiles a SQL statement with
+        /// provided bind parameter values, that publishes the rows in the result
         /// set for each subscription.
         /// </summary>
         /// <param name="This">The asynchronous database connection.</param>
@@ -418,7 +418,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Returns a cold observable that compiles a SQL statement 
+        /// Returns a cold observable that compiles a SQL statement
         /// that publishes the rows in the result set for each subscription.
         /// </summary>
         /// <param name="This">The asynchronous database connection.</param>
@@ -486,7 +486,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(f != null);
 
-            return This.Use(conn => new [] { f(conn) }).ToTask(cancellationToken);
+            return This.Use(conn => new[] { f(conn) }).ToTask(cancellationToken);
         }
 
         /// <summary>
@@ -564,7 +564,7 @@ namespace SQLitePCL.pretty
         }
 
         // Yes async void is evil and ugly. This is essentially a compromise decision to avoid
-        // common deadlock pitfalls. For instance, if Dispose was implemented as 
+        // common deadlock pitfalls. For instance, if Dispose was implemented as
         //
         //  public void Dispose()
         //  {
@@ -578,20 +578,20 @@ namespace SQLitePCL.pretty
         //     await db.Use(_ => { });
         //   }
         //
-        // In this case, the task pool immediately schedules the call to Dispose() after the 
+        // In this case, the task pool immediately schedules the call to Dispose() after the
         // Action completes on the same thread. This results in deadlock as the call to Dispose()
         // is waiting for the queue to indicate its empty, but the current running item on the
         // queue never completes since its blocked by the Dispose() call.
-        // 
+        //
         // A fix for this is available in .NET 4.5.3, which provides TaskCreationOptions.RunContinuationsAsynchronously
         // Unfortunately this is not, and will not for the forseable future be available in the PCL profile.
-        // Also the RX implementation of ToTask() does not accept TaskCreationOptions but that could 
+        // Also the RX implementation of ToTask() does not accept TaskCreationOptions but that could
         // be worked around with a custom implementation.
         //
         // Another fix considered but abandoned was to provide variant of Use() accepting an
-        // IScheduler that can be used to ObserveOn(). However this would essentially double the 
-        // number of static methods in this class, and would only in practice be 
-        // useful in unit tests, as most client code will typically call these async 
+        // IScheduler that can be used to ObserveOn(). However this would essentially double the
+        // number of static methods in this class, and would only in practice be
+        // useful in unit tests, as most client code will typically call these async
         // methods from an event loop, which doesn't suffer from this bug.
         public async void Dispose()
         {
@@ -620,7 +620,7 @@ namespace SQLitePCL.pretty
                                 cancellationToken.ThrowIfCancellationRequested();
 
                                 // Note: Diposing the connection wrapper doesn't dispose the underlying connection
-                                // The intent here is to prevent access to the underlying connection outside of the 
+                                // The intent here is to prevent access to the underlying connection outside of the
                                 // function call.
                                 using (var db = new DatabaseConnectionWrapper(this.conn))
                                 {
@@ -786,7 +786,7 @@ namespace SQLitePCL.pretty
                 db.Profile -= profile;
                 db.Update -= update;
 
-                // Guard against someone taking a reference to this and trying to use it outside of 
+                // Guard against someone taking a reference to this and trying to use it outside of
                 // the Use function delegate
                 disposed = true;
                 // We don't actually own the database connection so its not disposed

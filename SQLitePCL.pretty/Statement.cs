@@ -27,18 +27,18 @@ namespace SQLitePCL.pretty
     public static class Statement
     {
         /// <summary>
-        /// Binds the position indexed values in <paramref name="values"/> to the 
+        /// Binds the position indexed values in <paramref name="values"/> to the
         /// corresponding bind parameters in <paramref name="This"/>.
         /// </summary>
         /// <remarks>
         /// Bind parameters may be <see langword="null"/>, any numeric type, or an instance of <see cref="string"/>,
-        /// byte[], or <see cref="Stream"/>. 
+        /// byte[], or <see cref="Stream"/>.
         /// </remarks>
         /// <param name="This">The statement.</param>
         /// <param name="values">The position indexed values to bind.</param>
         /// <exception cref="ArgumentException">
-        /// If the <see cref="Type"/> of the value is not supported 
-        /// -or- 
+        /// If the <see cref="Type"/> of the value is not supported
+        /// -or-
         /// A non-readable stream is provided as a value.</exception>
         public static void Bind(this IStatement This, params object[] values)
         {
@@ -59,7 +59,7 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <remarks>
         /// Bind parameters may be <see langword="null"/>, any numeric type, or an instance of <see cref="string"/>,
-        /// byte[], or <see cref="Stream"/>. 
+        /// byte[], or <see cref="Stream"/>.
         /// </remarks>
         /// <param name="This">The statement.</param>
         /// <param name="pairs">An enumerable of keyvalue pairs keyed by bind parameter name.</param>

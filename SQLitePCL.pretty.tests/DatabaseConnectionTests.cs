@@ -335,7 +335,7 @@ namespace SQLitePCL.pretty.tests
                 db.RegisterAggregateFunc<Tuple<long, long>>("sum_plus_count", Tuple.Create(0L, 0L),
                     (Tuple<long, long> acc, ISQLiteValue arg) => Tuple.Create(acc.Item1 + arg.ToInt64(), acc.Item2 + 1L),
                     (Tuple<long, long> acc) => (acc.Item1 + acc.Item2).ToSQLiteValue());
-                
+
                 db.Execute("CREATE TABLE foo (x int);");
                 for (int i = 0; i < 5; i++)
                 {
@@ -345,7 +345,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(c, (0 + 1 + 2 + 3 + 4) + 5);
 
                 db.RemoveFunc("sum_plus_count", 1);
-                Assert.Throws<SQLiteException>(() => 
+                Assert.Throws<SQLiteException>(() =>
                     db.Query("SELECT sum_plus_count(x) FROM foo;")
                         .Select(row => row[0].ToInt64())
                         .First());
