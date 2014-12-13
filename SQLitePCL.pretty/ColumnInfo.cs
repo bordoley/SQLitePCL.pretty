@@ -85,11 +85,11 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Indicates if the the first SQLiteVersion is less than the second.
+        /// Indicates if the the first ColumnInfo is less than the second.
         /// </summary>
-        /// <param name="x">A SQLiteVersion instance.</param>
-        /// <param name="y">A SQLiteVersion instance.</param>
-        /// <returns><see langword="true"/> if the the first SQLiteVersion is less than the second; otherwise, <see langword="false"/>.</returns>
+        /// <param name="x">A ColumnInfo instance.</param>
+        /// <param name="y">A ColumnInfo instance.</param>
+        /// <returns><see langword="true"/> if the the first ColumnInfo is less than the second; otherwise, <see langword="false"/>.</returns>
         public static bool operator <(ColumnInfo x, ColumnInfo y)
         {
             switch (x.CompareTo(y))

@@ -129,6 +129,7 @@
     <Compile Include="SQLite3.cs" />
     <Compile Include="Statement.cs" />
     <Compile Include="ResultSet.cs" />
+    <Compile Include="TableColumnMetadata.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>

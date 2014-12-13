@@ -763,6 +763,12 @@ namespace SQLitePCL.pretty
                 statements.Remove(stmt.stmt);
             }
 
+            public TableColumnMetadata GetTableColumnMetadata(string dbName, string tableName, string columnName)
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                return db.GetTableColumnMetadata(dbName, tableName, columnName);
+            }
+
             public Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite)
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }

@@ -85,6 +85,16 @@ namespace SQLitePCL.pretty
         IEnumerable<IStatement> Statements { get; }
 
         /// <summary>
+        /// Returns metadata about a specific column of a specific database table,
+        /// </summary>
+        /// <param name="dbName">The database name.</param>
+        /// <param name="tableName">The table name.</param>
+        /// <param name="columnName">The column name.</param>
+        /// <returns>The column metadata.</returns>
+        /// <seealso href="https://www.sqlite.org/c3ref/table_column_metadata.html"/>
+        TableColumnMetadata GetTableColumnMetadata(string dbName, string tableName, string columnName);
+
+        /// <summary>
         /// Determine whether a database is readonly.
         /// </summary>
         /// <seealso href="https://www.sqlite.org/c3ref/db_readonly.html"/>

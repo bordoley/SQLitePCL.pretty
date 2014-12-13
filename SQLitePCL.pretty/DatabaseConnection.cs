@@ -743,6 +743,20 @@ namespace SQLitePCL.pretty
             Contract.Requires(columnInfo != null);
             return This.OpenBlob(columnInfo.DatabaseName, columnInfo.TableName, columnInfo.OriginName, rowId, canWrite);
         }
+
+        /// <summary>
+        ///  Returns metadata about a specific column of a specific database table,
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="columnInfo">The ColumnInfo of the column whose metadata should be retrieved.</param>
+        /// <returns>The metadata of the column specified by columnInfo.</returns>
+        public static TableColumnMetadata GetTableColumnMetadata(this IDatabaseConnection This, ColumnInfo columnInfo)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(columnInfo != null);
+
+            return This.GetTableColumnMetadata(columnInfo.DatabaseName, columnInfo.TableName, columnInfo.OriginName);
+        }
     }
 
     /// <summary>
@@ -1007,6 +1021,22 @@ namespace SQLitePCL.pretty
         {
             //int rc = raw.sqlite3_wal_autocheckpoint(db, -1);
             //SQLiteException.CheckOk(db, rc);
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public TableColumnMetadata GetTableColumnMetadata(string dbName, string tableName, string columnName)
+        {
+            string dataType;
+            string collSeq;
+            int notNull;
+            int primaryKey;
+            int autoInc;
+
+            //int rc = raw.sqlite3_table_column_metadata(db, dbName, tableName, columnName, out dataType, out collSeq, out notNull, out primaryKey, out autoInc);
+            //SQLiteException.CheckOk(db, rc);
+            //return new TableColumnMetadata(dataType,collSeq, notNull !=0, primaryKey !=0, autoInc !=0);
+
             throw new NotImplementedException();
         }
 
