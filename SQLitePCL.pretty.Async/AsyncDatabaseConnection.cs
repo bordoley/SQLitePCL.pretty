@@ -510,14 +510,14 @@ namespace SQLitePCL.pretty
         private readonly OperationsQueue queue = new OperationsQueue();
         private readonly IScheduler scheduler;
 
-        private readonly IDatabaseConnection conn;
+        private readonly SQLiteDatabaseConnection conn;
         private readonly IObservable<DatabaseTraceEventArgs> trace;
         private readonly IObservable<DatabaseProfileEventArgs> profile;
         private readonly IObservable<DatabaseUpdateEventArgs> update;
 
         private bool disposed = false;
 
-        internal AsyncDatabaseConnectionImpl(IDatabaseConnection conn, IScheduler scheduler)
+        internal AsyncDatabaseConnectionImpl(SQLiteDatabaseConnection conn, IScheduler scheduler)
         {
             this.conn = conn;
             this.scheduler = scheduler;
@@ -611,13 +611,12 @@ namespace SQLitePCL.pretty
                         return Task.FromResult(Unit.Default);
                     }
 
-                    return queue.EnqueueOperation(() =>
+                    return queue.EnqueueOperation(ct =>
                         {
-                            var cancellationTokenRegistration = cancellationToken.Register(() => { /* this.conn.Interrupt() */});
-
+                            //this.conn.RegisterProgressHandler(100, () => ct.IsCancellationRequested);
                             try
                             {
-                                cancellationToken.ThrowIfCancellationRequested();
+                                ct.ThrowIfCancellationRequested();
 
                                 // Note: Diposing the connection wrapper doesn't dispose the underlying connection
                                 // The intent here is to prevent access to the underlying connection outside of the
@@ -627,7 +626,7 @@ namespace SQLitePCL.pretty
                                     foreach (var e in f(db))
                                     {
                                         observer.OnNext(e);
-                                        cancellationToken.ThrowIfCancellationRequested();
+                                        ct.ThrowIfCancellationRequested();
                                     }
 
                                     observer.OnCompleted();
@@ -635,7 +634,7 @@ namespace SQLitePCL.pretty
                             }
                             finally
                             {
-                                cancellationTokenRegistration.Dispose();
+                                //this.conn.RemoveProgressHandler();
                             }
                         }, scheduler, cancellationToken);
                 });
@@ -669,7 +668,7 @@ namespace SQLitePCL.pretty
                 db.Profile += profile;
                 db.Update += update;
 
-                this.initialTotalChanges = db.TotalChanges;
+                this.initialTotalChanges = 0;//db.TotalChanges;
 
                 this.statementsEnumerable = new DelegatingEnumerable<IStatement>(StatementsEnumerator);
             }

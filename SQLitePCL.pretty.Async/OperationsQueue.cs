@@ -42,16 +42,16 @@ namespace SQLitePCL.pretty
 
         private sealed class Operation<T> : Operation
         {
-            public static Operation<T> Create(Func<Task<T>> f, CancellationToken cancellationToken)
+            public static Operation<T> Create(Func<CancellationToken, Task<T>> f, CancellationToken cancellationToken)
             {
                 return new Operation<T>(f, cancellationToken);
             }
 
-            private readonly Func<Task<T>> f;
+            private readonly Func<CancellationToken, Task<T>> f;
             private readonly CancellationToken cancellationToken;
             private readonly TaskCompletionSource<T> result = new TaskCompletionSource<T>();
 
-            private Operation(Func<Task<T>> f, CancellationToken cancellationToken)
+            private Operation(Func<CancellationToken, Task<T>> f, CancellationToken cancellationToken)
             {
                 this.f = f;
                 this.cancellationToken = cancellationToken;
@@ -71,7 +71,7 @@ namespace SQLitePCL.pretty
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    var result = await f().ConfigureAwait(false);
+                    var result = await f(cancellationToken).ConfigureAwait(false);
                     this.result.SetResult(result);
                 }
                 catch (Exception ex)
@@ -97,7 +97,7 @@ namespace SQLitePCL.pretty
             resultObs.Connect();
         }
 
-        public Task<T> EnqueueOperation<T>(Func<Task<T>> asyncCalculationFunc, CancellationToken cancellationToken)
+        public Task<T> EnqueueOperation<T>(Func<CancellationToken, Task<T>> asyncCalculationFunc, CancellationToken cancellationToken)
         {
             var item = Operation<T>.Create(asyncCalculationFunc, cancellationToken);
             queuedOps.OnNext(item);
@@ -118,11 +118,12 @@ namespace SQLitePCL.pretty
 
     internal static class OperationsQueueExtensions
     {
-        public static Task EnqueueOperation(this OperationsQueue This, Action calculationFunc, IScheduler scheduler, CancellationToken cancellationToken)
+        public static Task EnqueueOperation(this OperationsQueue This, Action<CancellationToken> calculationFunc, IScheduler scheduler, CancellationToken cancellationToken)
         {
-            return This.EnqueueOperation(() =>
-                Observable.Start(calculationFunc, scheduler).ToTask(),
-                cancellationToken);
+            return This.EnqueueOperation(ct =>
+                Observable.Start(() => 
+                    calculationFunc(ct), scheduler).ToTask(ct), cancellationToken);
         }
     }
 }
+ 

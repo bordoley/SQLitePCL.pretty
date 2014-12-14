@@ -27,7 +27,7 @@ namespace SQLitePCL.pretty
     /// </summary>
     public static class SQLite3
     {
-        private static IEnumerator<String> compilerOptionsEnumerator()
+        private static IEnumerator<string> CompilerOptionsEnumerator()
         {
             for (int i = 0; ; i++)
             {
@@ -43,14 +43,14 @@ namespace SQLitePCL.pretty
             }
         }
 
-        private static readonly IEnumerable<String> compilerOptions =
-            new DelegatingEnumerable<String>(compilerOptionsEnumerator);
+        private static readonly IEnumerable<string> compilerOptions =
+            new DelegatingEnumerable<string>(CompilerOptionsEnumerator);
 
         /// <summary>
         /// The SQLite compiler options that were defined at compile time.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/compileoption_get.html"/>
-        public static IEnumerable<String> CompilerOptions
+        public static IEnumerable<string> CompilerOptions
         {
             get
             {

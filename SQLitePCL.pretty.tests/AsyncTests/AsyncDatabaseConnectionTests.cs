@@ -303,9 +303,9 @@ namespace SQLitePCL.pretty.tests
                         "SELECT rowid, x FROM foo;");
                 Assert.AreEqual(stmts.Count, 3);
 
-                var stmt0 = await stmts[0].Use(stmt => stmt.SQL);
-                var stmt1 = await stmts[1].Use(stmt => stmt.SQL);
-                var stmt2 = await stmts[2].Use(stmt => stmt.SQL);
+                var stmt0 = await stmts[0].Use<string>(stmt => stmt.SQL);
+                var stmt1 = await stmts[1].Use<string>(stmt => stmt.SQL);
+                var stmt2 = await stmts[2].Use<string>(stmt => stmt.SQL);
 
                 Assert.AreEqual(stmt0, "SELECT * FROM foo;");
                 Assert.AreEqual(stmt1, "SELECT x FROM foo;");

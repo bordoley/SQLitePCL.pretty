@@ -110,8 +110,8 @@ namespace SQLitePCL.pretty
         }
 
         private readonly ActionCode action;
-        private readonly String database;
-        private readonly String table;
+        private readonly string database;
+        private readonly string table;
         private readonly long rowId;
 
         private DatabaseUpdateEventArgs(ActionCode action, String database, string table, long rowId)
@@ -136,7 +136,7 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// The database containing the affected row.
         /// </summary>
-        public String Database
+        public string Database
         {
             get
             {
@@ -147,7 +147,7 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// The table name containing the affected row.
         /// </summary>
-        public String Table
+        public string Table
         {
             get
             {
@@ -243,7 +243,7 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <param name="This">The database connection.</param>
         /// <param name="sql">One or more semicolon delimited SQL statements.</param>
-        public static void ExecuteAll(this IDatabaseConnection This, String sql)
+        public static void ExecuteAll(this IDatabaseConnection This, string sql)
         {
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
@@ -372,7 +372,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, string name, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -410,7 +410,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, string name, T seed, Func<T, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -429,7 +429,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -448,7 +448,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -467,7 +467,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -486,7 +486,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -505,7 +505,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -524,7 +524,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);
@@ -543,7 +543,7 @@ namespace SQLitePCL.pretty
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
-        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, String name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public static void RegisterAggregateFunc<T>(this SQLiteDatabaseConnection This, string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(name != null);

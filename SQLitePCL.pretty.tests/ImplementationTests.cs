@@ -182,7 +182,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestBindParameterCount()
         {
-            Tuple<String, int>[] tests =
+            Tuple<string, int>[] tests =
             {
                 Tuple.Create("CREATE TABLE foo (x int)", 0),
                 Tuple.Create("CREATE TABLE foo2 (x int, y int)", 0),
@@ -207,7 +207,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestReadOnly()
         {
-            Tuple<String, bool>[] tests =
+            Tuple<string, bool>[] tests =
             {
                 Tuple.Create("CREATE TABLE foo (x int)", false),
                 Tuple.Create("CREATE TABLE foo2 (x int, y int)", false),
@@ -232,7 +232,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestGetSQL()
         {
-            String[] sql =
+            string[] sql =
             {
                 "CREATE TABLE foo (x int)",
                 "INSERT INTO foo (x) VALUES (1)",
