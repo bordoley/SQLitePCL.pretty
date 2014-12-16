@@ -668,7 +668,7 @@ namespace SQLitePCL.pretty
                 db.Profile += profile;
                 db.Update += update;
 
-                this.initialTotalChanges = 0;//db.TotalChanges;
+                this.initialTotalChanges = db.TotalChanges;
 
                 this.statementsEnumerable = new DelegatingEnumerable<IStatement>(StatementsEnumerator);
             }

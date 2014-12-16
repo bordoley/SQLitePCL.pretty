@@ -844,8 +844,7 @@ namespace SQLitePCL.pretty
             get
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-                //return raw.sqlite3_total_changes(db);
-                throw new NotImplementedException();
+                return raw.sqlite3_total_changes(db);
             }
         }
 
@@ -886,8 +885,7 @@ namespace SQLitePCL.pretty
         public bool IsReadOnly(string dbName)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-            //return raw.sqlite3_db_readonly(db, dbName) != 0;
-            throw new NotImplementedException();
+            return raw.sqlite3_db_readonly(db, dbName) != 0;
         }
 
         /// <inheritdoc/>
@@ -1046,7 +1044,7 @@ namespace SQLitePCL.pretty
         public void Interrupt()
         {
             throw new NotImplementedException();
-            //raw.sqlite3_interrupt(db)
+            raw.sqlite3_interrupt(db);
         }
 
         /// <summary>
