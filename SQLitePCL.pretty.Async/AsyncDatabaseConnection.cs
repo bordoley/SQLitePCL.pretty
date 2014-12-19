@@ -107,10 +107,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
-            return This.Use((conn, ct) =>
-            {
-                conn.ExecuteAll(sql);
-            }, cancellationToken);
+            return This.Use((conn, ct) => conn.ExecuteAll(sql), cancellationToken);
         }
 
         /// <summary>
@@ -123,7 +120,7 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
-            return ExecuteAllAsync(This, sql, CancellationToken.None);
+            return This.ExecuteAllAsync(sql, CancellationToken.None);
         }
 
         /// <summary>
@@ -144,10 +141,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(sql != null);
             Contract.Requires(values != null);
 
-            return This.Use((conn, ct) =>
-                {
-                    conn.Execute(sql, values);
-                }, cancellationToken);
+            return This.Use((conn, ct) => conn.Execute(sql, values), cancellationToken);
         }
 
         /// <summary>
@@ -181,10 +175,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
-            return This.Use((conn, ct) =>
-            {
-                conn.Execute(sql);
-            }, cancellationToken);
+            return This.Use((conn, ct) => conn.Execute(sql), cancellationToken);
         }
 
         /// <summary>
