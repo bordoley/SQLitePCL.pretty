@@ -43,6 +43,7 @@ namespace SQLitePCL.pretty.tests
 
             Assert.Throws<ObjectDisposedException>(() => { db.BusyTimeout = TimeSpan.MaxValue; });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.Changes; });
+            Assert.Throws<ObjectDisposedException>(() => { var x = db.TotalChanges; });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.IsAutoCommit; });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.LastInsertedRowId; });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.Statements; });
@@ -52,6 +53,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.Throws<ObjectDisposedException>(() => { db.Backup("main", db2, "main"); });
             }
 
+            Assert.Throws<ObjectDisposedException>(() => { var x = db.IsReadOnly("main"); });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.GetFileName("main"); });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.OpenBlob("db", "tn", "cn", 0, false); });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.PrepareStatement("SELECT 1"); });
@@ -62,6 +64,20 @@ namespace SQLitePCL.pretty.tests
             Assert.Throws<ObjectDisposedException>(() => { db.RegisterAggregateFunc("name", null, (string a, ISQLiteValue b) => a, t => "".ToSQLiteValue()); });
             Assert.Throws<ObjectDisposedException>(() => { db.RegisterScalarFunc("name", () => "p".ToSQLiteValue()); });
             Assert.Throws<ObjectDisposedException>(() => { db.RemoveFunc("name", 0); });
+        }
+
+        [Test]
+        public void TestIsReadonly()
+        {
+            using (var db = SQLite3.Open(":memory:", ConnectionFlags.ReadOnly, null))
+            {
+                Assert.IsTrue(db.IsReadOnly("main"));
+            }
+
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                Assert.IsFalse(db.IsReadOnly("main"));
+            }
         }
 
         [Test]
@@ -167,12 +183,24 @@ namespace SQLitePCL.pretty.tests
         {
             using (var db = SQLite3.Open(":memory:"))
             {
+                Assert.AreEqual(db.TotalChanges, 0);
+                Assert.AreEqual(db.Changes, 0);
+
                 db.Execute("CREATE TABLE foo (x int);");
+                Assert.AreEqual(db.TotalChanges, 0);
+                Assert.AreEqual(db.Changes, 0);
+
                 db.Execute("INSERT INTO foo (x) VALUES (1);");
+                Assert.AreEqual(db.TotalChanges, 1);
                 Assert.AreEqual(db.Changes, 1);
+
                 db.Execute("INSERT INTO foo (x) VALUES (2);");
                 db.Execute("INSERT INTO foo (x) VALUES (3);");
+                Assert.AreEqual(db.TotalChanges, 3);
+                Assert.AreEqual(db.Changes, 1);
+
                 db.Execute("UPDATE foo SET x=5;");
+                Assert.AreEqual(db.TotalChanges, 6);
                 Assert.AreEqual(db.Changes, 3);
             }
         }
