@@ -1168,16 +1168,9 @@ namespace SQLitePCL.pretty
                 {
                     CtxState<T> state = (CtxState<T>)ctx.state;
 
-                    // FIXME: Is catching the exception really the right thing to do?
-                    try
-                    {
-                        ISQLiteValue result = resultSelector(state.Value);
-                        ctx.SetResult(result);
-                    }
-                    catch (Exception e)
-                    {
-                        raw.sqlite3_result_error(ctx, e.Message);
-                    }
+                    // FIXME: https://github.com/ericsink/SQLitePCL.raw/issues/30
+                    ISQLiteValue result = resultSelector(state.Value);
+                    ctx.SetResult(result);
                 };
 
             int rc = raw.sqlite3_create_function(db, name, nArg, null, funcStep, funcFinal);
@@ -1203,16 +1196,9 @@ namespace SQLitePCL.pretty
                 {
                     IReadOnlyList<ISQLiteValue> iArgs = args.Select(value => value.ToSQLiteValue()).ToList();
 
-                    // FIXME: Is catching the exception really the right thing to do?
-                    try
-                    {
-                        ISQLiteValue result = reduce(iArgs);
-                        ctx.SetResult(result);
-                    }
-                    catch (Exception e)
-                    {
-                        raw.sqlite3_result_error(ctx, e.Message);
-                    }
+                    // FIXME: https://github.com/ericsink/SQLitePCL.raw/issues/30
+                    ISQLiteValue result = reduce(iArgs);
+                    ctx.SetResult(result);
                 });
             SQLiteException.CheckOk(db, rc);
         }
