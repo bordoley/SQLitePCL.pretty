@@ -67,9 +67,7 @@ namespace SQLitePCL.pretty.tests
                     }
                 }
 
-                // Blob dispose is broken: https://github.com/ericsink/SQLitePCL.raw/pull/9
-                // so tryig to drop the table causes an exception.
-                //db.Execute("DROP TABLE foo;");
+                db.Execute("DROP TABLE foo;");
             }
         }
 
