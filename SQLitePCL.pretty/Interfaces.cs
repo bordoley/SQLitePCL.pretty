@@ -92,7 +92,7 @@ namespace SQLitePCL.pretty
         /// <param name="columnName">The column name.</param>
         /// <returns>The column metadata.</returns>
         /// <seealso href="https://www.sqlite.org/c3ref/table_column_metadata.html"/>
-        TableColumnMetadata GetTableColumnMetadata(string dbName, string tableName, string columnName);
+        //TableColumnMetadata GetTableColumnMetadata(string dbName, string tableName, string columnName);
 
         /// <summary>
         /// Determine whether a database is readonly.
@@ -110,7 +110,7 @@ namespace SQLitePCL.pretty
         /// <param name="mode">The checkpoint mode to use.</param>
         /// <param name="nLog">Returns the total number of frames in the log file before returning.</param>
         /// <param name="nCkpt">Return the total number of checkpointed frames.</param>
-        void WalCheckPoint(string dbName, WalCheckPointMode mode, out int nLog, out int nCkpt);
+        //void WalCheckPoint(string dbName, WalCheckPointMode mode, out int nLog, out int nCkpt);
 
         /// <summary>
         /// Opens the blob located by the a database, table, column, and rowid for incremental I/O as a <see cref="System.IO.Stream"/>.

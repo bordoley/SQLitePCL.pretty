@@ -18,6 +18,7 @@ using System;
 
 namespace SQLitePCL.pretty
 {
+    /*
     /// <summary>
     /// Metadata about a specific column of a database table
     /// </summary>
@@ -207,5 +208,5 @@ namespace SQLitePCL.pretty
 
             return this.CompareTo((TableColumnMetadata)obj);
         }
-    }
+    }*/
 }
