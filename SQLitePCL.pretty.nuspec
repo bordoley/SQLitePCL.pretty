@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>SQLitePCL.pretty</id>
-    <version>0.0.9</version>
+    <version>0.0.10</version>
     <title>SQLitePCL.pretty</title>
     <authors>David Bordoley</authors>
     <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
@@ -15,7 +15,7 @@ For asynchronous query support, an additional companion API is available. See: S
     </description>
     <tags>portable sqlite pcl LINQ</tags>
     <dependencies>
-      <dependency id="SQLitePCL.raw_basic" version="0.6.1" />
+      <dependency id="SQLitePCL.raw_basic" version="0.7.0" />
     </dependencies>
   </metadata>
   <files>
