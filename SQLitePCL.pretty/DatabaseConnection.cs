@@ -881,6 +881,7 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <inheritdoc/>
         public bool IsReadOnly
         {
             get
