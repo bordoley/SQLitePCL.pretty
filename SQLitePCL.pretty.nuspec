@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>SQLitePCL.pretty</id>
-    <version>0.0.10</version>
+    <version>0.0.11</version>
     <title>SQLitePCL.pretty</title>
     <authors>David Bordoley</authors>
     <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
@@ -14,6 +14,9 @@ SQLitePCL.pretty wraps the C like SQLiteAPI provided by SQLitePCL.raw with a fri
 For asynchronous query support, an additional companion API is available. See: SQLitePCL.pretty.Async 
     </description>
     <tags>portable sqlite pcl LINQ</tags>
+    <references>
+      <reference file="SQLitePCL.pretty.dll" />
+    </references>
     <dependencies>
       <dependency id="SQLitePCL.raw_basic" version="0.7.0" />
     </dependencies>
