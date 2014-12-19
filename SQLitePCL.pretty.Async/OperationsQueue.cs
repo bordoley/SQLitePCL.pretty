@@ -106,9 +106,11 @@ namespace SQLitePCL.pretty
 
         public Task DisposeAsync()
         {
+            if (shutdown != null) { return shutdown; }
+
+            // FIXME: Considered using AsyncLock from AsyncEx but didn't want to take on the dependency.
             lock (queuedOps)
             {
-                if (shutdown != null) { return shutdown; }
                 queuedOps.OnCompleted();
                 shutdown = resultObs.LastOrDefaultAsync().ToTask();
                 return shutdown;
