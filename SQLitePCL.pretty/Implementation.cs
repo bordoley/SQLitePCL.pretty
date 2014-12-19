@@ -591,12 +591,6 @@ namespace SQLitePCL.pretty
         public override int Read(byte[] buffer, int offset, int count)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-            if (buffer == null) { throw new ArgumentNullException(); }
-            if (offset + count > buffer.Length) { throw new ArgumentException(); }
-            if (offset < 0) { throw new ArgumentOutOfRangeException(); }
-            if (count < 0) { throw new ArgumentOutOfRangeException(); }
-
             if (position >= length) { return 0; }
 
             // At this point we're guaranteed that position is an int between 0 and length
@@ -651,11 +645,6 @@ namespace SQLitePCL.pretty
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
             if (!canWrite) { throw new NotSupportedException(); }
-
-            if (buffer == null) { throw new ArgumentNullException(); }
-            if (offset + count > buffer.Length) { throw new ArgumentException(); }
-            if (offset < 0) { throw new ArgumentOutOfRangeException(); }
-            if (count < 0) { throw new ArgumentOutOfRangeException(); }
 
             if (position >= length) { return; }
 

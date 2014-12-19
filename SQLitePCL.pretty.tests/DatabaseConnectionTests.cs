@@ -41,7 +41,7 @@ namespace SQLitePCL.pretty.tests
 
             Assert.Throws<ObjectDisposedException>(() => { stmtEnumerator.MoveNext(); });
 
-            Assert.Throws<ObjectDisposedException>(() => { db.BusyTimeout = TimeSpan.MaxValue; });
+            Assert.Throws<ObjectDisposedException>(() => { db.BusyTimeout = TimeSpan.MinValue; });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.Changes; });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.TotalChanges; });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.IsAutoCommit; });

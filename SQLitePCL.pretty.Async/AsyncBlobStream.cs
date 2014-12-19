@@ -118,11 +118,6 @@ namespace SQLitePCL.pretty
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-            if (buffer == null) { throw new ArgumentNullException(); }
-            if (offset + count > buffer.Length) { throw new ArgumentException(); }
-            if (offset < 0) { throw new ArgumentOutOfRangeException(); }
-            if (count < 0) { throw new ArgumentOutOfRangeException(); }
-
             return queue.Use((db, ct) => blobStream.Read(buffer, offset, count), cancellationToken);
         }
 
@@ -147,11 +142,6 @@ namespace SQLitePCL.pretty
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
             if (!this.CanWrite) { throw new NotSupportedException(); }
-
-            if (buffer == null) { throw new ArgumentNullException(); }
-            if (offset + count > buffer.Length) { throw new ArgumentException(); }
-            if (offset < 0) { throw new ArgumentOutOfRangeException(); }
-            if (count < 0) { throw new ArgumentOutOfRangeException(); }
 
             return queue.Use((db,ct) =>
                 {

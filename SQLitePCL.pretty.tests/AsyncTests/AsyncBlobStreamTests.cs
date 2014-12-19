@@ -81,12 +81,6 @@ namespace SQLitePCL.pretty.tests
                         Assert.AreEqual(bytes[i], bite[0]);
                     }
 
-                    // Test input validation
-                    Assert.Throws<ArgumentNullException>(() => stream.Read(null, 0, 1));
-                    Assert.Throws<ArgumentException>(() => stream.Read(new byte[10], 6, 6));
-                    Assert.Throws<ArgumentOutOfRangeException>(() => stream.Read(new byte[10], -5, 6));
-                    Assert.Throws<ArgumentOutOfRangeException>(() => stream.Read(new byte[10], 5, -4));
-
                     // Since this is a read only stream, this is a good chance to test that writing fails
                     Assert.Throws<NotSupportedException>(() => stream.WriteByte(0));
                 }
@@ -114,12 +108,6 @@ namespace SQLitePCL.pretty.tests
 
                 using (stream)
                 {
-                    // Test input validation
-                    Assert.Throws<ArgumentNullException>(() => stream.Write(null, 1, 1));
-                    Assert.Throws<ArgumentException>(() => stream.Write(new byte[10], 6, 6));
-                    Assert.Throws<ArgumentOutOfRangeException>(() => stream.Write(new byte[10], -5, 6));
-                    Assert.Throws<ArgumentOutOfRangeException>(() => stream.Write(new byte[10], 5, -4));
-
                     Assert.True(stream.CanRead);
                     Assert.True(stream.CanWrite);
                     await source.CopyToAsync(stream);
@@ -163,7 +151,6 @@ namespace SQLitePCL.pretty.tests
                 {
                     Assert.True(blob.CanSeek);
                     Assert.Throws<NotSupportedException>(() => blob.SetLength(10));
-                    Assert.Throws<ArgumentOutOfRangeException>(() => { blob.Position = -1; });
                     Assert.DoesNotThrow(() => { blob.Position = 100; });
 
                     // Test input validation
