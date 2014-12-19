@@ -283,10 +283,10 @@ namespace SQLitePCL.pretty.tests
             {
                 var cts = new CancellationTokenSource();
                 cts.Cancel();
-                Assert.That(async () => await adb.Use(_ => { }, cts.Token), Throws.TypeOf<TaskCanceledException>());
+                Assert.Throws<TaskCanceledException>(async () => await adb.Use((db, ct) => { }, cts.Token));
 
                 cts = new CancellationTokenSource();
-                Assert.That(async () => await adb.Use(_ => { cts.Cancel(); }, cts.Token), Throws.TypeOf<TaskCanceledException>());
+                Assert.Throws<TaskCanceledException>(async () => await adb.Use((db, ct) => { cts.Cancel(); }, cts.Token));
             }
         }
 

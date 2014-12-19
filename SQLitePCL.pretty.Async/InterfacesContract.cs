@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SQLitePCL.pretty
@@ -34,7 +35,7 @@ namespace SQLitePCL.pretty
 
         public abstract Task DisposeAsync();
 
-        public IObservable<T> Use<T>(Func<IDatabaseConnection, IEnumerable<T>> f)
+        public IObservable<T> Use<T>(Func<IDatabaseConnection, CancellationToken, IEnumerable<T>> f)
         {
             Contract.Requires(f != null);
 
@@ -47,7 +48,7 @@ namespace SQLitePCL.pretty
     {
         public abstract void Dispose();
 
-        public IObservable<T> Use<T>(Func<IStatement, IEnumerable<T>> f)
+        public IObservable<T> Use<T>(Func<IStatement, CancellationToken, IEnumerable<T>> f)
         {
             Contract.Requires(f != null);
 

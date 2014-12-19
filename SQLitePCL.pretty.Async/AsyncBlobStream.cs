@@ -93,10 +93,7 @@ namespace SQLitePCL.pretty
 
             if (disposing)
             {
-                queue.Use(db =>
-                    {
-                        blobStream.Dispose();
-                    });
+                queue.Use(db => blobStream.Dispose());
             }
 
             // Free any unmanaged objects here.
@@ -126,7 +123,7 @@ namespace SQLitePCL.pretty
             if (offset < 0) { throw new ArgumentOutOfRangeException(); }
             if (count < 0) { throw new ArgumentOutOfRangeException(); }
 
-            return queue.Use(db => blobStream.Read(buffer, offset, count), cancellationToken);
+            return queue.Use((db, ct) => blobStream.Read(buffer, offset, count), cancellationToken);
         }
 
         public override long Seek(long offset, SeekOrigin origin)
@@ -156,7 +153,7 @@ namespace SQLitePCL.pretty
             if (offset < 0) { throw new ArgumentOutOfRangeException(); }
             if (count < 0) { throw new ArgumentOutOfRangeException(); }
 
-            return queue.Use(db =>
+            return queue.Use((db,ct) =>
                 {
                     blobStream.Write(buffer, offset, count);
                 }, cancellationToken);

@@ -107,7 +107,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
-            return This.Use(conn =>
+            return This.Use((conn, ct) =>
             {
                 conn.ExecuteAll(sql);
             }, cancellationToken);
@@ -144,7 +144,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(sql != null);
             Contract.Requires(values != null);
 
-            return This.Use(conn =>
+            return This.Use((conn, ct) =>
                 {
                     conn.Execute(sql, values);
                 }, cancellationToken);
@@ -181,7 +181,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
-            return This.Use(conn =>
+            return This.Use((conn, ct) =>
             {
                 conn.Execute(sql);
             }, cancellationToken);
@@ -258,7 +258,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(tableName != null);
             Contract.Requires(columnName != null);
 
-            return This.Use<Stream>(db =>
+            return This.Use<Stream>((db, ct) =>
                 {
                     var blob = db.OpenBlob(database, tableName, columnName, rowId, canWrite);
                     return new AsyncBlobStream(blob, This);
@@ -326,7 +326,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
-            return Use<IReadOnlyList<IAsyncStatement>>(This, conn =>
+            return This.Use<IReadOnlyList<IAsyncStatement>>((conn, ct) =>
                 {
                     // Eagerly prepare all the statements. The synchronous version of PrepareAll()
                     // is lazy, preparing each statement when MoveNext() is called on the Enumerator.
@@ -374,7 +374,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
-            return Use<IAsyncStatement>(This, conn =>
+            return This.Use<IAsyncStatement>((conn, ct) =>
             {
                 var stmt = conn.PrepareStatement(sql);
                 return new AsyncStatementImpl(stmt, This);
@@ -414,7 +414,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(sql != null);
             Contract.Requires(values != null);
 
-            return This.Use(conn => conn.Query(sql, values));
+            return This.Use((conn, ct) => conn.Query(sql, values));
         }
 
         /// <summary>
@@ -443,15 +443,15 @@ namespace SQLitePCL.pretty
         /// <returns>A task that completes when <paramref name="f"/> returns.</returns>
         public static Task Use(
             this IAsyncDatabaseConnection This,
-            Action<IDatabaseConnection> f,
+            Action<IDatabaseConnection, CancellationToken> f,
             CancellationToken cancellationToken)
         {
             Contract.Requires(This != null);
             Contract.Requires(f != null);
 
-            return This.Use(conn =>
+            return This.Use((conn, ct) =>
             {
-                f(conn);
+                f(conn, ct);
                 return Enumerable.Empty<Unit>();
             }, cancellationToken);
         }
@@ -467,7 +467,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(f != null);
 
-            return Use(This, f, CancellationToken.None);
+            return This.Use((db, ct) => f(db), CancellationToken.None);
         }
 
         /// <summary>
@@ -480,13 +480,13 @@ namespace SQLitePCL.pretty
         /// <returns>A task that completes with the result of <paramref name="f"/>.</returns>
         public static Task<T> Use<T>(
             this IAsyncDatabaseConnection This,
-            Func<IDatabaseConnection, T> f,
+            Func<IDatabaseConnection, CancellationToken, T> f,
             CancellationToken cancellationToken)
         {
             Contract.Requires(This != null);
             Contract.Requires(f != null);
 
-            return This.Use(conn => new[] { f(conn) }).ToTask(cancellationToken);
+            return This.Use((conn, ct) => new[] { f(conn, ct) }).ToTask(cancellationToken);
         }
 
         /// <summary>
@@ -496,13 +496,33 @@ namespace SQLitePCL.pretty
         /// <param name="This">The asynchronous database connection.</param>
         /// <param name="f">A function from <see cref="IDatabaseConnection"/> to <typeparamref name="T"/>.</param>
         /// <returns>A task that completes with the result of <paramref name="f"/>.</returns>
-        public static Task<T> Use<T>(this IAsyncDatabaseConnection This, Func<IDatabaseConnection, T> f)
+        public static Task<T> Use<T>(this IAsyncDatabaseConnection This, Func<IDatabaseConnection,T> f)
         {
             Contract.Requires(This != null);
             Contract.Requires(f != null);
 
-            return Use(This, f, CancellationToken.None);
+            return This.Use((db, ct) => f(db), CancellationToken.None);
         }
+
+        /// <summary>
+        /// Returns a cold IObservable which schedules the function f on the database operation queue each
+        /// time it is is subscribed to. The published values are generated by enumerating the IEnumerable returned by f.
+        /// </summary>
+        /// <typeparam name="T">The result type.</typeparam>
+        /// <param name="This">The asynchronous database connection.</param>
+        /// <param name="f">
+        /// A function that may synchronously use the provided IDatabaseConnection and returns
+        /// an IEnumerable of produced values that are published to the subscribed IObserver.
+        /// The returned IEnumerable may block. This allows the IEnumerable to provide the results of
+        /// enumerating a SQLite prepared statement for instance.
+        /// </param>
+        /// <returns>A cold observable of the values produced by the function f.</returns>
+        public static IObservable<T> Use<T>(this IAsyncDatabaseConnection This, Func<IDatabaseConnection, IEnumerable<T>> f)
+        {
+            Contract.Requires(f != null);
+            return This.Use((conn, ct) => f(conn));
+        }
+        
     }
 
     internal sealed class AsyncDatabaseConnectionImpl : IAsyncDatabaseConnection
@@ -598,7 +618,7 @@ namespace SQLitePCL.pretty
             await this.DisposeAsync();
         }
 
-        public IObservable<T> Use<T>(Func<IDatabaseConnection, IEnumerable<T>> f)
+        public IObservable<T> Use<T>(Func<IDatabaseConnection, CancellationToken, IEnumerable<T>> f)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
@@ -623,7 +643,7 @@ namespace SQLitePCL.pretty
                                 // function call.
                                 using (var db = new DatabaseConnectionWrapper(this.conn))
                                 {
-                                    foreach (var e in f(db))
+                                    foreach (var e in f(db, ct))
                                     {
                                         observer.OnNext(e);
                                         ct.ThrowIfCancellationRequested();
