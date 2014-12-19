@@ -81,6 +81,25 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Test]
+        public void TestInterrupt()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                db.Execute("CREATE TABLE foo (x int);");
+                db.Execute("INSERT INTO foo (x) VALUES (1);");
+                db.Execute("INSERT INTO foo (x) VALUES (2);");
+                db.Execute("INSERT INTO foo (x) VALUES (3);");
+
+                using (var stmt = db.PrepareStatement("SELECT x FROM foo;"))
+                {
+                    stmt.MoveNext();
+                    db.Interrupt();
+                    Assert.Throws<OperationCanceledException>(() => stmt.MoveNext());
+                }
+            }
+        }
+
+        [Test]
         public void TestRollbackEvent()
         {
             using (var db = SQLite3.Open(":memory:"))

@@ -1043,7 +1043,6 @@ namespace SQLitePCL.pretty
         /// <seealso href="https://www.sqlite.org/c3ref/interrupt.html"/>
         public void Interrupt()
         {
-            throw new NotImplementedException();
             raw.sqlite3_interrupt(db);
         }
 

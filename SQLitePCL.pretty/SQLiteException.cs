@@ -54,14 +54,20 @@ namespace SQLitePCL.pretty
             CheckOk(raw.sqlite3_db_handle(stmt), rc);
         }
 
-        internal static SQLiteException Create(int rc, int extended, string msg)
+        internal static Exception Create(int rc, int extended, string msg)
         {
             return Create((ErrorCode)rc, (ErrorCode)extended, msg);
         }
 
-        internal static SQLiteException Create(ErrorCode rc, ErrorCode extended, string msg)
+        internal static Exception Create(ErrorCode rc, ErrorCode extended, string msg)
         {
-            return new SQLiteException(rc, extended, msg);
+            var exp = new SQLiteException(rc, extended, msg);
+
+            if (rc == pretty.ErrorCode.Interrupt)
+            {
+                return new OperationCanceledException(msg, exp);
+            }
+            return exp;
         }
 
         private readonly ErrorCode errorCode;
