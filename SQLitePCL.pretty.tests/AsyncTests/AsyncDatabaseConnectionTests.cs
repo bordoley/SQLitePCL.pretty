@@ -243,17 +243,23 @@ namespace SQLitePCL.pretty.tests
                 await adb.Use(db =>
                 {
                     Assert.DoesNotThrow(() => { var x = db.IsAutoCommit; });
+                    Assert.DoesNotThrow(() => { var x = db.IsReadOnly; });
                     Assert.DoesNotThrow(() => { var x = db.Changes; });
+                    Assert.DoesNotThrow(() => { var x = db.TotalChanges; });
                     Assert.DoesNotThrow(() => { var x = db.LastInsertedRowId; });
                     Assert.DoesNotThrow(() => { var x = db.Statements; });
+                    Assert.DoesNotThrow(() => { var x = db.IsDatabaseReadOnly("main"); });
                     Assert.DoesNotThrow(() => { using (var stmt = db.PrepareStatement("SELECT x FROM foo;")) { } });
 
                     db.Dispose();
 
                     Assert.Throws<ObjectDisposedException>(() => { var x = db.IsAutoCommit; });
+                    Assert.Throws<ObjectDisposedException>(() => { var x = db.IsReadOnly; });
                     Assert.Throws<ObjectDisposedException>(() => { var x = db.Changes; });
+                    Assert.Throws<ObjectDisposedException>(() => { var x = db.TotalChanges; });
                     Assert.Throws<ObjectDisposedException>(() => { var x = db.LastInsertedRowId; });
                     Assert.Throws<ObjectDisposedException>(() => { var x = db.Statements; });
+                    Assert.Throws<ObjectDisposedException>(() => { var x = db.IsDatabaseReadOnly("main"); });
                     Assert.Throws<ObjectDisposedException>(() => { var x = db.OpenBlob("", "", "", 0, true); });
                     Assert.Throws<ObjectDisposedException>(() => db.PrepareStatement("SELECT x FROM foo;"));
                 });

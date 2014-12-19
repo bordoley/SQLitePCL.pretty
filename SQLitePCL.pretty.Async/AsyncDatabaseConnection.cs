@@ -710,6 +710,15 @@ namespace SQLitePCL.pretty
                 }
             }
 
+            public bool IsReadOnly
+            {
+                get
+                {
+                    if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                    return db.IsReadOnly;
+                }
+            }
+
             public int Changes
             {
                 get
@@ -754,10 +763,10 @@ namespace SQLitePCL.pretty
                 db.WalCheckPoint(dbName, mode, out nLog, out nCkpt);
             }*/
 
-            public bool IsReadOnly(string dbName)
+            public bool IsDatabaseReadOnly(string dbName)
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-                return db.IsReadOnly(dbName);
+                return db.IsDatabaseReadOnly(dbName);
             }
 
             private IEnumerator<IStatement> StatementsEnumerator()

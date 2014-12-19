@@ -36,6 +36,8 @@ namespace SQLitePCL.pretty
 
         public abstract bool IsAutoCommit { get; }
 
+        public abstract bool IsReadOnly { get; }
+
         public abstract int Changes { get; }
 
         public abstract int TotalChanges { get; }
@@ -51,7 +53,7 @@ namespace SQLitePCL.pretty
             nCkpt = default(int);
         }
 
-        public bool IsReadOnly(string dbName)
+        public bool IsDatabaseReadOnly(string dbName)
         {
             Contract.Requires(dbName != null);
             return default(bool);

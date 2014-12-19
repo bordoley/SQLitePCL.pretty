@@ -862,6 +862,15 @@ namespace SQLitePCL.pretty
             }
         }
 
+        public bool IsReadOnly
+        {
+            get
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                return raw.sqlite3_db_readonly(db, null) != 0;
+            }
+        }
+
         /// <inheritdoc/>
         public long LastInsertedRowId
         {
@@ -885,10 +894,19 @@ namespace SQLitePCL.pretty
         }
 
         /// <inheritdoc/>
-        public bool IsReadOnly(string dbName)
+        public bool IsDatabaseReadOnly(string dbName)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-            return raw.sqlite3_db_readonly(db, dbName) != 0;
+            int rc = raw.sqlite3_db_readonly(db, dbName);
+            switch (rc)
+            {
+                case 1:
+                    return true;
+                case 0:
+                    return false;
+                default:
+                    throw new ArgumentException("Not the name of a database on the connection.");
+            }
         }
 
         /*

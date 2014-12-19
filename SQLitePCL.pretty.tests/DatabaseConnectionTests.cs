@@ -45,6 +45,7 @@ namespace SQLitePCL.pretty.tests
             Assert.Throws<ObjectDisposedException>(() => { var x = db.Changes; });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.TotalChanges; });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.IsAutoCommit; });
+            Assert.Throws<ObjectDisposedException>(() => { var x = db.IsReadOnly; });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.LastInsertedRowId; });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.Statements; });
 
@@ -53,7 +54,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.Throws<ObjectDisposedException>(() => { db.Backup("main", db2, "main"); });
             }
 
-            Assert.Throws<ObjectDisposedException>(() => { var x = db.IsReadOnly("main"); });
+            Assert.Throws<ObjectDisposedException>(() => { var x = db.IsDatabaseReadOnly("main"); });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.GetFileName("main"); });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.OpenBlob("db", "tn", "cn", 0, false); });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.PrepareStatement("SELECT 1"); });
@@ -67,16 +68,18 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Test]
-        public void TestIsReadonly()
+        public void TestIsDatabaseReadonly()
         {
             using (var db = SQLite3.Open(":memory:", ConnectionFlags.ReadOnly, null))
             {
-                Assert.IsTrue(db.IsReadOnly("main"));
+                Assert.IsTrue(db.IsReadOnly);
+                Assert.IsTrue(db.IsDatabaseReadOnly("main"));
+                Assert.Throws<ArgumentException>(() => db.IsDatabaseReadOnly("baz"));
             }
 
             using (var db = SQLite3.Open(":memory:"))
             {
-                Assert.IsFalse(db.IsReadOnly("main"));
+                Assert.IsFalse(db.IsDatabaseReadOnly("main"));
             }
         }
 

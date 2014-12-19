@@ -60,6 +60,11 @@ namespace SQLitePCL.pretty
         bool IsAutoCommit { get; }
 
         /// <summary>
+        /// Returns true if the database connection is readonly.
+        /// </summary>
+        bool IsReadOnly { get; }
+
+        /// <summary>
         /// Returns the number of database rows that were changed, inserted
         /// or deleted by the most recently completed <see cref="IStatement"/>.
         /// </summary>
@@ -100,7 +105,7 @@ namespace SQLitePCL.pretty
         /// <seealso href="https://www.sqlite.org/c3ref/db_readonly.html"/>
         /// <param name="dbName">The database name.</param>
         /// <returns><see langword="true"/> if the database is readonly, otherwise <see langword="false"/>.</returns>
-        bool IsReadOnly(string dbName);
+        bool IsDatabaseReadOnly(string dbName);
 
         /// <summary>
         /// Run a checkpoint operation on a WAL database on the connection. The specific operation
