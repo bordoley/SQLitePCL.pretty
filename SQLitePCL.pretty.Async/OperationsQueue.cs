@@ -83,7 +83,7 @@ namespace SQLitePCL.pretty
 
         private readonly Subject<Operation> queuedOps = new Subject<Operation>();
         private readonly IConnectableObservable<Unit> resultObs;
-        private Task shutdown;
+        private readonly Lazy<Task> dispose;
 
         internal OperationsQueue()
         {
@@ -95,6 +95,12 @@ namespace SQLitePCL.pretty
                 .Multicast(new Subject<Unit>());
 
             resultObs.Connect();
+
+            dispose = new Lazy<Task>(() =>
+            {
+                queuedOps.OnCompleted();
+                return resultObs.LastOrDefaultAsync().ToTask();
+            }, LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
         public Task<T> EnqueueOperation<T>(Func<CancellationToken, Task<T>> asyncCalculationFunc, CancellationToken cancellationToken)
@@ -106,15 +112,7 @@ namespace SQLitePCL.pretty
 
         public Task DisposeAsync()
         {
-            if (shutdown != null) { return shutdown; }
-
-            // FIXME: Considered using AsyncLock from AsyncEx but didn't want to take on the dependency.
-            lock (queuedOps)
-            {
-                queuedOps.OnCompleted();
-                shutdown = resultObs.LastOrDefaultAsync().ToTask();
-                return shutdown;
-            }
+            return dispose.Value;
         }
     }
 
