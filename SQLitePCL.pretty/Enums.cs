@@ -746,7 +746,7 @@ namespace SQLitePCL.pretty
         /// readers or writers to finish. Sync the db file if all frames in the
         /// log are checkpointed.
         /// </summary>
-        Passive = 0, //raw.SQLITE_CHECKPOINT_PASSIVE
+        Passive = raw.SQLITE_CHECKPOINT_PASSIVE,
 
         /// <summary>
         /// This mode blocks until there is no database writer and all readers are
@@ -754,7 +754,7 @@ namespace SQLitePCL.pretty
         /// frames in the log file and syncs the database file. This call blocks database
         /// writers while it is running, but not database readers.
         /// </summary>
-        Full = 1, //raw.SQLITE_CHECKPOINT_FULL
+        Full = raw.SQLITE_CHECKPOINT_FULL,
 
         /// <summary>
         /// This mode works the same way as <see cref="Full"/>, except after checkpointing
@@ -763,6 +763,6 @@ namespace SQLitePCL.pretty
         /// the log file from the beginning. This call blocks database writers while it
         /// is running, but not database readers.
         /// </summary>
-        Restart = 2, //raw.SQLITE_CHECKPOINT_RESTART
+        Restart = raw.SQLITE_CHECKPOINT_RESTART,
     }
 }

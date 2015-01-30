@@ -172,7 +172,6 @@ namespace SQLitePCL.pretty
     /// </summary>
     public static partial class DatabaseConnection
     {
-        /*
         /// <summary>
         /// Checkpoint the database name <paramref name="dbName"/>.
         /// </summary>
@@ -188,9 +187,8 @@ namespace SQLitePCL.pretty
             int nCkpt;
 
             This.WalCheckPoint(dbName, WalCheckPointMode.Passive, out nLog, out nCkpt);
-        }*/
+        }
 
-        /*
         /// <summary>
         /// Runs a checkpoint on all databases on the connection.
         /// </summary>
@@ -203,7 +201,7 @@ namespace SQLitePCL.pretty
             int nLog;
             int nCkpt;
             This.WalCheckPoint(null, WalCheckPointMode.Passive, out nLog, out nCkpt);
-        }*/
+        }
 
         /// <summary>
         /// Compiles and executes a SQL statement.
@@ -764,7 +762,6 @@ namespace SQLitePCL.pretty
             return This.OpenBlob(columnInfo.DatabaseName, columnInfo.TableName, columnInfo.OriginName, rowId, canWrite);
         }
 
-        /*
         /// <summary>
         ///  Returns metadata about a specific column of a specific database table,
         /// </summary>
@@ -777,7 +774,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(columnInfo != null);
 
             return This.GetTableColumnMetadata(columnInfo.DatabaseName, columnInfo.TableName, columnInfo.OriginName);
-        }*/
+        }
     }
 
     /// <summary>
@@ -929,7 +926,6 @@ namespace SQLitePCL.pretty
             }
         }
 
-        /*
         /// <inheritdoc/>
         public void WalCheckPoint(string dbName, WalCheckPointMode mode, out int nLog, out int nCkpt)
         {
@@ -937,7 +933,7 @@ namespace SQLitePCL.pretty
             //int rc = raw.sqlite3_wal_checkpoint_v2(db, dbName, (int) mode, out nLog, out nCkpt);
             //SQLiteException.CheckOk(db, rc);l
             throw new NotImplementedException();
-        }*/
+        }
 
         private IEnumerator<IStatement> StatementsEnumerator()
         {
@@ -1036,7 +1032,6 @@ namespace SQLitePCL.pretty
             statements.Remove(stmt.sqlite3_stmt);
         }
 
-        /*
         /// <summary>
         /// Causes any database on the database connection to automatically checkpoint
         /// after committing a transaction if there are <paramref name="n"/> or
@@ -1048,9 +1043,8 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(n > 0);
 
-            //int rc = raw.sqlite3_wal_autocheckpoint(db, n);
-            //SQLiteException.CheckOk(db, rc);
-            throw new NotImplementedException();
+            int rc = raw.sqlite3_wal_autocheckpoint(db, n);
+            SQLiteException.CheckOk(db, rc);
         }
 
         /// <summary>
@@ -1059,12 +1053,10 @@ namespace SQLitePCL.pretty
         /// <seealso href="https://www.sqlite.org/c3ref/wal_autocheckpoint.html"/>
         public void DisableAutoCheckPoint()
         {
-            //int rc = raw.sqlite3_wal_autocheckpoint(db, -1);
-            //SQLiteException.CheckOk(db, rc);
-            throw new NotImplementedException();
-        }*/
+            int rc = raw.sqlite3_wal_autocheckpoint(db, -1);
+            SQLiteException.CheckOk(db, rc);
+        }
 
-        /*
         /// <inheritdoc/>
         public TableColumnMetadata GetTableColumnMetadata(string dbName, string tableName, string columnName)
         {
@@ -1074,12 +1066,10 @@ namespace SQLitePCL.pretty
             int primaryKey;
             int autoInc;
 
-            //int rc = raw.sqlite3_table_column_metadata(db, dbName, tableName, columnName, out dataType, out collSeq, out notNull, out primaryKey, out autoInc);
-            //SQLiteException.CheckOk(db, rc);
-            //return new TableColumnMetadata(dataType,collSeq, notNull !=0, primaryKey !=0, autoInc !=0);
-
-            throw new NotImplementedException();
-        }*/
+            int rc = raw.sqlite3_table_column_metadata(db, dbName, tableName, columnName, out dataType, out collSeq, out notNull, out primaryKey, out autoInc);
+            SQLiteException.CheckOk(db, rc);
+            return new TableColumnMetadata(dataType,collSeq, notNull !=0, primaryKey !=0, autoInc !=0);
+        }
 
         /// <summary>
         ///  Causes any pending database operation to abort and return at its earliest opportunity.
@@ -1265,7 +1255,6 @@ namespace SQLitePCL.pretty
             SQLiteException.CheckOk(db, rc);
         }
 
-        /*
         /// <summary>
         /// Registers a callback function to be invoked periodically during
         /// database operations, providing a mechanism to interrupt the current operation.
@@ -1278,8 +1267,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(instructions > 0);
             Contract.Requires(handler != null);
 
-            throw new NotImplementedException();
-            //raw.sqlite3_progress_handler(db, instructions, _ => handler() ? 1 : 0, null);
+            raw.sqlite3_progress_handler(db, instructions, _ => handler() ? 1 : 0, null);
         }
 
         /// <summary>
@@ -1287,8 +1275,7 @@ namespace SQLitePCL.pretty
         /// </summary>
         public void RemoveProgressHandler()
         {
-            throw new NotImplementedException();
-            // raw.sqlite3_progress_handler(db, 0, null, null);
-        }*/
+            raw.sqlite3_progress_handler(db, 0, null, null);
+        }
     }
 }

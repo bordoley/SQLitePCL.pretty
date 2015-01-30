@@ -747,12 +747,11 @@ namespace SQLitePCL.pretty
                 }
             }
 
-            /*
             public void WalCheckPoint(string dbName, WalCheckPointMode mode, out int nLog, out int nCkpt)
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
                 db.WalCheckPoint(dbName, mode, out nLog, out nCkpt);
-            }*/
+            }
 
             public bool IsDatabaseReadOnly(string dbName)
             {
@@ -777,12 +776,11 @@ namespace SQLitePCL.pretty
                 statements.Remove(stmt.stmt);
             }
 
-            /*
             public TableColumnMetadata GetTableColumnMetadata(string dbName, string tableName, string columnName)
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
                 return db.GetTableColumnMetadata(dbName, tableName, columnName);
-            }*/
+            }
 
             public Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite)
             {

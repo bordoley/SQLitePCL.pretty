@@ -123,7 +123,7 @@ namespace SQLitePCL.pretty.tests
                 adb.Dispose();
 
                 Assert.Throws<ObjectDisposedException>(() => adb.Use(db => Enumerable.Range(0, 1000)));
-                Assert.Throws<ObjectDisposedException>(async () => { await anotherUse; });
+                Assert.Throws<ObjectDisposedException>(() => anotherUse.Subscribe());
                 Assert.Throws<ObjectDisposedException>(() => adb.Use(db => { }));
             }
         }
@@ -289,10 +289,10 @@ namespace SQLitePCL.pretty.tests
             {
                 var cts = new CancellationTokenSource();
                 cts.Cancel();
-                Assert.Throws<TaskCanceledException>(async () => await adb.Use((db, ct) => { }, cts.Token));
+                Assert.That(async () => await adb.Use((db, ct) => { }, cts.Token), Throws.TypeOf<TaskCanceledException>());
 
                 cts = new CancellationTokenSource();
-                Assert.Throws<TaskCanceledException>(async () => await adb.Use((db, ct) => { cts.Cancel(); }, cts.Token));
+                Assert.That(async () => await adb.Use((db, ct) => { cts.Cancel(); }, cts.Token), Throws.TypeOf<TaskCanceledException>());
             }
         }
 

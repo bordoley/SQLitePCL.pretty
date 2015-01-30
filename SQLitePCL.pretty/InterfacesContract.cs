@@ -61,7 +61,6 @@ namespace SQLitePCL.pretty
 
         public abstract void Dispose();
 
-        /*
         public TableColumnMetadata GetTableColumnMetadata(string dbName, string tableName, string columnName)
         {
             Contract.Requires(dbName != null);
@@ -69,7 +68,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(columnName != null);
 
             return default(TableColumnMetadata);
-        }*/
+        }
 
         public Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite)
         {

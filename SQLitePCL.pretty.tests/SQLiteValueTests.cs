@@ -47,7 +47,7 @@ namespace SQLitePCL.pretty.tests
             Assert.AreEqual(b.ToSQLiteValue().ToInt(), b);
 
             char c = 'c';
-            Assert.AreEqual(c.ToSQLiteValue().ToInt(), c);
+            Assert.AreEqual(c.ToSQLiteValue().ToInt(), (long) c);
 
             sbyte sb = 8;
             Assert.AreEqual(sb.ToSQLiteValue().ToInt(), sb);

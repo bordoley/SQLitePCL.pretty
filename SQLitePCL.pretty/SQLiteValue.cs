@@ -172,8 +172,7 @@ namespace SQLitePCL.pretty
                 case SQLiteType.Blob:
                     if (value is ZeroBlob)
                     {
-                        throw new NotImplementedException();
-                        //raw.sqlite3_result_zeroblob(ctx, result.Length);
+                        raw.sqlite3_result_zeroblob(ctx, value.Length);
                     }
                     else
                     {
