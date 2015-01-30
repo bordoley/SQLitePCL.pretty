@@ -765,4 +765,215 @@ namespace SQLitePCL.pretty
         /// </summary>
         Restart = raw.SQLITE_CHECKPOINT_RESTART,
     }
+
+    /// <summary>
+    /// These integer constants designate various run-time status parameters that can be returned by sqlite3_status().
+    /// 
+    /// </summary>
+    /// <seealso href="https://www.sqlite.org/c3ref/c_status_malloc_count.html"/>
+    public enum SQLiteStatus
+    {
+        /// <summary>
+        /// This parameter is the current amount of memory checked out using sqlite3_malloc(), 
+        /// either directly or indirectly. The figure includes calls made to sqlite3_malloc() 
+        /// by the application and internal memory usage by the SQLite library. Scratch 
+        /// memory controlled by SQLITE_CONFIG_SCRATCH and auxiliary page-cache memory 
+        /// controlled by SQLITE_CONFIG_PAGECACHE is not included in this parameter. 
+        /// The amount returned is the sum of the allocation sizes as reported by the xSize 
+        /// method in sqlite3_mem_methods.
+        /// </summary>
+        MemoryUsed = raw.SQLITE_STATUS_MEMORY_USED,
+
+        /// <summary>
+        /// This parameter returns the number of pages used out of the pagecache memory allocator
+        /// that was configured using SQLITE_CONFIG_PAGECACHE. The value returned is in pages, 
+        /// not in bytes.
+        /// </summary>
+        PageCacheUsed = raw.SQLITE_STATUS_PAGECACHE_USED,
+
+        /// <summary>
+        /// This parameter returns the number of bytes of page cache allocation which could 
+        /// not be satisfied by the SQLITE_CONFIG_PAGECACHE buffer and where forced to overflow 
+        /// to sqlite3_malloc(). The returned value includes allocations that overflowed 
+        /// because they where too large (they were larger than the "sz" parameter to 
+        /// SQLITE_CONFIG_PAGECACHE) and allocations that overflowed because no space was
+        /// left in the page cache.
+        /// </summary>
+        PageCacheOverflow = raw.SQLITE_STATUS_PAGECACHE_OVERFLOW,
+
+        /// <summary>
+        /// This parameter returns the number of allocations used out of the scratch memory 
+        /// allocator configured using SQLITE_CONFIG_SCRATCH. The value returned is in 
+        /// allocations, not in bytes. Since a single thread may only have one scratch 
+        /// allocation outstanding at time, this parameter also reports the number of threads 
+        /// using scratch memory at the same time.
+        /// </summary>
+        ScratchUsed = raw.SQLITE_STATUS_SCRATCH_USED,
+
+        /// <summary>
+        /// This parameter returns the number of bytes of scratch memory allocation which 
+        /// could not be satisfied by the SQLITE_CONFIG_SCRATCH buffer and where forced 
+        /// to overflow to sqlite3_malloc(). The values returned include overflows because 
+        /// the requested allocation was too larger (that is, because the requested allocation 
+        /// was larger than the "sz" parameter to SQLITE_CONFIG_SCRATCH) and because no 
+        /// scratch buffer slots were available.
+        /// </summary>
+        ScratchOverflow = raw.SQLITE_STATUS_SCRATCH_OVERFLOW,
+
+        /// <summary>
+        /// This parameter records the largest memory allocation request handed to 
+        /// sqlite3_malloc() or sqlite3_realloc() (or their internal equivalents). 
+        /// Only the value returned in the *pHighwater parameter to sqlite3_status() is 
+        /// of interest. The value written into the *pCurrent parameter is undefined.
+        /// </summary>
+        MallocSize = raw.SQLITE_STATUS_MALLOC_SIZE,
+
+        /// <summary>
+        /// This parameter records the deepest parser stack. It is only meaningful if 
+        /// SQLite is compiled with YYTRACKMAXSTACKDEPTH.
+        /// </summary>
+        ParserStack = raw.SQLITE_STATUS_PARSER_STACK,
+
+        /// <summary>
+        /// This parameter records the largest memory allocation request handed to 
+        /// pagecache memory allocator. Only the value returned in the *pHighwater 
+        /// parameter to sqlite3_status() is of interest. The value written into the 
+        /// *pCurrent parameter is undefined.
+        /// </summary>
+        PageCacheSize = raw.SQLITE_STATUS_PAGECACHE_SIZE,
+
+        /// <summary>
+        /// This parameter records the largest memory allocation request handed to 
+        /// scratch memory allocator. Only the value returned in the *pHighwater 
+        /// parameter to sqlite3_status() is of interest. The value written into 
+        /// the *pCurrent parameter is undefined.
+        /// </summary>
+        ScratchSize = raw.SQLITE_STATUS_SCRATCH_SIZE,
+
+        /// <summary>
+        /// This parameter records the number of separate memory allocations 
+        /// currently checked out.
+        /// </summary>
+        MallocCount = raw.SQLITE_STATUS_MALLOC_COUNT,
+    }
+
+    /// <summary>
+    /// These constants are the available integer "verbs" that can be 
+    /// passed as the second argument to the sqlite3_db_status() interface.
+    /// </summary>
+    /// <seealso href="https://www.sqlite.org/c3ref/c_dbstatus_options.html"/>
+    public enum DatabaseConnectionStatus
+    {
+        /// <summary>
+        /// This parameter returns the number of lookaside memory slots currently checked out.
+        /// </summary>
+        LookAsideUsed = raw.SQLITE_DBSTATUS_LOOKASIDE_USED,
+
+        /// <summary>
+        /// This parameter returns the approximate number of bytes of heap memory used by 
+        /// all pager caches associated with the database connection. The highwater mark 
+        /// associated with SQLITE_DBSTATUS_CACHE_USED is always 0.
+        /// </summary>
+        CacheUsed = raw.SQLITE_DBSTATUS_CACHE_USED,
+
+        /// <summary>
+        /// This parameter returns the approximate number of bytes of heap memory used 
+        /// to store the schema for all databases associated with the connection - main, 
+        /// temp, and any ATTACH-ed databases. The full amount of memory used by the 
+        /// schemas is reported, even if the schema memory is shared with other database 
+        /// connections due to shared cache mode being enabled. The highwater mark associated 
+        /// with SQLITE_DBSTATUS_SCHEMA_USED is always 0.
+        /// </summary>
+        SchemaUsed = raw.SQLITE_DBSTATUS_SCHEMA_USED,
+
+        /// <summary>
+        /// This parameter returns the approximate number of bytes of heap and lookaside 
+        /// memory used by all prepared statements associated with the database connection. 
+        /// The highwater mark associated with SQLITE_DBSTATUS_STMT_USED is always 0.
+        /// </summary>
+        StatementUsed = raw.SQLITE_DBSTATUS_STMT_USED,
+
+        /// <summary>
+        /// This parameter returns the number malloc attempts that were satisfied using 
+        /// lookaside memory. Only the high-water value is meaningful; the current value is always zero.
+        /// </summary>
+        LookAsideHit = raw.SQLITE_DBSTATUS_LOOKASIDE_HIT,
+
+        /// <summary>
+        /// This parameter returns the number malloc attempts that might have been satisfied 
+        /// using lookaside memory but failed due to the amount of memory requested being larger 
+        /// than the lookaside slot size. Only the high-water value is meaningful; the current 
+        /// value is always zero.
+        /// </summary>
+        LookAsideMissSize = raw.SQLITE_DBSTATUS_LOOKASIDE_MISS_SIZE,
+
+        /// <summary>
+        /// This parameter returns the number malloc attempts that might have been satisfied 
+        /// using lookaside memory but failed due to all lookaside memory already being in use. 
+        /// Only the high-water value is meaningful; the current value is always zero.
+        /// </summary>
+        LookAsideMissFull = raw.SQLITE_DBSTATUS_LOOKASIDE_MISS_FULL,
+
+        /// <summary>
+        /// This parameter returns the number of pager cache misses that have occurred. 
+        /// The highwater mark associated with SQLITE_DBSTATUS_CACHE_MISS is always 0.
+        /// </summary>
+        CacheMiss = raw.SQLITE_DBSTATUS_CACHE_MISS,
+
+        /// <summary>
+        /// This parameter returns the number of dirty cache entries that have been written 
+        /// to disk. Specifically, the number of pages written to the wal file in wal mode 
+        /// databases, or the number of pages written to the database file in rollback mode 
+        /// databases. Any pages written as part of transaction rollback or database recovery 
+        /// operations are not included. If an IO or other error occurs while writing a page 
+        /// to disk, the effect on subsequent SQLITE_DBSTATUS_CACHE_WRITE requests is undefined. 
+        /// The highwater mark associated with SQLITE_DBSTATUS_CACHE_WRITE is always 0.
+        /// </summary>
+        CacheWrite = raw.SQLITE_DBSTATUS_CACHE_WRITE,
+
+        /// <summary>
+        /// This parameter returns zero for the current value if and only if all foreign key 
+        /// constraints (deferred or immediate) have been resolved. The highwater mark is always 0.
+        /// </summary>
+        DeferedFKS = raw.SQLITE_DBSTATUS_DEFERRED_FKS
+    }
+
+    /// <summary>
+    /// Integer codes that name counter values associated with the sqlite3_stmt_status() interface. 
+    /// </summary>
+    /// <seealso href="https://www.sqlite.org/c3ref/c_stmtstatus_counter.html"/>
+    public enum StatementStatus
+    {
+        /// <summary>
+        /// This is the number of times that SQLite has stepped forward in a table as part 
+        /// of a full table scan. Large numbers for this counter may indicate opportunities 
+        /// for performance improvement through careful use of indices.
+        /// </summary>
+        FullscanStep = raw.SQLITE_STMTSTATUS_FULLSCAN_STEP,
+        
+        /// <summary>
+        /// This is the number of sort operations that have occurred. A non-zero value 
+        /// in this counter may indicate an opportunity to improvement performance through 
+        /// careful use of indices.
+        /// </summary>
+        Sort = raw.SQLITE_STMTSTATUS_SORT,
+        
+        /// <summary>
+        /// This is the number of rows inserted into transient indices that were created 
+        /// automatically in order to help joins run faster. A non-zero value in this 
+        /// counter may indicate an opportunity to improvement performance by adding 
+        /// permanent indices that do not need to be reinitialized each time the statement 
+        /// is run.
+        /// </summary>
+        AutoIndex = raw.SQLITE_STMTSTATUS_AUTOINDEX,
+        
+        /// <summary>
+        /// This is the number of virtual machine operations executed by the prepared statement 
+        /// if that number is less than or equal to 2147483647. The number of virtual machine 
+        /// operations can be used as a proxy for the total work done by the prepared statement. 
+        /// If the number of virtual machine operations exceeds 2147483647 then the value returned
+        /// by this statement status code is undefined.
+        /// </summary>
+        VirtualMachineStep = raw.SQLITE_STMTSTATUS_VM_STEP
+    }
 }
