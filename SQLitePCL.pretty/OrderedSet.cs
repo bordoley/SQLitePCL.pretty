@@ -5,6 +5,16 @@ namespace SQLitePCL.pretty
 {
     internal sealed class OrderedSet<T> : ICollection<T>
     {
+        private static IEnumerator<T> Reverse(LinkedList<T> list) 
+        {
+            var el = list.Last;
+            while (el != null) 
+            {
+                yield return el.Value;
+                el = el.Previous;
+            }
+        }
+
         private readonly IDictionary<T, LinkedListNode<T>> set = new Dictionary<T, LinkedListNode<T>>();
         private readonly LinkedList<T> list = new LinkedList<T>();
 
@@ -52,6 +62,11 @@ namespace SQLitePCL.pretty
                 list.Remove(value);
             }
             return false;
+        }
+
+        public IEnumerable<T> Reverse()
+        {
+            return new DelegatingEnumerable<T>(() => Reverse(this.list));
         }
 
         public IEnumerator<T> GetEnumerator()

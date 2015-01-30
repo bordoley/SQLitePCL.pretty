@@ -783,7 +783,7 @@ namespace SQLitePCL.pretty
     public sealed class SQLiteDatabaseConnection : IDatabaseConnection
     {
         private readonly sqlite3 db;
-        private readonly ICollection<StatementImpl> statements = new OrderedSet<StatementImpl>();
+        private readonly OrderedSet<StatementImpl> statements = new OrderedSet<StatementImpl>();
         private readonly ICollection<DatabaseBackupImpl> backups = new HashSet<DatabaseBackupImpl>();
         private readonly ICollection<BlobStream> blobs = new HashSet<BlobStream>();
 
@@ -909,8 +909,6 @@ namespace SQLitePCL.pretty
                 // Reverse the order of the statements to match the order returned by SQLite.
                 // Side benefit of preventing callers from being able to cast the statement 
                 // list and do evil things see: http://stackoverflow.com/a/491591
-                // FIXME: Reverse (at least on mono), results in an array allocation. Probably not the
-                // end of the world, but not ideal either.
                 return this.statements.Reverse();
             }
         }
