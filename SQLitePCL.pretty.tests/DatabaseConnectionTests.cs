@@ -35,11 +35,7 @@ namespace SQLitePCL.pretty.tests
             db.PrepareStatement("Select 1");
             db.PrepareStatement("Select 2");
 
-            var stmtEnumerator = db.Statements.GetEnumerator();
-
             db.Dispose();
-
-            Assert.Throws<ObjectDisposedException>(() => { stmtEnumerator.MoveNext(); });
 
             Assert.Throws<ObjectDisposedException>(() => { db.BusyTimeout = TimeSpan.MinValue; });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.Changes; });

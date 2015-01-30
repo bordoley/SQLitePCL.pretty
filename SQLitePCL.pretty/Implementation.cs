@@ -26,12 +26,14 @@ namespace SQLitePCL.pretty
     internal sealed class DatabaseBackupImpl : IDatabaseBackup
     {
         private readonly sqlite3_backup backup;
+        private readonly SQLiteDatabaseConnection db;
 
         private bool disposed = false;
 
-        internal DatabaseBackupImpl(sqlite3_backup backup)
+        internal DatabaseBackupImpl(sqlite3_backup backup, SQLiteDatabaseConnection db)
         {
             this.backup = backup;
+            this.db = db;
         }
 
         public int PageCount
@@ -54,10 +56,19 @@ namespace SQLitePCL.pretty
             }
         }
 
+        internal void DisposeInternal()
+        {
+            if (disposed) { return; }
+            disposed = true;
+
+            // FIXME: What to do about errors?
+            raw.sqlite3_backup_finish(backup);
+        }
+
         public void Dispose()
         {
-            disposed = true;
-            backup.Dispose();
+            DisposeInternal();
+            db.RemoveBackup(this);
         }
 
         public bool Step(int nPages)
@@ -190,12 +201,19 @@ namespace SQLitePCL.pretty
             SQLiteException.CheckOk(this.sqlite3_stmt, rc);
         }
 
-        public void Dispose()
+        internal void DisposeInternal()
         {
             if (disposed) { return; }
-            db.RemoveStatement(this);
             disposed = true;
-            stmt.Dispose();
+
+            // FIXME: Handle errors?
+            raw.sqlite3_finalize(stmt);
+        }
+
+        public void Dispose()
+        {
+            DisposeInternal();
+            db.RemoveStatement(this);
         }
 
         public bool MoveNext()
@@ -228,6 +246,13 @@ namespace SQLitePCL.pretty
         public void Reset()
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+            // FIXME: Ignore the result code?
+            // If the most recent call to sqlite3_step(S) for the prepared statement S 
+            // returned SQLITE_ROW or SQLITE_DONE, or if sqlite3_step(S) has never before been 
+            // called on S, then sqlite3_reset(S) returns SQLITE_OK.
+            // If the most recent call to sqlite3_step(S) for the prepared statement S indicated an 
+            // error, then sqlite3_reset(S) returns an appropriate error code.
 
             mustReset = false;
             int rc = raw.sqlite3_reset(this.sqlite3_stmt);
@@ -500,15 +525,17 @@ namespace SQLitePCL.pretty
         }
 
         private readonly sqlite3_blob blob;
+        private readonly SQLiteDatabaseConnection db;
         private readonly bool canWrite;
         private readonly int length;
 
         private bool disposed = false;
         private long position = 0;
 
-        internal BlobStream(sqlite3_blob blob, bool canWrite, int length)
+        internal BlobStream(sqlite3_blob blob, SQLiteDatabaseConnection db, bool canWrite, int length)
         {
             this.blob = blob;
+            this.db = db;
             this.canWrite = canWrite;
             this.length = length;
         }
@@ -564,23 +591,24 @@ namespace SQLitePCL.pretty
             }
         }
 
+        internal void DisposeInternal()
+        {
+            if (disposed) { return; }
+            raw.sqlite3_blob_close(blob);
+            disposed = true;
+            base.Dispose(true);
+        }
+
         // http://msdn.microsoft.com/en-us/library/system.idisposable(v=vs.110).aspx
         protected override void Dispose(bool disposing)
         {
-            if (disposed)
-            {
-                return;
-            }
+            if (disposed) { return; }
 
-            if (disposing)
-            {
-                // Free any other managed objects here.
-                blob.Dispose();
-            }
-
-            // Free any unmanaged objects here.
-
+            //FIXME: Handle errors?
+            raw.sqlite3_blob_close(blob);
+            
             disposed = true;
+            db.RemoveBlob(this); 
             base.Dispose(disposing);
         }
 

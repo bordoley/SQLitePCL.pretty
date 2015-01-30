@@ -783,15 +783,15 @@ namespace SQLitePCL.pretty
     public sealed class SQLiteDatabaseConnection : IDatabaseConnection
     {
         private readonly sqlite3 db;
-        private readonly Dictionary<sqlite3_stmt, StatementImpl> statements = new Dictionary<sqlite3_stmt, StatementImpl>();
-        private readonly IEnumerable<IStatement> statementsEnumerable;
+        private readonly ICollection<StatementImpl> statements = new OrderedSet<StatementImpl>();
+        private readonly ICollection<DatabaseBackupImpl> backups = new HashSet<DatabaseBackupImpl>();
+        private readonly ICollection<BlobStream> blobs = new HashSet<BlobStream>();
 
         private bool disposed = false;
 
         internal SQLiteDatabaseConnection(sqlite3 db)
         {
             this.db = db;
-            this.statementsEnumerable = new DelegatingEnumerable<IStatement>(StatementsEnumerator);
 
             // FIXME: Could argue that the shouldn't be setup until the first subscriber to the events
             raw.sqlite3_rollback_hook(db, v => Rollback(this, EventArgs.Empty), null);
@@ -906,7 +906,12 @@ namespace SQLitePCL.pretty
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-                return this.statementsEnumerable;
+                // Reverse the order of the statements to match the order returned by SQLite.
+                // Side benefit of preventing callers from being able to cast the statement 
+                // list and do evil things see: http://stackoverflow.com/a/491591
+                // FIXME: Reverse (at least on mono), results in an array allocation. Probably not the
+                // end of the world, but not ideal either.
+                return this.statements.Reverse();
             }
         }
 
@@ -930,29 +935,8 @@ namespace SQLitePCL.pretty
         public void WalCheckPoint(string dbName, WalCheckPointMode mode, out int nLog, out int nCkpt)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-            //int rc = raw.sqlite3_wal_checkpoint_v2(db, dbName, (int) mode, out nLog, out nCkpt);
-            //SQLiteException.CheckOk(db, rc);l
-            throw new NotImplementedException();
-        }
-
-        private IEnumerator<IStatement> StatementsEnumerator()
-        {
-            sqlite3_stmt next = null;
-
-            while (true)
-            {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-                next = raw.sqlite3_next_stmt(db, next);
-                if (next != null)
-                {
-                    yield return statements[next];
-                }
-                else
-                {
-                    break;
-                }
-            }
+            int rc = raw.sqlite3_wal_checkpoint_v2(db, dbName, (int) mode, out nLog, out nCkpt);
+            SQLiteException.CheckOk(db, rc);
         }
 
         /// <summary>
@@ -973,7 +957,14 @@ namespace SQLitePCL.pretty
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             sqlite3_backup backup = raw.sqlite3_backup_init(destConn.db, destDbName, db, dbName);
-            return new DatabaseBackupImpl(backup);
+            var result = new DatabaseBackupImpl(backup, this);
+            this.backups.Add(result);
+            return result;
+        }
+
+        internal void RemoveBackup(DatabaseBackupImpl backup)
+        {
+            backups.Remove(backup);
         }
 
         /// <summary>
@@ -1009,8 +1000,14 @@ namespace SQLitePCL.pretty
             SQLiteException.CheckOk(db, rc);
 
             var length = raw.sqlite3_blob_bytes(blob);
+            var result = new BlobStream(blob, this, canWrite, length);
+            this.blobs.Add(result);
+            return result;
+        }
 
-            return new BlobStream(blob, canWrite, length);
+        internal void RemoveBlob(BlobStream blob)
+        {
+            blobs.Remove(blob);
         }
 
         /// <inheritdoc/>
@@ -1022,14 +1019,14 @@ namespace SQLitePCL.pretty
             int rc = raw.sqlite3_prepare_v2(db, sql, out stmt, out tail);
             SQLiteException.CheckOk(db, rc);
 
-            var retval = new StatementImpl(stmt, this);
-            statements.Add(stmt, retval);
-            return retval;
+            var result = new StatementImpl(stmt, this);
+            statements.Add(result);
+            return result;
         }
 
         internal void RemoveStatement(StatementImpl stmt)
         {
-            statements.Remove(stmt.sqlite3_stmt);
+            statements.Remove(stmt);
         }
 
         /// <summary>
@@ -1138,8 +1135,25 @@ namespace SQLitePCL.pretty
         /// <inheritdoc/>
         public void Dispose()
         {
+            foreach (var stmt in statements)
+            {
+                stmt.DisposeInternal();
+            }
+
+            foreach (var blob in blobs)
+            {
+                blob.DisposeInternal();
+            }
+
+            foreach (var backup in backups)
+            {
+                backup.DisposeInternal();
+            }
+
             disposed = true;
-            db.Dispose();
+
+            //FIXME: Handle errors?
+            raw.sqlite3_close(db);
         }
 
         private sealed class CtxState<T>
