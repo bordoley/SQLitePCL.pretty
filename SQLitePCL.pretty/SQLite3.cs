@@ -69,9 +69,8 @@ namespace SQLitePCL.pretty
         {
             set
             {
-                //int rc = raw.sqlite3_enable_shared_cache(value ? 1 : 0);
-                //SQLiteException.CheckOk(rc);
-                throw new NotImplementedException();
+                int rc = raw.sqlite3_enable_shared_cache(value ? 1 : 0);
+                SQLiteException.CheckOk(rc);
             }
         }
 
