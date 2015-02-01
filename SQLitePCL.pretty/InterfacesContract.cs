@@ -84,6 +84,8 @@ namespace SQLitePCL.pretty
             tail = default(string);
             return default(IStatement);
         }
+
+        public abstract SQLiteStatusResult Status(DatabaseConnectionStatusCode statusCode, bool reset);
     }
 
     [ContractClassFor(typeof(IStatement))]
@@ -116,6 +118,8 @@ namespace SQLitePCL.pretty
         public abstract bool MoveNext();
 
         public abstract void Reset();
+
+        public abstract int Status(StatementStatusCode statusCode, bool reset);
     }
 
     [ContractClassFor(typeof(IBindParameter))]

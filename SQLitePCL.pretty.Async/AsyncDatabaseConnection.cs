@@ -887,6 +887,11 @@ namespace SQLitePCL.pretty
 
                 stmt.Dispose();
             }
+
+            public int Status(StatementStatusCode statusCode, bool reset)
+            {
+                return stmt.Status(statusCode, reset);
+            }
         }
     }
 }

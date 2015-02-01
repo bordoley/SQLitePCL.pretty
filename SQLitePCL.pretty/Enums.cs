@@ -771,7 +771,7 @@ namespace SQLitePCL.pretty
     /// 
     /// </summary>
     /// <seealso href="https://www.sqlite.org/c3ref/c_status_malloc_count.html"/>
-    public enum SQLiteStatus
+    public enum SQLiteStatusCode
     {
         /// <summary>
         /// This parameter is the current amount of memory checked out using sqlite3_malloc(), 
@@ -862,7 +862,7 @@ namespace SQLitePCL.pretty
     /// passed as the second argument to the sqlite3_db_status() interface.
     /// </summary>
     /// <seealso href="https://www.sqlite.org/c3ref/c_dbstatus_options.html"/>
-    public enum DatabaseConnectionStatus
+    public enum DatabaseConnectionStatusCode
     {
         /// <summary>
         /// This parameter returns the number of lookaside memory slots currently checked out.
@@ -942,7 +942,7 @@ namespace SQLitePCL.pretty
     /// Integer codes that name counter values associated with the sqlite3_stmt_status() interface. 
     /// </summary>
     /// <seealso href="https://www.sqlite.org/c3ref/c_stmtstatus_counter.html"/>
-    public enum StatementStatus
+    public enum StatementStatusCode
     {
         /// <summary>
         /// This is the number of times that SQLite has stepped forward in a table as part 

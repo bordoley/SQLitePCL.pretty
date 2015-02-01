@@ -184,6 +184,8 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/clear_bindings.html"/>
         void ClearBindings();
+
+        int Status(StatementStatusCode statusCode, bool reset);
     }
 
     /// <summary>

@@ -258,6 +258,12 @@ namespace SQLitePCL.pretty
             int rc = raw.sqlite3_reset(this.sqlite3_stmt);
             SQLiteException.CheckOk(stmt, rc);
         }
+
+        public int Status(StatementStatusCode statusCode, bool reset)
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            return raw.sqlite3_stmt_status(stmt, (int) statusCode, reset ? 1 : 0);
+        }
     }
 
     internal sealed class BindParameterOrderedDictionaryImpl : IReadOnlyOrderedDictionary<string, IBindParameter>

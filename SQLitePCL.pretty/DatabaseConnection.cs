@@ -1282,6 +1282,8 @@ namespace SQLitePCL.pretty
             Contract.Requires(instructions > 0);
             Contract.Requires(handler != null);
 
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
             raw.sqlite3_progress_handler(db, instructions, _ => handler() ? 1 : 0, null);
         }
 
@@ -1290,7 +1292,20 @@ namespace SQLitePCL.pretty
         /// </summary>
         public void RemoveProgressHandler()
         {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
             raw.sqlite3_progress_handler(db, 0, null, null);
+        }
+
+        public SQLiteStatusResult Status(DatabaseConnectionStatusCode statusCode, bool reset)
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+            int pCurrent;
+            int pHighwater;
+            int rc = raw.sqlite3_db_status(db, (int)statusCode, out pCurrent, out pHighwater, reset ? 1 : 0);
+            SQLiteException.CheckOk(rc);
+
+            return new SQLiteStatusResult(pCurrent, pHighwater);
         }
     }
 }

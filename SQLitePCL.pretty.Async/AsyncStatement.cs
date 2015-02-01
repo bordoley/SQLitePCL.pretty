@@ -306,6 +306,12 @@ namespace SQLitePCL.pretty
                 disposed = true;
                 // We don't actually own the statement so its not disposed
             }
+
+            public int Status(StatementStatusCode statusCode, bool reset)
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                return stmt.Status(statusCode, reset);
+            }
         }
     }
 }

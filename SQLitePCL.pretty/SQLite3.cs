@@ -194,5 +194,32 @@ namespace SQLitePCL.pretty
             Contract.Requires(sql != null);
             return raw.sqlite3_complete(sql) != 0;
         }
+
+        public static SQLiteStatusResult Status(SQLiteStatusCode statusCode, bool reset)
+        {
+            int pCurrent;
+            int pHighwater;
+            int rc = raw.sqlite3_status((int)statusCode, out pCurrent, out pHighwater, reset ? 1 : 0);
+            SQLiteException.CheckOk(rc);
+
+            return new SQLiteStatusResult(pCurrent, pHighwater);
+        }
+    }
+
+    // FIXME: Implement equality, comparable, and operators
+    public struct SQLiteStatusResult
+    {
+        private readonly int current;
+        private readonly int highwater;
+
+        internal SQLiteStatusResult(int current, int highwater)
+        {
+            this.current = current;
+            this.highwater = highwater;
+        }
+
+        public int Current { get { return this.current; } }
+        public int Highwater { get { return this.highwater; }}
+
     }
 }
