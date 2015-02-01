@@ -65,7 +65,7 @@ namespace SQLitePCL.pretty
         /// between connections to the same database.
         /// </summary>
         /// <seealso href="https://www.sqlite.org/c3ref/enable_shared_cache.html"/>
-        public static bool SharedCacheEnabled
+        public static bool EnableSharedCache
         {
             set
             {
