@@ -661,9 +661,8 @@ namespace SQLitePCL.pretty
 
         private sealed class DatabaseConnectionWrapper : IDatabaseConnection
         {
-            private readonly IDatabaseConnection db;
-            private readonly Dictionary<IStatement, StatementWrapper> statements = new Dictionary<IStatement, StatementWrapper>();
-            private readonly IEnumerable<IStatement> statementsEnumerable;
+            private readonly SQLiteDatabaseConnection db;
+            private readonly OrderedSet<StatementWrapper> statements = new OrderedSet<StatementWrapper>();
             private readonly int initialTotalChanges;
 
             private readonly EventHandler rollback;
@@ -673,7 +672,7 @@ namespace SQLitePCL.pretty
 
             private bool disposed = false;
 
-            internal DatabaseConnectionWrapper(IDatabaseConnection db)
+            internal DatabaseConnectionWrapper(SQLiteDatabaseConnection db)
             {
                 this.db = db;
 
@@ -688,8 +687,6 @@ namespace SQLitePCL.pretty
                 db.Update += update;
 
                 this.initialTotalChanges = db.TotalChanges;
-
-                this.statementsEnumerable = new DelegatingEnumerable<IStatement>(StatementsEnumerator);
             }
 
             public event EventHandler Rollback = (o, e) => { };
@@ -751,7 +748,10 @@ namespace SQLitePCL.pretty
                 {
                     if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-                    return this.statementsEnumerable;
+                    // Reverse the order of the statements to match the order returned by SQLite.
+                    // Side benefit of preventing callers from being able to cast the statement 
+                    // list and do evil things see: http://stackoverflow.com/a/491591
+                    return this.statements.Reverse();
                 }
             }
 
@@ -767,21 +767,9 @@ namespace SQLitePCL.pretty
                 return db.IsDatabaseReadOnly(dbName);
             }
 
-            private IEnumerator<IStatement> StatementsEnumerator()
-            {
-                foreach (var stmt in db.Statements)
-                {
-                    StatementWrapper result;
-                    if (this.statements.TryGetValue(stmt, out result))
-                    {
-                        yield return result;
-                    }
-                }
-            }
-
             internal void RemoveStatement(StatementWrapper stmt)
             {
-                statements.Remove(stmt.stmt);
+                statements.Remove(stmt);
             }
 
             public TableColumnMetadata GetTableColumnMetadata(string dbName, string tableName, string columnName)
@@ -802,7 +790,7 @@ namespace SQLitePCL.pretty
 
                 var stmt = db.PrepareStatement(sql, out tail);
                 var retval = new StatementWrapper(stmt, this);
-                this.statements.Add(stmt, retval);
+                this.statements.Add(retval);
                 return retval;
             }
 
