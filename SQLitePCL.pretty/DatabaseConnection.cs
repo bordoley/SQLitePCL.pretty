@@ -200,7 +200,10 @@ namespace SQLitePCL.pretty
 
             int nLog;
             int nCkpt;
-            This.WalCheckPoint(null, WalCheckPointMode.Passive, out nLog, out nCkpt);
+
+            // If parameter zDb is NULL or points to a zero length string, then the specified operation is 
+            // attempted on all WAL databases attached to database connection db
+            This.WalCheckPoint("", WalCheckPointMode.Passive, out nLog, out nCkpt);
         }
 
         /// <summary>
