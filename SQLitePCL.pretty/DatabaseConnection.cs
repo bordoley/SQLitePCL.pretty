@@ -788,10 +788,6 @@ namespace SQLitePCL.pretty
         private readonly sqlite3 db;
         private readonly OrderedSet<StatementImpl> statements = new OrderedSet<StatementImpl>();
 
-        // FIXME: Consider using a disposing event instead here.
-        private readonly ICollection<DatabaseBackupImpl> backups = new HashSet<DatabaseBackupImpl>();
-        private readonly ICollection<BlobStream> blobs = new HashSet<BlobStream>();
-
         private bool disposed = false;
 
         internal SQLiteDatabaseConnection(sqlite3 db)
@@ -832,7 +828,9 @@ namespace SQLitePCL.pretty
         public event EventHandler<DatabaseTraceEventArgs> Trace = (o, e) => { };
 
         /// <inheritdoc/>
-        public event EventHandler<DatabaseUpdateEventArgs> Update = (obj, args) => { };
+        public event EventHandler<DatabaseUpdateEventArgs> Update = (o, e) => { };
+
+        internal event EventHandler Disposing = (o, e) => { };
 
         /// <summary>
         /// Sets the connection busy timeout when waiting for a locked table.
@@ -961,13 +959,7 @@ namespace SQLitePCL.pretty
 
             sqlite3_backup backup = raw.sqlite3_backup_init(destConn.db, destDbName, db, dbName);
             var result = new DatabaseBackupImpl(backup, this);
-            this.backups.Add(result);
             return result;
-        }
-
-        internal void RemoveBackup(DatabaseBackupImpl backup)
-        {
-            backups.Remove(backup);
         }
 
         /// <summary>
@@ -1004,13 +996,7 @@ namespace SQLitePCL.pretty
 
             var length = raw.sqlite3_blob_bytes(blob);
             var result = new BlobStream(blob, this, canWrite, length);
-            this.blobs.Add(result);
             return result;
-        }
-
-        internal void RemoveBlob(BlobStream blob)
-        {
-            blobs.Remove(blob);
         }
 
         /// <inheritdoc/>
@@ -1138,20 +1124,7 @@ namespace SQLitePCL.pretty
         /// <inheritdoc/>
         public void Dispose()
         {
-            foreach (var stmt in statements)
-            {
-                stmt.DisposeInternal();
-            }
-
-            foreach (var blob in blobs)
-            {
-                blob.DisposeInternal();
-            }
-
-            foreach (var backup in backups)
-            {
-                backup.DisposeInternal();
-            }
+            this.Disposing(this, null);
 
             disposed = true;
 

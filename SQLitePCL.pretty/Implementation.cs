@@ -27,6 +27,7 @@ namespace SQLitePCL.pretty
     {
         private readonly sqlite3_backup backup;
         private readonly SQLiteDatabaseConnection db;
+        private readonly EventHandler dbDisposing;
 
         private bool disposed = false;
 
@@ -34,6 +35,9 @@ namespace SQLitePCL.pretty
         {
             this.backup = backup;
             this.db = db;
+
+            this.dbDisposing = (o, e) => Dispose();
+            this.db.Disposing += dbDisposing;
         }
 
         public int PageCount
@@ -56,19 +60,15 @@ namespace SQLitePCL.pretty
             }
         }
 
-        internal void DisposeInternal()
+        public void Dispose()
         {
             if (disposed) { return; }
             disposed = true;
 
             // FIXME: What to do about errors?
             raw.sqlite3_backup_finish(backup);
-        }
 
-        public void Dispose()
-        {
-            DisposeInternal();
-            db.RemoveBackup(this);
+            db.Disposing -= dbDisposing;
         }
 
         public bool Step(int nPages)
@@ -98,6 +98,7 @@ namespace SQLitePCL.pretty
     {
         private readonly sqlite3_stmt stmt;
         private readonly SQLiteDatabaseConnection db;
+        private readonly EventHandler dbDisposing;
         private readonly IReadOnlyOrderedDictionary<string, IBindParameter> bindParameters;
         private readonly IReadOnlyList<ColumnInfo> columns;
         private readonly IReadOnlyList<IResultSetValue> current;
@@ -113,6 +114,9 @@ namespace SQLitePCL.pretty
             this.bindParameters = new BindParameterOrderedDictionaryImpl(this);
             this.columns = new ColumnsListImpl(this);
             this.current = new ResultSetImpl(this);
+
+            this.dbDisposing = (o, e) => this.Dispose();
+            this.db.Disposing += dbDisposing;
         }
 
         internal sqlite3_stmt sqlite3_stmt
@@ -201,18 +205,15 @@ namespace SQLitePCL.pretty
             SQLiteException.CheckOk(this.sqlite3_stmt, rc);
         }
 
-        internal void DisposeInternal()
+        public void Dispose()
         {
             if (disposed) { return; }
             disposed = true;
 
             // FIXME: Handle errors?
             raw.sqlite3_finalize(stmt);
-        }
 
-        public void Dispose()
-        {
-            DisposeInternal();
+            db.Disposing -= dbDisposing;
             db.RemoveStatement(this);
         }
 
@@ -532,6 +533,7 @@ namespace SQLitePCL.pretty
 
         private readonly sqlite3_blob blob;
         private readonly SQLiteDatabaseConnection db;
+        private readonly EventHandler dbDisposing;
         private readonly bool canWrite;
         private readonly int length;
 
@@ -544,6 +546,9 @@ namespace SQLitePCL.pretty
             this.db = db;
             this.canWrite = canWrite;
             this.length = length;
+
+            this.dbDisposing = (o, e) => this.Dispose(true);
+            this.db.Disposing += dbDisposing;
         }
 
         public override bool CanRead
@@ -597,14 +602,6 @@ namespace SQLitePCL.pretty
             }
         }
 
-        internal void DisposeInternal()
-        {
-            if (disposed) { return; }
-            raw.sqlite3_blob_close(blob);
-            disposed = true;
-            base.Dispose(true);
-        }
-
         // http://msdn.microsoft.com/en-us/library/system.idisposable(v=vs.110).aspx
         protected override void Dispose(bool disposing)
         {
@@ -614,7 +611,8 @@ namespace SQLitePCL.pretty
             raw.sqlite3_blob_close(blob);
             
             disposed = true;
-            db.RemoveBlob(this); 
+            db.Disposing -= dbDisposing;
+
             base.Dispose(disposing);
         }
 
