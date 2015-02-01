@@ -145,6 +145,7 @@
     <Compile Include="Statement.cs" />
     <Compile Include="ResultSet.cs" />
     <Compile Include="TableColumnMetadata.cs" />
+    <Compile Include="SQLiteStatusResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="SQLitePCL.raw">

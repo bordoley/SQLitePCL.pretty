@@ -205,21 +205,4 @@ namespace SQLitePCL.pretty
             return new SQLiteStatusResult(pCurrent, pHighwater);
         }
     }
-
-    // FIXME: Implement equality, comparable, and operators
-    public struct SQLiteStatusResult
-    {
-        private readonly int current;
-        private readonly int highwater;
-
-        internal SQLiteStatusResult(int current, int highwater)
-        {
-            this.current = current;
-            this.highwater = highwater;
-        }
-
-        public int Current { get { return this.current; } }
-        public int Highwater { get { return this.highwater; }}
-
-    }
 }
