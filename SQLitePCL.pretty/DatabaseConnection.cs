@@ -787,6 +787,8 @@ namespace SQLitePCL.pretty
     {
         private readonly sqlite3 db;
         private readonly OrderedSet<StatementImpl> statements = new OrderedSet<StatementImpl>();
+
+        // FIXME: Consider using a disposing event instead here.
         private readonly ICollection<DatabaseBackupImpl> backups = new HashSet<DatabaseBackupImpl>();
         private readonly ICollection<BlobStream> blobs = new HashSet<BlobStream>();
 

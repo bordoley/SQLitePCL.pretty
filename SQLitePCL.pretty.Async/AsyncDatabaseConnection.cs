@@ -571,6 +571,14 @@ namespace SQLitePCL.pretty
 
             this.disposed = true;
             await this.queue.DisposeAsync();
+
+            // FIXME: This is a little broken. We really should track open Async
+            // AsyncStatementImpl's and AsyncBlobStream's and dispose them here first.
+            // Othewise those objects won't have their state correctly set to disposed,
+            // leading to some user errors.
+            // Two possible solutions: 
+            // * Track the open AsyncStatementImpl's and AsyncBlobStream's
+            // * Add a disposing event, and listen to it from AsyncStatementImpl's and AsyncBlobStream's.
             this.conn.Dispose();
         }
 
