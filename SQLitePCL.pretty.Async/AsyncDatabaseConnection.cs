@@ -794,6 +794,12 @@ namespace SQLitePCL.pretty
                 return retval;
             }
 
+            public SQLiteStatusResult Status(DatabaseConnectionStatusCode statusCode, bool reset)
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                return this.db.Status(statusCode, reset);
+            }
+
             public void Dispose()
             {
                 db.Rollback -= rollback;

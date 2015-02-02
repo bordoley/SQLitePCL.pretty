@@ -2,6 +2,10 @@
 
 namespace SQLitePCL.pretty
 {
+    /// <summary>
+    /// The current and highwater value of a perfromance metric returned by 
+    /// either <see cref="SQLite3.Status"/> or  <see cref="IDatabaseConnection.Status"/>.
+    /// </summary>
     public struct SQLiteStatusResult : IEquatable<SQLiteStatusResult>, IComparable<SQLiteStatusResult>, IComparable
     {
         /// <summary>
@@ -80,8 +84,14 @@ namespace SQLitePCL.pretty
             this.highwater = highwater;
         }
 
+        /// <summary>
+        /// The current value of the performance metric.
+        /// </summary>
         public int Current { get { return this.current; } }
 
+        /// <summary>
+        /// The highwater value of the performance metric.
+        /// </summary>
         public int Highwater { get { return this.highwater; }}
 
         /// <inheritdoc/>

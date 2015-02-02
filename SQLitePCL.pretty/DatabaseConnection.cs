@@ -1271,6 +1271,7 @@ namespace SQLitePCL.pretty
             raw.sqlite3_progress_handler(db, 0, null, null);
         }
 
+        /// <inheritdoc/>
         public SQLiteStatusResult Status(DatabaseConnectionStatusCode statusCode, bool reset)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }

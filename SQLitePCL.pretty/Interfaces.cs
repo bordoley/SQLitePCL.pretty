@@ -140,6 +140,15 @@ namespace SQLitePCL.pretty
         /// <param name="tail">Additional text beyond past the end of the first SQL statement.</param>
         /// <returns>The compiled <see cref="IStatement"/></returns>
         IStatement PrepareStatement(string sql, out string tail);
+
+        /// <summary>
+        /// Retrieve runtime status information about a single database connection.
+        /// </summary>
+        /// <seealso href="https://www.sqlite.org/c3ref/db_status.html"/>
+        /// <param name="statusCode">The parameter to interrogate.</param>
+        /// <param name="reset">If <see langword="true"/>, then the highest instantaneous value is reset back down to the current value.</param>
+        /// <returns></returns>
+        SQLiteStatusResult Status(DatabaseConnectionStatusCode statusCode, bool reset);
     }
 
     /// <summary>
@@ -185,6 +194,13 @@ namespace SQLitePCL.pretty
         /// <seealso href="https://sqlite.org/c3ref/clear_bindings.html"/>
         void ClearBindings();
 
+        /// <summary>
+        /// Retrieve and reset counter values from a prepared statement.
+        /// </summary>
+        /// <seealso href="https://www.sqlite.org/c3ref/stmt_status.html"/>
+        /// <param name="statusCode">The SQLITE_STMTSTATUS counter to be interrogated.</param>
+        /// <param name="reset">If <see langword="true"/>, then the counter is reset to zero after this interface call returns.</param>
+        /// <returns>The current value of the requested counter.</returns>
         int Status(StatementStatusCode statusCode, bool reset);
     }
 

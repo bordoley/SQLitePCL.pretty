@@ -767,8 +767,8 @@ namespace SQLitePCL.pretty
     }
 
     /// <summary>
-    /// These integer constants designate various run-time status parameters that can be returned by sqlite3_status().
-    /// 
+    /// These constants designate various run-time status parameters that can be 
+    /// returned by <see cref="SQLite3.Status"/>.
     /// </summary>
     /// <seealso href="https://www.sqlite.org/c3ref/c_status_malloc_count.html"/>
     public enum SQLiteStatusCode
@@ -858,8 +858,8 @@ namespace SQLitePCL.pretty
     }
 
     /// <summary>
-    /// These constants are the available integer "verbs" that can be 
-    /// passed as the second argument to the sqlite3_db_status() interface.
+    /// These constants designate various run-time status parameters that can be 
+    /// returned by <see cref="IDatabaseConnection.Status"/>.
     /// </summary>
     /// <seealso href="https://www.sqlite.org/c3ref/c_dbstatus_options.html"/>
     public enum DatabaseConnectionStatusCode
@@ -939,7 +939,7 @@ namespace SQLitePCL.pretty
     }
 
     /// <summary>
-    /// Integer codes that name counter values associated with the sqlite3_stmt_status() interface. 
+    /// Integer codes that name counter values associated with the <see cref="IStatement.Status"/> interface. 
     /// </summary>
     /// <seealso href="https://www.sqlite.org/c3ref/c_stmtstatus_counter.html"/>
     public enum StatementStatusCode
