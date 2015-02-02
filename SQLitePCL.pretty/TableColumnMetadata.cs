@@ -147,6 +147,16 @@ namespace SQLitePCL.pretty
         /// <inheritdoc/>
         public bool Equals(TableColumnMetadata other)
         {
+            if (Object.ReferenceEquals(other, null))
+            {
+                return false;
+            }
+
+            if (Object.ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
             return this.DeclaredType == other.DeclaredType &&
                    this.CollationSequence == other.CollationSequence &&
                    this.HasNotNullConstraint == other.HasNotNullConstraint &&
