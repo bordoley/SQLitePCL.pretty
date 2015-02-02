@@ -3,7 +3,7 @@
 namespace SQLitePCL.pretty
 {
     /// <summary>
-    /// The current and highwater value of a perfromance metric returned by 
+    /// The current and highwater value of a performance metric returned by 
     /// either <see cref="SQLite3.Status"/> or  <see cref="IDatabaseConnection.Status"/>.
     /// </summary>
     public struct SQLiteStatusResult : IEquatable<SQLiteStatusResult>, IComparable<SQLiteStatusResult>, IComparable
