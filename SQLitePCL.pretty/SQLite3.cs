@@ -202,15 +202,10 @@ namespace SQLitePCL.pretty
         /// <seealso href="https://www.sqlite.org/c3ref/status.html"/>
         /// <param name="statusCode">The specific parameter to measure.</param>
         /// <param name="reset">If <see langword="true"/>, then the highest record value is reset.</param>
-        /// <returns>The current and highwater value of the performance metric.</returns>
-        public static SQLiteStatusResult Status(SQLiteStatusCode statusCode, bool reset)
+        public static void Status(SQLiteStatusCode statusCode, out int current, out int highwater, bool reset)
         {
-            int pCurrent;
-            int pHighwater;
-            int rc = raw.sqlite3_status((int)statusCode, out pCurrent, out pHighwater, reset ? 1 : 0);
+            int rc = raw.sqlite3_status((int)statusCode, out current, out highwater, reset ? 1 : 0);
             SQLiteException.CheckOk(rc);
-
-            return new SQLiteStatusResult(pCurrent, pHighwater);
         }
     }
 }

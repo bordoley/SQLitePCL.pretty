@@ -85,7 +85,7 @@ namespace SQLitePCL.pretty
             return default(IStatement);
         }
 
-        public abstract SQLiteStatusResult Status(DatabaseConnectionStatusCode statusCode, bool reset);
+        public abstract void Status(DatabaseConnectionStatusCode statusCode, out int current, out int highwater, bool reset);
     }
 
     [ContractClassFor(typeof(IStatement))]

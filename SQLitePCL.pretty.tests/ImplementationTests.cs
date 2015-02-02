@@ -358,6 +358,29 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(count, stmt.Columns.Count);
             }
         }
+
+        [Test]
+        public void TestStatus()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                db.Execute("CREATE TABLE foo (x int);");
+
+                using (var stmt = db.PrepareStatement("SELECT x FROM foo"))
+                {
+                    stmt.MoveNext();
+
+                    int vmStep = stmt.Status(StatementStatusCode.VirtualMachineStep, false);
+                    Assert.IsTrue(vmStep > 0);
+
+                    int vmStep2 = stmt.Status(StatementStatusCode.VirtualMachineStep, true);
+                    Assert.AreEqual(vmStep, vmStep2);
+
+                    int vmStep3 = stmt.Status(StatementStatusCode.VirtualMachineStep, false);
+                    Assert.AreEqual(0, vmStep3);
+                }
+            }
+        }
     }
 
     [TestFixture]

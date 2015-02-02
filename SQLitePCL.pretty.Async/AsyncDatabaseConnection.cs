@@ -794,10 +794,10 @@ namespace SQLitePCL.pretty
                 return retval;
             }
 
-            public SQLiteStatusResult Status(DatabaseConnectionStatusCode statusCode, bool reset)
+            public void Status(DatabaseConnectionStatusCode statusCode, out int current, out int highwater, bool reset)
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-                return this.db.Status(statusCode, reset);
+                this.db.Status(statusCode, out current, out highwater, reset);
             }
 
             public void Dispose()

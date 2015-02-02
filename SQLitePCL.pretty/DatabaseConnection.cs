@@ -189,6 +189,7 @@ namespace SQLitePCL.pretty
             This.WalCheckPoint(dbName, WalCheckPointMode.Passive, out nLog, out nCkpt);
         }
 
+        /*
         /// <summary>
         /// Runs a checkpoint on all databases on the connection.
         /// </summary>
@@ -204,7 +205,7 @@ namespace SQLitePCL.pretty
             // If parameter zDb is NULL or points to a zero length string, then the specified operation is 
             // attempted on all WAL databases attached to database connection db
             This.WalCheckPoint("", WalCheckPointMode.Passive, out nLog, out nCkpt);
-        }
+        }*/
 
         /// <summary>
         /// Compiles and executes a SQL statement.
@@ -765,6 +766,7 @@ namespace SQLitePCL.pretty
             return This.OpenBlob(columnInfo.DatabaseName, columnInfo.TableName, columnInfo.OriginName, rowId, canWrite);
         }
 
+        /*
         /// <summary>
         ///  Returns metadata about a specific column of a specific database table,
         /// </summary>
@@ -777,7 +779,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(columnInfo != null);
 
             return This.GetTableColumnMetadata(columnInfo.DatabaseName, columnInfo.TableName, columnInfo.OriginName);
-        }
+        }*/
     }
 
     /// <summary>
@@ -1272,16 +1274,12 @@ namespace SQLitePCL.pretty
         }
 
         /// <inheritdoc/>
-        public SQLiteStatusResult Status(DatabaseConnectionStatusCode statusCode, bool reset)
+        public void Status(DatabaseConnectionStatusCode statusCode, out int current, out int highwater, bool reset)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-            int pCurrent;
-            int pHighwater;
-            int rc = raw.sqlite3_db_status(db, (int)statusCode, out pCurrent, out pHighwater, reset ? 1 : 0);
+            int rc = raw.sqlite3_db_status(db, (int)statusCode, out current, out highwater, reset ? 1 : 0);
             SQLiteException.CheckOk(rc);
-
-            return new SQLiteStatusResult(pCurrent, pHighwater);
         }
     }
 }

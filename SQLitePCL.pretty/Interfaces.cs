@@ -148,7 +148,7 @@ namespace SQLitePCL.pretty
         /// <param name="statusCode">The parameter to interrogate.</param>
         /// <param name="reset">If <see langword="true"/>, then the highest instantaneous value is reset back down to the current value.</param>
         /// <returns>The current and highwater value of the performance metric.</returns>
-        SQLiteStatusResult Status(DatabaseConnectionStatusCode statusCode, bool reset);
+        void Status(DatabaseConnectionStatusCode statusCode, out int current, out int highwater, bool reset);
     }
 
     /// <summary>

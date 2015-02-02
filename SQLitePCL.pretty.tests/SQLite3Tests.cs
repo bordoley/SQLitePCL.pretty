@@ -91,5 +91,26 @@ namespace SQLitePCL.pretty.tests
             var version = SQLite3.Version;
             Assert.AreEqual(version.Major, 3);
         }
+
+        [Test]
+        public void TestStatus()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                int current;
+                int highwater;
+                SQLite3.Status(SQLiteStatusCode.MemoryUsed, out current, out highwater, false);
+
+                Assert.IsTrue(current > 0);
+                Assert.IsTrue(highwater > 0);
+            }
+        }
+
+        [Test]
+        public void TestEnableSharedCache()
+        { 
+            SQLite3.EnableSharedCache = true;
+            SQLite3.EnableSharedCache = false;
+        }
     }
 }

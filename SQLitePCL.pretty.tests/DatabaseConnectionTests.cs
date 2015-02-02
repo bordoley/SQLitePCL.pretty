@@ -61,6 +61,14 @@ namespace SQLitePCL.pretty.tests
             Assert.Throws<ObjectDisposedException>(() => { db.RegisterAggregateFunc("name", null, (string a, ISQLiteValue b) => a, t => "".ToSQLiteValue()); });
             Assert.Throws<ObjectDisposedException>(() => { db.RegisterScalarFunc("name", () => "p".ToSQLiteValue()); });
             Assert.Throws<ObjectDisposedException>(() => { db.RemoveFunc("name", 0); });
+            Assert.Throws<ObjectDisposedException>(() => { db.RegisterProgressHandler(1, () => true); });
+            Assert.Throws<ObjectDisposedException>(() => { db.RemoveProgressHandler(); });
+
+            int current;
+            int highwater;
+            Assert.Throws<ObjectDisposedException>(() => { db.Status(DatabaseConnectionStatusCode.CacheMiss, out current, out highwater, false); });
+            
+            Assert.Throws<ObjectDisposedException>(() => { db.WalCheckPoint("main"); });
         }
 
         [Test]
@@ -572,6 +580,130 @@ namespace SQLitePCL.pretty.tests
 
                 result = db.Query("SELECT num_var(1, 2, 3, 4, 5, 6, 7, 8);").Select(rs => rs[0].ToInt()).First();
                 Assert.AreEqual(result, 8);
+            }
+        }
+
+        [Test]
+        public void TestWalCheckpoint()
+        {
+            var tmpFile = Path.GetTempFileName();
+            using (var db = SQLite3.Open(tmpFile))
+            {
+                db.Execute("PRAGMA journal_mode=WAL;");
+
+                // CREATE TABLE results in 2 frames check pointed and increaseses the log size by 2
+                // so manually do a checkpoint to reset the counters thus testing both
+                // sqlite3_wal_checkpoint and sqlite3_wal_checkpoint_v2.
+                db.Execute("CREATE TABLE foo (x int);");
+                db.WalCheckPoint("main");
+
+                db.Execute("INSERT INTO foo (x) VALUES (1);");
+                db.Execute("INSERT INTO foo (x) VALUES (2);");
+
+                int logSize;
+                int framesCheckPointed;
+                db.WalCheckPoint("main", WalCheckPointMode.Full, out logSize, out framesCheckPointed);
+
+                Assert.AreEqual(2, logSize);
+                Assert.AreEqual(2, framesCheckPointed);
+
+                // Set autocheckpoint to 1 so that regardless of the number of 
+                // commits, explicit checkpoints only checkpoint the last update.
+                db.EnableAutoCheckPoint(1);
+
+                db.Execute("INSERT INTO foo (x) VALUES (3);");
+                db.Execute("INSERT INTO foo (x) VALUES (4);");
+                db.Execute("INSERT INTO foo (x) VALUES (5);");
+
+                db.WalCheckPoint("main", WalCheckPointMode.Passive, out logSize, out framesCheckPointed);
+
+                Assert.AreEqual(1, logSize);
+                Assert.AreEqual(1, framesCheckPointed);
+
+                db.DisableAutoCheckPoint();
+
+                db.Execute("INSERT INTO foo (x) VALUES (3);");
+                db.Execute("INSERT INTO foo (x) VALUES (4);");
+                db.Execute("INSERT INTO foo (x) VALUES (5);");
+
+                db.WalCheckPoint("main", WalCheckPointMode.Passive, out logSize, out framesCheckPointed);
+
+                Assert.Greater(logSize, 1);
+                Assert.Greater(framesCheckPointed, 1);
+            }
+
+            raw.sqlite3__vfs__delete(null, tmpFile, 1);
+        }
+
+        [Test]
+        public void TestTableColumnMetadata()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                // out string dataType, out string collSeq, out int notNull, out int primaryKey, out int autoInc
+                db.Execute("CREATE TABLE foo (rowid integer primary key asc autoincrement, x int not null);");
+
+                var metadata = db.GetTableColumnMetadata("main", "foo", "x");
+                Assert.AreEqual(metadata.DeclaredType, "int");
+                Assert.AreEqual(metadata.CollationSequence, "BINARY");
+                Assert.IsTrue(metadata.HasNotNullConstraint);
+                Assert.IsFalse(metadata.IsPrimaryKeyPart);
+                Assert.IsFalse(metadata.IsAutoIncrement);
+
+                metadata = db.GetTableColumnMetadata("main", "foo", "rowid");
+                Assert.AreEqual(metadata.DeclaredType, "integer");
+                Assert.AreEqual(metadata.CollationSequence, "BINARY");
+                Assert.IsFalse(metadata.HasNotNullConstraint);
+                Assert.IsTrue(metadata.IsPrimaryKeyPart);
+                Assert.IsTrue(metadata.IsAutoIncrement);
+            }
+        }
+
+        [Test]
+        public void TestProgressHandler()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                int count = 0;
+
+                db.RegisterProgressHandler(1, () => 
+                    { 
+                        count++; return false; 
+                    });
+
+                using (var stmt = db.PrepareStatement("SELECT 1;"))
+                {
+                    stmt.MoveNext();
+                }
+                Assert.IsTrue(count > 0);
+
+                db.RegisterProgressHandler(1, () => true);
+
+                using (var stmt = db.PrepareStatement("SELECT 1;"))
+                {
+                    Assert.Throws<OperationCanceledException>(() => stmt.MoveNext());
+                }
+
+                // Test that assigning null to the handler removes the progress handler.
+                db.RemoveProgressHandler();
+                using (var stmt = db.PrepareStatement("SELECT 1;"))
+                {
+                    stmt.MoveNext();
+                }
+            }
+        }
+
+        [Test]
+        public void TestStatus()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                int current;
+                int highwater;
+                db.Status(DatabaseConnectionStatusCode.CacheUsed, out current, out highwater, false);
+
+                Assert.IsTrue(current > 0);
+                Assert.AreEqual(highwater, 0);
             }
         }
     }
