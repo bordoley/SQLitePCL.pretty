@@ -602,6 +602,8 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestDispose()
         {
+            Stream notDisposedStream;
+
             using (var db = SQLite3.Open(":memory:"))
             {
                 db.Execute("CREATE TABLE foo (x blob);");
@@ -621,7 +623,15 @@ namespace SQLitePCL.pretty.tests
                 Assert.Throws<ObjectDisposedException>(() => { blob.Read(new byte[10], 0, 2); });
                 Assert.Throws<ObjectDisposedException>(() => { blob.Write(new byte[10], 0, 1); });
                 Assert.Throws<ObjectDisposedException>(() => { blob.Seek(0, SeekOrigin.Begin); });
+
+                notDisposedStream =
+                    db.Query("SELECT rowid, x FROM foo;")
+                        .Select(row => db.OpenBlob(row[1].ColumnInfo, row[0].ToInt64(), false))
+                        .First();
             }
+
+            // Test that disposing the connection disposes the stream
+            Assert.Throws<ObjectDisposedException>(() => { var x = notDisposedStream.Length; });
         }
 
         [Test]
