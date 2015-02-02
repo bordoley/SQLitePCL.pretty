@@ -38,6 +38,8 @@ namespace SQLitePCL.pretty.tests
                     db.Execute("INSERT INTO foo (x) VALUES (?);", i);
                 }
 
+                IDatabaseBackup notDisposedBackup;
+                
                 using (var db2 = SQLite3.Open(":memory:"))
                 {
                     var backup = db.BackupInit("main", db2, "main");
@@ -46,7 +48,15 @@ namespace SQLitePCL.pretty.tests
                     Assert.Throws<ObjectDisposedException>(() => { var x = backup.PageCount; });
                     Assert.Throws<ObjectDisposedException>(() => { var x = backup.RemainingPages; });
                     Assert.Throws<ObjectDisposedException>(() => { backup.Step(1); });
+
+                    notDisposedBackup = db.BackupInit("main", db2, "main");
                 }
+
+                // Ensure diposing the database connection automatically disposes the backup as well.
+                Assert.Throws<ObjectDisposedException>(() => { var x = notDisposedBackup.PageCount; });
+
+                // Test double disposing doesn't result in exceptions.
+                notDisposedBackup.Dispose();
             }
         }
 

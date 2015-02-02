@@ -960,7 +960,7 @@ namespace SQLitePCL.pretty
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             sqlite3_backup backup = raw.sqlite3_backup_init(destConn.db, destDbName, db, dbName);
-            var result = new DatabaseBackupImpl(backup, this);
+            var result = new DatabaseBackupImpl(backup, this, destConn);
             return result;
         }
 

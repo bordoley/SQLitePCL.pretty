@@ -26,18 +26,21 @@ namespace SQLitePCL.pretty
     internal sealed class DatabaseBackupImpl : IDatabaseBackup
     {
         private readonly sqlite3_backup backup;
-        private readonly SQLiteDatabaseConnection db;
+        private readonly SQLiteDatabaseConnection srcDb;
+        private readonly SQLiteDatabaseConnection destDb;
         private readonly EventHandler dbDisposing;
 
         private bool disposed = false;
 
-        internal DatabaseBackupImpl(sqlite3_backup backup, SQLiteDatabaseConnection db)
+        internal DatabaseBackupImpl(sqlite3_backup backup, SQLiteDatabaseConnection srcDb, SQLiteDatabaseConnection  destDb)
         {
             this.backup = backup;
-            this.db = db;
+            this.srcDb = srcDb;
+            this.destDb = destDb;
 
             this.dbDisposing = (o, e) => Dispose();
-            this.db.Disposing += dbDisposing;
+            this.srcDb.Disposing += dbDisposing;
+            this.destDb.Disposing += dbDisposing;
         }
 
         public int PageCount
@@ -68,7 +71,8 @@ namespace SQLitePCL.pretty
             // FIXME: What to do about errors?
             raw.sqlite3_backup_finish(backup);
 
-            db.Disposing -= dbDisposing;
+            srcDb.Disposing -= dbDisposing;
+            destDb.Disposing -= dbDisposing;
         }
 
         public bool Step(int nPages)
