@@ -581,6 +581,22 @@ namespace SQLitePCL.pretty.tests
                 result = db.Query("SELECT num_var(1, 2, 3, 4, 5, 6, 7, 8);").Select(rs => rs[0].ToInt()).First();
                 Assert.AreEqual(result, 8);
             }
+
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                db.RegisterScalarFunc("zeroblob", (ISQLiteValue i) => SQLiteValue.ZeroBlob(i.ToInt()));
+
+                int length = 10;
+                var result = db.Query("SELECT zeroblob(?);", length).Select(rs => rs[0].Length).First();
+                Assert.AreEqual(result, length);
+            }
+
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                db.RegisterScalarFunc("nullFunc", () => SQLiteValue.Null);
+                var result = db.Query("SELECT nullFunc();").Select(rs => rs[0].SQLiteType).First();
+                Assert.AreEqual(result, SQLiteType.Null);
+            }
         }
 
         [Test]
