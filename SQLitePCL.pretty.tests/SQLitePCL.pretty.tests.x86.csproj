@@ -81,6 +81,7 @@
     <Compile Include="SQLite3Tests.cs" />
     <Compile Include="SQLiteValueTests.cs" />
     <Compile Include="SQLiteVersionTests.cs" />
+    <Compile Include="TableColumnMetadataTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SQLitePCL.pretty.Async\SQLitePCL.pretty.Async.csproj">

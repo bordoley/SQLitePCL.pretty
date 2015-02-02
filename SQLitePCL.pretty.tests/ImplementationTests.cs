@@ -17,6 +17,7 @@
 
 using NUnit.Framework;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -131,6 +132,21 @@ namespace SQLitePCL.pretty.tests
     public class StatementTests
     {
         [Test]
+        public void TestCurrent()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            using (var stmt = db.PrepareStatement("SELECT 1"))
+            {
+                stmt.MoveNext();
+                Assert.AreEqual(stmt.Current[0].ToInt(), 1);
+
+                var ienumCurrent = ((IEnumerator)stmt).Current;
+                var ienumResultSet = (IReadOnlyList<IResultSetValue>) ienumCurrent;
+                Assert.AreEqual(ienumResultSet[0].ToInt(), 1);
+            }
+        }
+
+        [Test]
         public void TestDispose()
         {
             using (var db = SQLite3.Open(":memory:"))
@@ -150,6 +166,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.Throws<ObjectDisposedException>(() => { stmt.ClearBindings(); });
                 Assert.Throws<ObjectDisposedException>(() => { stmt.MoveNext(); });
                 Assert.Throws<ObjectDisposedException>(() => { stmt.Reset(); });
+                Assert.Throws<ObjectDisposedException>(() => { stmt.Status(StatementStatusCode.Sort, false); });
             }
         }
 
@@ -286,6 +303,8 @@ namespace SQLitePCL.pretty.tests
                     Assert.Throws<KeyNotFoundException>(() => { var x = stmt.BindParameters[":nope"]; });
                     Assert.Throws<ArgumentOutOfRangeException>(() => { var x = stmt.BindParameters[-1]; });
                     Assert.Throws<ArgumentOutOfRangeException>(() => { var x = stmt.BindParameters[100]; });
+
+                    Assert.NotNull(((IEnumerable) stmt.BindParameters).GetEnumerator());
                 }
             }
         }
@@ -386,6 +405,24 @@ namespace SQLitePCL.pretty.tests
     [TestFixture]
     public class BindParameters
     {
+        [Test]
+        public void TestBindOnDisposedStatement()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                db.Execute("CREATE TABLE foo (v int);");
+
+                IReadOnlyOrderedDictionary<string, IBindParameter> bindParams;
+
+                using (var stmt = db.PrepareStatement("INSERT INTO foo (v) VALUES (?)"))
+                {
+                    bindParams = stmt.BindParameters;
+                }
+
+                Assert.Throws<ObjectDisposedException>(() => { var x = bindParams[0]; });
+            }
+        }
+
         [Test]
         public void TestBindObject()
         {
