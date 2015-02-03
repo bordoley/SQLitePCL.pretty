@@ -201,6 +201,8 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <seealso href="https://www.sqlite.org/c3ref/status.html"/>
         /// <param name="statusCode">The specific parameter to measure.</param>
+        /// <param name="current">The current value of the performance metric.</param>
+        /// <param name="highwater">The highwater value of the performance metric.</param>
         /// <param name="reset">If <see langword="true"/>, then the highest record value is reset.</param>
         public static void Status(SQLiteStatusCode statusCode, out int current, out int highwater, bool reset)
         {

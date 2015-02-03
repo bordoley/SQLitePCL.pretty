@@ -146,8 +146,9 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <seealso href="https://www.sqlite.org/c3ref/db_status.html"/>
         /// <param name="statusCode">The parameter to interrogate.</param>
+        /// <param name="current">The current value of the performance metric.</param>
+        /// <param name="highwater">The highwater value of the performance metric.</param>
         /// <param name="reset">If <see langword="true"/>, then the highest instantaneous value is reset back down to the current value.</param>
-        /// <returns>The current and highwater value of the performance metric.</returns>
         void Status(DatabaseConnectionStatusCode statusCode, out int current, out int highwater, bool reset);
     }
 
