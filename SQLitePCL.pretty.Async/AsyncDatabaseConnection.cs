@@ -33,6 +33,11 @@ namespace SQLitePCL.pretty
     /// </summary>
     public static partial class DatabaseConnection
     {
+        // FIXME: I picked this number fairly randomly. It would be good to do some experimentation
+        // to determine if its a good default. The goal should be supporting cancelling of queries that are
+        // actually blocking use of the database for a measurable period of time.
+        private static readonly int defaultInterruptInstructionCount = 100;
+
         private static IScheduler defaultScheduler = TaskPoolScheduler.Default;
 
         /// <summary>
@@ -54,6 +59,13 @@ namespace SQLitePCL.pretty
             }
         }
 
+        internal static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this SQLiteDatabaseConnection This, IScheduler scheduler, int interruptInstructionCount)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(scheduler != null);
+            return new AsyncDatabaseConnectionImpl(This, scheduler, interruptInstructionCount);
+        }
+
         /// <summary>
         /// Returns an <see cref="IAsyncDatabaseConnection"/> instance that delegates database requests
         /// to the provided <see cref="IDatabaseConnection"/>.
@@ -66,9 +78,7 @@ namespace SQLitePCL.pretty
         /// <returns>An <see cref="IAsyncDatabaseConnection"/> instance.</returns>
         public static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this SQLiteDatabaseConnection This, IScheduler scheduler)
         {
-            Contract.Requires(This != null);
-            Contract.Requires(scheduler != null);
-            return new AsyncDatabaseConnectionImpl(This, scheduler);
+            return AsAsyncDatabaseConnection(This, scheduler, defaultInterruptInstructionCount);
         }
 
         /// <summary>
@@ -82,7 +92,6 @@ namespace SQLitePCL.pretty
         /// <returns>An <see cref="IAsyncDatabaseConnection"/> instance.</returns>
         public static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this SQLiteDatabaseConnection This)
         {
-            Contract.Requires(This != null);
             return AsAsyncDatabaseConnection(This, defaultScheduler);
         }
     }
@@ -520,6 +529,7 @@ namespace SQLitePCL.pretty
     {
         private readonly OperationsQueue queue = new OperationsQueue();
         private readonly IScheduler scheduler;
+        private readonly int interruptInstructionCount;
 
         private readonly SQLiteDatabaseConnection conn;
         private readonly IObservable<DatabaseTraceEventArgs> trace;
@@ -528,10 +538,11 @@ namespace SQLitePCL.pretty
 
         private bool disposed = false;
 
-        internal AsyncDatabaseConnectionImpl(SQLiteDatabaseConnection conn, IScheduler scheduler)
+        internal AsyncDatabaseConnectionImpl(SQLiteDatabaseConnection conn, IScheduler scheduler, int interruptInstructionCount)
         {
             this.conn = conn;
             this.scheduler = scheduler;
+            this.interruptInstructionCount = interruptInstructionCount;
 
             this.trace = Observable.FromEventPattern<DatabaseTraceEventArgs>(conn, "Trace").Select(e => e.EventArgs);
             this.profile = Observable.FromEventPattern<DatabaseProfileEventArgs>(conn, "Profile").Select(e => e.EventArgs);
@@ -632,7 +643,7 @@ namespace SQLitePCL.pretty
 
                     return queue.EnqueueOperation(ct =>
                         {
-                            //this.conn.RegisterProgressHandler(100, () => ct.IsCancellationRequested);
+                            this.conn.RegisterProgressHandler(interruptInstructionCount, () => ct.IsCancellationRequested);
                             try
                             {
                                 ct.ThrowIfCancellationRequested();
@@ -653,7 +664,7 @@ namespace SQLitePCL.pretty
                             }
                             finally
                             {
-                                //this.conn.RemoveProgressHandler();
+                                this.conn.RemoveProgressHandler();
                             }
                         }, scheduler, cancellationToken);
                 });

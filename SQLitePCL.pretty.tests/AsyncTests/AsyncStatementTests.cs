@@ -43,6 +43,7 @@ namespace SQLitePCL.pretty.tests
                         Assert.Throws<ObjectDisposedException>(() => { stmt.ClearBindings(); });
                         Assert.Throws<ObjectDisposedException>(() => { stmt.MoveNext(); });
                         Assert.Throws<ObjectDisposedException>(() => { stmt.Reset(); });
+                        Assert.Throws<ObjectDisposedException>(() => { stmt.Status(StatementStatusCode.AutoIndex, false); });
                     });
 
                 await aStmt.Use(stmt =>

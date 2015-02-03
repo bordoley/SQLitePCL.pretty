@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -251,6 +252,11 @@ namespace SQLitePCL.pretty.tests
                     Assert.DoesNotThrow(() => { var x = db.IsDatabaseReadOnly("main"); });
                     Assert.DoesNotThrow(() => { using (var stmt = db.PrepareStatement("SELECT x FROM foo;")) { } });
 
+                    int current;
+                    int highwater;
+                    Assert.DoesNotThrow(() => { db.Status(DatabaseConnectionStatusCode.CacheMiss, out current, out highwater, false); });
+                    Assert.DoesNotThrow(() => { db.WalCheckPoint("main"); });
+
                     db.Dispose();
 
                     Assert.Throws<ObjectDisposedException>(() => { var x = db.IsAutoCommit; });
@@ -261,7 +267,10 @@ namespace SQLitePCL.pretty.tests
                     Assert.Throws<ObjectDisposedException>(() => { var x = db.Statements; });
                     Assert.Throws<ObjectDisposedException>(() => { var x = db.IsDatabaseReadOnly("main"); });
                     Assert.Throws<ObjectDisposedException>(() => { var x = db.OpenBlob("", "", "", 0, true); });
+                    Assert.Throws<ObjectDisposedException>(() => { var x = db.GetTableColumnMetadata("", "", ""); });
                     Assert.Throws<ObjectDisposedException>(() => db.PrepareStatement("SELECT x FROM foo;"));
+                    Assert.Throws<ObjectDisposedException>(() => { db.Status(DatabaseConnectionStatusCode.CacheMiss, out current, out highwater, false); });
+                    Assert.Throws<ObjectDisposedException>(() => { db.WalCheckPoint("main"); });
                 });
 
                 await adb.Use(db =>
@@ -336,6 +345,22 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(result.Item1, _0);
                 Assert.AreEqual(result.Item2, _1);
                 Assert.AreEqual(result.Item3 != 0, _2);
+            }
+        }
+
+        [Test]
+        public void TestStatementCancellation()
+        {
+            using (var adb = SQLite3.Open(":memory:").AsAsyncDatabaseConnection(TaskPoolScheduler.Default, 1))
+            {
+                var cts = new CancellationTokenSource();
+                Assert.That(async () =>
+                    await adb.Use((db, ct) => 
+                        {
+                            cts.Cancel();
+                            db.Execute("Select 1;");
+                            Assert.Fail();
+                        }, cts.Token), Throws.TypeOf<TaskCanceledException>());
             }
         }
     }
