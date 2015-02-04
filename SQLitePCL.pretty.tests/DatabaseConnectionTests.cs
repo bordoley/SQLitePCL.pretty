@@ -27,6 +27,16 @@ namespace SQLitePCL.pretty.tests
     public class SQLiteDatabaseConnectionTests
     {
         [Test]
+        public void TestFinalize()
+        {
+            // There is no way to assert, so this test is primarily for code coverage.
+            var db = SQLite3.Open(":memory:");
+            var stmt = db.PrepareStatement("SELECT 1;");
+
+            GC.Collect();
+        }
+
+        [Test]
         public void TestDispose()
         {
             var db = SQLite3.Open(":memory:");

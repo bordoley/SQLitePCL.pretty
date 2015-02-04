@@ -1126,12 +1126,26 @@ namespace SQLitePCL.pretty
         /// <inheritdoc/>
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (disposed) { return; }
+
             this.Disposing(this, null);
 
             disposed = true;
 
             //FIXME: Handle errors?
             raw.sqlite3_close(db);
+        }
+
+        /// <inheritdoc/>
+        ~SQLiteDatabaseConnection()
+        {
+            Dispose(false);
         }
 
         private sealed class CtxState<T>
