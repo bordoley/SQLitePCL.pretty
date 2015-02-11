@@ -127,7 +127,6 @@ namespace SQLitePCL.pretty
             return new DelegatingEnumerable<IReadOnlyList<IResultSetValue>>(() => 
                 {
                     This.Reset();
-                    This.ClearBindings();
                     return This;
                 });
         }
