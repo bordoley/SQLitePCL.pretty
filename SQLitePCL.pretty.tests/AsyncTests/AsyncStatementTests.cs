@@ -201,5 +201,34 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(count, 100);
             }
         }
+
+        [Test]
+        public async Task TestQuery()
+        {
+            using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            {
+                await db.ExecuteAsync("CREATE TABLE foo (v int);");
+
+                using (var stmt = await db.PrepareStatementAsync("INSERT INTO foo (v) VALUES (?)"))
+                {
+                    foreach (var i in Enumerable.Range(0, 100))
+                    {
+                        await stmt.ExecuteAsync(i);
+                    }
+                }
+
+                using (var stmt = await db.PrepareStatementAsync("SELECT * from FOO WHERE v < ?"))
+                {
+                    var result = await stmt.Query(50).Count();
+                    Assert.AreEqual(result, 50);
+                }
+
+                using (var stmt = await db.PrepareStatementAsync("SELECT * from FOO WHERE v < 50"))
+                {
+                    var result = await stmt.Query().Count();
+                    Assert.AreEqual(result, 50);
+                }
+            }
+        }
     }
 }

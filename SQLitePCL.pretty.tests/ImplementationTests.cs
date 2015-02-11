@@ -341,6 +341,34 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Test]
+        public void TestQuery()
+        {
+            using (var db = SQLite3.Open(":memory:"))
+            {
+                db.Execute("CREATE TABLE foo (v int);");
+                using (var stmt = db.PrepareStatement("INSERT INTO foo (v) VALUES (?)"))
+                {
+                    foreach (var i in Enumerable.Range(0, 100))
+                    {
+                        stmt.Execute(i);
+                    }
+                }
+
+                using (var stmt = db.PrepareStatement("SELECT * from FOO WHERE v < ?"))
+                {
+                    var result = stmt.Query(50).Count();
+                    Assert.AreEqual(result, 50);
+                }
+
+                using (var stmt = db.PrepareStatement("SELECT * from FOO WHERE v < 50"))
+                {
+                    var result = stmt.Query().Count();
+                    Assert.AreEqual(result, 50);
+                }
+            }
+        }
+
+        [Test]
         public void TestClearBindings()
         {
             using (var db = SQLite3.Open(":memory:"))
