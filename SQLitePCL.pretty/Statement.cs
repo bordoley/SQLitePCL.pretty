@@ -16,6 +16,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 
@@ -90,6 +91,45 @@ namespace SQLitePCL.pretty
             This.ClearBindings();
             This.Bind(values);
             This.MoveNext();
+        }
+
+        /// <summary>
+        /// Queries the database using the provided IStatement and provided bind variables.
+        /// </summary>
+        /// <param name="This">The statements.</param>
+        /// <param name="values">The position indexed values to bind.</param>
+        /// <returns>An <see cref="IEnumerable&lt;T&gt;"/> of rows in the result set.</returns>
+        public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(
+            this IStatement This, 
+            params object[] values)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(values != null);
+
+            return new DelegatingEnumerable<IReadOnlyList<IResultSetValue>>(() => 
+                {
+                    This.Reset();
+                    This.ClearBindings();
+                    This.Bind(values);
+                    return This;
+                });
+        }
+
+        /// <summary>
+        /// Queries the database using the provided IStatement.
+        /// </summary>
+        /// <param name="This">The statements.</param>
+        /// <returns>An <see cref="IEnumerable&lt;T&gt;"/> of rows in the result set.</returns>
+        public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(this IStatement This)
+        {
+            Contract.Requires(This != null);
+
+            return new DelegatingEnumerable<IReadOnlyList<IResultSetValue>>(() => 
+                {
+                    This.Reset();
+                    This.ClearBindings();
+                    return This;
+                });
         }
     }
 }

@@ -141,6 +141,29 @@ namespace SQLitePCL.pretty
         {
             return This.ExecuteAsync(CancellationToken.None, values);
         }
+
+        /// <summary>
+        /// Queries the database asynchronously using the provided IStatement and provided bind variables.
+        /// </summary>
+        /// <param name="This">The async statement.</param>
+        /// <param name="values">The position indexed values to bind.</param>
+        /// <returns>A cold IObservable of the rows in the result set.</returns>
+        public static IObservable<IReadOnlyList<IResultSetValue>> Query(
+            this IAsyncStatement This, 
+            params object[] values)
+        {
+            return This.Use<IReadOnlyList<IResultSetValue>>(stmt => stmt.Query(values));
+        }
+
+        /// <summary>
+        /// Queries the database asynchronously using the provided IStatement
+        /// </summary>
+        /// <param name="This">The async statement.</param>
+        /// <returns>A cold IObservable of the rows in the result set.</returns>
+        public static IObservable<IReadOnlyList<IResultSetValue>> Query(this IAsyncStatement This)
+        {
+            return This.Use<IReadOnlyList<IResultSetValue>>(stmt => stmt.Query());
+        }
     }
 
     internal class AsyncStatementImpl : IAsyncStatement

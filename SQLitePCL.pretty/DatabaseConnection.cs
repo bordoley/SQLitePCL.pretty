@@ -294,8 +294,10 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
-            object[] empty = { };
-            return This.Query(sql, empty);
+            return new DelegatingEnumerable<IReadOnlyList<IResultSetValue>>(() =>
+                {
+                    return This.PrepareStatement(sql);
+                });
         }
 
         /// <summary>
