@@ -16,6 +16,7 @@
 */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
@@ -111,7 +112,9 @@ namespace SQLitePCL.pretty
                     This.Reset();
                     This.ClearBindings();
                     This.Bind(values);
-                    return This;
+
+                    // Prevent the statement from being disposed when the enumerator is disposed
+                    return new NonDisposingEnumerator<IReadOnlyList<IResultSetValue>>(This);
                 });
         }
 
@@ -127,8 +130,52 @@ namespace SQLitePCL.pretty
             return new DelegatingEnumerable<IReadOnlyList<IResultSetValue>>(() => 
                 {
                     This.Reset();
-                    return This;
+
+                    // Prevent the statement from being disposed when the enumerator is disposed
+                    return new NonDisposingEnumerator<IReadOnlyList<IResultSetValue>>(This);
                 });
+        }
+    }
+
+    // An IEnumerator that wraps a delegate, and prevents unintentional disposing of the delegate
+    internal sealed class NonDisposingEnumerator<T> : IEnumerator<T>
+    {
+        private readonly IEnumerator<T> deleg;
+
+        internal NonDisposingEnumerator(IEnumerator<T> deleg)
+        {
+            this.deleg = deleg;
+        }
+
+        public void Dispose()
+        {
+            // Intentionally left blank
+        }
+
+        public bool MoveNext()
+        {
+            return deleg.MoveNext();
+        }
+
+        public void Reset()
+        {
+            deleg.Reset();
+        }
+
+        object IEnumerator.Current
+        {
+            get
+            {
+                return deleg.Current;
+            }
+        }
+
+        public T Current
+        {
+            get
+            {
+                return deleg.Current;
+            }
         }
     }
 }

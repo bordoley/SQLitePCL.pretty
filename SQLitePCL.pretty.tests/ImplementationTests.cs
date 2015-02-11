@@ -357,12 +357,18 @@ namespace SQLitePCL.pretty.tests
                 using (var stmt = db.PrepareStatement("SELECT * from FOO WHERE v < ?"))
                 {
                     var result = stmt.Query(50).Count();
+
+                    // Ensure that enumerating the Query Enumerable doesn't dispose the stmt
+                    Assert.DoesNotThrow(() => { var x = stmt.IsBusy; });
                     Assert.AreEqual(result, 50);
                 }
 
                 using (var stmt = db.PrepareStatement("SELECT * from FOO WHERE v < 50"))
                 {
                     var result = stmt.Query().Count();
+
+                    // Ensure that enumerating the Query Enumerable doesn't dispose the stmt
+                    Assert.DoesNotThrow(() => { var x = stmt.IsBusy; });
                     Assert.AreEqual(result, 50);
                 }
             }
