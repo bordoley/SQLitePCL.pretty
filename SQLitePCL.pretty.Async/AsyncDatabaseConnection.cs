@@ -23,6 +23,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -59,11 +60,15 @@ namespace SQLitePCL.pretty
             }
         }
 
+        // Guarantee that for a given database connection there is only ever one IAsyncDatabaseConnection
+        private static readonly ConditionalWeakTable<SQLiteDatabaseConnection, IAsyncDatabaseConnection> _asyncConnections =
+            new ConditionalWeakTable<SQLiteDatabaseConnection, IAsyncDatabaseConnection>();
+        
         internal static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this SQLiteDatabaseConnection This, IScheduler scheduler, int interruptInstructionCount)
         {
             Contract.Requires(This != null);
             Contract.Requires(scheduler != null);
-            return new AsyncDatabaseConnectionImpl(This, scheduler, interruptInstructionCount);
+            return _asyncConnections.GetValue(This, conn => new AsyncDatabaseConnectionImpl(conn, scheduler, interruptInstructionCount));
         }
 
         /// <summary>
@@ -670,6 +675,9 @@ namespace SQLitePCL.pretty
                 });
         }
 
+        // FIXME: Move this into SQLitePCL.pretty as an internal class so that the ORM
+        // can use introspect the type and get the underlying db connection for adding 
+        // dynamice properties to the connections.
         private sealed class DatabaseConnectionWrapper : IDatabaseConnection
         {
             private readonly SQLiteDatabaseConnection db;
