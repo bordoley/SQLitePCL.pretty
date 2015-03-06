@@ -11,3 +11,4 @@ using System.Runtime.CompilerServices;
 [assembly: NeutralResourcesLanguageAttribute("en-US")]
 [assembly: InternalsVisibleTo("SQLitePCL.pretty.Async")]
 [assembly: InternalsVisibleTo("SQLitePCL.pretty.tests")]
+[assembly: InternalsVisibleTo("SQLitePCL.pretty.Orm")]
