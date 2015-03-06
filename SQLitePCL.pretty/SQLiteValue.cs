@@ -17,6 +17,7 @@
 
 using System;
 using System.Diagnostics.Contracts;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -59,6 +60,11 @@ namespace SQLitePCL.pretty
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this int This)
+        {
+            return ToSQLiteValue((long)This);
+        }
+
+        public static ISQLiteValue ToSQLiteValue(this short This)
         {
             return ToSQLiteValue((long)This);
         }
@@ -113,6 +119,11 @@ namespace SQLitePCL.pretty
             return ToSQLiteValue((long)(Convert.ChangeType(This, typeof(long))));
         }
 
+        public static ISQLiteValue ToSQLiteValue(this UInt16 This)
+        {
+            return Convert.ToInt64(This).ToSQLiteValue();
+        }
+
         /// <summary>
         /// Converts a <see cref="long"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
@@ -131,6 +142,11 @@ namespace SQLitePCL.pretty
         public static ISQLiteValue ToSQLiteValue(this double This)
         {
             return new FloatValue(This);
+        }
+
+        public static ISQLiteValue ToSQLiteValue(this float This)
+        {
+            return Convert.ToDouble(This).ToSQLiteValue();
         }
 
         /// <summary>
@@ -153,6 +169,31 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(This != null);
             return new BlobValue(This);
+        }
+
+        public static ISQLiteValue ToSQLiteValue(this TimeSpan This)
+        {
+            return This.Ticks.ToSQLiteValue();
+        }
+
+        public static ISQLiteValue ToSQLiteValue(this DateTime This)
+        {
+            return This.Ticks.ToSQLiteValue();
+        }
+
+        public static ISQLiteValue ToSQLiteValue(this DateTimeOffset This)
+        {
+            return This.ToOffset(TimeSpan.Zero).Ticks.ToSQLiteValue();
+        }
+
+        public static ISQLiteValue ToSQLiteValue(this decimal This)
+        {
+            return Convert.ToDouble(This).ToSQLiteValue();
+        }            
+
+        public static ISQLiteValue ToSQLiteValue(this Guid This)
+        {
+            return This.ToString().ToSQLiteValue();
         }
 
         internal static ISQLiteValue ToSQLiteValue(this sqlite3_value This)
@@ -195,6 +236,97 @@ namespace SQLitePCL.pretty
                 case SQLiteType.Integer:
                     raw.sqlite3_result_int64(ctx, value.ToInt64());
                     return;
+            }
+        }
+
+        public static bool ToBool(this ISQLiteValue value)
+        {
+            return value.ToInt() != 0;
+        }
+
+        public static float ToFloat(this ISQLiteValue value)
+        {
+            return (float) value.ToDouble();
+        }
+
+        public static TimeSpan ToTimeSpan(this ISQLiteValue value)
+        {
+            return new TimeSpan(value.ToInt64());
+        }
+
+        public static DateTime ToDateTime(this ISQLiteValue value)
+        {
+            return new DateTime (value.ToInt64());
+        }
+
+        public static DateTimeOffset ToDateTimeOffset(this ISQLiteValue value)
+        {
+            return new DateTimeOffset(value.ToInt64(), TimeSpan.Zero);
+        }
+
+        public static UInt32 ToUInt32(this ISQLiteValue value)
+        {
+            return (uint) value.ToInt64();
+        }
+
+        public static decimal ToDecimal(this ISQLiteValue value)
+        {
+            return (decimal) value.ToDouble();
+        }
+
+        public static byte ToByte(this ISQLiteValue value)
+        {
+            return (byte) value.ToInt();
+        }
+
+        public static UInt16 ToUInt16(this ISQLiteValue value)
+        {
+            return (ushort) value.ToInt();
+        }
+
+        public static short ToShort(this ISQLiteValue value)
+        {
+            return (short) value.ToInt();
+        }
+
+        public static sbyte ToSByte(this ISQLiteValue value)
+        {
+            return (sbyte) value.ToInt();
+        }
+
+        public static Guid ToGuid(this ISQLiteValue value)
+        {
+            var text = value.ToString();
+            return new Guid(text);
+        }
+
+        internal static object ToObject(this ISQLiteValue value, Type clrType)
+        {
+            if (value.SQLiteType == SQLiteType.Null)    { return null; } 
+            else if (clrType == typeof(String))         { return value.ToString(); } 
+            else if (clrType == typeof(Int32))          { return value.ToInt(); } 
+            else if (clrType == typeof(Boolean))        { return value.ToBool(); } 
+            else if (clrType == typeof(double))         { return value.ToDouble(); } 
+            else if (clrType == typeof(float))          { return value.ToFloat(); } 
+            else if (clrType == typeof(TimeSpan))       { return value.ToTimeSpan(); } 
+            else if (clrType == typeof(DateTime))       { return value.ToDateTime(); } 
+            else if (clrType == typeof(DateTimeOffset)) { return value.ToDateTimeOffset(); }
+            else if (clrType.GetTypeInfo().IsEnum)      { return value.ToInt(); } 
+            else if (clrType == typeof(Int64))          { return value.ToInt64(); } 
+            else if (clrType == typeof(UInt32))         { return value.ToUInt32(); } 
+            else if (clrType == typeof(decimal))        { return value.ToDecimal(); } 
+            else if (clrType == typeof(Byte))           { return value.ToByte(); } 
+            else if (clrType == typeof(UInt16))         { return value.ToUInt16(); } 
+            else if (clrType == typeof(Int16))          { return value.ToShort(); } 
+            else if (clrType == typeof(sbyte))          { return value.ToSByte(); } 
+
+            // FIXME: Bonus points clrType == Stream
+            else if (clrType == typeof(byte[]))         { return value.ToBlob(); } 
+            else if (clrType == typeof(Guid))           { return value.ToGuid(); } 
+
+            else 
+            {
+                throw new NotSupportedException ("Don't know how to read " + clrType);
             }
         }
     }

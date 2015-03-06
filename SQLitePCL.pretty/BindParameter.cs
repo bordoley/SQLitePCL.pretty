@@ -28,6 +28,83 @@ namespace SQLitePCL.pretty
     /// </summary>
     public static class BindParameter
     {
+
+        public static void Bind(this IBindParameter This, short value)
+        {
+            This.Bind((int) value);
+        }
+
+        public static void Bind(this IBindParameter This, bool value)
+        {
+            This.Bind((long)(Convert.ChangeType(value, typeof(long))));
+        }
+
+        public static void Bind(this IBindParameter This, byte value)
+        {
+            This.Bind((long)(Convert.ChangeType(value, typeof(long))));
+        }
+
+        public static void Bind(this IBindParameter This, char value)
+        {
+            This.Bind((long)(Convert.ChangeType(value, typeof(long))));
+        }
+            
+        public static void Bind(this IBindParameter This, sbyte value)
+        {
+            This.Bind((long)(Convert.ChangeType(value, typeof(long))));
+        }
+
+        public static void Bind(this IBindParameter This, UInt32 value)
+        {
+            This.Bind((long)(Convert.ChangeType(value, typeof(long))));
+        }
+
+        public static void Bind(this IBindParameter This, UInt16 value)
+        {
+            This.Bind(Convert.ToInt32(This));
+        }
+
+        public static void Bind(this IBindParameter This, float value)
+        {
+            This.Bind(Convert.ToDouble(value));
+        }
+
+        public static void Bind(this IBindParameter This, TimeSpan value)
+        {
+            This.Bind(value.Ticks);
+        }
+
+        public static void Bind(this IBindParameter This, DateTime value)
+        {
+            This.Bind(value.Ticks);
+        }
+
+        public static void Bind(this IBindParameter This, DateTimeOffset value)
+        {
+            This.Bind(value.ToOffset(TimeSpan.Zero).Ticks);
+        }
+
+        public static void Bind(this IBindParameter This, decimal value)
+        {
+            This.Bind(Convert.ToDouble(value));
+        }            
+
+        public static void Bind(this IBindParameter This, Guid value)
+        {
+            This.Bind(value.ToString());
+        }
+
+        public static void Bind(this IBindParameter This, Stream stream)
+        {
+            if (!stream.CanRead)
+            {
+                throw new ArgumentException("Stream is not readable");
+            }
+
+            // FIXME: Stream.Length is Int64, better to take max int
+            This.BindZeroBlob((int) stream.Length);
+        }
+            
         /// <summary>
         /// Bind the parameter to a value based upon its runtime type.
         /// </summary>
@@ -51,13 +128,10 @@ namespace SQLitePCL.pretty
                 This.BindNull();
                 return;
             }
-
+                
             Type t = obj.GetType();
 
-            if (typeof(string) == t)
-            {
-                This.Bind((string)obj);
-            }
+            if (typeof(string) == t) { This.Bind((string)obj); }
             else if (
                 (typeof(Int32) == t)
                 || (typeof(Boolean) == t)
@@ -66,35 +140,15 @@ namespace SQLitePCL.pretty
                 || (typeof(Int16) == t)
                 || (typeof(sbyte) == t)
                 || (typeof(Int64) == t)
-                || (typeof(UInt32) == t))
-            {
-                This.Bind((long)(Convert.ChangeType(obj, typeof(long))));
-            }
-            else if (
-                (typeof(double) == t)
-                || (typeof(float) == t)
-                || (typeof(decimal) == t))
-            {
-                This.Bind((double)(Convert.ChangeType(obj, typeof(double))));
-            }
-            else if (typeof(byte[]) == t)
-            {
-                This.Bind((byte[])obj);
-            }
-            else if (t.GetTypeInfo().ImplementedInterfaces.Contains(typeof(ISQLiteValue)))
-            {
-                This.Bind((ISQLiteValue)obj);
-            }
-            else if (obj is Stream)
-            {
-                var stream = (Stream)obj;
-                if (!stream.CanRead)
-                {
-                    throw new ArgumentException("Stream is not readable");
-                }
-
-                This.BindZeroBlob((int)stream.Length);
-            }
+                || (typeof(UInt32) == t))                                                     { This.Bind((long)(Convert.ChangeType(obj, typeof(long)))); }
+            else if ((typeof(double) == t) || (typeof(float) == t) || (typeof(decimal) == t)) { This.Bind((double)(Convert.ChangeType(obj, typeof(double)))); }
+            else if (typeof(byte[]) == t)                                                     { This.Bind((byte[]) obj); }
+            else if (t.GetTypeInfo().ImplementedInterfaces.Contains(typeof(ISQLiteValue)))    { This.Bind((ISQLiteValue)obj); }
+            else if (obj is TimeSpan)                                                         { This.Bind((TimeSpan)obj); }
+            else if (obj is DateTime)                                                         { This.Bind((DateTime) obj); }
+            else if (obj is DateTimeOffset)                                                   { This.Bind((DateTimeOffset) obj); }
+            else if (obj is Guid)                                                             { This.Bind((Guid) obj); }
+            else if (obj is Stream)                                                           { This.Bind((Stream) obj); }
             else
             {
                 throw new ArgumentException("Invalid type conversion" + t);
