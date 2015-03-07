@@ -73,6 +73,8 @@ namespace SQLitePCL.pretty.Orm
     {
         String TableName { get; }
 
+        CreateFlags CreateFlags { get; }
+
         ColumnMapping this[string column] { get; }
 
         IEnumerable<IndexInfo> Indexes { get; }
@@ -91,11 +93,9 @@ namespace SQLitePCL.pretty.Orm
         }
 
         // FIXME: Rename this as it actually will create/migrate the table and create indexes
-        // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
-        // on the object itself. Might diverge from SQLIte-net here
-        public static void CreateTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, CreateFlags createFlags)
+        public static void CreateTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
-            This.Execute(tableMapping.CreateTable(createFlags));
+            This.Execute(tableMapping.CreateTable());
             if (This.Changes == 0)
             {
                 This.MigrateTable(tableMapping);
@@ -136,14 +136,7 @@ namespace SQLitePCL.pretty.Orm
 
         public static string CreateTable<T>(this ITableMapping<T> This)
         {
-            return This.CreateTable<T>(CreateFlags.None);
-        }
-
-        // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
-        // on the object itself. Might diverge from SQLIte-net here
-        public static string CreateTable<T>(this ITableMapping<T> This, CreateFlags createFlags)
-        {
-            return SQLBuilder.CreateTable(This.TableName,createFlags, This.Select(x => Tuple.Create(x.Key, x.Value.Metadata)));
+            return SQLBuilder.CreateTable(This.TableName, This.CreateFlags, This.Select(x => Tuple.Create(x.Key, x.Value.Metadata)));
         }
 
         // FIXME: I'm a little dubious of this method. If the table mapping is a representation of the table
@@ -183,27 +176,13 @@ namespace SQLitePCL.pretty.Orm
 
         public static ITableMapping<T> Create<T>()
         {
-            return TableMapping.Create<T>(CreateFlags.None);
-        }
-
-        // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
-        // on the object itself. Might diverge from SQLIte-net here
-        public static ITableMapping<T> Create<T>(CreateFlags createFlags)
-        {
             Func<object> builder = () => Activator.CreateInstance<T>();
             Func<object, T> build = obj => (T) obj;
 
-            return TableMapping.Create(builder, build, createFlags);
+            return TableMapping.Create(builder, build);
         }
-
+            
         public static ITableMapping<T> Create<T>(Func<object> builder, Func<object, T> build)
-        {
-            return TableMapping.Create(builder, build, CreateFlags.None);
-        }
-
-        // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
-        // on the object itself. Might diverge from SQLIte-net here
-        public static ITableMapping<T> Create<T>(Func<object> builder, Func<object, T> build, CreateFlags createFlags)
         {
             var mappedType = typeof(T);
 
@@ -211,6 +190,7 @@ namespace SQLitePCL.pretty.Orm
                 (TableAttribute)CustomAttributeExtensions.GetCustomAttribute(mappedType.GetTypeInfo(), typeof(TableAttribute), true);
 
             var tableName = tableAttr != null ? tableAttr.Name : mappedType.Name;
+            var createFlags = tableAttr != null ? tableAttr.CreateFlags : CreateFlags.None;
 
             var props = mappedType.GetRuntimeProperties().Where(p => p.GetMethod != null && p.GetMethod.IsPublic && !p.GetMethod.IsStatic);
 
@@ -232,16 +212,13 @@ namespace SQLitePCL.pretty.Orm
 
                     columnToMapping.Add(name, new ColumnMapping(columnType, prop, metadata));
 
-                    // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
-                    // on the object itself. Might diverge from SQLIte-net here
+                    // FIXME: Duplicate code. Make a function
                     var isPK = IsPrimaryKey(prop) ||
                                (((createFlags & CreateFlags.ImplicitPK) == CreateFlags.ImplicitPK) &&
                                string.Compare(prop.Name, ImplicitPkName, StringComparison.OrdinalIgnoreCase) == 0);
 
                     var columnIndexes = GetIndexes(prop);
-
-                    // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
-                    // on the object itself. Might diverge from SQLIte-net here
+                               
                     if (!columnIndexes.Any()
                         && !isPK
                         && ((createFlags & CreateFlags.ImplicitIndex) == CreateFlags.ImplicitIndex)
@@ -293,25 +270,20 @@ namespace SQLitePCL.pretty.Orm
                     )
                 ).ToList();
 
-            return new TableMapping<T>(builder, build, tableName, columnToMapping, indexes);
+            return new TableMapping<T>(builder, build, tableName, createFlags, columnToMapping, indexes);
         }
-
-        // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
-        // on the object itself. Might diverge from SQLIte-net here
+            
         private static TableColumnMetadata CreateColumnMetadata(PropertyInfo prop, CreateFlags createFlags = CreateFlags.None)
         {
             //If this type is Nullable<T> then Nullable.GetUnderlyingType returns the T, otherwise it returns null, so get the actual type instead
             var columnType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
             var collation = Collation(prop);
 
-            // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
-            // on the object itself. Might diverge from SQLIte-net here
+            // FIXME: Duplicate code. Make a function
             var isPK = IsPrimaryKey(prop) ||
                 (((createFlags & CreateFlags.ImplicitPK) == CreateFlags.ImplicitPK) &&
                     string.Compare (prop.Name, ImplicitPkName, StringComparison.OrdinalIgnoreCase) == 0);
             
-            // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
-            // on the object itself. Might diverge from SQLIte-net here
             var isAuto = IsAutoIncrement(prop) || (isPK && ((createFlags & CreateFlags.AutoIncPK) == CreateFlags.AutoIncPK));
             var isAutoGuid = isAuto && columnType == typeof(Guid);
             var isAutoInc = isAuto && !isAutoGuid;
@@ -407,6 +379,8 @@ namespace SQLitePCL.pretty.Orm
 
         private readonly string tableName;
 
+        private readonly CreateFlags createFlags;
+
         private readonly IReadOnlyDictionary<string, ColumnMapping> columnToMapping;
         private readonly IReadOnlyList<IndexInfo> indexes;
 
@@ -414,17 +388,21 @@ namespace SQLitePCL.pretty.Orm
             Func<object> builder, 
             Func<object,T> build, 
             string tableName,
+            CreateFlags createFlags,
             IReadOnlyDictionary<string, ColumnMapping> columnToMapping,
             IReadOnlyList<IndexInfo> indexes)
         {
             this.builder = builder;
             this.build = build;
             this.tableName = tableName;
+            this.createFlags = createFlags;
             this.columnToMapping = columnToMapping;
             this.indexes = indexes;
         }
 
         public String TableName { get { return tableName; } }
+
+        public CreateFlags CreateFlags { get { return createFlags; } }
 
         public IEnumerable<IndexInfo> Indexes { get { return indexes.AsEnumerable(); } }
 
