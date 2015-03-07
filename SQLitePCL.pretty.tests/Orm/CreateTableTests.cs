@@ -12,8 +12,13 @@ namespace SQLitePCL.pretty.tests
         public void TestCreateTableMapping()
         {
             var productMap = TableMapping.Create<Product>();
-            var selectAllProduct = productMap.Select().ToString();
-            var productCount = productMap.Select().Count();
+            var selectAllProduct = productMap.Query().Where(x => x.Id == 0);
+            var productCount = 
+                (from product in productMap.Query()
+                where product.Id == 0
+                select product).Count();
+
+            //productMap.Select().Count();
 
             using (var db = SQLite3.Open(":memory:"))
             {

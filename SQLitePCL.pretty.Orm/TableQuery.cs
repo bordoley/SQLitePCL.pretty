@@ -77,32 +77,32 @@ namespace SQLitePCL.pretty.Orm
 
         public override string ToString()
         {
-            var cmdText = "select " + _selection + " from \"" + this.Mapping.TableName + "\"";
+            var cmdText = "SELECT " + _selection + " FROM \"" + this.Mapping.TableName + "\"";
 
             if (this._where != null)
             {
                 var w = SQLBuilder.CompileExpr(this.Where);
-                cmdText += " where " + w;
+                cmdText += " WHERE " + w;
             }
 
             if (this.OrderBy.Count > 0)
             {
-                var t = string.Join(", ", this.OrderBy.Select(o => "\"" + o.ColumnName + "\"" + (o.Ascending ? "" : " desc")).ToArray());
-                cmdText += " order by " + t;
+                var t = string.Join(", ", this.OrderBy.Select(o => "\"" + o.ColumnName + "\"" + (o.Ascending ? "" : " DESC")).ToArray());
+                cmdText += " ORDER BY " + t;
             }
 
             if (this.Limit.HasValue)
             {
-                cmdText += " limit " + this.Limit.Value;
+                cmdText += " LIMIT " + this.Limit.Value;
             }
 
             if (this.Offset.HasValue)
             {
                 if (!this.Limit.HasValue)
                 {
-                    cmdText += " limit -1 ";
+                    cmdText += " LIMIT -1 ";
                 }
-                cmdText += " offset " + this.Offset.Value;
+                cmdText += " OFFSET " + this.Offset.Value;
             }
 
             return cmdText;
@@ -111,7 +111,7 @@ namespace SQLitePCL.pretty.Orm
 
     public static class TableQuery
     {
-        public static TableQuery<T> Select<T>(this ITableMapping<T> This)
+        public static TableQuery<T> Query<T>(this ITableMapping<T> This)
         {
             return new TableQuery<T>(This, "*", null, new List<Ordering>(), null, null);
         }
