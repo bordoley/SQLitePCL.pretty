@@ -57,6 +57,8 @@ namespace SQLitePCL.pretty.Orm
         bool TryGetColumnMapping(string column, out ColumnMapping mapping);
 
         T ToObject(IReadOnlyList<IResultSetValue> row);
+
+        // FIXME: Indices?
     }
 
     public static class TableMapping
@@ -130,6 +132,20 @@ namespace SQLitePCL.pretty.Orm
                     var metadata = CreateColumnMetadata(prop, createFlags);
 
                     columnToMapping.Add(name, new ColumnMapping(columnType, prop, metadata));
+
+                    var isPK = IsPrimaryKey(prop) ||
+                               (((createFlags & CreateFlags.ImplicitPK) == CreateFlags.ImplicitPK) &&
+                               string.Compare(prop.Name, ImplicitPkName, StringComparison.OrdinalIgnoreCase) == 0);
+
+                    // FIXME What to about indices
+                    var indices = GetIndices(prop);
+                    if (!indices.Any()
+                        && !isPK
+                        && ((createFlags & CreateFlags.ImplicitIndex) == CreateFlags.ImplicitIndex)
+                        && name.EndsWith(ImplicitIndexSuffix, StringComparison.OrdinalIgnoreCase))
+                    {
+                        indices = new IndexedAttribute[] { new IndexedAttribute() };
+                    }
                 }
             }
 
@@ -149,22 +165,10 @@ namespace SQLitePCL.pretty.Orm
             var isAuto = IsAutoIncrement(prop) || (isPK && ((createFlags & CreateFlags.AutoIncPK) == CreateFlags.AutoIncPK));
             var isAutoGuid = isAuto && columnType == typeof(Guid);
             var isAutoInc = isAuto && !isAutoGuid;
-
-            var colAttr = (ColumnAttribute)prop.GetCustomAttributes(typeof(ColumnAttribute), true).FirstOrDefault();
-            var name = colAttr == null ? prop.Name : colAttr.Name;
-            var indices = GetIndices(prop);
-            if (!indices.Any()
-                && !isPK
-                && ((createFlags & CreateFlags.ImplicitIndex) == CreateFlags.ImplicitIndex)
-                && name.EndsWith (ImplicitIndexSuffix, StringComparison.OrdinalIgnoreCase)
-                )
-            {
-                indices = new IndexedAttribute[] { new IndexedAttribute() };
-            }
             var isNullable = !(isPK || IsMarkedNotNull(prop));
             var maxStringLength = MaxStringLength(prop);
 
-            return new TableColumnMetadata(GetSqlType(columnType, maxStringLength), collation,isNullable, isPK, isAutoInc);
+            return new TableColumnMetadata(GetSqlType(columnType, maxStringLength), collation, isNullable, isPK, isAutoInc);
         }
 
         private const int DefaultMaxStringLength = 140;
