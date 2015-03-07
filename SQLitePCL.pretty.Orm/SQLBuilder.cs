@@ -56,6 +56,19 @@ namespace SQLitePCL.pretty.Orm
 
         public const string Rollback = "ROLLBACK";
 
+        public const string DeleteAll = "DELETE FROM ?";
+
+        public const string DropTable = "DROP TABLE If EXISTS ?";
+
+        public const string SavePoint = "SAVEPOINT ?";
+
+        public const string Release = "RELEASE ?";
+
+        public static string DeleteUsingPrimaryKey(string tableName, string pkColumn)
+        {
+            return string.Format ("DELETE FROM \"{0}\" WHERE \"{1}\" = ?", tableName, pkColumn);
+        }
+
         public static string Insert(string tableName, IEnumerable<string> columns)
         {
             return string.Format(
