@@ -22,6 +22,7 @@
 //
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -30,6 +31,11 @@ using SQLitePCL.pretty.Orm.Attributes;
 
 namespace SQLitePCL.pretty.Orm
 {
+    public interface ITableMappedStatement<T> : IStatement
+    {
+        void Bind(T obj);
+    }
+
     public sealed class ColumnMapping
     {
         private readonly Type clrType;
@@ -91,6 +97,24 @@ namespace SQLitePCL.pretty.Orm
         {
             var colAttr = (ColumnAttribute)prop.GetCustomAttributes(typeof(ColumnAttribute), true).FirstOrDefault();
             return colAttr == null ? prop.Name : colAttr.Name;
+        }
+            
+        internal static void Bind<T>(this IStatement This, ITableMapping<T> tableMapping, T obj)
+        {
+            foreach (var column in tableMapping)
+            {
+                var key = ":" + column.Key;
+                var value = column.Value.Property.GetValue(obj);
+                This.BindParameters[key].Bind(value);
+            }
+        }
+
+        public static void Execute<T>(this ITableMappedStatement<T> This, T obj)
+        {
+            This.Reset();
+            This.ClearBindings();
+            This.Bind(obj);
+            This.MoveNext();
         }
 
         // FIXME: Rename this as it actually will create/migrate the table and create indexes
@@ -165,9 +189,12 @@ namespace SQLitePCL.pretty.Orm
             return SQLBuilder.CreateIndex(This.TableName, colName, unique);
         }
 
-        public static IStatement PrepareInsert<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
+        // FIXME: Consider subclassing IStatement to encapsulate the TableMapping so that
+        // Callers can bind objects to the statement without explicitly passing the mapping.
+
+        public static ITableMappedStatement<T> PrepareInsert<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
-            return This.PrepareStatement(tableMapping.Insert());   
+            return new TableMappedStatement<T>(This.PrepareStatement(tableMapping.Insert()), tableMapping);   
         }
 
         private static string Insert<T>(this ITableMapping<T> tableMapping)
@@ -175,9 +202,9 @@ namespace SQLitePCL.pretty.Orm
             return SQLBuilder.Insert(tableMapping.TableName, tableMapping.Select(x => x.Key));
         }
 
-        public static IStatement PrepareInsertOrReplace<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
+        public static ITableMappedStatement<T> PrepareInsertOrReplace<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
-            return This.PrepareStatement(tableMapping.InsertOrReplace());   
+            return new TableMappedStatement<T>(This.PrepareStatement(tableMapping.InsertOrReplace()), tableMapping);   
         }
 
         private static string InsertOrReplace<T>(this ITableMapping<T> tableMapping)
@@ -452,6 +479,104 @@ namespace SQLitePCL.pretty.Orm
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
+        }
+    }
+
+    internal sealed class TableMappedStatement<T> : ITableMappedStatement<T>
+    {
+        private readonly IStatement deleg;
+        private readonly ITableMapping<T> mapping;
+
+        internal TableMappedStatement(IStatement deleg, ITableMapping<T> mapping)
+        {
+            this.deleg = deleg;
+            this.mapping = mapping;
+        }
+
+        public void Bind(T obj)
+        {
+            deleg.Bind(mapping, obj);
+        }
+
+        public void ClearBindings()
+        {
+            deleg.ClearBindings();
+        }
+
+        public int Status(StatementStatusCode statusCode, bool reset)
+        {
+            return deleg.Status(statusCode, reset);
+        }
+
+        public IReadOnlyOrderedDictionary<string, IBindParameter> BindParameters
+        {
+            get
+            {
+                return deleg.BindParameters;
+            }
+        }
+
+        public IReadOnlyList<ColumnInfo> Columns
+        {
+            get
+            {
+                return deleg.Columns;
+            }
+        }
+
+        public string SQL
+        {
+            get
+            {
+                return deleg.SQL;
+            }
+        }
+
+        public bool IsReadOnly
+        {
+            get
+            {
+                return deleg.IsReadOnly;
+            }
+        }
+
+        public bool IsBusy
+        {
+            get
+            {
+                return deleg.IsBusy;
+            }
+        }
+
+        public void Dispose()
+        {
+            deleg.Dispose();
+        }
+
+        public bool MoveNext()
+        {
+            return deleg.MoveNext();
+        }
+
+        public void Reset()
+        {
+            deleg.Reset();
+        }
+
+        object IEnumerator.Current
+        {
+            get
+            {
+                return deleg.Current;
+            }
+        }
+
+        public IReadOnlyList<IResultSetValue> Current
+        {
+            get
+            {
+                return deleg.Current;
+            }
         }
     }
 }

@@ -31,7 +31,7 @@ namespace SQLitePCL.pretty.tests
                         Name = "TestProduct",
                         Price = 5.55m
                     };
-                    stmt.Execute<Product>(productMap, product);
+                    stmt.Execute<Product>(product);
 
                     Console.WriteLine(db.Query(productCount).Select(x => x.First().ToInt()).First());
 
@@ -42,7 +42,7 @@ namespace SQLitePCL.pretty.tests
                         Price = 5.55m
                     };
 
-                    stmt.Execute<Product>(productMap, product);
+                    stmt.Execute<Product>(product);
 
                     Console.WriteLine(db.Query(productCount).Select(x => x.First().ToInt()).First());
                 }
