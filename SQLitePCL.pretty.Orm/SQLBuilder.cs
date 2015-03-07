@@ -22,8 +22,12 @@
 //
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Text;
 
 namespace SQLitePCL.pretty.Orm
 {
@@ -114,6 +118,251 @@ namespace SQLitePCL.pretty.Orm
             }
             
             return decl;
+        }
+
+        internal static string CompileExpr(Expression expr)
+        {
+            return CompileExpr(expr, new List<object>()).Item1;
+        }
+
+        private static Tuple<String,object> CompileExpr(Expression expr, List<object> queryArgs)
+        {
+            if (expr is BinaryExpression)
+            {
+                var bin = (BinaryExpression)expr;
+                
+                var leftr = CompileExpr(bin.Left, queryArgs);
+                var rightr = CompileExpr(bin.Right, queryArgs);
+
+                //If either side is a parameter and is null,then handle the other side specially (for "is null"/"is not null")
+                string text;
+
+                if (leftr.Item1 == "?" && leftr.Item2 == null)
+                {
+                    text = CompileNullBinaryExpression(bin, rightr.Item1);
+                }
+                else if (rightr.Item1 == "?" && rightr.Item2 == null)
+                {
+                    text = CompileNullBinaryExpression(bin, leftr.Item1);
+                }
+                else
+                {
+                    text = "(" + leftr.Item1 + " " + GetSqlName(bin) + " " + rightr.Item1 + ")";
+                }
+                return Tuple.Create<String, object>(text, null);
+            }
+
+            else if (expr.NodeType == ExpressionType.Not)
+            {
+                var operandExpr = ((UnaryExpression)expr).Operand;
+                var opr = CompileExpr(operandExpr, queryArgs);
+                object val = opr.Item2;
+
+                if (val is bool)
+                {
+                    val = !((bool)val);
+                }
+
+                return Tuple.Create("NOT(" + opr.Item1 + ")", val);
+
+            } 
+
+            else if (expr.NodeType == ExpressionType.Call) 
+            {  
+                var call = (MethodCallExpression) expr;
+                var args = new Tuple<String,object>[call.Arguments.Count];
+
+                var obj = call.Object != null ? CompileExpr (call.Object, queryArgs) : null;
+                
+                for (var i = 0; i < args.Length; i++) 
+                {
+                    args [i] = CompileExpr (call.Arguments[i], queryArgs);
+                }
+                
+                var sqlCall = "";
+                
+                if (call.Method.Name == "Like" && args.Length == 2) 
+                {
+                    sqlCall = "(" + args[0].Item1 + " like " + args[1].Item1 + ")";
+                }
+
+                else if (call.Method.Name == "Contains" && args.Length == 2) 
+                {
+                    sqlCall = "(" + args[1].Item1 + " in " + args[0].Item1 + ")";
+                }
+
+                else if (call.Method.Name == "Contains" && args.Length == 1)
+                 {
+                    if (call.Object != null && call.Object.Type == typeof(string))
+                    {
+                        sqlCall = "(" + obj.Item1 + " like ('%' || " + args [0].Item1 + " || '%'))";
+                    }
+                    else 
+                    {
+                        sqlCall = "(" + args[0].Item1 + " in " + obj.Item1 + ")";
+                    }
+                }
+
+                else if (call.Method.Name == "StartsWith" && args.Length == 1) 
+                {
+                    sqlCall = "(" + obj.Item1 + " like (" + args [0].Item1 + " || '%'))";
+                }
+
+                else if (call.Method.Name == "EndsWith" && args.Length == 1) 
+                {
+                    sqlCall = "(" + obj.Item1 + " like ('%' || " + args [0].Item1 + "))";
+                }
+
+                else if (call.Method.Name == "Equals" && args.Length == 1) 
+                {
+                    sqlCall = "(" + obj.Item1 + " = (" + args[0].Item1 + "))";
+                } 
+
+                else if (call.Method.Name == "ToLower") 
+                {
+                    sqlCall = "(lower(" + obj.Item1 + "))"; 
+                } 
+
+                else if (call.Method.Name == "ToUpper") 
+                {
+                    sqlCall = "(upper(" + obj.Item1 + "))"; 
+                } 
+
+                else 
+                {
+                    sqlCall = call.Method.Name.ToLower () + "(" + string.Join (",", args.Select (a => a.Item1).ToArray ()) + ")";
+                }
+
+                return Tuple.Create<String, object>(sqlCall, null);
+                
+            } 
+
+            else if (expr.NodeType == ExpressionType.Constant) 
+            {
+                var c = (ConstantExpression) expr;
+                queryArgs.Add (c.Value);
+
+                return Tuple.Create("?", c.Value);
+            } 
+
+            else if (expr.NodeType == ExpressionType.Convert) 
+            {
+                var u = (UnaryExpression) expr;
+                var ty = u.Type;
+                var valr = CompileExpr (u.Operand, queryArgs);
+
+                return Tuple.Create(valr.Item1, valr.Item2 != null ? SQLBuilder.ConvertTo (valr.Item2, ty) : null);
+            } 
+
+            else if (expr.NodeType == ExpressionType.MemberAccess) 
+            {
+                var mem = (MemberExpression)expr;
+                
+                if (mem.Expression!=null && mem.Expression.NodeType == ExpressionType.Parameter) 
+                {
+                    //
+                    // This is a column of our table, output just the column name
+                    // Need to translate it if that column name is mapped
+                    //
+                    var columnName = TableMapping.PropertyToColumnName((PropertyInfo) mem.Member);
+                    return Tuple.Create<String, object>( "\"" + columnName + "\"", null);
+                } 
+
+                else 
+                {
+                    object obj = null;
+
+                    if (mem.Expression != null) 
+                    {
+                        var r = CompileExpr (mem.Expression, queryArgs);
+
+                        if (r.Item2 == null) { throw new NotSupportedException ("Member access failed to compile expression"); }
+
+                        if (r.Item1 == "?") { queryArgs.RemoveAt (queryArgs.Count - 1); }
+                        obj = r.Item2;
+                    }
+                    
+                    //
+                    // Get the member value
+                    //
+                    object val = null;
+
+                    if (mem.Member is PropertyInfo)
+                    {
+                        var m = (PropertyInfo)mem.Member;
+                        val = m.GetValue (obj, null);
+                    } 
+
+                    else if (mem.Member is FieldInfo) 
+                    {
+                        var m = (FieldInfo)mem.Member;
+                        val = m.GetValue (obj);
+                    } 
+
+                    else { throw new NotSupportedException ("MemberExpr: " + mem.Member.DeclaringType); }
+                    
+                    //
+                    // Work special magic for enumerables
+                    //
+                    if (val != null && val is IEnumerable && !(val is string) && !(val is IEnumerable<byte>)) 
+                    {
+                        var sb = new StringBuilder("(");
+                        var head = "";
+
+                        foreach (var a in (IEnumerable) val) 
+                        {
+                            queryArgs.Add(a);
+                            sb.Append(head);
+                            sb.Append("?");
+                            head = ",";
+                        }
+
+                        sb.Append(")");
+                        return Tuple.Create(sb.ToString(), val);
+                    }
+
+                    else 
+                    {
+                        queryArgs.Add (val);
+                        return Tuple.Create("?", val);
+                    }
+                }
+            }
+
+            throw new NotSupportedException ("Cannot compile: " + expr.NodeType.ToString ());
+        }
+
+        private static string GetSqlName (Expression expr)
+        {
+            var n = expr.NodeType;
+
+            if (n == ExpressionType.GreaterThan)             { return ">"; }
+            else if (n == ExpressionType.GreaterThanOrEqual) { return ">="; } 
+            else if (n == ExpressionType.LessThan)           { return "<"; } 
+            else if (n == ExpressionType.LessThanOrEqual)    { return "<="; } 
+            else if (n == ExpressionType.And)                { return "&"; } 
+            else if (n == ExpressionType.AndAlso)            { return "and"; } 
+            else if (n == ExpressionType.Or)                 { return "|"; } 
+            else if (n == ExpressionType.OrElse)             { return "or"; } 
+            else if (n == ExpressionType.Equal)              { return "="; } 
+            else if (n == ExpressionType.NotEqual)           { return "!="; } 
+            else { throw new NotSupportedException ("Cannot get SQL for: " + n); }
+        }
+
+        private static string CompileNullBinaryExpression(BinaryExpression expression, string parameter)
+        {
+            if (expression.NodeType == ExpressionType.Equal)         { return "(" + parameter + " is ?)"; }
+            else if (expression.NodeType == ExpressionType.NotEqual) { return "(" + parameter + " is not ?)"; }
+            else { throw new NotSupportedException("Cannot compile Null-BinaryExpression with type " + expression.NodeType.ToString()); }
+        }
+
+        private static object ConvertTo (object obj, Type t)
+        {
+            if (obj == null) { return null; }
+
+            var nut = Nullable.GetUnderlyingType(t) ?? t;
+            
+            return Convert.ChangeType (obj, nut);
         }
     }
 }
