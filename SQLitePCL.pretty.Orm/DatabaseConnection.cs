@@ -32,7 +32,7 @@ namespace SQLitePCL.pretty.Orm
 
         public static void DropTable(this IDatabaseConnection This, string table)
         {
-            This.Execute (SQLBuilder.DropTable, table);
+            This.Execute(SQLBuilder.DropTable, table);
         }
 
         public static void BeginTransaction(this IDatabaseConnection This)
@@ -59,12 +59,44 @@ namespace SQLitePCL.pretty.Orm
 
         public static void RollbackTo(this IDatabaseConnection This, string savepoint)
         {
-            This.Execute("ROLLBACK TO " + savepoint);
+            This.Execute(SQLBuilder.RollbackTo(savepoint));
         }
 
         public static void Rollback(this IDatabaseConnection This)
         {
-            This.Execute("ROLLBACK");
+            This.Execute(SQLBuilder.Rollback);
+        }
+
+        public static void CreateIndex(this IDatabaseConnection This, string indexName, string tableName, IEnumerable<string> columnNames, bool unique)
+        {
+            This.Execute(SQLBuilder.CreateIndex(indexName, tableName, columnNames, unique));
+        }
+
+        public static void CreateIndex(this IDatabaseConnection This, string indexName, string tableName, string columnName, bool unique)
+        {
+            This.Execute(SQLBuilder.CreateIndex(indexName, tableName, columnName, unique));
+        }
+
+        public static void CreateIndex(this IDatabaseConnection This, string tableName, string columnName, bool unique)
+        {
+            This.Execute(SQLBuilder.CreateIndex(tableName, columnName, unique));
+        }
+
+        public static void CreateIndex(this IDatabaseConnection This, string tableName, IEnumerable<string> columnNames, bool unique)
+        {
+            This.Execute(SQLBuilder.CreateIndex(tableName,columnNames, unique));
+        }
+
+        public static IReadOnlyDictionary<string, TableColumnMetadata> GetTableInfo(this IDatabaseConnection This, string tableName)
+        {
+            // FIXME: Would be preferable to return an actual immutable data structure so that we could cache this result.
+            var retval = new Dictionary<string, TableColumnMetadata>();
+            foreach (var row in This.Query(SQLBuilder.TableInfo, tableName))
+            {
+                var column = row[1].ToString();
+                retval.Add(column, This.GetTableColumnMetadata(null, tableName, column));
+            }
+            return retval;
         }
 
         public static void RunInTransaction (this IDatabaseConnection This, Action<IDatabaseConnection> action)
@@ -93,7 +125,7 @@ namespace SQLitePCL.pretty.Orm
                 switch (e.ErrorCode)
                 {   
                     // It is recommended that applications respond to the errors listed below 
-                    //    by explicitly issuing a ROLLBACK command.
+                    // by explicitly issuing a ROLLBACK command.
                     case ErrorCode.IOError:
                     case ErrorCode.Full:
                     case ErrorCode.Busy:

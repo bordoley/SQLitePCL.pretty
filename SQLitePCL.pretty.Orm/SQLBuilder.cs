@@ -60,13 +60,20 @@ namespace SQLitePCL.pretty.Orm
 
         public const string DropTable = "DROP TABLE If EXISTS ?";
 
+        public const string TableInfo = "PRAGMA TABLE_INFO(?)";
+
         public const string SavePoint = "SAVEPOINT ?";
 
         public const string Release = "RELEASE ?";
 
+        public static string AlterTableAddColumn(string tableName, string columnName, TableColumnMetadata metadata)
+        {
+            return string.Format("ALTER TABLE \"{0}\" ADD COLUMN {1}", tableName, SqlDecl(columnName, metadata));
+        }
+
         public static string DeleteUsingPrimaryKey(string tableName, string pkColumn)
         {
-            return string.Format ("DELETE FROM \"{0}\" WHERE \"{1}\" = ?", tableName, pkColumn);
+            return string.Format("DELETE FROM \"{0}\" WHERE \"{1}\" = ?", tableName, pkColumn);
         }
 
         public static string Insert(string tableName, IEnumerable<string> columns)
@@ -85,6 +92,42 @@ namespace SQLitePCL.pretty.Orm
                 tableName,
                 string.Join(",", columns),
                 string.Join(",", columns.Select(x => ":" + x)));
+        }
+
+        public static string CreateIndex(string indexName, string tableName, IEnumerable<string> columnNames, bool unique)
+        {
+            const string sqlFormat = "create {2} index if not exists \"{3}\" on \"{0}\"(\"{1}\")";
+            return String.Format(sqlFormat, tableName, string.Join ("\", \"", columnNames), unique ? "unique" : "", indexName);
+        }
+
+        public static string CreateIndex(string indexName, string tableName, string columnName, bool unique)
+        {
+            return CreateIndex(indexName, tableName, new string[] { columnName }, unique);
+        }
+
+        public static string CreateIndex(string tableName, string columnName, bool unique)
+        {
+            return CreateIndex(NameIndex(tableName, new String[] { columnName}), tableName, columnName, unique);
+        }
+
+        public static string CreateIndex(string tableName, IEnumerable<string> columnNames, bool unique)
+        {
+            return CreateIndex(NameIndex(tableName, columnNames), tableName, columnNames, unique);
+        }
+
+        public static string NameIndex(string tableName, IEnumerable<string> columnNames)
+        {
+            return tableName + "_" + string.Join ("_", columnNames);
+        }
+
+        public static string NameIndex(string tableName, string columnName)
+        {
+            return NameIndex(tableName, new String[] { columnName});
+        }
+
+        public static string RollbackTo(string savepoint)
+        {
+            return "ROLLBACK TO " + savepoint;
         }
 
         public static string CreateTable(string tableName, CreateFlags createFlags, IEnumerable<Tuple<string, TableColumnMetadata>> columns)
@@ -106,28 +149,28 @@ namespace SQLitePCL.pretty.Orm
             return query;
         }
 
-        private static string SqlDecl (string columnName,  TableColumnMetadata p)
+        private static string SqlDecl (string columnName, TableColumnMetadata metadata)
         {
-            string decl = "\"" + columnName + "\" " + p.DeclaredType + " ";
+            string decl = "\"" + columnName + "\" " + metadata.DeclaredType + " ";
             
-            if (p.IsPrimaryKeyPart) 
+            if (metadata.IsPrimaryKeyPart) 
             {
                 decl += "PRIMARY KEY ";
             }
 
-            if (p.IsAutoIncrement) 
+            if (metadata.IsAutoIncrement) 
             {
                 decl += "AUTOINCREMENT ";
             }
 
-            if (p.HasNotNullConstraint) 
+            if (metadata.HasNotNullConstraint) 
             {
                 decl += "NOT NULL ";
             }
 
-            if (!string.IsNullOrEmpty (p.CollationSequence)) 
+            if (!string.IsNullOrEmpty (metadata.CollationSequence)) 
             {
-                decl += "COLLATE " + p.CollationSequence + " ";
+                decl += "COLLATE " + metadata.CollationSequence + " ";
             }
             
             return decl;

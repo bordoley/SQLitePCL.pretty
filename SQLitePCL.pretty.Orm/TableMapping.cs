@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace SQLitePCL.pretty.Orm
@@ -48,17 +49,37 @@ namespace SQLitePCL.pretty.Orm
         public TableColumnMetadata Metadata { get { return metadata; } }
     }
 
+    public sealed class IndexInfo
+    {
+        private readonly string name;
+        private readonly bool unique;
+        private readonly IReadOnlyList<string> columns;
+
+        internal IndexInfo(string name, bool unique, IReadOnlyList<string> columns)
+        {
+            this.name = name;
+            this.unique = unique;
+            this.columns = columns;
+        }
+
+        public string Name { get { return name; } }
+
+        public bool Unique { get { return unique; } }
+
+        public IEnumerable<string> Columns { get { return columns; } }
+    }
+
     public interface ITableMapping<T> : IEnumerable<KeyValuePair<string, ColumnMapping>>
     {
         String TableName { get; }
 
         ColumnMapping this[string column] { get; }
 
+        IEnumerable<IndexInfo> Indexes { get; }
+
         bool TryGetColumnMapping(string column, out ColumnMapping mapping);
 
         T ToObject(IReadOnlyList<IResultSetValue> row);
-
-        // FIXME: Indices?
     }
 
     public static class TableMapping
@@ -69,14 +90,85 @@ namespace SQLitePCL.pretty.Orm
             return colAttr == null ? prop.Name : colAttr.Name;
         }
 
+        // FIXME: Rename this as it actually will create/migrate the table and create indexes
+        // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
+        // on the object itself. Might diverge from SQLIte-net here
+        public static void CreateTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, CreateFlags createFlags)
+        {
+            This.Execute(tableMapping.CreateTable(createFlags));
+            if (This.Changes == 0)
+            {
+                This.MigrateTable(tableMapping);
+            }
+
+            foreach (var index in tableMapping.Indexes) 
+            {
+                This.CreateIndex(index.Name, tableMapping.TableName,index.Columns, index.Unique);
+            }
+        }
+            
+        public static void MigrateTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
+        {
+            var existingCols = This.GetTableInfo(tableMapping.TableName);
+            
+            var toBeAdded = new List<Tuple<string, TableColumnMetadata>> ();
+
+            // FIXME: Nasty n^2 search due to case insensitive strings. Number of columns
+            // is normally small so not that big of a deal.
+            foreach (var p in tableMapping) 
+            {
+                var found = false;
+
+                foreach (var c in existingCols) 
+                {
+                    found = (string.Compare (p.Key, c.Key, StringComparison.OrdinalIgnoreCase) == 0);
+                    if (found) { break; }
+                }
+
+                if (!found) { toBeAdded.Add (Tuple.Create(p.Key, p.Value.Metadata)); }
+            }
+            
+            foreach (var p in toBeAdded) 
+            {
+                This.Execute (SQLBuilder.AlterTableAddColumn(tableMapping.TableName, p.Item1, p.Item2));
+            }
+        }
+
         public static string CreateTable<T>(this ITableMapping<T> This)
         {
             return This.CreateTable<T>(CreateFlags.None);
         }
 
+        // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
+        // on the object itself. Might diverge from SQLIte-net here
         public static string CreateTable<T>(this ITableMapping<T> This, CreateFlags createFlags)
         {
             return SQLBuilder.CreateTable(This.TableName,createFlags, This.Select(x => Tuple.Create(x.Key, x.Value.Metadata)));
+        }
+
+        // FIXME: I'm a little dubious of this method. If the table mapping is a representation of the table
+        // then all indexes should be defined on the table itself and not out of band using functions like this.
+        public static string CreateIndex<T>(this ITableMapping<T> This, Expression<Func<T, object>> property, bool unique)
+        {
+            MemberExpression mx;
+            if (property.Body.NodeType == ExpressionType.Convert)
+            {
+                mx = ((UnaryExpression) property.Body).Operand as MemberExpression;
+            }
+            else
+            {
+                mx = (property.Body as MemberExpression);
+            }
+
+            var propertyInfo = mx.Member as PropertyInfo;
+            if (propertyInfo == null)
+            {
+                throw new ArgumentException("The lambda expression 'property' should point to a valid Property");
+            }
+
+            var colName = PropertyToColumnName(propertyInfo);
+
+            return SQLBuilder.CreateIndex(This.TableName, colName, unique);
         }
 
         public static string Insert<T>(this ITableMapping<T> tableMapping)
@@ -94,6 +186,8 @@ namespace SQLitePCL.pretty.Orm
             return TableMapping.Create<T>(CreateFlags.None);
         }
 
+        // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
+        // on the object itself. Might diverge from SQLIte-net here
         public static ITableMapping<T> Create<T>(CreateFlags createFlags)
         {
             Func<object> builder = () => Activator.CreateInstance<T>();
@@ -107,6 +201,8 @@ namespace SQLitePCL.pretty.Orm
             return TableMapping.Create(builder, build, CreateFlags.None);
         }
 
+        // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
+        // on the object itself. Might diverge from SQLIte-net here
         public static ITableMapping<T> Create<T>(Func<object> builder, Func<object, T> build, CreateFlags createFlags)
         {
             var mappedType = typeof(T);
@@ -118,8 +214,11 @@ namespace SQLitePCL.pretty.Orm
 
             var props = mappedType.GetRuntimeProperties().Where(p => p.GetMethod != null && p.GetMethod.IsPublic && !p.GetMethod.IsStatic);
 
+            // FIXME: I wish this was immutable
             var columnToMapping = new Dictionary<string, ColumnMapping>();
 
+            // map each column to it's index attributes
+            var columnToIndexMapping = new Dictionary<string, IEnumerable<IndexedAttribute>>();
             foreach (var prop in props)
             {
                 if (prop.GetCustomAttributes(typeof(IgnoreAttribute), true).Count() == 0)
@@ -133,35 +232,86 @@ namespace SQLitePCL.pretty.Orm
 
                     columnToMapping.Add(name, new ColumnMapping(columnType, prop, metadata));
 
+                    // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
+                    // on the object itself. Might diverge from SQLIte-net here
                     var isPK = IsPrimaryKey(prop) ||
                                (((createFlags & CreateFlags.ImplicitPK) == CreateFlags.ImplicitPK) &&
                                string.Compare(prop.Name, ImplicitPkName, StringComparison.OrdinalIgnoreCase) == 0);
 
-                    // FIXME What to about indices
-                    var indices = GetIndices(prop);
-                    if (!indices.Any()
+                    var columnIndexes = GetIndexes(prop);
+
+                    // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
+                    // on the object itself. Might diverge from SQLIte-net here
+                    if (!columnIndexes.Any()
                         && !isPK
                         && ((createFlags & CreateFlags.ImplicitIndex) == CreateFlags.ImplicitIndex)
                         && name.EndsWith(ImplicitIndexSuffix, StringComparison.OrdinalIgnoreCase))
                     {
-                        indices = new IndexedAttribute[] { new IndexedAttribute() };
+                        columnIndexes = new IndexedAttribute[] { new IndexedAttribute() };
                     }
+
+                    columnToIndexMapping.Add(name, columnIndexes);
                 }
             }
 
-            return new TableMapping<T>(builder, build, tableName, columnToMapping);
+            // A Map of the index name to its columns and whether its unique or not
+            var indexToColumns = new Dictionary<string, Tuple<bool, Dictionary<int, string>>>();
+
+            foreach (var columnIndex in columnToIndexMapping)
+            {
+                foreach (var indexAttribute in columnIndex.Value)
+                {
+                    var indexName = indexAttribute.Name ?? SQLBuilder.NameIndex(tableName, columnIndex.Key);
+
+                    Tuple<bool, Dictionary<int, string>> iinfo;
+                    if (!indexToColumns.TryGetValue(indexName, out iinfo))
+                    {
+                        iinfo = Tuple.Create(indexAttribute.Unique, new Dictionary<int,string>());
+                        indexToColumns.Add(indexName, iinfo);
+                    }
+
+                    if (indexAttribute.Unique != iinfo.Item1)
+                    {
+                        throw new Exception("All the columns in an index must have the same value for their Unique property");
+                    }
+
+                    if (iinfo.Item2.ContainsKey(indexAttribute.Order))
+                    {
+                        throw new Exception("Ordered columns must have unique values for their Order property.");
+                    }
+
+                    iinfo.Item2.Add(indexAttribute.Order, columnIndex.Key);
+                }
+            }
+ 
+            var indexes = 
+                indexToColumns.Select(x => 
+                    new IndexInfo(
+                        x.Key, 
+                        x.Value.Item1, 
+                        x.Value.Item2.OrderBy(col => col.Key).Select(col => col.Value).ToList()
+                    )
+                ).ToList();
+
+            return new TableMapping<T>(builder, build, tableName, columnToMapping, indexes);
         }
 
+        // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
+        // on the object itself. Might diverge from SQLIte-net here
         private static TableColumnMetadata CreateColumnMetadata(PropertyInfo prop, CreateFlags createFlags = CreateFlags.None)
         {
             //If this type is Nullable<T> then Nullable.GetUnderlyingType returns the T, otherwise it returns null, so get the actual type instead
             var columnType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
             var collation = Collation(prop);
 
+            // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
+            // on the object itself. Might diverge from SQLIte-net here
             var isPK = IsPrimaryKey(prop) ||
                 (((createFlags & CreateFlags.ImplicitPK) == CreateFlags.ImplicitPK) &&
                     string.Compare (prop.Name, ImplicitPkName, StringComparison.OrdinalIgnoreCase) == 0);
-
+            
+            // FIXME: I'm dubious of using create flags here. I'd prefer any thing that impacts the db mapping be defined 
+            // on the object itself. Might diverge from SQLIte-net here
             var isAuto = IsAutoIncrement(prop) || (isPK && ((createFlags & CreateFlags.AutoIncPK) == CreateFlags.AutoIncPK));
             var isAutoGuid = isAuto && columnType == typeof(Guid);
             var isAutoInc = isAuto && !isAutoGuid;
@@ -226,7 +376,7 @@ namespace SQLitePCL.pretty.Orm
             return attrs.Count() > 0;
         }
 
-        private static IEnumerable<IndexedAttribute> GetIndices(MemberInfo p)
+        private static IEnumerable<IndexedAttribute> GetIndexes(MemberInfo p)
         {
             var attrs = p.GetCustomAttributes(typeof(IndexedAttribute), true);
             return attrs.Cast<IndexedAttribute>();
@@ -258,25 +408,27 @@ namespace SQLitePCL.pretty.Orm
         private readonly string tableName;
 
         private readonly IReadOnlyDictionary<string, ColumnMapping> columnToMapping;
+        private readonly IReadOnlyList<IndexInfo> indexes;
 
         internal TableMapping(
             Func<object> builder, 
             Func<object,T> build, 
             string tableName,
-            IReadOnlyDictionary<string, ColumnMapping> columnToMapping)
+            IReadOnlyDictionary<string, ColumnMapping> columnToMapping,
+            IReadOnlyList<IndexInfo> indexes)
         {
             this.builder = builder;
             this.build = build;
             this.tableName = tableName;
             this.columnToMapping = columnToMapping;
+            this.indexes = indexes;
         }
 
         public String TableName { get { return tableName; } }
 
-        public ColumnMapping this [string column]
-        {
-            get  { return columnToMapping[column]; }
-        }
+        public IEnumerable<IndexInfo> Indexes { get { return indexes.AsEnumerable(); } }
+
+        public ColumnMapping this [string column] { get  { return columnToMapping[column]; } }
 
         public bool TryGetColumnMapping(string column, out ColumnMapping mapping)
         {
