@@ -22,9 +22,9 @@ namespace SQLitePCL.pretty.tests
 
             using (var db = SQLite3.Open(":memory:"))
             {
-                db.Execute(productMap.CreateTable());
+                db.InitTable(productMap);
 
-                using (var stmt = db.PrepareStatement(productMap.Insert()))
+                using (var stmt = db.PrepareInsert(productMap))
                 {
                     var product = new Product()
                     {

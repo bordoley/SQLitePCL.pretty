@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
+// FIXME: Consider moving this into SQLitePCL.pretty and perhaps into the main package even.
+// The later is border line, but really there is nothing here that is Orm specific. 
+// Just useful extensions.
 namespace SQLitePCL.pretty.Orm
 {
     public static class DatabaseConnection

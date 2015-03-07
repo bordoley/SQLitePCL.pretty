@@ -34,16 +34,16 @@ namespace SQLitePCL.pretty.Orm
     [Flags]
     public enum CreateFlags
     {
-        None                = 0x000,
-        ImplicitPK          = 0x001,    // create a primary key for field called 'Id' (Orm.ImplicitPkName)
-        ImplicitIndex       = 0x002,    // create an index for fields ending in 'Id' (Orm.ImplicitIndexSuffix)
-        AllImplicit         = 0x003,    // do both above
-        AutoIncPK           = 0x004,    // force PK field to be auto inc
-        FullTextSearch3     = 0x100,    // create virtual table using FTS3
-        FullTextSearch4     = 0x200     // create virtual table using FTS4
+        None                    = 0x000,
+        ImplicitPrimaryKey      = 0x001,    // create a primary key for field called 'Id' (Orm.ImplicitPkName)
+        ImplicitIndex           = 0x002,    // create an index for fields ending in 'Id' (Orm.ImplicitIndexSuffix)
+        AllImplicit             = 0x003,    // do both above
+        AutoIncrementPrimaryKey = 0x004,    // force PK field to be auto inc
+        FullTextSearch3         = 0x100,    // create virtual table using FTS3
+        FullTextSearch4         = 0x200     // create virtual table using FTS4
     }
 
-    public static class SQLBuilder
+    internal static class SQLBuilder
     {
         public const string SelectAllTables = 
             @"SELECT name FROM sqlite_master

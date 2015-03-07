@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using SQLitePCL.pretty.Orm.Attributes;
 
 namespace SQLitePCL.pretty.Orm
 {
@@ -93,7 +94,7 @@ namespace SQLitePCL.pretty.Orm
         }
 
         // FIXME: Rename this as it actually will create/migrate the table and create indexes
-        public static void CreateTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
+        public static void InitTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
             This.Execute(tableMapping.CreateTable());
             if (This.Changes == 0)
@@ -107,7 +108,7 @@ namespace SQLitePCL.pretty.Orm
             }
         }
             
-        public static void MigrateTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
+        private static void MigrateTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
             var existingCols = This.GetTableInfo(tableMapping.TableName);
             
@@ -134,14 +135,14 @@ namespace SQLitePCL.pretty.Orm
             }
         }
 
-        public static string CreateTable<T>(this ITableMapping<T> This)
+        private static string CreateTable<T>(this ITableMapping<T> This)
         {
             return SQLBuilder.CreateTable(This.TableName, This.CreateFlags, This.Select(x => Tuple.Create(x.Key, x.Value.Metadata)));
         }
 
         // FIXME: I'm a little dubious of this method. If the table mapping is a representation of the table
         // then all indexes should be defined on the table itself and not out of band using functions like this.
-        public static string CreateIndex<T>(this ITableMapping<T> This, Expression<Func<T, object>> property, bool unique)
+        private static string CreateIndex<T>(this ITableMapping<T> This, Expression<Func<T, object>> property, bool unique)
         {
             MemberExpression mx;
             if (property.Body.NodeType == ExpressionType.Convert)
@@ -164,12 +165,22 @@ namespace SQLitePCL.pretty.Orm
             return SQLBuilder.CreateIndex(This.TableName, colName, unique);
         }
 
-        public static string Insert<T>(this ITableMapping<T> tableMapping)
+        public static IStatement PrepareInsert<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
+        {
+            return This.PrepareStatement(tableMapping.Insert());   
+        }
+
+        private static string Insert<T>(this ITableMapping<T> tableMapping)
         {
             return SQLBuilder.Insert(tableMapping.TableName, tableMapping.Select(x => x.Key));
         }
 
-        public static string InsertOrReplace<T>(this ITableMapping<T> tableMapping)
+        public static IStatement PrepareInsertOrReplace<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
+        {
+            return This.PrepareStatement(tableMapping.InsertOrReplace());   
+        }
+
+        private static string InsertOrReplace<T>(this ITableMapping<T> tableMapping)
         {
             return SQLBuilder.InsertOrReplace(tableMapping.TableName, tableMapping.Select(x => x.Key));     
         }
@@ -214,7 +225,7 @@ namespace SQLitePCL.pretty.Orm
 
                     // FIXME: Duplicate code. Make a function
                     var isPK = IsPrimaryKey(prop) ||
-                               (((createFlags & CreateFlags.ImplicitPK) == CreateFlags.ImplicitPK) &&
+                               (((createFlags & CreateFlags.ImplicitPrimaryKey) == CreateFlags.ImplicitPrimaryKey) &&
                                string.Compare(prop.Name, ImplicitPkName, StringComparison.OrdinalIgnoreCase) == 0);
 
                     var columnIndexes = GetIndexes(prop);
@@ -281,10 +292,10 @@ namespace SQLitePCL.pretty.Orm
 
             // FIXME: Duplicate code. Make a function
             var isPK = IsPrimaryKey(prop) ||
-                (((createFlags & CreateFlags.ImplicitPK) == CreateFlags.ImplicitPK) &&
+                (((createFlags & CreateFlags.ImplicitPrimaryKey) == CreateFlags.ImplicitPrimaryKey) &&
                     string.Compare (prop.Name, ImplicitPkName, StringComparison.OrdinalIgnoreCase) == 0);
             
-            var isAuto = IsAutoIncrement(prop) || (isPK && ((createFlags & CreateFlags.AutoIncPK) == CreateFlags.AutoIncPK));
+            var isAuto = IsAutoIncrement(prop) || (isPK && ((createFlags & CreateFlags.AutoIncrementPrimaryKey) == CreateFlags.AutoIncrementPrimaryKey));
             var isAutoGuid = isAuto && columnType == typeof(Guid);
             var isAutoInc = isAuto && !isAutoGuid;
             var isNullable = !(isPK || IsMarkedNotNull(prop));

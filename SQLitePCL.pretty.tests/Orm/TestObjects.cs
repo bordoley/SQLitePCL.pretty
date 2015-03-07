@@ -1,5 +1,6 @@
 ﻿using System;
 using SQLitePCL.pretty.Orm;
+using SQLitePCL.pretty.Orm.Attributes;
 
 namespace SQLitePCL.pretty.tests
 {
