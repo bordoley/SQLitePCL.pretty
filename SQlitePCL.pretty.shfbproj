@@ -28,6 +28,8 @@
       <DocumentationSource sourceFile="SQLitePCL.pretty.Async\bin\Release\SQLitePCL.pretty.Async.dll" />
 <DocumentationSource sourceFile="SQLitePCL.pretty.Async\bin\Release\SQLitePCL.pretty.Async.xml" />
 <DocumentationSource sourceFile="SQLitePCL.pretty\bin\Release\SQLitePCL.pretty.dll" />
+<DocumentationSource sourceFile="SQLitePCL.pretty.Orm\bin\Release\SQLitePCL.pretty.Orm.dll" />
+<DocumentationSource sourceFile="SQLitePCL.pretty.Orm\bin\Release\SQLitePCL.pretty.Orm.xml" />
 <DocumentationSource sourceFile="SQLitePCL.pretty\bin\Release\SQLitePCL.pretty.xml" /></DocumentationSources>
     <MaximumGroupParts>2</MaximumGroupParts>
     <NamespaceGrouping>True</NamespaceGrouping>

@@ -73,6 +73,8 @@ namespace SQLitePCL.pretty.Orm
     {
     }
 
+
+    // FIXME: This should be sealed maybe use an interface instead
     [AttributeUsage (AttributeTargets.Property)]
     public class IndexedAttribute : Attribute
     {
@@ -104,11 +106,11 @@ namespace SQLitePCL.pretty.Orm
     {
     }
 
+    // FIXME: Not a fan of inheritance, maybe rework around an interface
     [AttributeUsage (AttributeTargets.Property)]
     public class UniqueAttribute : IndexedAttribute
     {
-        // FIXME:
-        public UniqueAttribute()
+        public UniqueAttribute() : base(null, 0, true)
         {
         }
     }

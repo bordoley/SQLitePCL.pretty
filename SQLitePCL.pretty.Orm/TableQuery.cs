@@ -199,22 +199,25 @@ namespace SQLitePCL.pretty.Orm
 
         public static TableQuery<T> OrderBy<T,TValue>(this TableQuery<T> This, Expression<Func<T, TValue>> orderExpr)
         {
-            // FIXME: Weird whats the difference from ThenBy?
+            // FIXME: Throw an exception if order by is not empty?
             return This.AddOrderBy(orderExpr, true);
         }
 
         public static TableQuery<T> OrderByDescending<T,TValue>(this TableQuery<T> This, Expression<Func<T, TValue>> orderExpr)
         {
+            // FIXME: Throw an exception if order by is not empty?
             return This.AddOrderBy(orderExpr, false);
         }
 
         public static TableQuery<T> ThenBy<T,TValue>(this TableQuery<T> This, Expression<Func<T, TValue>> orderExpr)
         {
+            // FIXME: Throw an exception if order by is empty?
             return This.AddOrderBy(orderExpr, true);
         }
 
         public static TableQuery<T> ThenByDescending<T,TValue>(this TableQuery<T> This, Expression<Func<T, TValue>> orderExpr)
         {
+            // FIXME: Throw an exception if order by is empty?
             return This.AddOrderBy(orderExpr, false);
         }
     }
