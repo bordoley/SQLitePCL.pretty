@@ -111,9 +111,14 @@ namespace SQLitePCL.pretty.Orm
 
     public static class TableQuery
     {
-        public static TableQuery<T> Query<T>(this ITableMapping<T> This)
+        public static IEnumerable<T> Query<T>(this IDatabaseConnection This, TableQuery<T> query)
         {
-            return new TableQuery<T>(This, "*", null, new List<Ordering>(), null, null);
+            return This.Query(query.ToString()).Select(query.Mapping.ToObject);
+        }
+
+        public static int Count<T>(this IDatabaseConnection This, TableQuery<T> query)
+        {
+            return This.Query(query.Count()).Select(x => x[0].ToInt()).First();
         }
             
         public static string Count<T>(this TableQuery<T> This)

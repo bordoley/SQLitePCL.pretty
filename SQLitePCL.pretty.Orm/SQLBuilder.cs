@@ -66,6 +66,11 @@ namespace SQLitePCL.pretty.Orm
 
         public const string Release = "RELEASE ?";
 
+        public static string SelectWhereColumnEquals(string tableName, string columnName)
+        {
+            return string.Format ("select * from \"{0}\" where \"{1}\" = ?", tableName, columnName);
+        }
+
         public static string AlterTableAddColumn(string tableName, string columnName, TableColumnMetadata metadata)
         {
             return string.Format("ALTER TABLE \"{0}\" ADD COLUMN {1}", tableName, SqlDecl(columnName, metadata));
@@ -76,12 +81,23 @@ namespace SQLitePCL.pretty.Orm
             return string.Format("DELETE FROM \"{0}\" WHERE \"{1}\" = ?", tableName, pkColumn);
         }
 
+        public static string Update(string tableName, IEnumerable<string> columns, string pkColumn)
+        {
+            return string.Format (
+                "UPDATE \"{0}\" SET {1} WHERE {2} = ? ", 
+                tableName, 
+                string.Join (",", columns.Where(x => x != pkColumn).Select(x => "\"" + x + "\" = :" + x).ToArray ()), 
+                pkColumn);
+        }
+
         public static string Insert(string tableName, IEnumerable<string> columns)
         {
             return string.Format(
                 "INSERT INTO \"{0}\"({1}) VALUES ({2})",
                 tableName,
                 string.Join(",", columns),
+
+                // FIXME: Might need to quote this for some cases. Test!!!
                 string.Join(",", columns.Select(x => ":" + x)));
         }
 
@@ -91,13 +107,15 @@ namespace SQLitePCL.pretty.Orm
                 "INSERT OR REPLACE INTO \"{0}\"({1}) VALUES ({2})",
                 tableName,
                 string.Join(",", columns),
+
+                // FIXME: Might need to quote this for some cases. Test!!!
                 string.Join(",", columns.Select(x => ":" + x)));
         }
 
         public static string CreateIndex(string indexName, string tableName, IEnumerable<string> columnNames, bool unique)
         {
-            const string sqlFormat = "create {2} index if not exists \"{3}\" on \"{0}\"(\"{1}\")";
-            return String.Format(sqlFormat, tableName, string.Join ("\", \"", columnNames), unique ? "unique" : "", indexName);
+            const string sqlFormat = "CREATE {2} INDEX IF NOT EXISTS \"{3}\" ON \"{0}\"(\"{1}\")";
+            return String.Format(sqlFormat, tableName, string.Join ("\", \"", columnNames), unique ? "UNIQUE" : "", indexName);
         }
 
         public static string CreateIndex(string indexName, string tableName, string columnName, bool unique)
@@ -239,34 +257,34 @@ namespace SQLitePCL.pretty.Orm
                 
                 if (call.Method.Name == "Like" && args.Length == 2) 
                 {
-                    sqlCall = "(" + args[0].Item1 + " like " + args[1].Item1 + ")";
+                    sqlCall = "(" + args[0].Item1 + " LIKE " + args[1].Item1 + ")";
                 }
 
                 else if (call.Method.Name == "Contains" && args.Length == 2) 
                 {
-                    sqlCall = "(" + args[1].Item1 + " in " + args[0].Item1 + ")";
+                    sqlCall = "(" + args[1].Item1 + " IN " + args[0].Item1 + ")";
                 }
 
                 else if (call.Method.Name == "Contains" && args.Length == 1)
                  {
                     if (call.Object != null && call.Object.Type == typeof(string))
                     {
-                        sqlCall = "(" + obj.Item1 + " like ('%' || " + args [0].Item1 + " || '%'))";
+                        sqlCall = "(" + obj.Item1 + " LIKE ('%' || " + args [0].Item1 + " || '%'))";
                     }
                     else 
                     {
-                        sqlCall = "(" + args[0].Item1 + " in " + obj.Item1 + ")";
+                        sqlCall = "(" + args[0].Item1 + " IN " + obj.Item1 + ")";
                     }
                 }
 
                 else if (call.Method.Name == "StartsWith" && args.Length == 1) 
                 {
-                    sqlCall = "(" + obj.Item1 + " like (" + args [0].Item1 + " || '%'))";
+                    sqlCall = "(" + obj.Item1 + " LIKE (" + args [0].Item1 + " || '%'))";
                 }
 
                 else if (call.Method.Name == "EndsWith" && args.Length == 1) 
                 {
-                    sqlCall = "(" + obj.Item1 + " like ('%' || " + args [0].Item1 + "))";
+                    sqlCall = "(" + obj.Item1 + " LIKE ('%' || " + args [0].Item1 + "))";
                 }
 
                 else if (call.Method.Name == "Equals" && args.Length == 1) 
@@ -276,12 +294,12 @@ namespace SQLitePCL.pretty.Orm
 
                 else if (call.Method.Name == "ToLower") 
                 {
-                    sqlCall = "(lower(" + obj.Item1 + "))"; 
+                    sqlCall = "(LOWER(" + obj.Item1 + "))"; 
                 } 
 
                 else if (call.Method.Name == "ToUpper") 
                 {
-                    sqlCall = "(upper(" + obj.Item1 + "))"; 
+                    sqlCall = "(UPPER(" + obj.Item1 + "))"; 
                 } 
 
                 else 

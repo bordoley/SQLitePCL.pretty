@@ -27,15 +27,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using SQLitePCL.pretty.Orm.Attributes;
 
 namespace SQLitePCL.pretty.Orm
 {
-    public interface ITableMappedStatement<T> : IStatement
-    {
-        void Bind(T obj);
-    }
-
     public sealed class ColumnMapping
     {
         private readonly Type clrType;
@@ -76,7 +72,7 @@ namespace SQLitePCL.pretty.Orm
         public IEnumerable<string> Columns { get { return columns; } }
     }
 
-    public interface ITableMapping<T> : IEnumerable<KeyValuePair<string, ColumnMapping>>
+    public interface ITableMapping : IEnumerable<KeyValuePair<string, ColumnMapping>>
     {
         String TableName { get; }
 
@@ -87,7 +83,10 @@ namespace SQLitePCL.pretty.Orm
         IEnumerable<IndexInfo> Indexes { get; }
 
         bool TryGetColumnMapping(string column, out ColumnMapping mapping);
+    }
 
+    public interface ITableMapping<T> : ITableMapping
+    {
         T ToObject(IReadOnlyList<IResultSetValue> row);
     }
 
@@ -98,7 +97,7 @@ namespace SQLitePCL.pretty.Orm
             var colAttr = (ColumnAttribute)prop.GetCustomAttributes(typeof(ColumnAttribute), true).FirstOrDefault();
             return colAttr == null ? prop.Name : colAttr.Name;
         }
-            
+
         internal static void Bind<T>(this IStatement This, ITableMapping<T> tableMapping, T obj)
         {
             foreach (var column in tableMapping)
@@ -109,15 +108,11 @@ namespace SQLitePCL.pretty.Orm
             }
         }
 
-        public static void Execute<T>(this ITableMappedStatement<T> This, T obj)
+        public static TableQuery<T> CreateQuery<T>(this ITableMapping<T> This)
         {
-            This.Reset();
-            This.ClearBindings();
-            This.Bind(obj);
-            This.MoveNext();
+            return new TableQuery<T>(This, "*", null, new List<Ordering>(), null, null);
         }
-
-        // FIXME: Rename this as it actually will create/migrate the table and create indexes
+            
         public static void InitTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
             This.Execute(tableMapping.CreateTable());
@@ -164,37 +159,71 @@ namespace SQLitePCL.pretty.Orm
             return SQLBuilder.CreateTable(This.TableName, This.CreateFlags, This.Select(x => Tuple.Create(x.Key, x.Value.Metadata)));
         }
 
-        // FIXME: I'm a little dubious of this method. If the table mapping is a representation of the table
-        // then all indexes should be defined on the table itself and not out of band using functions like this.
-        private static string CreateIndex<T>(this ITableMapping<T> This, Expression<Func<T, object>> property, bool unique)
+        public static ITableMappedStatement<T> PrepareFind<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
-            MemberExpression mx;
-            if (property.Body.NodeType == ExpressionType.Convert)
-            {
-                mx = ((UnaryExpression) property.Body).Operand as MemberExpression;
-            }
-            else
-            {
-                mx = (property.Body as MemberExpression);
-            }
-
-            var propertyInfo = mx.Member as PropertyInfo;
-            if (propertyInfo == null)
-            {
-                throw new ArgumentException("The lambda expression 'property' should point to a valid Property");
-            }
-
-            var colName = PropertyToColumnName(propertyInfo);
-
-            return SQLBuilder.CreateIndex(This.TableName, colName, unique);
+            return new TableMappedStatement<T>(This.PrepareStatement(tableMapping.Find()), tableMapping);   
         }
 
-        // FIXME: Consider subclassing IStatement to encapsulate the TableMapping so that
-        // Callers can bind objects to the statement without explicitly passing the mapping.
+        private static readonly ConditionalWeakTable<ITableMapping, string> find = 
+            new ConditionalWeakTable<ITableMapping, string>();
 
+        private static string Find(this ITableMapping This)
+        {
+            return find.GetValue(This, mapping => 
+                {
+                    var column = This.PrimaryKeyColumn();
+                    return SQLBuilder.SelectWhereColumnEquals(This.TableName, column);
+                });
+        }
+
+        private static readonly ConditionalWeakTable<ITableMapping, string> primaryKeyColumn = 
+            new ConditionalWeakTable<ITableMapping, string>();
+
+        private static string PrimaryKeyColumn(this ITableMapping This)
+        {
+            return primaryKeyColumn.GetValue(This, mapping => 
+                // Intentionally throw if the column doesn't have a primary key
+                mapping.Where(x => x.Value.Metadata.IsPrimaryKeyPart).Select(x => x.Key).First());
+        }
+ 
         public static ITableMappedStatement<T> PrepareInsert<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
             return new TableMappedStatement<T>(This.PrepareStatement(tableMapping.Insert()), tableMapping);   
+        }
+
+        public static T Insert<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
+        {
+            return This.RunInTransaction(db =>
+                {
+                    using (var insertStmt = db.PrepareInsert(tableMapping))
+                    using (var findStmt = db.PrepareFind(tableMapping))
+                    {
+                        insertStmt.Execute(obj);
+                        var pk = db.LastInsertedRowId;
+                        return findStmt.Query(pk).First();
+                    }
+                });
+        }
+
+        public static IEnumerable<T> InsertAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
+        {
+            return This.RunInTransaction(db =>
+                {
+                    var retval = new List<T>();
+
+                    using (var insertStmt = db.PrepareInsert(tableMapping))
+                    using (var findStmt = db.PrepareFind(tableMapping))
+                    {
+                        foreach (var obj in objects)
+                        {
+                            insertStmt.Execute(obj);
+                            var pk = db.LastInsertedRowId;
+                            retval.Add(findStmt.Query(pk).First());
+                        }
+
+                        return retval;
+                    }
+                });
         }
 
         private static string Insert<T>(this ITableMapping<T> tableMapping)
@@ -210,6 +239,146 @@ namespace SQLitePCL.pretty.Orm
         private static string InsertOrReplace<T>(this ITableMapping<T> tableMapping)
         {
             return SQLBuilder.InsertOrReplace(tableMapping.TableName, tableMapping.Select(x => x.Key));     
+        }
+            
+        public static T InsertOrReplace<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
+        {
+            return This.RunInTransaction(db =>
+                {
+                    using (var insertOrReplaceStmt = db.PrepareInsertOrReplace(tableMapping))
+                    using (var findStmt = db.PrepareFind(tableMapping))
+                    {
+                        insertOrReplaceStmt.Execute(obj);
+                        var pk = db.LastInsertedRowId;
+                        return findStmt.Query(pk).First();
+                    }
+                });
+        }
+
+        public static IEnumerable<T> InsertOrReplaceAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
+        {
+            return This.RunInTransaction(db =>
+                {
+                    var retval = new List<T>();
+
+                    using (var insertOrReplaceStmt = db.PrepareInsertOrReplace(tableMapping))
+                    using (var findStmt = db.PrepareFind(tableMapping))
+                    {
+                        foreach (var obj in objects)
+                        {
+                            insertOrReplaceStmt.Execute(obj);
+                            var pk = db.LastInsertedRowId;
+                            retval.Add(findStmt.Query(pk).First());
+                        }
+
+                        return retval;
+                    }
+                });
+        }
+
+        public static ITableMappedStatement<T> PrepareUpdate<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
+        {
+            return new TableMappedStatement<T>(This.PrepareStatement(tableMapping.Update()), tableMapping);   
+        }
+
+        private static string Update<T>(this ITableMapping<T> tableMapping)
+        {
+            return SQLBuilder.Update(tableMapping.TableName, tableMapping.Select(x => x.Key), tableMapping.PrimaryKeyColumn());     
+        }
+            
+        public static T Update<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
+        {
+            return This.RunInTransaction(db =>
+                {
+                    using (var updateStmt = db.PrepareUpdate(tableMapping))
+                    using (var findStmt = db.PrepareFind(tableMapping))
+                    {
+                        updateStmt.Execute(obj);
+                        var pk = db.LastInsertedRowId;
+                        return findStmt.Query(pk).First();
+                    }
+                });
+        }
+
+        public static IEnumerable<T> UpdateAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
+        {
+            return This.RunInTransaction(db =>
+                {
+                    var retval = new List<T>();
+
+                    using (var updateAllStmt = db.PrepareUpdate(tableMapping))
+                    using (var findStmt = db.PrepareFind(tableMapping))
+                    {
+                        foreach (var obj in objects)
+                        {
+                            updateAllStmt.Execute(obj);
+                            var pk = db.LastInsertedRowId;
+                            retval.Add(findStmt.Query(pk).First());
+                        }
+
+                        return retval;
+                    }
+                });
+        }
+
+        public static ITableMappedStatement<T> PrepareDelete<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
+        {
+            return new TableMappedStatement<T>(This.PrepareStatement(tableMapping.Delete()), tableMapping);   
+        }
+
+        private static string Delete<T>(this ITableMapping<T> tableMapping)
+        {
+            return SQLBuilder.DeleteUsingPrimaryKey(tableMapping.TableName, tableMapping.PrimaryKeyColumn());
+        }
+
+        public static T Delete<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey)
+        {
+            return This.RunInTransaction(db =>
+                {
+                    using (var deleteStmt = db.PrepareDelete(tableMapping))
+                    using (var findStmt = db.PrepareFind(tableMapping))
+                    {
+                        var result = findStmt.Query(primaryKey).First();
+                        deleteStmt.Execute(primaryKey);
+                        return result;
+                    }
+                });
+        }
+
+        public static T Delete<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
+        {
+            var primaryKeyPropery = tableMapping[tableMapping.PrimaryKeyColumn()].Property;
+            var primaryKey = primaryKeyPropery.GetValue(obj);
+            return This.Delete(tableMapping, primaryKey);
+        }
+
+        public static IEnumerable<T> DeleteAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable primaryKeys)
+        {
+            return This.RunInTransaction(db =>
+                {
+                    var retval = new List<T>();
+
+                    using (var deleteStmt = db.PrepareDelete(tableMapping))
+                    using (var findStmt = db.PrepareFind(tableMapping))
+                    {
+                        foreach (var primaryKey in primaryKeys)
+                        {
+                            var result = findStmt.Query(primaryKey).First();
+                            deleteStmt.Execute(primaryKey);
+                            retval.Add(result);
+                        }
+                    }
+
+                    return retval;
+                });
+        }
+
+        public static IEnumerable<T> DeleteAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
+        {
+            var primaryKeyPropery = tableMapping[tableMapping.PrimaryKeyColumn()].Property;
+            var primaryKeys = objects.Select(x => primaryKeyPropery.GetValue(x));
+
+            return This.DeleteAll<T>(tableMapping, primaryKeys);
         }
 
         public static ITableMapping<T> Create<T>()
@@ -481,103 +650,4 @@ namespace SQLitePCL.pretty.Orm
             return this.GetEnumerator();
         }
     }
-
-    internal sealed class TableMappedStatement<T> : ITableMappedStatement<T>
-    {
-        private readonly IStatement deleg;
-        private readonly ITableMapping<T> mapping;
-
-        internal TableMappedStatement(IStatement deleg, ITableMapping<T> mapping)
-        {
-            this.deleg = deleg;
-            this.mapping = mapping;
-        }
-
-        public void Bind(T obj)
-        {
-            deleg.Bind(mapping, obj);
-        }
-
-        public void ClearBindings()
-        {
-            deleg.ClearBindings();
-        }
-
-        public int Status(StatementStatusCode statusCode, bool reset)
-        {
-            return deleg.Status(statusCode, reset);
-        }
-
-        public IReadOnlyOrderedDictionary<string, IBindParameter> BindParameters
-        {
-            get
-            {
-                return deleg.BindParameters;
-            }
-        }
-
-        public IReadOnlyList<ColumnInfo> Columns
-        {
-            get
-            {
-                return deleg.Columns;
-            }
-        }
-
-        public string SQL
-        {
-            get
-            {
-                return deleg.SQL;
-            }
-        }
-
-        public bool IsReadOnly
-        {
-            get
-            {
-                return deleg.IsReadOnly;
-            }
-        }
-
-        public bool IsBusy
-        {
-            get
-            {
-                return deleg.IsBusy;
-            }
-        }
-
-        public void Dispose()
-        {
-            deleg.Dispose();
-        }
-
-        public bool MoveNext()
-        {
-            return deleg.MoveNext();
-        }
-
-        public void Reset()
-        {
-            deleg.Reset();
-        }
-
-        object IEnumerator.Current
-        {
-            get
-            {
-                return deleg.Current;
-            }
-        }
-
-        public IReadOnlyList<IResultSetValue> Current
-        {
-            get
-            {
-                return deleg.Current;
-            }
-        }
-    }
 }
-

@@ -12,11 +12,11 @@ namespace SQLitePCL.pretty.tests
         public void TestCreateTableMapping()
         {
             var productMap = TableMapping.Create<Product>();
-            var selectAllProduct = productMap.Query().Where(x => x.Id == 0);
+            var selectAllProduct = productMap.CreateQuery().Where(x => x.Id == 0);
             var productCount = 
-                (from product in productMap.Query()
+                (from product in productMap.CreateQuery()
                 where product.Id == 0
-                select product).Count();
+                select product);
 
             //productMap.Select().Count();
 
@@ -33,7 +33,7 @@ namespace SQLitePCL.pretty.tests
                     };
                     stmt.Execute<Product>(product);
 
-                    Console.WriteLine(db.Query(productCount).Select(x => x.First().ToInt()).First());
+                    Console.WriteLine(db.Count(productCount));
 
                     product = new Product()
                     {
@@ -44,10 +44,10 @@ namespace SQLitePCL.pretty.tests
 
                     stmt.Execute<Product>(product);
 
-                    Console.WriteLine(db.Query(productCount).Select(x => x.First().ToInt()).First());
+                    Console.WriteLine(db.Count(productCount));
                 }
 
-                foreach (var p in db.Query("SELECT * from Product").Select(productMap.ToObject))
+                foreach (var p in db.Query(selectAllProduct))
                 {
                     Console.WriteLine(String.Join(", ", p));
                 }

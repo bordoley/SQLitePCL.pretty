@@ -102,13 +102,28 @@ namespace SQLitePCL.pretty.Orm
             return retval;
         }
 
-        public static void RunInTransaction (this IDatabaseConnection This, Action<IDatabaseConnection> action)
+        public static void RunInTransaction(this IDatabaseConnection This, Action<IDatabaseConnection> action)
+        {
+            This.RunInTransaction(db => 
+                {
+                    action(db);
+                    return Enumerable.Empty<object>();
+                });
+        }
+
+        public static T RunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, T> func)
+        {
+            return This.RunInTransaction(db => Enumerable.Repeat(func(db), 1)).First();
+        }
+
+        public static IEnumerable<T> RunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, IEnumerable<T>> func)
         {
             try 
             {
                 var savePoint = This.SaveTransactionPoint ();
-                action (This);
+                var retval = func(This);
                 This.Release (savePoint);
+                return retval;
             } 
             catch (Exception) 
             {
