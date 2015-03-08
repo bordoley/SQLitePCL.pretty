@@ -89,9 +89,9 @@ namespace SQLitePCL.pretty
         public static string Insert(string tableName, IEnumerable<string> columns)
         {
             return string.Format(
-                "INSERT INTO \"{0}\"({1}) VALUES ({2})",
+                "INSERT INTO \"{0}\" ({1}) VALUES ({2})",
                 tableName,
-                string.Join(",", columns),
+                string.Join(",", columns.Select(x => "\"" + x + "\"")),
 
                 // FIXME: Might need to quote this for some cases. Test!!!
                 string.Join(",", columns.Select(x => ":" + x)));
@@ -100,9 +100,9 @@ namespace SQLitePCL.pretty
         public static string InsertOrReplace(string tableName, IEnumerable<string> columns)
         {
             return string.Format(
-                "INSERT OR REPLACE INTO \"{0}\"({1}) VALUES ({2})",
+                "INSERT OR REPLACE INTO \"{0}\" ({1}) VALUES ({2})",
                 tableName,
-                string.Join(",", columns),
+                string.Join(",", columns.Select(x => "\"" + x + "\"")),
 
                 // FIXME: Might need to quote this for some cases. Test!!!
                 string.Join(",", columns.Select(x => ":" + x)));
