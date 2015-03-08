@@ -41,15 +41,15 @@ namespace SQLitePCL.pretty.tests
         {
             [AutoIncrement, PrimaryKey]
             public int? Id { get; set; }
-			
-			public string Name { get; set; }
-			
+            
+            public string Name { get; set; }
+            
             public override string ToString ()
             {
-            	return string.Format("[TestObj: Id={0}, Name={1}]", Id, Name);
+                return string.Format("[TestObj: Id={0}, Name={1}]", Id, Name);
             }
         }
-		
+        
         [Test]
         public void ContainsConstantData()
         {
@@ -72,8 +72,8 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(2, more.Count);
             }
         }
-		
-		[Test]
+        
+        [Test]
         public void ContainsQueriedData()
         {
             var table = TableMapping.Create<TestObj>();
@@ -101,7 +101,7 @@ namespace SQLitePCL.pretty.tests
                 var moreq2 = moreq.ToArray ();
                 var more2 = db.Query(table.CreateQuery().Where(o => moreq2.Contains(o.Name)), moreq2).ToList();
                 Assert.AreEqual(2, more2.Count);
-            }		
+            }        
         }
     }
 }

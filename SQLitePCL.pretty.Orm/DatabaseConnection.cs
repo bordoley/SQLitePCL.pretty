@@ -239,16 +239,22 @@ namespace SQLitePCL.pretty
 
         public static IEnumerable<T> RunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, IEnumerable<T>> func)
         {
+            var savePoint = This.SaveTransactionPoint ();
+
             try 
             {
-                var savePoint = This.SaveTransactionPoint ();
                 var retval = func(This);
                 This.Release (savePoint);
                 return retval;
             } 
             catch (Exception) 
             {
-                Rollback(This);
+                // FIXME: This differs from SQLite-Net. SQLite-net they keep track of the transaction depth
+                // and then control whether to issue a rollback command. We don't so always rollback
+                // to the savepoint and let the exception propogate.
+                // We could consider tracking the transaction depth but its a little painful to do
+                // as an extension property.
+                This.RollbackTo(savePoint);
                 throw;
             }
         }

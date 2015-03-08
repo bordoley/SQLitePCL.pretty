@@ -261,7 +261,7 @@ namespace SQLitePCL.pretty.Orm
 
         public static T Insert<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
         {
-            return This.RunInTransaction(db => This.YieldInsertAll(tableMapping, new T[] { obj })).First();
+            return This.YieldInsertAll(tableMapping, new T[] { obj }).First();
         }
 
         public static Task<T> InsertAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, T obj, CancellationToken cancellationToken)
@@ -276,12 +276,12 @@ namespace SQLitePCL.pretty.Orm
 
         public static IEnumerable<T> InsertAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
-            return This.RunInTransaction(db => db.YieldInsertAll(tableMapping, objects)).ToList();
+            return This.YieldInsertAll(tableMapping, objects).ToList();
         }
 
         public static IObservable<T> InsertAll<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
-            return This.Use(x => x.RunInTransaction(db => db.YieldInsertAll(tableMapping, objects)));
+            return This.Use(db => db.YieldInsertAll(tableMapping, objects));
         }
 
         private static string InsertOrReplace<T>(this ITableMapping<T> tableMapping)
@@ -310,7 +310,7 @@ namespace SQLitePCL.pretty.Orm
             
         public static T InsertOrReplace<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
         {
-            return This.RunInTransaction(db => db.YieldInsertOrReplaceAll(tableMapping, new T[] {obj})).First();
+            return This.YieldInsertOrReplaceAll(tableMapping, new T[] {obj}).First();
         }
 
         public static Task<T> InsertOrReplaceAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, T obj, CancellationToken cancellationToken)
@@ -325,12 +325,12 @@ namespace SQLitePCL.pretty.Orm
 
         public static IEnumerable<T> InsertOrReplaceAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
-            return This.RunInTransaction(db => db.YieldInsertOrReplaceAll(tableMapping, objects)).ToList();
+            return This.YieldInsertOrReplaceAll(tableMapping, objects).ToList();
         }
 
         public static IObservable<T> InsertOrReplaceAll<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
-            return This.Use(x => x.RunInTransaction(db => db.YieldInsertOrReplaceAll(tableMapping, objects)));
+            return This.Use(db => db.YieldInsertOrReplaceAll(tableMapping, objects));
         }
 
         private static string Update<T>(this ITableMapping<T> tableMapping)
@@ -359,7 +359,7 @@ namespace SQLitePCL.pretty.Orm
       
         public static T Update<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
         {
-            return This.RunInTransaction(db => db.YieldUpdateAll(tableMapping, new T[] {obj})).First();
+            return This.YieldUpdateAll(tableMapping, new T[] {obj}).First();
         }
 
         public static Task<T> UpdateAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, T obj, CancellationToken cancellationToken)
@@ -374,12 +374,12 @@ namespace SQLitePCL.pretty.Orm
 
         public static IEnumerable<T> UpdateAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
-            return This.RunInTransaction(db => db.YieldUpdateAll(tableMapping, objects)).ToList();
+            return This.YieldUpdateAll(tableMapping, objects).ToList();
         }
 
         public static IObservable<T> UpdateAll<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
-            return This.Use(x => x.RunInTransaction(db => db.YieldUpdateAll(tableMapping, objects)));
+            return This.Use(db => db.YieldUpdateAll(tableMapping, objects));
         }
 
         public static ITableMappedStatement<T> PrepareDelete<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
@@ -405,7 +405,7 @@ namespace SQLitePCL.pretty.Orm
 
         public static T Delete<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey)
         {
-            return This.RunInTransaction(db => db.YieldDeleteAll(tableMapping, new object[] { primaryKey })).First();
+            return This.YieldDeleteAll(tableMapping, new object[] { primaryKey }).First();
         }
 
         public static Task<T> DeleteAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey, CancellationToken cancellationToken)
@@ -436,12 +436,12 @@ namespace SQLitePCL.pretty.Orm
 
         public static IEnumerable<T> DeleteAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable primaryKeys)
         {
-            return This.RunInTransaction(db => db.YieldDeleteAll(tableMapping, primaryKeys)).ToList();
+            return This.YieldDeleteAll(tableMapping, primaryKeys).ToList();
         }
 
         public static IObservable<T> DeleteAll<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable primaryKeys)
         {
-            return This.Use(x => x.RunInTransaction(db => db.YieldDeleteAll(tableMapping, primaryKeys)));
+            return This.Use(db => db.YieldDeleteAll(tableMapping, primaryKeys));
         }
 
         public static IEnumerable<T> DeleteAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)

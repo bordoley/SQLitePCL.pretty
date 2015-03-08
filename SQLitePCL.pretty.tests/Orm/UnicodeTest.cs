@@ -31,11 +31,11 @@ using SQLitePCL.pretty.Orm.Attributes;
 
 namespace SQLitePCL.pretty.tests
 {
-	[TestFixture]
-	public class UnicodeTest
-	{
-		[Test]
-		public void Insert()
+    [TestFixture]
+    public class UnicodeTest
+    {
+        [Test]
+        public void Insert()
         {
             var table = TableMapping.Create<Product>();
 
@@ -49,10 +49,10 @@ namespace SQLitePCL.pretty.tests
                 var p =  db.Find(table, 1).First();
                 Assert.AreEqual (testString, p.Name);
             }
-		}
-		
-		[Test]
-		public void Query()
+        }
+        
+        [Test]
+        public void Query()
         {
             var table = TableMapping.Create<Product>();
 
@@ -68,6 +68,6 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual (1, resultSet.Count);
                 Assert.AreEqual (testString, resultSet[0].Name);
             }
-		}
-	}
+        }
+    }
 }
