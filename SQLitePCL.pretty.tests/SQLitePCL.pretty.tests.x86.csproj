@@ -89,6 +89,7 @@
     <Compile Include="Orm\UniqueTests.cs" />
     <Compile Include="Orm\UnicodeTest.cs" />
     <Compile Include="Orm\TransactionTest.cs" />
+    <Compile Include="Orm\StringQueryTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SQLitePCL.pretty.Async\SQLitePCL.pretty.Async.csproj">

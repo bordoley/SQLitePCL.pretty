@@ -29,7 +29,7 @@ using SQLitePCL.pretty;
 using SQLitePCL.pretty.Orm;
 using SQLitePCL.pretty.Orm.Attributes;
 
-namespace SQLite.Tests
+namespace SQLitePCL.pretty.tests
 {
     [TestFixture]
     public class TransactionTest
