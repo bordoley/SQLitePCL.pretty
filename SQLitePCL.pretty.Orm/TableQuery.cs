@@ -26,6 +26,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reactive.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -113,7 +114,17 @@ namespace SQLitePCL.pretty.Orm
 
     public static class TableQuery
     {
+        public static ITableMappedStatement<T> PrepareQuery<T>(this IDatabaseConnection This, TableQuery<T> query)
+        {
+            return new TableMappedStatement<T>(This.PrepareStatement(query.ToString()));
+        }
+
         public static IEnumerable<T> Query<T>(this IDatabaseConnection This, TableQuery<T> query)
+        {
+            return This.Query(query.ToString()).Select(query.Mapping.ToObject);
+        }
+
+        public static IObservable<T> Query<T>(this IAsyncDatabaseConnection This, TableQuery<T> query)
         {
             return This.Query(query.ToString()).Select(query.Mapping.ToObject);
         }
