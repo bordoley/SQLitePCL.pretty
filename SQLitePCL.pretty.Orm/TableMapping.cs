@@ -54,26 +54,6 @@ namespace SQLitePCL.pretty.Orm
         public TableColumnMetadata Metadata { get { return metadata; } }
     }
 
-    public sealed class IndexInfo
-    {
-        private readonly string name;
-        private readonly bool unique;
-        private readonly IReadOnlyList<string> columns;
-
-        internal IndexInfo(string name, bool unique, IReadOnlyList<string> columns)
-        {
-            this.name = name;
-            this.unique = unique;
-            this.columns = columns;
-        }
-
-        public string Name { get { return name; } }
-
-        public bool Unique { get { return unique; } }
-
-        public IEnumerable<string> Columns { get { return columns; } }
-    }
-
     public interface ITableMapping : IEnumerable<KeyValuePair<string, ColumnMapping>>
     {
         String TableName { get; }
@@ -705,6 +685,8 @@ namespace SQLitePCL.pretty.Orm
         private readonly CreateFlags createFlags;
 
         private readonly IReadOnlyDictionary<string, ColumnMapping> columnToMapping;
+
+        // FIXME: To implement equality correctly this should be a set
         private readonly IReadOnlyList<IndexInfo> indexes;
 
         internal TableMapping(
@@ -713,6 +695,8 @@ namespace SQLitePCL.pretty.Orm
             string tableName,
             CreateFlags createFlags,
             IReadOnlyDictionary<string, ColumnMapping> columnToMapping,
+
+            // FIXME: To implement equality correctly this should be a set
             IReadOnlyList<IndexInfo> indexes)
         {
             this.builder = builder;

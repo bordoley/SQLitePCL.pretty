@@ -40,6 +40,76 @@ namespace SQLitePCL.pretty
         FullTextSearch4         = 0x200     // create virtual table using FTS4
     }
 
+    public sealed class IndexInfo : IEquatable<IndexInfo>
+    {
+        /// <summary>
+        /// Indicates whether the two IndexInfo instances are equal to each other.
+        /// </summary>
+        /// <param name="x">A IndexInfo instance.</param>
+        /// <param name="y">A IndexInfo instance.</param>
+        /// <returns><see langword="true"/> if the two instances are equal to each other; otherwise,  <see langword="false"/>.</returns>
+        public static bool operator ==(IndexInfo x, IndexInfo y)
+        {
+            return x.Equals(y);
+        }
+
+        /// <summary>
+        /// Indicates whether the two IndexInfo instances are not equal each other.
+        /// </summary>
+        /// <param name="x">A IndexInfo instance.</param>
+        /// <param name="y">A IndexInfo instance.</param>
+        /// <returns><see langword="true"/> if the two instances are not equal to each other; otherwise,  <see langword="false"/>.</returns>
+        public static bool operator !=(IndexInfo x, IndexInfo y)
+        {
+            return !(x == y);
+        }
+
+        private readonly string name;
+        private readonly bool unique;
+        private readonly IReadOnlyList<string> columns;
+
+        internal IndexInfo(string name, bool unique, IReadOnlyList<string> columns)
+        {
+            this.name = name;
+            this.unique = unique;
+            this.columns = columns;
+        }
+
+        public string Name { get { return name; } }
+
+        public bool Unique { get { return unique; } }
+
+        public IEnumerable<string> Columns { get { return columns; } }
+
+        public bool Equals(IndexInfo other)
+        {
+            return (this.Name == other.Name) && 
+                (this.Unique == other.Unique) &&
+                // FIXME: Ideally we use immutable lists that implement correct equality semantics
+                (this.Columns.SequenceEqual(other.Columns));
+        }
+            
+        public bool Equals(object other)
+        {
+            return other is IndexInfo && this == (IndexInfo)other;
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            int hash = 17;
+            hash = hash * 31 + this.Name.GetHashCode();
+            hash = hash * 31 + this.Unique.GetHashCode();
+
+            // FIXME: This sucks. Prefer to use actual immutable collections.
+            foreach (var col in this.Columns)
+            {
+                hash =  hash * 31 + col.GetHashCode();
+            }
+            return hash;
+        }
+    }
+
     public static class DatabaseConnection
     {
         private static readonly ThreadLocal<Random> _rand = new ThreadLocal<Random>(() => new Random());
@@ -120,6 +190,25 @@ namespace SQLitePCL.pretty
         public static void CreateIndex(this IDatabaseConnection This, string tableName, IEnumerable<string> columnNames, bool unique)
         {
             This.Execute(SQLBuilder.CreateIndex(tableName,columnNames, unique));
+        }
+
+        public static IEnumerable<IndexInfo> GetIndexInfo(this IDatabaseConnection This, string tableName)
+        {
+            return This.RunInTransaction(db =>
+                db.Query(SQLBuilder.ListIndexes(tableName))
+                    .Select(row => 
+                        {
+                            var indexName = row[1].ToString();
+                            var unique = row[2].ToBool();
+
+                            var columns = 
+                                db.Query(SQLBuilder.IndexInfo(indexName))
+                                  .Select(x => Tuple.Create(x[0].ToInt(),x[2].ToString()))
+                                  .OrderBy(x => x.Item1)
+                                  .Select(x => x.Item2)
+                                  .ToList();
+                            return new IndexInfo(indexName, unique, columns);
+                        }).ToList());
         }
 
         public static IReadOnlyDictionary<string, TableColumnMetadata> GetTableInfo(this IDatabaseConnection This, string tableName)

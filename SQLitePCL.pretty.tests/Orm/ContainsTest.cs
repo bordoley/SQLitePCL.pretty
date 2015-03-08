@@ -71,7 +71,6 @@ namespace SQLitePCL.pretty.tests
                 var more = db.Query(table.CreateQuery().Where(o => moreq.Contains(o.Name)), moreq).ToList();
                 Assert.AreEqual(2, more.Count);
             }
-			
         }
 		
 		[Test]

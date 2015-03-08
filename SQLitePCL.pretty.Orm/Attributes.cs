@@ -86,8 +86,11 @@ namespace SQLitePCL.pretty.Orm.Attributes
         {
         }
 
-        public IndexedAttribute(string name, int order) : this(name, order, false)
-        {}
+        public IndexedAttribute(string name, bool unique) : this(name, default(int), unique)
+        {
+        }
+
+        public IndexedAttribute(string name, int order) : this(name, order, false) {}
         
         public IndexedAttribute(string name, int order, bool unique)
         {
@@ -110,7 +113,7 @@ namespace SQLitePCL.pretty.Orm.Attributes
     [AttributeUsage (AttributeTargets.Property)]
     public class UniqueAttribute : IndexedAttribute
     {
-        public UniqueAttribute() : base(null, 0, true)
+        public UniqueAttribute(string name, int order) : base(name, order, true)
         {
         }
     }

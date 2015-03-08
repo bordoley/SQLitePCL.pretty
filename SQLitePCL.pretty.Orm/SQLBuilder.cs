@@ -139,6 +139,16 @@ namespace SQLitePCL.pretty
             return NameIndex(tableName, new String[] { columnName});
         }
 
+        public static string ListIndexes(string tableName)
+        {
+            return string.Format("PRAGMA INDEX_LIST (\"{0}\")", tableName);
+        }
+
+        public static string IndexInfo(string indexName)
+        {
+            return string.Format("PRAGMA INDEX_INFO (\"{0}\")", indexName);
+        }
+
         public static string RollbackTo(string savepoint)
         {
             return "ROLLBACK TO " + savepoint;
