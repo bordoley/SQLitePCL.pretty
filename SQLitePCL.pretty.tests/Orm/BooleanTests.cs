@@ -63,8 +63,8 @@ namespace SQLitePCL.pretty.tests
                 {
                     // FIXME: Kind of unwieldy. Maybe add FirstInt(), FirstString(), etc. or
                     // SelectScalar()  or both
-                    Assert.AreEqual(4, countStmt.Query(true).Select(x => x[0].ToInt()).First());
-                    Assert.AreEqual(6, countStmt.Query(false).Select(x => x[0].ToInt()).First());
+                    Assert.AreEqual(4, countStmt.Query(true).SelectScalarInt().First());
+                    Assert.AreEqual(6, countStmt.Query(false).SelectScalarInt().First());
                 }     
             }
         }

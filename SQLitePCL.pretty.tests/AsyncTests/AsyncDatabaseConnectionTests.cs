@@ -112,7 +112,7 @@ namespace SQLitePCL.pretty.tests
                 int expected = 10;
                 var t = await adb.Use(db =>
                     {
-                        return db.Query("Select ?", expected).Select(row => row[0].ToInt()).First();
+                        return db.Query("Select ?", expected).SelectScalarInt().First();
                     });
                 Assert.AreEqual(t, expected);
 

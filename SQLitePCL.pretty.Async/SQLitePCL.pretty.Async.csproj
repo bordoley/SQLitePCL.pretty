@@ -137,6 +137,7 @@
     <Compile Include="InterfacesContract.cs" />
     <Compile Include="OperationsQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResultSet.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Reactive.Core">

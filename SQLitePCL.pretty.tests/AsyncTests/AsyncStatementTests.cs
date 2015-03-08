@@ -197,7 +197,7 @@ namespace SQLitePCL.pretty.tests
                     await aStmt.ExecuteAsync(i);
                 }
 
-                var count = await db.Query("SELECT COUNT(*) from foo").Select(row => row[0].ToInt()).FirstAsync();
+                var count = await db.Query("SELECT COUNT(*) from foo").SelectScalarInt().FirstAsync();
                 Assert.AreEqual(count, 100);
             }
         }

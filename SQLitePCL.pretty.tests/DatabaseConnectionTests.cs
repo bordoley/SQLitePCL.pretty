@@ -335,9 +335,7 @@ namespace SQLitePCL.pretty.tests
                 db.Execute("INSERT INTO foo (x) VALUES ('f')");
 
                 string top =
-                    db.Query("SELECT x FROM foo ORDER BY x ASC LIMIT 1;")
-                        .Select(x => x[0].ToString())
-                        .First();
+                    db.Query("SELECT x FROM foo ORDER BY x ASC LIMIT 1;").SelectScalarString().First();
 
                 Assert.AreEqual(top, "e");
 
@@ -405,14 +403,12 @@ namespace SQLitePCL.pretty.tests
                 {
                     db.Execute("INSERT INTO foo (x) VALUES (?);", i);
                 }
-                long c = db.Query("SELECT sum_plus_count(x) FROM foo;").Select(row => row[0].ToInt64()).First();
+                long c = db.Query("SELECT sum_plus_count(x) FROM foo;").SelectScalarInt64().First();
                 Assert.AreEqual(c, (0 + 1 + 2 + 3 + 4) + 5);
 
                 db.RemoveFunc("sum_plus_count", 1);
                 Assert.Throws<SQLiteException>(() =>
-                    db.Query("SELECT sum_plus_count(x) FROM foo;")
-                        .Select(row => row[0].ToInt64())
-                        .First());
+                    db.Query("SELECT sum_plus_count(x) FROM foo;").SelectScalarInt64().First());
             }
 
             using (var db = SQLite3.Open(":memory:"))
@@ -428,43 +424,43 @@ namespace SQLitePCL.pretty.tests
                 }
 
                 db.RegisterAggregateFunc("row_count", 0, i => i + 1, i => i.ToSQLiteValue());
-                var result = db.Query("SELECT row_count() FROM foo;").Select(row => row[0].ToInt64()).First();
+                var result = db.Query("SELECT row_count() FROM foo;").SelectScalarInt64().First();
                 Assert.AreEqual(result, 5);
 
                 db.RegisterAggregateFunc("row_count", 0, (int i, ISQLiteValue _v0) => i + 1, i => i.ToSQLiteValue());
-                result = db.Query("SELECT row_count(x) FROM foo;").Select(row => row[0].ToInt64()).First();
+                result = db.Query("SELECT row_count(x) FROM foo;").SelectScalarInt64().First();
                 Assert.AreEqual(result, 5);
 
                 db.RegisterAggregateFunc("row_count", 0, (i, _v0, _v1) => i + 1, i => i.ToSQLiteValue());
-                result = db.Query("SELECT row_count(x, 1) FROM foo;").Select(row => row[0].ToInt64()).First();
+                result = db.Query("SELECT row_count(x, 1) FROM foo;").SelectScalarInt64().First();
                 Assert.AreEqual(result, 5);
 
                 db.RegisterAggregateFunc("row_count", 0, (i, _v0, _v1, _v2) => i + 1, i => i.ToSQLiteValue());
-                result = db.Query("SELECT row_count(x, 1, 2) FROM foo;").Select(row => row[0].ToInt64()).First();
+                result = db.Query("SELECT row_count(x, 1, 2) FROM foo;").SelectScalarInt64().First();
                 Assert.AreEqual(result, 5);
 
                 db.RegisterAggregateFunc("row_count", 0, (i, _v0, _v1, _v2, _v3) => i + 1, i => i.ToSQLiteValue());
-                result = db.Query("SELECT row_count(x, 1, 2, 3) FROM foo;").Select(row => row[0].ToInt64()).First();
+                result = db.Query("SELECT row_count(x, 1, 2, 3) FROM foo;").SelectScalarInt64().First();
                 Assert.AreEqual(result, 5);
 
                 db.RegisterAggregateFunc("row_count", 0, (i, _v0, _v1, _v2, _v3, _v4) => i + 1, i => i.ToSQLiteValue());
-                result = db.Query("SELECT row_count(x, 1, 2, 3, 4) FROM foo;").Select(row => row[0].ToInt64()).First();
+                result = db.Query("SELECT row_count(x, 1, 2, 3, 4) FROM foo;").SelectScalarInt64().First();
                 Assert.AreEqual(result, 5);
 
                 db.RegisterAggregateFunc("row_count", 0, (i, _v0, _v1, _v2, _v3, _v4, _v5) => i + 1, i => i.ToSQLiteValue());
-                result = db.Query("SELECT row_count(x, 1, 2, 3, 4, 5) FROM foo;").Select(row => row[0].ToInt64()).First();
+                result = db.Query("SELECT row_count(x, 1, 2, 3, 4, 5) FROM foo;").SelectScalarInt64().First();
                 Assert.AreEqual(result, 5);
 
                 db.RegisterAggregateFunc("row_count", 0, (i, _v0, _v1, _v2, _v3, _v4, _v5, _v6) => i + 1, i => i.ToSQLiteValue());
-                result = db.Query("SELECT row_count(x, 1, 2, 3, 4, 5, 6) FROM foo;").Select(row => row[0].ToInt64()).First();
+                result = db.Query("SELECT row_count(x, 1, 2, 3, 4, 5, 6) FROM foo;").SelectScalarInt64().First();
                 Assert.AreEqual(result, 5);
 
                 db.RegisterAggregateFunc("row_count", 0, (i, _v0, _v1, _v2, _v3, _v4, _v5, _v6, _v7) => i + 1, i => i.ToSQLiteValue());
-                result = db.Query("SELECT row_count(x, 1, 2, 3, 4, 5, 6, 7) FROM foo;").Select(row => row[0].ToInt64()).First();
+                result = db.Query("SELECT row_count(x, 1, 2, 3, 4, 5, 6, 7) FROM foo;").SelectScalarInt64().First();
                 Assert.AreEqual(result, 5);
 
                 db.RegisterAggregateFunc("row_count", 0, (int i, IReadOnlyList<ISQLiteValue> v) => i + 1, i => i.ToSQLiteValue());
-                result = db.Query("SELECT row_count(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11) FROM foo;").Select(row => row[0].ToInt64()).First();
+                result = db.Query("SELECT row_count(x, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11) FROM foo;").SelectScalarInt64().First();
                 Assert.AreEqual(result, 5);
             }
         }
@@ -477,10 +473,10 @@ namespace SQLitePCL.pretty.tests
                 db.RegisterScalarFunc("count_nulls", (IReadOnlyList<ISQLiteValue> vals) =>
                     vals.Count(val => val.SQLiteType == SQLiteType.Null).ToSQLiteValue());
 
-                Assert.AreEqual(0, db.Query("SELECT count_nulls(1,2,3,4,5,6,7,8);").Select(v => v[0].ToInt()).First());
-                Assert.AreEqual(0, db.Query("SELECT count_nulls();").Select(v => v[0].ToInt()).First());
-                Assert.AreEqual(1, db.Query("SELECT count_nulls(null);").Select(v => v[0].ToInt()).First());
-                Assert.AreEqual(2, db.Query("SELECT count_nulls(1,null,3,null,5);").Select(v => v[0].ToInt()).First());
+                Assert.AreEqual(0, db.Query("SELECT count_nulls(1,2,3,4,5,6,7,8);").SelectScalarInt().First());
+                Assert.AreEqual(0, db.Query("SELECT count_nulls();").SelectScalarInt().First());
+                Assert.AreEqual(1, db.Query("SELECT count_nulls(null);").SelectScalarInt().First());
+                Assert.AreEqual(2, db.Query("SELECT count_nulls(1,null,3,null,5);").SelectScalarInt().First());
 
                 // Test removing the function
                 db.RemoveFunc("count_nulls", -1);
@@ -493,26 +489,26 @@ namespace SQLitePCL.pretty.tests
             using (var db = SQLite3.Open(":memory:"))
             {
                 db.RegisterScalarFunc("count_args", (IReadOnlyList<ISQLiteValue> values) => values.Count.ToSQLiteValue());
-                Assert.AreEqual(8, db.Query("SELECT count_args(1,2,3,4,5,6,7,8);").Select(v => v[0].ToInt()).First());
-                Assert.AreEqual(0, db.Query("SELECT count_args();").Select(v => v[0].ToInt()).First());
-                Assert.AreEqual(1, db.Query("SELECT count_args(null);").Select(v => v[0].ToInt()).First());
+                Assert.AreEqual(8, db.Query("SELECT count_args(1,2,3,4,5,6,7,8);").SelectScalarInt().First());
+                Assert.AreEqual(0, db.Query("SELECT count_args();").SelectScalarInt().First());
+                Assert.AreEqual(1, db.Query("SELECT count_args(null);").SelectScalarInt().First());
             }
 
             using (var db = SQLite3.Open(":memory:"))
             {
                 db.RegisterScalarFunc("len_as_blobs", (IReadOnlyList<ISQLiteValue> values) =>
                     values.Where(v => v.SQLiteType != SQLiteType.Null).Aggregate(0, (acc, val) => acc + val.Length).ToSQLiteValue());
-                Assert.AreEqual(0, db.Query("SELECT len_as_blobs();").Select(v => v[0].ToInt()).First());
-                Assert.AreEqual(0, db.Query("SELECT len_as_blobs(null);").Select(v => v[0].ToInt()).First());
-                Assert.IsTrue(8 <= db.Query("SELECT len_as_blobs(1,2,3,4,5,6,7,8);").Select(v => v[0].ToInt()).First());
+                Assert.AreEqual(0, db.Query("SELECT len_as_blobs();").SelectScalarInt().First());
+                Assert.AreEqual(0, db.Query("SELECT len_as_blobs(null);").SelectScalarInt().First());
+                Assert.IsTrue(8 <= db.Query("SELECT len_as_blobs(1,2,3,4,5,6,7,8);").SelectScalarInt().First());
             }
 
             using (var db = SQLite3.Open(":memory:"))
             {
                 db.RegisterScalarFunc("my_concat", (IReadOnlyList<ISQLiteValue> values) =>
                     string.Join("", values.Select(v => v.ToString())).ToSQLiteValue());
-                Assert.AreEqual("foobar", db.Query("SELECT my_concat('foo', 'bar');").Select(v => v[0].ToString()).First());
-                Assert.AreEqual("abc", db.Query("SELECT my_concat('a', 'b', 'c');").Select(v => v[0].ToString()).First());
+                Assert.AreEqual("foobar", db.Query("SELECT my_concat('foo', 'bar');").SelectScalarString().First());
+                Assert.AreEqual("abc", db.Query("SELECT my_concat('a', 'b', 'c');").SelectScalarString().First());
             }
 
             using (var db = SQLite3.Open(":memory:"))
@@ -520,7 +516,7 @@ namespace SQLitePCL.pretty.tests
                 db.RegisterScalarFunc("my_mean", (IReadOnlyList<ISQLiteValue> values) =>
                     (values.Aggregate(0d, (acc, v) => acc + v.ToDouble()) / values.Count).ToSQLiteValue());
 
-                var result = db.Query("SELECT my_mean(1,2,3,4,5,6,7,8);").Select(rs => rs[0].ToDouble()).First();
+                var result = db.Query("SELECT my_mean(1,2,3,4,5,6,7,8);").SelectScalarDouble().First();
                 Assert.IsTrue(result >= (36 / 8));
                 Assert.IsTrue(result <= (36 / 8 + 1));
             }
@@ -538,7 +534,7 @@ namespace SQLitePCL.pretty.tests
                     return b.ToSQLiteValue();
                 });
 
-                var c = db.Query("SELECT makeblob(?);", val).Select(rs => rs[0].ToBlob()).First();
+                var c = db.Query("SELECT makeblob(?);", val).SelectScalarBlob().First();
                 Assert.AreEqual(c.Length, val);
             }
 
@@ -547,7 +543,7 @@ namespace SQLitePCL.pretty.tests
                 int val = 5;
 
                 db.RegisterScalarFunc("cube", (ISQLiteValue x) => (x.ToInt64() * x.ToInt64() * x.ToInt64()).ToSQLiteValue());
-                var c = db.Query("SELECT cube(?);", val).Select(rs => rs[0].ToInt64()).First();
+                var c = db.Query("SELECT cube(?);", val).SelectScalarInt64().First();
                 Assert.AreEqual(c, val * val * val);
             }
 
@@ -564,31 +560,31 @@ namespace SQLitePCL.pretty.tests
                 db.RegisterScalarFunc("num_var", (_1, _2, _3, _4, _5, _6, _7) => (7).ToSQLiteValue());
                 db.RegisterScalarFunc("num_var", (_1, _2, _3, _4, _5, _6, _7, _8) => (8).ToSQLiteValue());
 
-                var result = db.Query("SELECT num_var();").Select(rs => rs[0].ToInt()).First();
+                var result = db.Query("SELECT num_var();").SelectScalarInt().First();
                 Assert.AreEqual(result, 0);
 
-                result = db.Query("SELECT num_var(1);").Select(rs => rs[0].ToInt()).First();
+                result = db.Query("SELECT num_var(1);").SelectScalarInt().First();
                 Assert.AreEqual(result, 1);
 
-                result = db.Query("SELECT num_var(1, 2);").Select(rs => rs[0].ToInt()).First();
+                result = db.Query("SELECT num_var(1, 2);").SelectScalarInt().First();
                 Assert.AreEqual(result, 2);
 
-                result = db.Query("SELECT num_var(1, 2, 3);").Select(rs => rs[0].ToInt()).First();
+                result = db.Query("SELECT num_var(1, 2, 3);").SelectScalarInt().First();
                 Assert.AreEqual(result, 3);
 
-                result = db.Query("SELECT num_var(1, 2, 3, 4);").Select(rs => rs[0].ToInt()).First();
+                result = db.Query("SELECT num_var(1, 2, 3, 4);").SelectScalarInt().First();
                 Assert.AreEqual(result, 4);
 
-                result = db.Query("SELECT num_var(1, 2, 3, 4, 5);").Select(rs => rs[0].ToInt()).First();
+                result = db.Query("SELECT num_var(1, 2, 3, 4, 5);").SelectScalarInt().First();
                 Assert.AreEqual(result, 5);
 
-                result = db.Query("SELECT num_var(1, 2, 3, 4, 5, 6);").Select(rs => rs[0].ToInt()).First();
+                result = db.Query("SELECT num_var(1, 2, 3, 4, 5, 6);").SelectScalarInt().First();
                 Assert.AreEqual(result, 6);
 
-                result = db.Query("SELECT num_var(1, 2, 3, 4, 5, 6, 7);").Select(rs => rs[0].ToInt()).First();
+                result = db.Query("SELECT num_var(1, 2, 3, 4, 5, 6, 7);").SelectScalarInt().First();
                 Assert.AreEqual(result, 7);
 
-                result = db.Query("SELECT num_var(1, 2, 3, 4, 5, 6, 7, 8);").Select(rs => rs[0].ToInt()).First();
+                result = db.Query("SELECT num_var(1, 2, 3, 4, 5, 6, 7, 8);").SelectScalarInt().First();
                 Assert.AreEqual(result, 8);
             }
 

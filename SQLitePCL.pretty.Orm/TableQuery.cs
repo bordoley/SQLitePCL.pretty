@@ -136,7 +136,7 @@ namespace SQLitePCL.pretty.Orm
 
         public static int Count<T>(this IDatabaseConnection This, TableQuery<T> query)
         {
-            return This.Query(query.Count()).Select(x => x[0].ToInt()).First();
+            return This.Query(query.Count()).SelectScalarInt().First();
         }
             
         private static string Count<T>(this TableQuery<T> This)

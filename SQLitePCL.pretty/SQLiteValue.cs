@@ -264,7 +264,7 @@ namespace SQLitePCL.pretty
             return new DateTimeOffset(value.ToInt64(), TimeSpan.Zero);
         }
 
-        public static UInt32 ToUInt32(this ISQLiteValue value)
+        public static uint ToUInt32(this ISQLiteValue value)
         {
             return (uint) value.ToInt64();
         }
