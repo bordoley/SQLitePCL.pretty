@@ -1,20 +1,52 @@
-﻿using System;
+﻿//
+// Copyright (c) 2009-2015 Krueger Systems, Inc.
+// Copyright (c) 2015 David Bordoley
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-// FIXME: Consider moving this into SQLitePCL.pretty and perhaps into the main package even.
-// The later is border line, but really there is nothing here that is Orm specific. 
-// Just useful extensions.
-namespace SQLitePCL.pretty.Orm
+namespace SQLitePCL.pretty
 {
+    [Flags]
+    public enum CreateFlags
+    {
+        None                    = 0x000,
+        ImplicitPrimaryKey      = 0x001,    // create a primary key for field called 'Id' (Orm.ImplicitPkName)
+        ImplicitIndex           = 0x002,    // create an index for fields ending in 'Id' (Orm.ImplicitIndexSuffix)
+        AllImplicit             = 0x003,    // do both above
+        AutoIncrementPrimaryKey = 0x004,    // force PK field to be auto inc
+        FullTextSearch3         = 0x100,    // create virtual table using FTS3
+        FullTextSearch4         = 0x200     // create virtual table using FTS4
+    }
+
     public static class DatabaseConnection
     {
         private static readonly ThreadLocal<Random> _rand = new ThreadLocal<Random>(() => new Random());
 
-        public static void CreateTable(this IDatabaseConnection conn, string tableName, CreateFlags createFlags, IEnumerable<Tuple<string, TableColumnMetadata>> columns)
+        public static void CreateTableIfNotExists(this IDatabaseConnection conn, string tableName, CreateFlags createFlags, IEnumerable<Tuple<string, TableColumnMetadata>> columns)
         {
-            var query = SQLBuilder.CreateTable(tableName, createFlags, columns);
+            var query = SQLBuilder.CreateTableIfNotExists(tableName, createFlags, columns);
             conn.Execute(query);
         }
 

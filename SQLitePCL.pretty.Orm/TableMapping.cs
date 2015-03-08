@@ -115,7 +115,8 @@ namespace SQLitePCL.pretty.Orm
             
         public static void InitTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
-            This.Execute(tableMapping.CreateTable());
+            This.CreateTableIfNotExists(tableMapping.TableName, tableMapping.CreateFlags, tableMapping.Select(x => Tuple.Create(x.Key, x.Value.Metadata)));
+
             if (This.Changes == 0)
             {
                 This.MigrateTable(tableMapping);
@@ -123,7 +124,7 @@ namespace SQLitePCL.pretty.Orm
 
             foreach (var index in tableMapping.Indexes) 
             {
-                This.CreateIndex(index.Name, tableMapping.TableName,index.Columns, index.Unique);
+                This.CreateIndex(index.Name, tableMapping.TableName, index.Columns, index.Unique);
             }
         }
             
@@ -152,11 +153,6 @@ namespace SQLitePCL.pretty.Orm
             {
                 This.Execute (SQLBuilder.AlterTableAddColumn(tableMapping.TableName, p.Item1, p.Item2));
             }
-        }
-
-        private static string CreateTable<T>(this ITableMapping<T> This)
-        {
-            return SQLBuilder.CreateTable(This.TableName, This.CreateFlags, This.Select(x => Tuple.Create(x.Key, x.Value.Metadata)));
         }
 
         public static ITableMappedStatement<T> PrepareFind<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
@@ -323,12 +319,9 @@ namespace SQLitePCL.pretty.Orm
 
         public static ITableMappedStatement<T> PrepareDelete<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
-            return new TableMappedStatement<T>(This.PrepareStatement(tableMapping.Delete()), tableMapping);   
-        }
-
-        private static string Delete<T>(this ITableMapping<T> tableMapping)
-        {
-            return SQLBuilder.DeleteUsingPrimaryKey(tableMapping.TableName, tableMapping.PrimaryKeyColumn());
+            return new TableMappedStatement<T>(
+                This.PrepareDelete(tableMapping.TableName, tableMapping.PrimaryKeyColumn()), 
+                tableMapping);   
         }
 
         public static T Delete<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey)
@@ -373,12 +366,22 @@ namespace SQLitePCL.pretty.Orm
                 });
         }
 
+        public static void DeleteAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
+        {
+            This.DeleteAll(tableMapping.TableName);
+        }
+
         public static IEnumerable<T> DeleteAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
             var primaryKeyPropery = tableMapping[tableMapping.PrimaryKeyColumn()].Property;
             var primaryKeys = objects.Select(x => primaryKeyPropery.GetValue(x));
 
             return This.DeleteAll<T>(tableMapping, primaryKeys);
+        }
+
+        public static void DropTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
+        {
+            This.DropTable(tableMapping.TableName);
         }
 
         public static ITableMapping<T> Create<T>()
