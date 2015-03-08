@@ -45,5 +45,9 @@
       <Project>{C6743D26-E16E-41CA-A757-72BE2D7EAF28}</Project>
       <Name>SQLitePCL.pretty</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SQLitePCL.pretty.Async\SQLitePCL.pretty.Async.csproj">
+      <Project>{ED71D4D4-498E-432E-B941-F704CECCF254}</Project>
+      <Name>SQLitePCL.pretty.Async</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>
