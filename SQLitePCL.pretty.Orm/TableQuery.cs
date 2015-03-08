@@ -116,7 +116,7 @@ namespace SQLitePCL.pretty.Orm
     {
         public static ITableMappedStatement<T> PrepareQuery<T>(this IDatabaseConnection This, TableQuery<T> query)
         {
-            return new TableMappedStatement<T>(This.PrepareStatement(query.ToString()));
+            return new TableMappedStatement<T>(This.PrepareStatement(query.ToString()), query.Mapping);
         }
 
         public static IEnumerable<T> Query<T>(this IDatabaseConnection This, TableQuery<T> query)

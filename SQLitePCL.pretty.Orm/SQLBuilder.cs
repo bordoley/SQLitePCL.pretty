@@ -47,11 +47,20 @@ namespace SQLitePCL.pretty
 
         public const string DropTable = "DROP TABLE If EXISTS ?";
 
-        public const string TableInfo = "PRAGMA TABLE_INFO(?)";
+        public static string SavePoint(string savePoint)
+        {
+            return  "SAVEPOINT " + savePoint;
+        }
 
-        public const string SavePoint = "SAVEPOINT ?";
+        public static string Release(string savePoint)
+        {
+            return  "RELEASE " + savePoint;
+        }
 
-        public const string Release = "RELEASE ?";
+        public static string GetTableInfo (string tableName)
+        {
+            return "PRAGMA TABLE_INFO(\"" + tableName + "\")";         
+        }
 
         public static string SelectWhereColumnEquals(string tableName, string columnName)
         {

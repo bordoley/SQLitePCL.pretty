@@ -78,13 +78,13 @@ namespace SQLitePCL.pretty
         public static string SaveTransactionPoint(this IDatabaseConnection This)
         {
             var savePoint = "S" + _rand.Value.Next (short.MaxValue);
-            This.TryOrRollback(db => db.Execute(SQLBuilder.SavePoint, savePoint));
+            This.TryOrRollback(db => db.Execute(SQLBuilder.SavePoint(savePoint)));
             return savePoint;
         }
 
         public static void Release(this IDatabaseConnection This, string savepoint)
         {
-            This.Execute(SQLBuilder.Release, savepoint);
+            This.Execute(SQLBuilder.Release(savepoint));
         }
 
         public static void Commit(this IDatabaseConnection This)
@@ -126,7 +126,7 @@ namespace SQLitePCL.pretty
         {
             // FIXME: Would be preferable to return an actual immutable data structure so that we could cache this result.
             var retval = new Dictionary<string, TableColumnMetadata>();
-            foreach (var row in This.Query(SQLBuilder.TableInfo, tableName))
+            foreach (var row in This.Query(SQLBuilder.GetTableInfo(tableName)))
             {
                 var column = row[1].ToString();
                 retval.Add(column, This.GetTableColumnMetadata(null, tableName, column));

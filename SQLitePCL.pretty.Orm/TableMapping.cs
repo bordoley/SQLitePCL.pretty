@@ -610,10 +610,10 @@ namespace SQLitePCL.pretty.Orm
             var isAuto = IsAutoIncrement(prop) || (isPK && ((createFlags & CreateFlags.AutoIncrementPrimaryKey) == CreateFlags.AutoIncrementPrimaryKey));
             var isAutoGuid = isAuto && columnType == typeof(Guid);
             var isAutoInc = isAuto && !isAutoGuid;
-            var isNullable = !(isPK || IsMarkedNotNull(prop));
+            var hasNotNullConstraint = isPK || IsMarkedNotNull(prop);
             var maxStringLength = MaxStringLength(prop);
 
-            return new TableColumnMetadata(GetSqlType(columnType, maxStringLength), collation, isNullable, isPK, isAutoInc);
+            return new TableColumnMetadata(GetSqlType(columnType, maxStringLength), collation, hasNotNullConstraint, isPK, isAutoInc);
         }
 
         private const int DefaultMaxStringLength = 140;
