@@ -124,6 +124,11 @@ namespace SQLitePCL.pretty.Orm
             return This.Query(query.ToString()).Select(query.Mapping.ToObject);
         }
 
+        public static IEnumerable<T> Query<T>(this IDatabaseConnection This, TableQuery<T> query, params object[] values)
+        {
+            return This.Query(query.ToString(), values).Select(query.Mapping.ToObject);
+        }
+
         public static IObservable<T> Query<T>(this IAsyncDatabaseConnection This, TableQuery<T> query)
         {
             return This.Query(query.ToString()).Select(query.Mapping.ToObject);
