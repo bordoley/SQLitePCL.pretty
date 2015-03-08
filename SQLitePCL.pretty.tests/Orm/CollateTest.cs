@@ -26,7 +26,6 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using SQLite;
 
 using NUnit.Framework;
 
@@ -34,7 +33,7 @@ using SQLitePCL.pretty;
 using SQLitePCL.pretty.Orm;
 using SQLitePCL.pretty.Orm.Attributes;
 
-namespace SQLite.Tests
+namespace SQLitePCL.pretty.tests
 {    
     [TestFixture]
     public class CollateTest
@@ -97,7 +96,6 @@ namespace SQLite.Tests
                     Assert.AreEqual(0, colRTrimStmt.Query("ALPHA ").Count());
                     Assert.AreEqual(1, colRTrimStmt.Query("Alpha").Count());
                     Assert.AreEqual(0, colRTrimStmt.Query("ALPHA").Count());
-
 
                     Assert.AreEqual(1, colNoCaseStmt.Query("Alpha ").Count());
                     Assert.AreEqual(1, colNoCaseStmt.Query("ALPHA ").Count());
