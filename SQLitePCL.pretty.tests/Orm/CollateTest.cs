@@ -73,7 +73,7 @@ namespace SQLite.Tests
 
             var table = TableMapping.Create<TestObj>();
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.InitTable(table);
                 db.Insert(table, obj);  

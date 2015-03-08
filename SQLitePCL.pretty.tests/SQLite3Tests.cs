@@ -35,7 +35,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestMemory()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (x int);");
 
@@ -50,7 +50,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestOpen()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (x int);");
             }
@@ -64,7 +64,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestIsCompleteStatement()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 Assert.IsFalse(SQLite3.IsCompleteStatement("SELECT x FROM"));
                 Assert.IsFalse(SQLite3.IsCompleteStatement("SELECT"));
@@ -95,7 +95,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestStatus()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 int current;
                 int highwater;

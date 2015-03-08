@@ -608,7 +608,7 @@ namespace SQLitePCL.pretty
         //
         // then this trivial example would deadlock when run on the task pool:
         //
-        //   using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+        //   using (var db = SQLite3.OpenInMemoryDb().AsAsyncDatabaseConnection())
         //   {
         //     await db.Use(_ => { });
         //   }

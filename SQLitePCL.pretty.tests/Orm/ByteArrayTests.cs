@@ -81,7 +81,7 @@ namespace SQLitePCL.pretty.tests
             var table = TableMapping.Create<ByteArrayClass>();
             var orderedById = table.CreateQuery().OrderBy(x => x.ID);
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.InitTable(table);
 

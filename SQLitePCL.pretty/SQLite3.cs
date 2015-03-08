@@ -151,6 +151,11 @@ namespace SQLitePCL.pretty
             return new SQLiteDatabaseConnection(db);
         }
 
+        public static SQLiteDatabaseConnection OpenInMemory()
+        {
+            return SQLite3.Open(":memory:");
+        }
+
         /// <summary>
         /// Opens a SQLite database.
         /// </summary>

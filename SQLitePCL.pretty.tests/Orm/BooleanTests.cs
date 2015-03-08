@@ -52,7 +52,7 @@ namespace SQLitePCL.pretty.tests
             var table = TableMapping.Create<VO>();
             const string countWithFlag = "SELECT COUNT(*) FROM VO Where Flag = ?";
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.InitTable(table);
 
@@ -61,8 +61,6 @@ namespace SQLitePCL.pretty.tests
 
                 using (var countStmt = db.PrepareStatement(countWithFlag))
                 {
-                    // FIXME: Kind of unwieldy. Maybe add FirstInt(), FirstString(), etc. or
-                    // SelectScalar()  or both
                     Assert.AreEqual(4, countStmt.Query(true).SelectScalarInt().First());
                     Assert.AreEqual(6, countStmt.Query(false).SelectScalarInt().First());
                 }     

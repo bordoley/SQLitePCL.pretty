@@ -39,7 +39,7 @@ namespace SQLitePCL.pretty.tests
         [TestMethod]
         public void test_error()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (x int UNIQUE);");
                 db.Execute("INSERT INTO foo (x) VALUES (3);");
@@ -62,7 +62,7 @@ namespace SQLitePCL.pretty.tests
         [TestMethod]
         public void test_count()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (x int);");
                 db.Execute("INSERT INTO foo (x) VALUES (1);");
@@ -81,7 +81,7 @@ namespace SQLitePCL.pretty.tests
         [TestMethod]
         public void test_exec_with_tail()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 try
                 {

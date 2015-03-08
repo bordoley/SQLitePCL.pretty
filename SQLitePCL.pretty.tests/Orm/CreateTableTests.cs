@@ -20,7 +20,7 @@ namespace SQLitePCL.pretty.tests
 
             //productMap.Select().Count();
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.InitTable(productMap);
 

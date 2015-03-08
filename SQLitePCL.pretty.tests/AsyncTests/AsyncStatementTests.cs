@@ -28,7 +28,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public async Task TestIStatementDispose()
         {
-            using (var adb = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            using (var adb = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
             {
                 var aStmt = await adb.PrepareStatementAsync("SELECT ?, ?, ?");
                 await aStmt.Use(stmt =>
@@ -57,7 +57,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public async Task TestUse()
         {
-            using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
             {
                 await db.ExecuteAsync("CREATE TABLE foo (x int);");
 
@@ -94,7 +94,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public async Task TestIStatementEnumerator()
         {
-            using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
             {
                 await db.ExecuteAllAsync(
                     @"CREATE TABLE foo (x int, y int, z int);
@@ -121,7 +121,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public async Task TestIStatementBindings()
         {
-            using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
             {
                 var aStmt = await db.PrepareStatementAsync("SELECT :a as a, :b as b, :c as c");
                 await aStmt.Use(stmt =>
@@ -173,7 +173,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public async Task TestIStatementColumns()
         {
-            using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
             {
                 var aStmt = await db.PrepareStatementAsync("SELECT :a as a, :b as b, :c as c");
                 await aStmt.Use(stmt =>
@@ -188,7 +188,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public async Task TestExecuteAsync()
         {
-            using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
             {
                 await db.ExecuteAsync("CREATE TABLE foo (x int)");
                 var aStmt = await db.PrepareStatementAsync("INSERT INTO foo (x) VALUES (?)");
@@ -205,7 +205,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public async Task TestQuery()
         {
-            using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
             {
                 await db.ExecuteAsync("CREATE TABLE foo (v int);");
 

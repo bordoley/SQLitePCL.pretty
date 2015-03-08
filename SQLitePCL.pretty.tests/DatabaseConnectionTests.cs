@@ -30,7 +30,7 @@ namespace SQLitePCL.pretty.tests
         public void TestFinalize()
         {
             // There is no way to assert, so this test is primarily for code coverage.
-            var db = SQLite3.Open(":memory:");
+            var db = SQLite3.OpenInMemory();
             var stmt = db.PrepareStatement("SELECT 1;");
 
             GC.Collect();
@@ -39,7 +39,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestDispose()
         {
-            var db = SQLite3.Open(":memory:");
+            var db = SQLite3.OpenInMemory();
 
             // This is for test purposes only, never prepare a statement and dispose the db before the statements.
             db.PrepareStatement("Select 1");
@@ -55,7 +55,7 @@ namespace SQLitePCL.pretty.tests
             Assert.Throws<ObjectDisposedException>(() => { var x = db.LastInsertedRowId; });
             Assert.Throws<ObjectDisposedException>(() => { var x = db.Statements; });
 
-            using (var db2 = SQLite3.Open(":memory:"))
+            using (var db2 = SQLite3.OpenInMemory())
             {
                 Assert.Throws<ObjectDisposedException>(() => { db.Backup("main", db2, "main"); });
             }
@@ -91,7 +91,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.Throws<ArgumentException>(() => db.IsDatabaseReadOnly("baz"));
             }
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 Assert.IsFalse(db.IsDatabaseReadOnly("main"));
             }
@@ -100,7 +100,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestInterrupt()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (x int);");
                 db.Execute("INSERT INTO foo (x) VALUES (1);");
@@ -119,7 +119,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestRollbackEvent()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 var rollbacks = 0;
 
@@ -143,7 +143,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestProfileEvent()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 var statement = "CREATE TABLE foo (x int);";
                 db.Profile += (o, e) =>
@@ -159,7 +159,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestTraceEvent()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 var statement = "CREATE TABLE foo (x int);";
                 db.Trace += (o, e) =>
@@ -177,7 +177,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestUpdateEvent()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 var currentAction = ActionCode.CreateTable;
                 var rowid = 1;
@@ -217,7 +217,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestChanges()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 Assert.AreEqual(db.TotalChanges, 0);
                 Assert.AreEqual(db.Changes, 0);
@@ -244,7 +244,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestIsAutoCommit()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 Assert.IsTrue(db.IsAutoCommit);
                 db.Execute("BEGIN TRANSACTION;");
@@ -255,7 +255,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestSetBusyTimeout()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 // FIXME: Not the best test without Asserts.
                 db.BusyTimeout = TimeSpan.MinValue;
@@ -266,7 +266,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestStatements()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 Assert.AreEqual(db.Statements.Count(), 0);
 
@@ -293,7 +293,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestTryGetFileName()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (x int);");
                 string filename = null;
@@ -318,7 +318,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestRegisterCollation()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.RegisterCollation("e2a", (string s1, string s2) =>
                 {
@@ -347,7 +347,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestRegisterCommitHook()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 var commits = 0;
                 db.RegisterCommitHook(() =>
@@ -366,7 +366,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(2, commits);
             }
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (x int);");
                 db.RegisterCommitHook(() => true);
@@ -392,7 +392,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestRegisterAggregateFunc()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.RegisterAggregateFunc<Tuple<long, long>>("sum_plus_count", Tuple.Create(0L, 0L),
                     (Tuple<long, long> acc, ISQLiteValue arg) => Tuple.Create(acc.Item1 + arg.ToInt64(), acc.Item2 + 1L),
@@ -411,7 +411,7 @@ namespace SQLitePCL.pretty.tests
                     db.Query("SELECT sum_plus_count(x) FROM foo;").SelectScalarInt64().First());
             }
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (x int);");
 
@@ -468,7 +468,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestRegisterScalarFunc()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.RegisterScalarFunc("count_nulls", (IReadOnlyList<ISQLiteValue> vals) =>
                     vals.Count(val => val.SQLiteType == SQLiteType.Null).ToSQLiteValue());
@@ -486,7 +486,7 @@ namespace SQLitePCL.pretty.tests
                         .First());
             }
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.RegisterScalarFunc("count_args", (IReadOnlyList<ISQLiteValue> values) => values.Count.ToSQLiteValue());
                 Assert.AreEqual(8, db.Query("SELECT count_args(1,2,3,4,5,6,7,8);").SelectScalarInt().First());
@@ -494,7 +494,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(1, db.Query("SELECT count_args(null);").SelectScalarInt().First());
             }
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.RegisterScalarFunc("len_as_blobs", (IReadOnlyList<ISQLiteValue> values) =>
                     values.Where(v => v.SQLiteType != SQLiteType.Null).Aggregate(0, (acc, val) => acc + val.Length).ToSQLiteValue());
@@ -503,7 +503,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.IsTrue(8 <= db.Query("SELECT len_as_blobs(1,2,3,4,5,6,7,8);").SelectScalarInt().First());
             }
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.RegisterScalarFunc("my_concat", (IReadOnlyList<ISQLiteValue> values) =>
                     string.Join("", values.Select(v => v.ToString())).ToSQLiteValue());
@@ -511,7 +511,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual("abc", db.Query("SELECT my_concat('a', 'b', 'c');").SelectScalarString().First());
             }
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.RegisterScalarFunc("my_mean", (IReadOnlyList<ISQLiteValue> values) =>
                     (values.Aggregate(0d, (acc, v) => acc + v.ToDouble()) / values.Count).ToSQLiteValue());
@@ -521,7 +521,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.IsTrue(result <= (36 / 8 + 1));
             }
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 int val = 5;
                 db.RegisterScalarFunc("makeblob", (ISQLiteValue v) =>
@@ -538,7 +538,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(c.Length, val);
             }
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 int val = 5;
 
@@ -548,7 +548,7 @@ namespace SQLitePCL.pretty.tests
             }
 
             // Test all the extension methods.
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.RegisterScalarFunc("num_var", () => (0).ToSQLiteValue());
                 db.RegisterScalarFunc("num_var", (ISQLiteValue _1) => (1).ToSQLiteValue());
@@ -588,7 +588,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(result, 8);
             }
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.RegisterScalarFunc("zeroblob", (ISQLiteValue i) => SQLiteValue.ZeroBlob(i.ToInt()));
 
@@ -597,7 +597,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(result, length);
             }
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.RegisterScalarFunc("nullFunc", () => SQLiteValue.Null);
                 var result = db.Query("SELECT nullFunc();").Select(rs => rs[0].SQLiteType).First();
@@ -660,7 +660,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestTableColumnMetadata()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 // out string dataType, out string collSeq, out int notNull, out int primaryKey, out int autoInc
                 db.Execute("CREATE TABLE foo (rowid integer primary key asc autoincrement, x int not null);");
@@ -684,7 +684,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestProgressHandler()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 int count = 0;
 
@@ -718,7 +718,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestStatus()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 int current;
                 int highwater;

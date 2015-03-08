@@ -29,7 +29,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public async Task TestDispose()
         {
-            using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
             {
                 await db.ExecuteAsync("CREATE TABLE foo (x blob);");
                 await db.ExecuteAsync("INSERT INTO foo (x) VALUES(?);", "data");
@@ -54,7 +54,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public async Task TestRead()
         {
-            using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
             {
                 byte[] bytes = new byte[1000];
                 Random random = new Random();
@@ -90,7 +90,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public async Task TestWrite()
         {
-            using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
             {
                 byte[] bytes = new byte[1000];
                 Random random = new Random();
@@ -139,7 +139,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public async Task TestSeek()
         {
-            using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
             {
                 await db.ExecuteAsync("CREATE TABLE foo (x blob);");
                 await db.ExecuteAsync("INSERT INTO foo (x) VALUES(?);", "data");

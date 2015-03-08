@@ -59,7 +59,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestNullValue()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 using (var stmt = db.PrepareStatement("SELECT null;"))
                 {
@@ -84,7 +84,7 @@ namespace SQLitePCL.pretty.tests
                 -1.12345678901234567E100
             };
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 foreach (var test in tests)
                 {
@@ -123,7 +123,7 @@ namespace SQLitePCL.pretty.tests
                     -1234
                 };
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 foreach (var test in tests)
                 {
@@ -161,7 +161,7 @@ namespace SQLitePCL.pretty.tests
                     // "1111111111111111111111" SQLite's result in this case is undefined
                 };
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 foreach (var test in tests.Select(test => Encoding.UTF8.GetBytes(test)))
                 {
@@ -184,7 +184,7 @@ namespace SQLitePCL.pretty.tests
         {
             int[] tests = { 0, 1, 2, 10 };
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 foreach (var test in tests.Select(SQLiteValue.ZeroBlob))
                 {
@@ -219,7 +219,7 @@ namespace SQLitePCL.pretty.tests
                     // "1111111111111111111111" SQLite's result in this case is undefined
                 };
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 foreach (var test in tests)
                 {
@@ -240,7 +240,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestResultSetValue()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (w int, x text, y real, z blob, n text);");
 
