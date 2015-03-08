@@ -7,7 +7,7 @@ namespace SQLitePCL.pretty.tests
     public class Product
     {
         [AutoIncrement, PrimaryKey]
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         public string Name { get; set; }
 
@@ -19,7 +19,7 @@ namespace SQLitePCL.pretty.tests
     public class Order
     {
         [AutoIncrement, PrimaryKey]
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         public DateTime PlacedTime { get; set; }
     }
@@ -27,7 +27,7 @@ namespace SQLitePCL.pretty.tests
     public class OrderHistory
     {
         [AutoIncrement, PrimaryKey]
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         public int OrderId { get; set; }
 
@@ -39,7 +39,7 @@ namespace SQLitePCL.pretty.tests
     public class OrderLine
     {
         [AutoIncrement, PrimaryKey]
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         [Indexed("IX_OrderProduct", 1)]
         public int OrderId { get; set; }

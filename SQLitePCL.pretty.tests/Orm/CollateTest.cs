@@ -77,10 +77,10 @@ namespace SQLitePCL.pretty.tests
                 db.InitTable(table);
                 db.Insert(table, obj);  
 
-                using (var colDefaultStmt = db.PrepareQuery(table.CreateQuery().Where(o => o.CollateDefault == "")))
-                using (var colBinaryStmt = db.PrepareQuery(table.CreateQuery().Where(o => o.CollateBinary =="")))
-                using (var colRTrimStmt = db.PrepareQuery(table.CreateQuery().Where(o => o.CollateRTrim == "")))
-                using (var colNoCaseStmt = db.PrepareQuery(table.CreateQuery().Where(o => o.CollateNoCase == "")))
+                using (var colDefaultStmt = db.PrepareQuery(table.CreateQuery().Where(o => o.CollateDefault == default(string))))
+                using (var colBinaryStmt = db.PrepareQuery(table.CreateQuery().Where(o => o.CollateBinary == default(string))))
+                using (var colRTrimStmt = db.PrepareQuery(table.CreateQuery().Where(o => o.CollateRTrim == default(string))))
+                using (var colNoCaseStmt = db.PrepareQuery(table.CreateQuery().Where(o => o.CollateNoCase == default(string))))
                 {
                     Assert.AreEqual(1, colDefaultStmt.Query("Alpha ").Count());
                     Assert.AreEqual(0, colDefaultStmt.Query("ALPHA ").Count());

@@ -134,11 +134,21 @@ namespace SQLitePCL.pretty.Orm
             return This.Query(query.ToString()).Select(query.Mapping.ToObject);
         }
 
+        public static IStatement PrepareCount<T>(this IDatabaseConnection This, TableQuery<T> query)
+        {
+            return This.PrepareStatement(query.Count());
+        }
+
         public static int Count<T>(this IDatabaseConnection This, TableQuery<T> query)
         {
             return This.Query(query.Count()).SelectScalarInt().First();
         }
-            
+
+        public static int Count<T>(this IDatabaseConnection This, TableQuery<T> query, params object[] values)
+        {
+            return This.Query(query.Count(), values).SelectScalarInt().First();
+        }
+                    
         private static string Count<T>(this TableQuery<T> This)
         {
             return (new TableQuery<T>(This.Mapping, "count(*)", This.Where, This.OrderBy, This.Limit, This.Offset)).ToString();

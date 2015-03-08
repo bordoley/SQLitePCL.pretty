@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2009-2015 Krueger Systems, Inc.
+// Copyright (c) 2009-2015 Krueger Systems, Inc.
 // Copyright (c) 2015 David Bordoley
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,52 +21,53 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
+using SQLitePCL.pretty;
 using SQLitePCL.pretty.Orm;
 using SQLitePCL.pretty.Orm.Attributes;
 
 namespace SQLitePCL.pretty.tests
-{   
-    [TestFixture]
-    public class BooleanTests
-    {
-        public class VO
+{
+	[TestFixture]
+	public class UnicodeTest
+	{
+		[Test]
+		public void Insert()
         {
-            // FIXME: This is a difference from SQLite-NET need to document
-            [AutoIncrement, PrimaryKey]
-            public int? ID { get; set; }
-            public bool Flag { get; set; }
-            public String Text { get; set; }
-
-            public override string ToString()
-            {
-                return string.Format("VO:: ID:{0} Flag:{1} Text:{2}", ID, Flag, Text);
-            }
-        }
-            
-        [Test]
-        public void TestBoolean()
-        {
-            var table = TableMapping.Create<VO>();
-
-            var whereFlagEqualsQuery = table.CreateQuery().Where(x => x.Flag == default(bool));
+            var table = TableMapping.Create<Product>();
 
             using (var db = SQLite3.OpenInMemory())
             {
                 db.InitTable(table);
 
-                var objects = Enumerable.Range(0, 10).Select(i => new VO() { Flag = (i % 3 == 0), Text = String.Format("VO{0}", i) });
-                db.InsertAll(table, objects);
+                string testString = "\u2329\u221E\u232A";
+                db.Insert(table, (new Product { Name = testString }));
 
-                using (var countStmt = db.PrepareCount(whereFlagEqualsQuery))
-                {
-                    Assert.AreEqual(4, countStmt.Query(true).SelectScalarInt().First());
-                    Assert.AreEqual(6, countStmt.Query(false).SelectScalarInt().First());
-                }     
+                var p =  db.Find(table, 1).First();
+                Assert.AreEqual (testString, p.Name);
             }
-        }
-    }
-}
+		}
+		
+		[Test]
+		public void Query()
+        {
+            var table = TableMapping.Create<Product>();
 
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                string testString = "\u2329\u221E\u232A";
+                db.Insert(table, (new Product { Name = testString }));
+
+                var query = table.CreateQuery().Where(p => p.Name == default(string));
+
+                var resultSet = db.Query(query, testString).ToList();
+                Assert.AreEqual (1, resultSet.Count);
+                Assert.AreEqual (testString, resultSet[0].Name);
+            }
+		}
+	}
+}
