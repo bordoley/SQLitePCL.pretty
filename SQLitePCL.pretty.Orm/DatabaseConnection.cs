@@ -132,7 +132,7 @@ namespace SQLitePCL.pretty
 
         public static void DeleteAll(this IDatabaseConnection This, string table)
         {
-            This.Execute(SQLBuilder.DeleteAll, table);
+            This.Execute(SQLBuilder.DeleteAll(table));
         }
 
         public static void DropTable(this IDatabaseConnection This, string table)
