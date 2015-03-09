@@ -70,7 +70,12 @@ namespace SQLitePCL.pretty
 
         public static string SelectWhereColumnEquals(string tableName, string columnName)
         {
-            return string.Format ("select * from \"{0}\" where \"{1}\" = ?", tableName, columnName);
+            return string.Format("SELECT * FROM \"{0}\" WHERE \"{1}\" = ?", tableName, columnName);
+        }
+
+        public static string FindByRowID(string tableName)
+        {
+            return string.Format("SELECT * FROM \"{0}\" WHERE ROWID = ?", tableName);
         }
 
         public static string AlterTableAddColumn(string tableName, string columnName, TableColumnMetadata metadata)

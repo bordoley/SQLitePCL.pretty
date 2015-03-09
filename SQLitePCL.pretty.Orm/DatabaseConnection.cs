@@ -211,6 +211,16 @@ namespace SQLitePCL.pretty
                         }).ToList());
         }
 
+        public static IStatement PrepareFindByRowId(this IDatabaseConnection This, string tableName)
+        {
+            return This.PrepareStatement(SQLBuilder.FindByRowID(tableName));
+        }
+
+        public static IEnumerable<IReadOnlyList<IResultSetValue>> FindByRowId(this IDatabaseConnection This, string tableName, long rowid)
+        {
+            return This.Query(SQLBuilder.FindByRowID(tableName), rowid);
+        }
+
         public static IReadOnlyDictionary<string, TableColumnMetadata> GetTableInfo(this IDatabaseConnection This, string tableName)
         {
             // FIXME: Would be preferable to return an actual immutable data structure so that we could cache this result.

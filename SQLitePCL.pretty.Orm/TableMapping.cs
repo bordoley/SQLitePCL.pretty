@@ -219,6 +219,11 @@ namespace SQLitePCL.pretty.Orm
             return This.FindAll(tableMapping, primaryKeys);
         }
 
+        public static ITableMappedStatement<T> PrepareFindByRowId<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
+        {
+            return new TableMappedStatement<T>(This.PrepareFindByRowId(tableMapping.TableName), tableMapping);   
+        }
+
         private static readonly ConditionalWeakTable<ITableMapping, string> primaryKeyColumn = 
             new ConditionalWeakTable<ITableMapping, string>();
 
@@ -248,13 +253,13 @@ namespace SQLitePCL.pretty.Orm
         private static IEnumerable<T> YieldInsertAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
             using (var insertStmt = This.PrepareInsert(tableMapping))
-            using (var findStmt = This.PrepareFind(tableMapping))
+            using (var findStmt = This.PrepareFindByRowId(tableMapping))
             {
                 foreach (var obj in objects)
                 {
                     insertStmt.Execute(obj);
-                    var pk = This.LastInsertedRowId;
-                    yield return findStmt.Query(pk).First();
+                    var rowId = This.LastInsertedRowId;
+                    yield return findStmt.Query(rowId).First();
                 }
             }
         }
@@ -297,13 +302,13 @@ namespace SQLitePCL.pretty.Orm
         private static IEnumerable<T> YieldInsertOrReplaceAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
             using (var insertOrReplaceStmt = This.PrepareInsertOrReplace(tableMapping))
-            using (var findStmt = This.PrepareFind(tableMapping))
+            using (var findStmt = This.PrepareFindByRowId(tableMapping))
             {
                 foreach (var obj in objects)
                 {
                     insertOrReplaceStmt.Execute(obj);
-                    var pk = This.LastInsertedRowId;
-                    yield return findStmt.Query(pk).First();
+                    var rowId = This.LastInsertedRowId;
+                    yield return findStmt.Query(rowId).First();
                 } 
             }
         }
@@ -346,13 +351,13 @@ namespace SQLitePCL.pretty.Orm
         private static IEnumerable<T> YieldUpdateAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
             using (var updateAllStmt = This.PrepareUpdate(tableMapping))
-            using (var findStmt = This.PrepareFind(tableMapping))
+            using (var findStmt = This.PrepareFindByRowId(tableMapping))
             {
                 foreach (var obj in objects)
                 {
                     updateAllStmt.Execute(obj);
-                    var pk = This.LastInsertedRowId;
-                    yield return findStmt.Query(pk).First();
+                    var rowId = This.LastInsertedRowId;
+                    yield return findStmt.Query(rowId).First();
                 }
             }
         }
