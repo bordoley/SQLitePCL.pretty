@@ -31,7 +31,7 @@ namespace SQLitePCL.pretty.Orm.Attributes
         private readonly string _name;
         private readonly CreateFlags _createFlags;
 
-        public TableAttribute(CreateFlags createFlags) : this(null, CreateFlags.None)
+        public TableAttribute(CreateFlags createFlags) : this(null, createFlags)
         {
         }
 

@@ -21,58 +21,70 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
 using SQLitePCL.pretty.Orm;
 using SQLitePCL.pretty.Orm.Attributes;
 
+using IgnoreAttribute = SQLitePCL.pretty.Orm.Attributes.IgnoreAttribute;
+
 namespace SQLitePCL.pretty.tests
-{
+{    
     [TestFixture]
-    public class GuidTests 
+    public class IgnoreTest
     {
-        public class TestObj 
+        public class TestObj
         {
-            [PrimaryKey]
-            public Guid Id { get; set; }
+            [AutoIncrement, PrimaryKey]
+            public int? Id { get; set; }
 
-            public String Text { get; set; }
+            public string Text { get; set; }
 
-            public override string ToString() 
-            {
-                return string.Format("[TestObj: Id={0}, Text={1}]", Id, Text);
-            }
-        }
-
-        [Test]
-        public void ShouldPersistAndReadGuid()
-        {
-            var table = TableMapping.Create<TestObj>();
-
-            using (var db = SQLite3.OpenInMemory())
-            {
-                db.InitTable(table);
-
-                var obj1 = new TestObj() { Id = new Guid("36473164-C9E4-4CDF-B266-A0B287C85623"), Text = "First Guid Object" };
-                var obj2 = new TestObj() { Id = new Guid("BC5C4C4A-CA57-4B61-8B53-9FD4673528B6"), Text = "Second Guid Object" };
-
-                db.Insert(table, obj1);
-                db.Insert(table, obj2);
-
-                var result = db.Query(table.CreateQuery()).ToList();
-
-                Assert.AreEqual(2, result.Count);
-                Assert.AreEqual(obj1.Text, result[0].Text);
-                Assert.AreEqual(obj2.Text, result[1].Text);
-
-                Assert.AreEqual(obj1.Id, result[0].Id);
-                Assert.AreEqual(obj2.Id, result[1].Id);
-            }
-        }
+            [Ignore]
+            public Dictionary<int, string> Edibles
+            { 
+                get { return this._edibles; }
+                set { this._edibles = value; }
+            } 
             
+            protected Dictionary<int, string> _edibles = new Dictionary<int, string>();
+
+            [Ignore]
+            public string IgnoredText { get; set; }
+
+            public override string ToString ()
+            {
+                return string.Format("[TestObj: Id={0}]", Id);
+            }
+        }
+
         [Test]
-        public void AutoGuid_HasGuid()
+        public void MappingIgnoreColumn ()
+        {
+            var table = TableMapping.Create<TestObj> ();
+            Assert.AreEqual (2, table.Count());
+        }
+
+        [Test]
+        public void InsertSucceeds()
+        {
+            var table = TableMapping.Create<TestObj> ();
+
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+
+                var o = new TestObj { Text = "Hello", IgnoredText = "World" };
+                o = db.Insert (table, o);
+
+                Assert.IsNotNull(o.Id);
+            }   
+        }
+
+        [Test]
+        public void GetDoesntHaveIgnores()
         {
             var table = TableMapping.Create<TestObj>();
 
@@ -80,17 +92,12 @@ namespace SQLitePCL.pretty.tests
             {
                 db.InitTable(table);
 
-                var guid1 = new Guid("36473164-C9E4-4CDF-B266-A0B287C85623");
-                var guid2 = new Guid("BC5C4C4A-CA57-4B61-8B53-9FD4673528B6");
+                var o = new TestObj { Text = "Hello", IgnoredText = "World" };
+                var result = db.Insert(table, o);
 
-                var obj1 = new TestObj() { Id = guid1, Text = "First Guid Object" };
-                var obj2 = new TestObj() { Id = guid2, Text = "Second Guid Object" };
-
-                var result1 = db.Insert(table, obj1);
-                var result2 = db.Insert(table, obj2);
-
-                Assert.AreEqual(guid1, result1.Id);
-                Assert.AreEqual(guid2, result2.Id);
+                var oo = db.Find(table, result.Id).First();
+                Assert.AreEqual(o.Text, oo.Text);
+                Assert.IsNull(oo.IgnoredText);
             }
         }
     }

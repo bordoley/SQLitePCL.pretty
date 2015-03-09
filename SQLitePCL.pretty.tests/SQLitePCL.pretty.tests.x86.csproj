@@ -98,6 +98,9 @@
     <Compile Include="Orm\DropTableTest.cs" />
     <Compile Include="Orm\EqualsTest.cs" />
     <Compile Include="Orm\GuidTests.cs" />
+    <Compile Include="Orm\IgnoreTest.cs" />
+    <Compile Include="Orm\InheritanceTest.cs" />
+    <Compile Include="Orm\InsertTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SQLitePCL.pretty.Async\SQLitePCL.pretty.Async.csproj">

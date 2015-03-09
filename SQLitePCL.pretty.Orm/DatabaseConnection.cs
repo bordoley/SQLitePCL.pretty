@@ -28,6 +28,7 @@ using System.Threading;
 
 namespace SQLitePCL.pretty
 {
+    // FIXME: Tempted to get rid of this enum all together in favor convention over configuration.
     [Flags]
     public enum CreateFlags
     {

@@ -497,7 +497,9 @@ namespace SQLitePCL.pretty.Orm
             var tableAttr = 
                 (TableAttribute)CustomAttributeExtensions.GetCustomAttribute(mappedType.GetTypeInfo(), typeof(TableAttribute), true);
 
-            var tableName = tableAttr != null ? tableAttr.Name : mappedType.Name;
+            // TableAttribute name can be null
+            var tableName = tableAttr != null ? (tableAttr.Name ?? mappedType.Name) : mappedType.Name;
+
             var createFlags = tableAttr != null ? tableAttr.CreateFlags : CreateFlags.None;
 
             var props = mappedType.GetRuntimeProperties().Where(p => p.GetMethod != null && p.GetMethod.IsPublic && !p.GetMethod.IsStatic);
@@ -592,6 +594,8 @@ namespace SQLitePCL.pretty.Orm
                 (((createFlags & CreateFlags.ImplicitPrimaryKey) == CreateFlags.ImplicitPrimaryKey) &&
                     string.Compare (prop.Name, ImplicitPkName, StringComparison.OrdinalIgnoreCase) == 0);
             
+            // FIXME: Lets refactor this. Basically the PK should always be autoincrement if its nullable<long> or nullable<int>
+            // otherwise its a required not null attribute
             var isAuto = IsAutoIncrement(prop) || (isPK && ((createFlags & CreateFlags.AutoIncrementPrimaryKey) == CreateFlags.AutoIncrementPrimaryKey));
             var isAutoGuid = isAuto && columnType == typeof(Guid);
             var isAutoInc = isAuto && !isAutoGuid;
