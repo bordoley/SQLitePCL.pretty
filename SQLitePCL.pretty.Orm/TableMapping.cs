@@ -54,7 +54,7 @@ namespace SQLitePCL.pretty.Orm
         public TableColumnMetadata Metadata { get { return metadata; } }
     }
 
-    public interface ITableMapping : IEnumerable<KeyValuePair<string, ColumnMapping>>
+    public interface ITableMapping : IReadOnlyDictionary<string, ColumnMapping>
     {
         String TableName { get; }
 
@@ -63,8 +63,6 @@ namespace SQLitePCL.pretty.Orm
         ColumnMapping this[string column] { get; }
 
         IEnumerable<IndexInfo> Indexes { get; }
-
-        bool TryGetColumnMapping(string column, out ColumnMapping mapping);
     }
 
     public interface ITableMapping<T> : ITableMapping
@@ -724,11 +722,6 @@ namespace SQLitePCL.pretty.Orm
 
         public ColumnMapping this [string column] { get  { return columnToMapping[column]; } }
 
-        public bool TryGetColumnMapping(string column, out ColumnMapping mapping)
-        {
-            return this.columnToMapping.TryGetValue(column, out mapping);
-        }
-
         public T ToObject(IReadOnlyList<IResultSetValue> row)
         {
             var builder = this.builder();
@@ -757,6 +750,40 @@ namespace SQLitePCL.pretty.Orm
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
+        }
+
+        public bool ContainsKey(string key)
+        {
+            return this.columnToMapping.ContainsKey(key);
+        }
+
+        public bool TryGetValue(string column, out ColumnMapping mapping)
+        {
+            return this.columnToMapping.TryGetValue(column, out mapping);
+        }
+
+        public IEnumerable<string> Keys
+        {
+            get
+            {
+                return this.columnToMapping.Keys;
+            }
+        }
+
+        public IEnumerable<ColumnMapping> Values
+        {
+            get
+            {
+                return this.columnToMapping.Values;
+            }
+        }
+
+        public int Count
+        {
+            get
+            {
+                return this.columnToMapping.Count;
+            }
         }
     }
 }

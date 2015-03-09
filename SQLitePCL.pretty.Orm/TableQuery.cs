@@ -190,11 +190,6 @@ namespace SQLitePCL.pretty.Orm
             return This.Skip(index).Take(1);
         }
 
-        public static TableQuery<T> First<T>(this TableQuery<T> This)
-        {
-            return This.Take(1);
-        }
-
         private static TableQuery<T> AddOrderBy<T,TValue>(this TableQuery<T> This, Expression<Func<T, TValue>> orderExpr, bool asc)
         {
             if (orderExpr.NodeType == ExpressionType.Lambda)
