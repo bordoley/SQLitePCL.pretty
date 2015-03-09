@@ -91,6 +91,7 @@
     <Compile Include="Orm\TransactionTest.cs" />
     <Compile Include="Orm\StringQueryTest.cs" />
     <Compile Include="Orm\SkipTest.cs" />
+    <Compile Include="Orm\NullableTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SQLitePCL.pretty.Async\SQLitePCL.pretty.Async.csproj">
