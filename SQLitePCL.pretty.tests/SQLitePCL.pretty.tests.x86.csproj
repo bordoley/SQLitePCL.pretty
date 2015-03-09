@@ -96,6 +96,7 @@
     <Compile Include="Orm\DateTimeTest.cs" />
     <Compile Include="Orm\DeleteTest.cs" />
     <Compile Include="Orm\DropTableTest.cs" />
+    <Compile Include="Orm\EqualsTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SQLitePCL.pretty.Async\SQLitePCL.pretty.Async.csproj">
