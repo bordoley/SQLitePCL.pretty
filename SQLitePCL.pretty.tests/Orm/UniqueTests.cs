@@ -39,13 +39,13 @@ namespace SQLitePCL.pretty.tests
             [PrimaryKey, AutoIncrement]
             public int? ID { get; set; }
 
-            [Unique ("UX_Uno", 0)]
+            [Indexed ("UX_Uno", 0)]
             public int Uno { get; set; }
 
-            [Unique ("UX_Dos", 1)]
+            [Indexed ("UX_Dos", 1)]
             public int Dos { get; set; }
 
-            [Unique ("UX_Dos", 2)]
+            [Indexed ("UX_Dos", 2)]
             public int Tres { get; set; }
 
             [Indexed ("UX_Uno_bool", 3, true)]

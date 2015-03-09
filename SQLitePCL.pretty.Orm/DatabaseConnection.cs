@@ -90,7 +90,7 @@ namespace SQLitePCL.pretty
                 (this.Columns.SequenceEqual(other.Columns));
         }
             
-        public bool Equals(object other)
+        public override bool Equals(object other)
         {
             return other is IndexInfo && this == (IndexInfo)other;
         }

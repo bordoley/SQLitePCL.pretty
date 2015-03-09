@@ -73,10 +73,8 @@ namespace SQLitePCL.pretty.Orm.Attributes
     {
     }
 
-
-    // FIXME: This should be sealed maybe use an interface instead
     [AttributeUsage (AttributeTargets.Property)]
-    public class IndexedAttribute : Attribute
+    public sealed class IndexedAttribute : Attribute
     {
         private readonly string _name;
         private readonly int _order;
@@ -107,15 +105,6 @@ namespace SQLitePCL.pretty.Orm.Attributes
     [AttributeUsage (AttributeTargets.Property)]
     public sealed class IgnoreAttribute : Attribute
     {
-    }
-
-    // FIXME: Not a fan of inheritance, maybe rework around an interface
-    [AttributeUsage (AttributeTargets.Property)]
-    public class UniqueAttribute : IndexedAttribute
-    {
-        public UniqueAttribute(string name, int order) : base(name, order, true)
-        {
-        }
     }
 
     [AttributeUsage (AttributeTargets.Property)]
