@@ -29,16 +29,6 @@ namespace SQLitePCL.pretty
     public static class BindParameter
     {
         /// <summary>
-        /// Bind the parameter to an <see cref="short"/>.
-        /// </summary>
-        /// <param name="This">The bind parameter.</param>
-        /// <param name="value">A <see cref="short"/>.</param>
-        public static void Bind(this IBindParameter This, short value)
-        {
-            This.Bind((int) value);
-        }
-
-        /// <summary>
         /// Bind the parameter to an <see cref="bool"/>.
         /// </summary>
         /// <param name="This">The bind parameter.</param>
@@ -46,66 +36,6 @@ namespace SQLitePCL.pretty
         public static void Bind(this IBindParameter This, bool value)
         {
             This.Bind((long)(Convert.ChangeType(value, typeof(long))));
-        }
-
-        /// <summary>
-        /// Bind the parameter to an <see cref="byte"/>.
-        /// </summary>
-        /// <param name="This">The bind parameter.</param>
-        /// <param name="value">A <see cref="byte"/>.</param>
-        public static void Bind(this IBindParameter This, byte value)
-        {
-            This.Bind((long)(Convert.ChangeType(value, typeof(long))));
-        }
-
-        /// <summary>
-        /// Bind the parameter to an <see cref="char"/>.
-        /// </summary>
-        /// <param name="This">The bind parameter.</param>
-        /// <param name="value">A <see cref="char"/>.</param>
-        public static void Bind(this IBindParameter This, char value)
-        {
-            This.Bind((long)(Convert.ChangeType(value, typeof(long))));
-        }
-
-        /// <summary>
-        /// Bind the parameter to an <see cref="sbyte"/>.
-        /// </summary>
-        /// <param name="This">The bind parameter.</param>
-        /// <param name="value">A <see cref="sbyte"/>.</param>    
-        public static void Bind(this IBindParameter This, sbyte value)
-        {
-            This.Bind((long)(Convert.ChangeType(value, typeof(long))));
-        }
-
-        /// <summary>
-        /// Bind the parameter to an <see cref="uint"/>.
-        /// </summary>
-        /// <param name="This">The bind parameter.</param>
-        /// <param name="value">A <see cref="uint"/>.</param>
-        public static void Bind(this IBindParameter This, uint value)
-        {
-            This.Bind((long)(Convert.ChangeType(value, typeof(long))));
-        }
-
-        /// <summary>
-        /// Bind the parameter to an <see cref="UInt16"/>.
-        /// </summary>
-        /// <param name="This">The bind parameter.</param>
-        /// <param name="value">A <see cref="UInt16"/>.</param>
-        public static void Bind(this IBindParameter This, UInt16 value)
-        {
-            This.Bind(Convert.ToInt32(This));
-        }
-
-        /// <summary>
-        /// Bind the parameter to an <see cref="float"/>.
-        /// </summary>
-        /// <param name="This">The bind parameter.</param>
-        /// <param name="value">A <see cref="float"/>.</param>
-        public static void Bind(this IBindParameter This, float value)
-        {
-            This.Bind(Convert.ToDouble(value));
         }
 
         /// <summary>

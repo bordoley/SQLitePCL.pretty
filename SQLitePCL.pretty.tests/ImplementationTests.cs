@@ -490,8 +490,24 @@ namespace SQLitePCL.pretty.tests
             {
                 using (var stmt = db.PrepareStatement("SELECT ?"))
                 {
-                    Assert.AreEqual(stmt.Query((short) 1).SelectScalarShort().First(), (short) 1);
-                    Assert.AreEqual(stmt.Query(true).SelectScalarBool().First(), true);
+                    stmt.Reset();
+                    stmt.ClearBindings();
+                    stmt.BindParameters[0].Bind(true);
+                    stmt.MoveNext();
+                    Assert.AreEqual(stmt.Current[0].ToBool(), true);
+
+                    stmt.Reset();
+                    stmt.ClearBindings();
+                    stmt.BindParameters[0].Bind(TimeSpan.Zero);
+                    stmt.MoveNext();
+                    Assert.AreEqual(stmt.Current[0].ToTimeSpan(), TimeSpan.Zero);
+
+                    stmt.Reset();
+                    stmt.ClearBindings();
+                    stmt.BindParameters[0].Bind(1.1m);
+                    stmt.MoveNext();
+                    Assert.AreEqual(stmt.Current[0].ToDecimal(), 1.1);
+
                 }
             }
         }
