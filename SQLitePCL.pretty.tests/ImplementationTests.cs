@@ -484,6 +484,19 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Test]
+        public void TestBindExtensions()
+        {
+            using (var db = SQLite3.OpenInMemory())
+            {
+                using (var stmt = db.PrepareStatement("SELECT ?"))
+                {
+                    Assert.AreEqual(stmt.Query((short) 1).SelectScalarShort().First(), (short) 1);
+                    Assert.AreEqual(stmt.Query(true).SelectScalarBool().First(), true);
+                }
+            }
+        }
+
+        [Test]
         public void TestBindSQLiteValue()
         {
             using (var db = SQLite3.OpenInMemory())
