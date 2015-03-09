@@ -101,6 +101,7 @@
     <Compile Include="Orm\IgnoreTest.cs" />
     <Compile Include="Orm\InheritanceTest.cs" />
     <Compile Include="Orm\InsertTest.cs" />
+    <Compile Include="Orm\MigrationTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SQLitePCL.pretty.Async\SQLitePCL.pretty.Async.csproj">
