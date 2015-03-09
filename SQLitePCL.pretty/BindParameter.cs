@@ -28,81 +28,150 @@ namespace SQLitePCL.pretty
     /// </summary>
     public static class BindParameter
     {
-
+        /// <summary>
+        /// Bind the parameter to an <see cref="short"/>.
+        /// </summary>
+        /// <param name="This">The bind parameter.</param>
+        /// <param name="value">A <see cref="short"/>.</param>
         public static void Bind(this IBindParameter This, short value)
         {
             This.Bind((int) value);
         }
 
+        /// <summary>
+        /// Bind the parameter to an <see cref="bool"/>.
+        /// </summary>
+        /// <param name="This">The bind parameter.</param>
+        /// <param name="value">A <see cref="bool"/>.</param>
         public static void Bind(this IBindParameter This, bool value)
         {
             This.Bind((long)(Convert.ChangeType(value, typeof(long))));
         }
 
+        /// <summary>
+        /// Bind the parameter to an <see cref="byte"/>.
+        /// </summary>
+        /// <param name="This">The bind parameter.</param>
+        /// <param name="value">A <see cref="byte"/>.</param>
         public static void Bind(this IBindParameter This, byte value)
         {
             This.Bind((long)(Convert.ChangeType(value, typeof(long))));
         }
 
+        /// <summary>
+        /// Bind the parameter to an <see cref="char"/>.
+        /// </summary>
+        /// <param name="This">The bind parameter.</param>
+        /// <param name="value">A <see cref="char"/>.</param>
         public static void Bind(this IBindParameter This, char value)
         {
             This.Bind((long)(Convert.ChangeType(value, typeof(long))));
         }
-            
+
+        /// <summary>
+        /// Bind the parameter to an <see cref="sbyte"/>.
+        /// </summary>
+        /// <param name="This">The bind parameter.</param>
+        /// <param name="value">A <see cref="sbyte"/>.</param>    
         public static void Bind(this IBindParameter This, sbyte value)
         {
             This.Bind((long)(Convert.ChangeType(value, typeof(long))));
         }
 
-        public static void Bind(this IBindParameter This, UInt32 value)
+        /// <summary>
+        /// Bind the parameter to an <see cref="uint"/>.
+        /// </summary>
+        /// <param name="This">The bind parameter.</param>
+        /// <param name="value">A <see cref="uint"/>.</param>
+        public static void Bind(this IBindParameter This, uint value)
         {
             This.Bind((long)(Convert.ChangeType(value, typeof(long))));
         }
 
+        /// <summary>
+        /// Bind the parameter to an <see cref="UInt16"/>.
+        /// </summary>
+        /// <param name="This">The bind parameter.</param>
+        /// <param name="value">A <see cref="UInt16"/>.</param>
         public static void Bind(this IBindParameter This, UInt16 value)
         {
             This.Bind(Convert.ToInt32(This));
         }
 
+        /// <summary>
+        /// Bind the parameter to an <see cref="float"/>.
+        /// </summary>
+        /// <param name="This">The bind parameter.</param>
+        /// <param name="value">A <see cref="float"/>.</param>
         public static void Bind(this IBindParameter This, float value)
         {
             This.Bind(Convert.ToDouble(value));
         }
 
+        /// <summary>
+        /// Bind the parameter to an <see cref="TimeSpan"/>.
+        /// </summary>
+        /// <param name="This">The bind parameter.</param>
+        /// <param name="value">A <see cref="TimeSpan"/>.</param>
         public static void Bind(this IBindParameter This, TimeSpan value)
         {
             This.Bind(value.Ticks);
         }
 
+        /// <summary>
+        /// Bind the parameter to an <see cref="DateTime"/>.
+        /// </summary>
+        /// <param name="This">The bind parameter.</param>
+        /// <param name="value">A <see cref="DateTime"/>.</param>
         public static void Bind(this IBindParameter This, DateTime value)
         {
             This.Bind(value.Ticks);
         }
 
+        /// <summary>
+        /// Bind the parameter to an <see cref="DateTimeOffset"/>.
+        /// </summary>
+        /// <param name="This">The bind parameter.</param>
+        /// <param name="value">A <see cref="DateTimeOffset"/>.</param>
         public static void Bind(this IBindParameter This, DateTimeOffset value)
         {
             This.Bind(value.ToOffset(TimeSpan.Zero).Ticks);
         }
 
+        /// <summary>
+        /// Bind the parameter to an <see cref="decimal"/>.
+        /// </summary>
+        /// <param name="This">The bind parameter.</param>
+        /// <param name="value">A <see cref="decimal"/>.</param>
         public static void Bind(this IBindParameter This, decimal value)
         {
             This.Bind(Convert.ToDouble(value));
         }            
 
+        /// <summary>
+        /// Bind the parameter to an <see cref="Guid"/>.
+        /// </summary>
+        /// <param name="This">The bind parameter.</param>
+        /// <param name="value">A <see cref="Guid"/>.</param>
         public static void Bind(this IBindParameter This, Guid value)
         {
             This.Bind(value.ToString());
         }
 
-        public static void Bind(this IBindParameter This, Stream stream)
+        /// <summary>
+        /// Bind the parameter to an <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="This">The bind parameter.</param>
+        /// <param name="value">A <see cref="Stream"/>.</param>
+        public static void Bind(this IBindParameter This, Stream value)
         {
-            if (!stream.CanRead)
+            if (!value.CanRead)
             {
                 throw new ArgumentException("Stream is not readable");
             }
 
             // FIXME: Stream.Length is Int64, better to take max int
-            This.BindZeroBlob((int) stream.Length);
+            This.BindZeroBlob((int) value.Length);
         }
             
         /// <summary>

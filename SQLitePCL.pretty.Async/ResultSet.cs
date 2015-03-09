@@ -28,91 +28,181 @@ namespace SQLitePCL.pretty
     /// </summary>
     public static class ResultSet
     {
+        /// <summary>
+        /// Selects the value in the first column of the result set row.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<IResultSetValue> SelectScalar(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.Select(x => x[0]);
         }
 
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="int"/>.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<int> SelectScalarInt(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToInt());
         }
 
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="long"/>.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<long> SelectScalarInt64(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToInt64());
         }
 
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="string"/>.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<string> SelectScalarString(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToString());
         }
 
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="byte"/> array.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<byte[]> SelectScalarBlob(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToBlob());
         }
 
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="double"/>.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<double> SelectScalarDouble(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToDouble());
         }
 
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="bool"/>.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<bool> SelectScalarBool(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToBool());
         }
 
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="float"/>.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<float> SelectScalarFloat(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToFloat());
         }
 
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="TimeSpan"/>.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<TimeSpan> SelectScalarTimeSpan(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToTimeSpan());
         }
 
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="DateTime"/>.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<DateTime> SelectScalarDateTime(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToDateTime());
         }
 
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="DateTimeOffset"/>.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<DateTimeOffset> SelectScalarDateTimeOffset(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToDateTimeOffset());
         }
 
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="uint"/>.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<uint> SelectScalarUInt32(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToUInt32());
         }
 
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="decimal"/>.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<decimal> SelectScalarDecimal(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToDecimal());
         }
 
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="byte"/>.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<byte> SelectScalarByte(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToByte());
         }
 
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="UInt16"/>.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<UInt16> SelectScalarUInt16(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToUInt16());
         }
 
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="short"/>.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<short> SelectScalarShort(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToShort());
         }
 
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="sbyte"/>.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<sbyte> SelectScalarSByte(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToSByte());
         }
 
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="Guid"/>.
+        /// </summary>
+        /// <returns>An IObservable of the scalar values.</returns>
+        /// <param name="This">This.</param>
         public static IObservable<Guid> SelectScalarGuid(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToGuid());
