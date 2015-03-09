@@ -38,6 +38,40 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Test]
+        public void TestToSQLiteValueExtensions()
+        {
+            short testShort = 2;
+            Assert.AreEqual(testShort, testShort.ToSQLiteValue().ToShort());
+
+            byte testByte = 2;
+            Assert.AreEqual(testByte, testByte.ToSQLiteValue().ToByte());
+
+            float testFloat = 2.0f;
+            Assert.AreEqual(testFloat, testFloat.ToSQLiteValue().ToFloat());
+
+            TimeSpan testTimeSpan = new TimeSpan(100);
+            Assert.AreEqual(testTimeSpan, testTimeSpan.ToSQLiteValue().ToTimeSpan());
+
+            DateTime testDateTime = DateTime.Now;
+            Assert.AreEqual(testDateTime, testDateTime.ToSQLiteValue().ToDateTime());
+
+            DateTimeOffset testDateTimeOffset = new DateTimeOffset(100, TimeSpan.Zero);
+            Assert.AreEqual(testDateTimeOffset, testDateTimeOffset.ToSQLiteValue().ToDateTimeOffset());
+
+            decimal testDecimal = 2.2m;
+            Assert.AreEqual(testDecimal, testDecimal.ToSQLiteValue().ToDecimal());
+
+            Guid testGuid = Guid.NewGuid();
+            Assert.AreEqual(testGuid, testGuid.ToSQLiteValue().ToGuid());
+
+            ushort testUShort = 1;
+            Assert.AreEqual(testUShort, testUShort.ToSQLiteValue().ToUInt16());
+
+            sbyte testSByte = 1;
+            Assert.AreEqual(testSByte, testSByte.ToSQLiteValue().ToSByte());
+        }
+
+        [Test]
         public void TestToSQLiteValue()
         {
             Assert.AreEqual(false.ToSQLiteValue().ToInt(), 0);
