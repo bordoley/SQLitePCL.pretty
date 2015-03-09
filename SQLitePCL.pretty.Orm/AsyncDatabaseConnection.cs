@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SQLitePCL.pretty.Orm
+namespace SQLitePCL.pretty
 {
     public static class AsyncDatabaseConnection
     {
