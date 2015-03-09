@@ -137,7 +137,7 @@ namespace SQLitePCL.pretty
 
         public static void DropTable(this IDatabaseConnection This, string table)
         {
-            This.Execute(SQLBuilder.DropTable, table);
+            This.Execute(SQLBuilder.DropTableIfExists(table));
         }
 
         public static void BeginTransaction(this IDatabaseConnection This)

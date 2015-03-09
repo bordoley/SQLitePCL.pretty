@@ -43,11 +43,14 @@ namespace SQLitePCL.pretty
 
         public const string Rollback = "ROLLBACK";
 
-        public const string DropTable = "DROP TABLE If EXISTS ?";
-
         public static string DeleteAll(string tableName)
         {
             return string.Format("DELETE FROM \"{0}\"", tableName);
+        }
+
+        public static string DropTableIfExists(string tableName)
+        {
+            return string.Format("DROP TABLE If EXISTS \"{0}\"", tableName);
         }
 
         public static string SavePoint(string savePoint)
