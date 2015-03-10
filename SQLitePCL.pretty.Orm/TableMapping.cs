@@ -69,6 +69,12 @@ namespace SQLitePCL.pretty.Orm
             this.metadata = metadata;
         }
 
+        public Type ClrType { get { return clrType; } }
+
+        public PropertyInfo Property { get { return property; } }
+
+        public TableColumnMetadata Metadata { get { return metadata; } }
+
         /// <inheritdoc/>
         public bool Equals(ColumnMapping other)
         {
@@ -93,11 +99,15 @@ namespace SQLitePCL.pretty.Orm
             return other is ColumnMapping && this == (ColumnMapping)other;
         }
 
-        public Type ClrType { get { return clrType; } }
-
-        public PropertyInfo Property { get { return property; } }
-
-        public TableColumnMetadata Metadata { get { return metadata; } }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            int hash = 17;
+            hash = hash * 31 + this.ClrType.GetHashCode();
+            hash = hash * 31 + this.Property.GetHashCode();
+            hash = hash * 31 + this.Metadata.GetHashCode();
+            return hash;
+        }
     }
 
     public interface ITableMapping : IReadOnlyDictionary<string, ColumnMapping>
