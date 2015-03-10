@@ -33,10 +33,6 @@ namespace SQLitePCL.pretty
     public enum CreateFlags
     {
         None                    = 0x000,
-        ImplicitPrimaryKey      = 0x001,    // create a primary key for field called 'Id' (Orm.ImplicitPkName)
-        ImplicitIndex           = 0x002,    // create an index for fields ending in 'Id' (Orm.ImplicitIndexSuffix)
-        AllImplicit             = 0x003,    // do both above
-        AutoIncrementPrimaryKey = 0x004,    // force PK field to be auto inc
         FullTextSearch3         = 0x100,    // create virtual table using FTS3
         FullTextSearch4         = 0x200     // create virtual table using FTS4
     }
@@ -212,16 +208,35 @@ namespace SQLitePCL.pretty
                         }).ToList());
         }
 
+        /// <summary>
+        /// Creates a SQLite prepared statement that can be used to find a row in the table by its rowid. 
+        /// </summary>
+        /// <returns>The SQLite prepared statement.</returns>
+        /// <param name="This">The database connection.</param>
+        /// <param name="tableName">The table name.</param>
         public static IStatement PrepareFindByRowId(this IDatabaseConnection This, string tableName)
         {
             return This.PrepareStatement(SQLBuilder.FindByRowID(tableName));
         }
 
+        /// <summary>
+        /// Finds a row by it's SQLite rowid.
+        /// </summary>
+        /// <returns>An IEnumerable that contains either 1 or 0 results depending on whether the rowid was found in the table.</returns>
+        /// <param name="This">The database connection.</param>
+        /// <param name="tableName">The table name.</param>
+        /// <param name="rowid">The rowid of the row to fetch.</param>
         public static IEnumerable<IReadOnlyList<IResultSetValue>> FindByRowId(this IDatabaseConnection This, string tableName, long rowid)
         {
             return This.Query(SQLBuilder.FindByRowID(tableName), rowid);
         }
 
+        /// <summary>
+        /// Gets the table column info.
+        /// </summary>
+        /// <returns>The an <see cref="IReadOnlyDictionary&lt;TKey,TValue&gt;"/> of column names to <see cref="TableColumnMetadata"/>.</returns>
+        /// <param name="This">The database connection.</param>
+        /// <param name="tableName">The table name.</param>
         public static IReadOnlyDictionary<string, TableColumnMetadata> GetTableInfo(this IDatabaseConnection This, string tableName)
         {
             // FIXME: Would be preferable to return an actual immutable data structure so that we could cache this result.
@@ -234,6 +249,11 @@ namespace SQLitePCL.pretty
             return retval;
         }
 
+        /// <summary>
+        ///  Runs the action <paramref name="action"/> in a transaction.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="action">The Action to run in a transaction.</param>
         public static void RunInTransaction(this IDatabaseConnection This, Action<IDatabaseConnection> action)
         {
             This.RunInTransaction(db => 
@@ -243,28 +263,42 @@ namespace SQLitePCL.pretty
                 });
         }
 
-        public static T RunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, T> func)
-        {
-            return This.RunInTransaction(db => Enumerable.Repeat(func(db), 1)).First();
-        }
 
-        public static IEnumerable<T> RunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, IEnumerable<T>> func)
+        /// <summary>
+        /// Runs the function <paramref name="f"/> in a transaction and returns function result.
+        /// </summary>
+        /// <returns>The function result.</returns>
+        /// <param name="This">The database connection.</param>
+        /// <param name="f">
+        /// The function to run in a transaction.
+        /// </param>
+        /// <typeparam name="T">The result type.</typeparam>
+        public static T RunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, T> f)
+        {
+            return This.RunInTransaction(db => Enumerable.Repeat(f(db), 1)).First();
+        }
+       
+        /// <summary>
+        /// Runs the function <paramref name="f"/> in a transaction and returns function result.
+        /// </summary>
+        /// <returns>The function result.</returns>
+        /// <param name="This">The database connection.</param>
+        /// <param name="f">
+        /// The function to run in a transaction.
+        /// </param>
+        /// <typeparam name="T">The result type.</typeparam>
+        public static IEnumerable<T> RunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, IEnumerable<T>> f)
         {
             var savePoint = This.SaveTransactionPoint ();
 
             try 
             {
-                var retval = func(This);
+                var retval = f(This);
                 This.Release (savePoint);
                 return retval;
             } 
             catch (Exception) 
             {
-                // FIXME: This differs from SQLite-Net. SQLite-net they keep track of the transaction depth
-                // and then control whether to issue a rollback command. We don't so always rollback
-                // to the savepoint and let the exception propogate.
-                // We could consider tracking the transaction depth but its a little painful to do
-                // as an extension property.
                 This.RollbackTo(savePoint);
                 throw;
             }
