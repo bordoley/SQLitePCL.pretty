@@ -34,8 +34,30 @@ using SQLitePCL.pretty.Orm.Attributes;
 
 namespace SQLitePCL.pretty.Orm
 {
-    public sealed class ColumnMapping
+    public sealed class ColumnMapping: IEquatable<ColumnMapping>
     {
+        /// <summary>
+        /// Indicates whether the two ColumnMapping instances are equal to each other.
+        /// </summary>
+        /// <param name="x">A ColumnMapping instance.</param>
+        /// <param name="y">A ColumnMapping instance.</param>
+        /// <returns><see langword="true"/> if the two instances are equal to each other; otherwise,  <see langword="false"/>.</returns>
+        public static bool operator ==(ColumnMapping x, ColumnMapping y)
+        {
+            return x.Equals(y);
+        }
+
+        /// <summary>
+        /// Indicates whether the two ColumnMapping instances are not equal each other.
+        /// </summary>
+        /// <param name="x">A ColumnMapping instance.</param>
+        /// <param name="y">A ColumnMapping instance.</param>
+        /// <returns><see langword="true"/> if the two instances are not equal to each other; otherwise,  <see langword="false"/>.</returns>
+        public static bool operator !=(ColumnMapping x, ColumnMapping y)
+        {
+            return !(x == y);
+        }
+
         private readonly Type clrType;
         private readonly PropertyInfo property;
         private readonly TableColumnMetadata metadata;
@@ -45,6 +67,30 @@ namespace SQLitePCL.pretty.Orm
             this.clrType = clrType;
             this.property = property;
             this.metadata = metadata;
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(ColumnMapping other)
+        {
+            if (Object.ReferenceEquals(other, null))
+            {
+                return false;
+            }
+
+            if (Object.ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return this.ClrType == other.ClrType &&
+                this.Property == other.Property &&
+                this.Metadata == other.Metadata;
+        }
+
+        /// <inheritdoc/>
+        public override bool Equals(object other)
+        {
+            return other is ColumnMapping && this == (ColumnMapping)other;
         }
 
         public Type ClrType { get { return clrType; } }
