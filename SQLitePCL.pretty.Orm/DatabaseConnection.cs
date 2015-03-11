@@ -169,6 +169,11 @@ namespace SQLitePCL.pretty
             This.Execute(SQLBuilder.Rollback);
         }
 
+        public static void Vacuum(this IDatabaseConnection This)
+        {
+            This.Execute(SQLBuilder.Vacuum);
+        }
+
         public static void CreateIndex(this IDatabaseConnection This, string indexName, string tableName, IEnumerable<string> columnNames, bool unique)
         {
             This.Execute(SQLBuilder.CreateIndex(indexName, tableName, columnNames, unique));
@@ -274,20 +279,6 @@ namespace SQLitePCL.pretty
         /// </param>
         /// <typeparam name="T">The result type.</typeparam>
         public static T RunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, T> f)
-        {
-            return This.RunInTransaction(db => Enumerable.Repeat(f(db), 1)).First();
-        }
-       
-        /// <summary>
-        /// Runs the function <paramref name="f"/> in a transaction and returns function result.
-        /// </summary>
-        /// <returns>The function result.</returns>
-        /// <param name="This">The database connection.</param>
-        /// <param name="f">
-        /// The function to run in a transaction.
-        /// </param>
-        /// <typeparam name="T">The result type.</typeparam>
-        public static IEnumerable<T> RunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, IEnumerable<T>> f)
         {
             var savePoint = This.SaveTransactionPoint ();
 

@@ -43,6 +43,8 @@ namespace SQLitePCL.pretty
 
         public const string Rollback = "ROLLBACK";
 
+        public const string Vacuum = "VACUUM";
+
         public static string DeleteAll(string tableName)
         {
             return string.Format("DELETE FROM \"{0}\"", tableName);
