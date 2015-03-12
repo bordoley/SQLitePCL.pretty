@@ -32,25 +32,13 @@ namespace SQLitePCL.pretty.Orm.Attributes
     public sealed class TableAttribute : Attribute
     {
         private readonly string _name;
-        private readonly CreateFlags _createFlags;
 
-        public TableAttribute(CreateFlags createFlags) : this(null, createFlags)
-        {
-        }
-
-        public TableAttribute(string name) : this(name, CreateFlags.None)
-        {
-        }
-
-        public TableAttribute (string name, CreateFlags createFlags)
+        public TableAttribute (string name)
         {
             _name = name;
-            _createFlags = createFlags;
         }
 
         public string Name { get { return _name; } }
-
-        public CreateFlags CreateFlags { get { return _createFlags; } }
     }
 
     [AttributeUsage (AttributeTargets.Property)]

@@ -114,8 +114,6 @@ namespace SQLitePCL.pretty.Orm
     {
         String TableName { get; }
 
-        CreateFlags CreateFlags { get; }
-
         ColumnMapping this[string column] { get; }
 
         IEnumerable<IndexInfo> Indexes { get; }
@@ -151,7 +149,7 @@ namespace SQLitePCL.pretty.Orm
             
         public static void InitTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
-            This.CreateTableIfNotExists(tableMapping.TableName, tableMapping.CreateFlags, tableMapping.Select(x => Tuple.Create(x.Key, x.Value.Metadata)));
+            This.CreateTableIfNotExists(tableMapping.TableName, CreateFlags.None, tableMapping.Select(x => Tuple.Create(x.Key, x.Value.Metadata)));
 
             if (This.Changes == 0)
             {
@@ -273,7 +271,7 @@ namespace SQLitePCL.pretty.Orm
             return This.FindAll(tableMapping, primaryKeys);
         }
 
-        public static ITableMappedStatement<T> PrepareFindByRowId<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
+        private static ITableMappedStatement<T> PrepareFindByRowId<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
             return new TableMappedStatement<T>(This.PrepareFindByRowId(tableMapping.TableName), tableMapping);   
         }
@@ -409,6 +407,7 @@ namespace SQLitePCL.pretty.Orm
             {
                 foreach (var obj in objects)
                 {
+                    // FIXME: This is broken update can fail to affect any rows
                     updateAllStmt.Execute(obj);
                     var rowId = This.LastInsertedRowId;
                     yield return findStmt.Query(rowId).First();
@@ -455,6 +454,7 @@ namespace SQLitePCL.pretty.Orm
             {
                 foreach (var primaryKey in primaryKeys)
                 {
+                    // FIXME: This is broken update find can fail in this case
                     var result = findStmt.Query(primaryKey).First();
                     deleteStmt.Execute(primaryKey);
                     yield return result;
@@ -554,8 +554,6 @@ namespace SQLitePCL.pretty.Orm
             // TableAttribute name can be null
             var tableName = tableAttr != null ? (tableAttr.Name ?? mappedType.Name) : mappedType.Name;
 
-            var createFlags = tableAttr != null ? tableAttr.CreateFlags : CreateFlags.None;
-
             var props = mappedType.GetRuntimeProperties().Where(p => p.GetMethod != null && p.GetMethod.IsPublic && !p.GetMethod.IsStatic);
 
             // FIXME: I wish this was immutable
@@ -621,7 +619,7 @@ namespace SQLitePCL.pretty.Orm
                     )
                 ).ToList();
 
-            return new TableMapping<T>(builder, build, tableName, createFlags, columnToMapping, indexes);
+            return new TableMapping<T>(builder, build, tableName, columnToMapping, indexes);
         }
             
         private static TableColumnMetadata CreateColumnMetadata(PropertyInfo prop)
@@ -735,8 +733,6 @@ namespace SQLitePCL.pretty.Orm
 
         private readonly string tableName;
 
-        private readonly CreateFlags createFlags;
-
         private readonly IReadOnlyDictionary<string, ColumnMapping> columnToMapping;
 
         // FIXME: To implement equality correctly this should be a set
@@ -746,7 +742,6 @@ namespace SQLitePCL.pretty.Orm
             Func<object> builder, 
             Func<object,T> build, 
             string tableName,
-            CreateFlags createFlags,
             IReadOnlyDictionary<string, ColumnMapping> columnToMapping,
 
             // FIXME: To implement equality correctly this should be a set
@@ -755,14 +750,11 @@ namespace SQLitePCL.pretty.Orm
             this.builder = builder;
             this.build = build;
             this.tableName = tableName;
-            this.createFlags = createFlags;
             this.columnToMapping = columnToMapping;
             this.indexes = indexes;
         }
 
         public String TableName { get { return tableName; } }
-
-        public CreateFlags CreateFlags { get { return createFlags; } }
 
         public IEnumerable<IndexInfo> Indexes { get { return indexes.AsEnumerable(); } }
 

@@ -21,9 +21,9 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 
-namespace SQLitePCL.pretty
+namespace SQLitePCL.pretty.Orm
 {
-    public static partial class DatabaseConnection
+    internal static partial class DatabaseConnection
     {
         /// <summary>
         /// Renames the table;
@@ -32,7 +32,7 @@ namespace SQLitePCL.pretty
         /// <param name="table">The table name.</param>
         /// <param name="newName">The new table name.</param>
         /// <seealso href="https://www.sqlite.org/lang_altertable.html"/>
-        public static void Rename(this IDatabaseConnection This, string table, string newName)
+        internal static void Rename(this IDatabaseConnection This, string table, string newName)
         {
             This.Execute(SQLBuilder.AlterTableRename(table, newName));
         }
@@ -43,7 +43,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="table">The table name.</param>
         /// <seealso href="https://www.sqlite.org/lang_droptable.html"/>
-        public static void DropTable(this IDatabaseConnection This, string table)
+        internal static void DropTable(this IDatabaseConnection This, string table)
         {
             This.Execute(SQLBuilder.DropTable(table));
         }
@@ -54,7 +54,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="table">The table name.</param>
         /// <seealso href="https://www.sqlite.org/lang_droptable.html"/>
-        public static void DropTableIfExists(this IDatabaseConnection This, string table)
+        internal static void DropTableIfExists(this IDatabaseConnection This, string table)
         {
             This.Execute(SQLBuilder.DropTableIfExists(table));
         }

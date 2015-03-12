@@ -25,11 +25,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SQLitePCL.pretty
+namespace SQLitePCL.pretty.Orm
 {
     // FIXME: Tempted to get rid of this enum all together in favor convention over configuration.
     [Flags]
-    public enum CreateFlags
+    internal enum CreateFlags
     {
         None                    = 0x000,
         FullTextSearch3         = 0x100,    // create virtual table using FTS3
@@ -106,66 +106,27 @@ namespace SQLitePCL.pretty
         }
     }
 
-    public static partial class DatabaseConnection
+    internal static partial class DatabaseConnection
     {
-        public static void CreateTableIfNotExists(this IDatabaseConnection conn, string tableName, CreateFlags createFlags, IEnumerable<Tuple<string, TableColumnMetadata>> columns)
+        internal static void CreateTableIfNotExists(this IDatabaseConnection conn, string tableName, CreateFlags createFlags, IEnumerable<Tuple<string, TableColumnMetadata>> columns)
         {
             var query =CreateTableIfNotExists(tableName, createFlags, columns);
             conn.Execute(query);
         }
 
-        public static IStatement PrepareDelete(this IDatabaseConnection This, string table, string primaryKeyColumn)
+        internal static IStatement PrepareDelete(this IDatabaseConnection This, string table, string primaryKeyColumn)
         {
             return This.PrepareStatement(SQLBuilder.DeleteUsingPrimaryKey(table, primaryKeyColumn));
         }
 
-        public static void Delete(this IDatabaseConnection This, string table, string primaryKeyColumn, object primaryKey)
+        internal static void Delete(this IDatabaseConnection This, string table, string primaryKeyColumn, object primaryKey)
         {
             This.Execute(SQLBuilder.DeleteUsingPrimaryKey(table, primaryKeyColumn), primaryKey);
         } 
 
-        public static void DeleteAll(this IDatabaseConnection This, string table)
+        internal static void DeleteAll(this IDatabaseConnection This, string table)
         {
             This.Execute(SQLBuilder.DeleteAll(table));
-        }
-
-        public static void CreateIndex(this IDatabaseConnection This, string indexName, string tableName, IEnumerable<string> columnNames, bool unique)
-        {
-            This.Execute(SQLBuilder.CreateIndex(indexName, tableName, columnNames, unique));
-        }
-
-        public static void CreateIndex(this IDatabaseConnection This, string indexName, string tableName, string columnName, bool unique)
-        {
-            This.Execute(SQLBuilder.CreateIndex(indexName, tableName, columnName, unique));
-        }
-
-        public static void CreateIndex(this IDatabaseConnection This, string tableName, string columnName, bool unique)
-        {
-            This.Execute(SQLBuilder.CreateIndex(tableName, columnName, unique));
-        }
-
-        public static void CreateIndex(this IDatabaseConnection This, string tableName, IEnumerable<string> columnNames, bool unique)
-        {
-            This.Execute(SQLBuilder.CreateIndex(tableName,columnNames, unique));
-        }
-
-        public static IEnumerable<IndexInfo> GetIndexInfo(this IDatabaseConnection This, string tableName)
-        {
-            return This.RunInTransaction(db =>
-                db.Query(SQLBuilder.ListIndexes(tableName))
-                    .Select(row => 
-                        {
-                            var indexName = row[1].ToString();
-                            var unique = row[2].ToBool();
-
-                            var columns = 
-                                db.Query(SQLBuilder.IndexInfo(indexName))
-                                  .Select(x => Tuple.Create(x[0].ToInt(),x[2].ToString()))
-                                  .OrderBy(x => x.Item1)
-                                  .Select(x => x.Item2)
-                                  .ToList();
-                            return new IndexInfo(indexName, unique, columns);
-                        }).ToList());
         }
 
         /// <summary>
@@ -174,7 +135,7 @@ namespace SQLitePCL.pretty
         /// <returns>The SQLite prepared statement.</returns>
         /// <param name="This">The database connection.</param>
         /// <param name="tableName">The table name.</param>
-        public static IStatement PrepareFindByRowId(this IDatabaseConnection This, string tableName)
+        internal static IStatement PrepareFindByRowId(this IDatabaseConnection This, string tableName)
         {
             return This.PrepareStatement(SQLBuilder.FindByRowID(tableName));
         }
@@ -186,7 +147,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="tableName">The table name.</param>
         /// <param name="rowid">The rowid of the row to fetch.</param>
-        public static IEnumerable<IReadOnlyList<IResultSetValue>> FindByRowId(this IDatabaseConnection This, string tableName, long rowid)
+        internal static IEnumerable<IReadOnlyList<IResultSetValue>> FindByRowId(this IDatabaseConnection This, string tableName, long rowid)
         {
             return This.Query(SQLBuilder.FindByRowID(tableName), rowid);
         }
@@ -197,7 +158,7 @@ namespace SQLitePCL.pretty
         /// <returns>The an <see cref="IReadOnlyDictionary&lt;TKey,TValue&gt;"/> of column names to <see cref="TableColumnMetadata"/>.</returns>
         /// <param name="This">The database connection.</param>
         /// <param name="tableName">The table name.</param>
-        public static IReadOnlyDictionary<string, TableColumnMetadata> GetTableInfo(this IDatabaseConnection This, string tableName)
+        internal static IReadOnlyDictionary<string, TableColumnMetadata> GetTableInfo(this IDatabaseConnection This, string tableName)
         {
             // FIXME: Would be preferable to return an actual immutable data structure so that we could cache this result.
             var retval = new Dictionary<string, TableColumnMetadata>();
