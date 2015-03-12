@@ -24,7 +24,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace SQLitePCL.pretty
 {
@@ -109,11 +108,9 @@ namespace SQLitePCL.pretty
 
     public static class DatabaseConnection
     {
-        private static readonly ThreadLocal<Random> _rand = new ThreadLocal<Random>(() => new Random());
-
         public static void CreateTableIfNotExists(this IDatabaseConnection conn, string tableName, CreateFlags createFlags, IEnumerable<Tuple<string, TableColumnMetadata>> columns)
         {
-            var query = SQLBuilder.CreateTableIfNotExists(tableName, createFlags, columns);
+            var query =CreateTableIfNotExists(tableName, createFlags, columns);
             conn.Execute(query);
         }
 
@@ -130,48 +127,6 @@ namespace SQLitePCL.pretty
         public static void DeleteAll(this IDatabaseConnection This, string table)
         {
             This.Execute(SQLBuilder.DeleteAll(table));
-        }
-
-        public static void DropTable(this IDatabaseConnection This, string table)
-        {
-            This.Execute(SQLBuilder.DropTableIfExists(table));
-        }
-
-        public static void BeginTransaction(this IDatabaseConnection This)
-        {
-            This.TryOrRollback(db => db.Execute(SQLBuilder.BeginTransaction));
-        }
-
-        public static string SaveTransactionPoint(this IDatabaseConnection This)
-        {
-            var savePoint = "S" + _rand.Value.Next (short.MaxValue);
-            This.TryOrRollback(db => db.Execute(SQLBuilder.SavePoint(savePoint)));
-            return savePoint;
-        }
-
-        public static void Release(this IDatabaseConnection This, string savepoint)
-        {
-            This.Execute(SQLBuilder.Release(savepoint));
-        }
-
-        public static void Commit(this IDatabaseConnection This)
-        {
-            This.Execute(SQLBuilder.Commit);
-        }
-
-        public static void RollbackTo(this IDatabaseConnection This, string savepoint)
-        {
-            This.Execute(SQLBuilder.RollbackTo(savepoint));
-        }
-
-        public static void Rollback(this IDatabaseConnection This)
-        {
-            This.Execute(SQLBuilder.Rollback);
-        }
-
-        public static void Vacuum(this IDatabaseConnection This)
-        {
-            This.Execute(SQLBuilder.Vacuum);
         }
 
         public static void CreateIndex(this IDatabaseConnection This, string indexName, string tableName, IEnumerable<string> columnNames, bool unique)
@@ -254,70 +209,24 @@ namespace SQLitePCL.pretty
             return retval;
         }
 
-        /// <summary>
-        ///  Runs the action <paramref name="action"/> in a transaction.
-        /// </summary>
-        /// <param name="This">The database connection.</param>
-        /// <param name="action">The Action to run in a transaction.</param>
-        public static void RunInTransaction(this IDatabaseConnection This, Action<IDatabaseConnection> action)
+        // FIXME: SHould really be in SQLbuilder, but moved out for now do to the createFlags
+        internal static string CreateTableIfNotExists(string tableName, CreateFlags createFlags, IEnumerable<Tuple<string, TableColumnMetadata>> columns)
         {
-            This.RunInTransaction(db => 
-                {
-                    action(db);
-                    return Enumerable.Empty<object>();
-                });
-        }
+            bool fts3 = (createFlags & CreateFlags.FullTextSearch3) != 0;
+            bool fts4 = (createFlags & CreateFlags.FullTextSearch4) != 0;
+            bool fts = fts3 || fts4;
 
+            var @virtual = fts ? "VIRTUAL " : string.Empty;
+            var @using = fts3 ? "USING FTS3 " : fts4 ? "USING FTS4 " : string.Empty;
 
-        /// <summary>
-        /// Runs the function <paramref name="f"/> in a transaction and returns function result.
-        /// </summary>
-        /// <returns>The function result.</returns>
-        /// <param name="This">The database connection.</param>
-        /// <param name="f">
-        /// The function to run in a transaction.
-        /// </param>
-        /// <typeparam name="T">The result type.</typeparam>
-        public static T RunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, T> f)
-        {
-            var savePoint = This.SaveTransactionPoint ();
+            // Build query.
+            var query = "CREATE " + @virtual + "TABLE IF NOT EXISTS \"" + tableName + "\" " + @using + "(\n";
+            var decls = columns.Select (c => SQLBuilder.SqlDecl(c.Item1, c.Item2));
+            var decl = string.Join (",\n", decls.ToArray ());
+            query += decl;
+            query += ")";
 
-            try 
-            {
-                var retval = f(This);
-                This.Release (savePoint);
-                return retval;
-            } 
-            catch (Exception) 
-            {
-                This.RollbackTo(savePoint);
-                throw;
-            }
-        }
-
-        private static void TryOrRollback(this IDatabaseConnection This, Action<IDatabaseConnection> action)
-        {
-            try
-            {
-                action(This);
-            }
-            catch (SQLiteException e)
-            {
-                switch (e.ErrorCode)
-                {   
-                    // It is recommended that applications respond to the errors listed below 
-                    // by explicitly issuing a ROLLBACK command.
-                    case ErrorCode.IOError:
-                    case ErrorCode.Full:
-                    case ErrorCode.Busy:
-                    case ErrorCode.NoMemory:
-                    case ErrorCode.Interrupt:
-                        Rollback(This);
-                        break;
-                }
-
-                throw;
-            }
+            return query;
         }
     }
 }

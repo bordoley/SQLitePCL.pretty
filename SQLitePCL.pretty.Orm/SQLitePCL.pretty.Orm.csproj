@@ -35,10 +35,8 @@
     <Compile Include="TableMapping.cs" />
     <Compile Include="Attributes.cs" />
     <Compile Include="DatabaseConnection.cs" />
-    <Compile Include="SQLBuilder.cs" />
     <Compile Include="TableQuery.cs" />
     <Compile Include="TableMappedStatement.cs" />
-    <Compile Include="AsyncDatabaseConnection.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>

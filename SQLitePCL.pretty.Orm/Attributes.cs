@@ -24,7 +24,10 @@
 using System;
 
 namespace SQLitePCL.pretty.Orm.Attributes
-{    
+{   
+    /// <summary>
+    /// Table attribute.
+    /// </summary>
     [AttributeUsage (AttributeTargets.Class)]
     public sealed class TableAttribute : Attribute
     {

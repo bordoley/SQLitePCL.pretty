@@ -572,24 +572,11 @@ namespace SQLitePCL.pretty.Orm
                     var colAttr = (ColumnAttribute)prop.GetCustomAttributes(typeof(ColumnAttribute), true).FirstOrDefault();
                     var name = colAttr == null ? prop.Name : colAttr.Name;
 
-                    var metadata = CreateColumnMetadata(prop, createFlags);
+                    var metadata = CreateColumnMetadata(prop);
 
                     columnToMapping.Add(name, new ColumnMapping(columnType, prop, metadata));
 
-                    // FIXME: Duplicate code. Make a function
-                    var isPK = IsPrimaryKey(prop) ||
-                               (((createFlags & CreateFlags.ImplicitPrimaryKey) == CreateFlags.ImplicitPrimaryKey) &&
-                               string.Compare(prop.Name, ImplicitPkName, StringComparison.OrdinalIgnoreCase) == 0);
-
                     var columnIndexes = GetIndexes(prop);
-                               
-                    if (!columnIndexes.Any()
-                        && !isPK
-                        && ((createFlags & CreateFlags.ImplicitIndex) == CreateFlags.ImplicitIndex)
-                        && name.EndsWith(ImplicitIndexSuffix, StringComparison.OrdinalIgnoreCase))
-                    {
-                        columnIndexes = new IndexedAttribute[] { new IndexedAttribute() };
-                    }
 
                     columnToIndexMapping.Add(name, columnIndexes);
                 }
@@ -637,33 +624,36 @@ namespace SQLitePCL.pretty.Orm
             return new TableMapping<T>(builder, build, tableName, createFlags, columnToMapping, indexes);
         }
             
-        private static TableColumnMetadata CreateColumnMetadata(PropertyInfo prop, CreateFlags createFlags = CreateFlags.None)
+        private static TableColumnMetadata CreateColumnMetadata(PropertyInfo prop)
         {
-            //If this type is Nullable<T> then Nullable.GetUnderlyingType returns the T, otherwise it returns null, so get the actual type instead
-            var columnType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
-            var collation = Collation(prop);
+            var definedType = prop.PropertyType;
 
-            // FIXME: Duplicate code. Make a function
-            var isPK = IsPrimaryKey(prop) ||
-                (((createFlags & CreateFlags.ImplicitPrimaryKey) == CreateFlags.ImplicitPrimaryKey) &&
-                    string.Compare (prop.Name, ImplicitPkName, StringComparison.OrdinalIgnoreCase) == 0);
-            
-            // FIXME: Lets refactor this. Basically the PK should always be autoincrement if its nullable<long> or nullable<int>
-            // otherwise its a required not null attribute
-            var isAuto = IsAutoIncrement(prop) || (isPK && ((createFlags & CreateFlags.AutoIncrementPrimaryKey) == CreateFlags.AutoIncrementPrimaryKey));
-            var isAutoGuid = isAuto && columnType == typeof(Guid);
-            var isAutoInc = isAuto && !isAutoGuid;
+            // If this type is Nullable<T> then Nullable.GetUnderlyingType returns the T, otherwise it returns null, so get the actual type instead
+            var columnType = Nullable.GetUnderlyingType(definedType) ?? definedType;
+            var collation = prop.Collation();
+            var isPK = prop.IsPrimaryKey();
+
+            var pkIsAutoInc = false;
+            if (isPK && definedType.GetTypeInfo().IsGenericType &&
+                ((definedType.GetGenericTypeDefinition() == typeof(Nullable<int>)) ||
+                 (definedType.GetGenericTypeDefinition() == typeof(Nullable<long>))
+                ))
+            {
+                pkIsAutoInc = true;
+            }
+
+            var isAutoInc = prop.IsAutoIncrement() || pkIsAutoInc;
+
             var hasNotNullConstraint = isPK || IsMarkedNotNull(prop);
+
             var maxStringLength = MaxStringLength(prop);
 
-            return new TableColumnMetadata(GetSqlType(columnType, maxStringLength), collation, hasNotNullConstraint, isPK, isAutoInc);
+            return new TableColumnMetadata(columnType.GetSqlType(maxStringLength), collation, hasNotNullConstraint, isPK, isAutoInc);
         }
 
         private const int DefaultMaxStringLength = 140;
-        private const string ImplicitPkName = "Id";
-        private const string ImplicitIndexSuffix = "Id";
 
-        private static string GetSqlType(Type clrType, int? maxStringLen)
+        private static string GetSqlType(this Type clrType, int? maxStringLen)
         {
             if (clrType == typeof(Boolean) || 
                 clrType == typeof(Byte)    || 
@@ -674,31 +664,31 @@ namespace SQLitePCL.pretty.Orm
                 clrType == typeof(UInt32)  || 
                 clrType == typeof(Int64))  
             { 
-                return "integer"; 
+                return "INTEGER"; 
             } 
                 
-            else if (clrType == typeof(Single) || clrType == typeof(Double) || clrType == typeof(Decimal)) { return "float"; } 
-            else if (clrType == typeof(String) && maxStringLen.HasValue)                                   { return "varchar(" + maxStringLen.Value + ")";  }
-            else if (clrType == typeof(String))                                                            { return "varchar"; } 
-            else if (clrType == typeof(TimeSpan))                                                          { return "bigint"; } 
-            else if (clrType == typeof(DateTime))                                                          { return "bigint"; } 
-            else if (clrType == typeof(DateTimeOffset))                                                    { return "bigint"; } 
-            else if (clrType.GetTypeInfo().IsEnum)                                                         { return "integer"; } 
-            else if (clrType == typeof(byte[]))                                                            { return "blob"; } 
-            else if (clrType == typeof(Guid))                                                              { return "varchar(36)"; } 
+            else if (clrType == typeof(Single) || clrType == typeof(Double) || clrType == typeof(Decimal)) { return "FLOAT"; } 
+            else if (clrType == typeof(String) && maxStringLen.HasValue)                                   { return "VARCHAR(" + maxStringLen.Value + ")";  }
+            else if (clrType == typeof(String))                                                            { return "VARCHAR"; } 
+            else if (clrType == typeof(TimeSpan))                                                          { return "BIGINT"; } 
+            else if (clrType == typeof(DateTime))                                                          { return "BIGINT"; } 
+            else if (clrType == typeof(DateTimeOffset))                                                    { return "BIGINT"; } 
+            else if (clrType.GetTypeInfo().IsEnum)                                                         { return "INTEGER"; } 
+            else if (clrType == typeof(byte[]))                                                            { return "BLOB"; } 
+            else if (clrType == typeof(Guid))                                                              { return "VARCHAR(36)"; } 
             else 
             {
                 throw new NotSupportedException ("Don't know about " + clrType);
             }
         }
 
-        private static bool IsPrimaryKey (MemberInfo p)
+        private static bool IsPrimaryKey (this MemberInfo p)
         {
             var attrs = p.GetCustomAttributes (typeof(PrimaryKeyAttribute), true);
             return attrs.Count() > 0;
         }
 
-        private static string Collation (MemberInfo p)
+        private static string Collation (this MemberInfo p)
         {
             var attrs = p.GetCustomAttributes (typeof(CollationAttribute), true);
             if (attrs.Count() > 0) {
@@ -708,19 +698,19 @@ namespace SQLitePCL.pretty.Orm
             }
         }
 
-        private static bool IsAutoIncrement (MemberInfo p)
+        private static bool IsAutoIncrement (this MemberInfo p)
         {
             var attrs = p.GetCustomAttributes (typeof(AutoIncrementAttribute), true);
             return attrs.Count() > 0;
         }
 
-        private static IEnumerable<IndexedAttribute> GetIndexes(MemberInfo p)
+        private static IEnumerable<IndexedAttribute> GetIndexes(this MemberInfo p)
         {
             var attrs = p.GetCustomAttributes(typeof(IndexedAttribute), true);
             return attrs.Cast<IndexedAttribute>();
         }
 
-        private static int? MaxStringLength(PropertyInfo prop)
+        private static int? MaxStringLength(this PropertyInfo prop)
         {
             var attrs = prop.GetCustomAttributes(typeof(MaxLengthAttribute), true);
             if (attrs.Count() > 0)
@@ -731,7 +721,7 @@ namespace SQLitePCL.pretty.Orm
             return null;
         }
 
-        private static bool IsMarkedNotNull(MemberInfo p)
+        private static bool IsMarkedNotNull(this MemberInfo p)
         {
             var attrs = p.GetCustomAttributes (typeof (NotNullAttribute), true);
             return attrs.Count() > 0;

@@ -34,7 +34,6 @@ namespace SQLitePCL.pretty.tests
     {
         public class VO
         {
-            // FIXME: This is a difference from SQLite-NET need to document
             [AutoIncrement, PrimaryKey]
             public int? ID { get; set; }
             public bool Flag { get; set; }
