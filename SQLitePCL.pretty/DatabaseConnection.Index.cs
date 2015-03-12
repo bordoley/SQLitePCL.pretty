@@ -3,21 +3,6 @@ using System.Collections.Generic;
 
 namespace SQLitePCL.pretty
 {
-    public sealed class IndexedColumn
-    {
-        public enum SortOrder
-        {
-            Ascending,
-            Descending
-        }
-
-        private readonly string name;
-        private readonly string collation;
-        private readonly SortOrder? sortOrder;
-
-        public 
-    }    
-
     public static partial class DatabaseConnection
     {   
         /// <summary>
