@@ -137,10 +137,10 @@ namespace SQLitePCL.pretty
         /// <param name="action">The Action to run in a transaction.</param>
         public static void RunInTransaction(this IDatabaseConnection This, Action<IDatabaseConnection> action)
         {
-            This.RunInTransaction(db => 
+            This.RunInTransaction<object>(db => 
                 {
                     action(db);
-                    return Enumerable.Empty<object>();
+                    return null;
                 });
         }
 
@@ -178,15 +178,11 @@ namespace SQLitePCL.pretty
         /// <param name="action">The action.</param>
         public static void TryOrRollback(this IDatabaseConnection This, Action<IDatabaseConnection> action)
         {
-            try
-            {
-                action(This);
-            }
-            catch (Exception)
-            {
-                Rollback(This);
-                throw;
-            }
+            This.TryOrRollback<object>(_ => 
+                { 
+                    action(This); 
+                    return null; 
+                });
         }
 
         /// <summary>
