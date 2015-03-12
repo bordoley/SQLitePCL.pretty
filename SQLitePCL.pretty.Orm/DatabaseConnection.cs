@@ -106,7 +106,7 @@ namespace SQLitePCL.pretty
         }
     }
 
-    public static class DatabaseConnection
+    public static partial class DatabaseConnection
     {
         public static void CreateTableIfNotExists(this IDatabaseConnection conn, string tableName, CreateFlags createFlags, IEnumerable<Tuple<string, TableColumnMetadata>> columns)
         {

@@ -37,6 +37,8 @@
     <Compile Include="DatabaseConnection.cs" />
     <Compile Include="TableQuery.cs" />
     <Compile Include="TableMappedStatement.cs" />
+    <Compile Include="DatabaseConnection.Index.cs" />
+    <Compile Include="DatabaseConnection.Tables.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>

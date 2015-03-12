@@ -78,7 +78,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Executs the SQLite SAVEPOINT command, starting a new transaction with a name.
+        /// Executes the SQLite SAVEPOINT command, starting a new transaction with a name.
         /// </summary>
         /// <returns>The savepoint name.</returns>
         /// <param name="This">The database connection.</param>
