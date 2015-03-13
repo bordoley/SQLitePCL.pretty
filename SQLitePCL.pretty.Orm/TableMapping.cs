@@ -24,6 +24,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -662,27 +663,25 @@ namespace SQLitePCL.pretty.Orm
 
         private static string GetSqlType(this Type clrType)
         {
-            if (clrType == typeof(Boolean) || 
-                clrType == typeof(Byte)    || 
-                clrType == typeof(UInt16)  || 
-                clrType == typeof(SByte)   || 
-                clrType == typeof(Int16)   || 
-                clrType == typeof(Int32)   ||
-                clrType == typeof(UInt32)  || 
-                clrType == typeof(Int64))  
+            if (clrType == typeof(Boolean)        || 
+                clrType == typeof(Byte)           || 
+                clrType == typeof(UInt16)         || 
+                clrType == typeof(SByte)          || 
+                clrType == typeof(Int16)          || 
+                clrType == typeof(Int32)          ||
+                clrType == typeof(UInt32)         || 
+                clrType == typeof(Int64)          ||
+                clrType == typeof(TimeSpan)       ||
+                clrType == typeof(DateTime)       ||
+                clrType == typeof(DateTimeOffset) ||  
+                clrType.GetTypeInfo().IsEnum)
             { 
                 return "INTEGER"; 
             } 
                 
-            else if (clrType == typeof(Single) || clrType == typeof(Double) || clrType == typeof(Decimal)) { return "FLOAT"; } 
-            else if (clrType == typeof(String))                                                            { return "VARCHAR"; } 
-            else if (clrType == typeof(TimeSpan))                                                          { return "BIGINT"; } 
-            else if (clrType == typeof(DateTime))                                                          { return "BIGINT"; } 
-            else if (clrType == typeof(DateTimeOffset))                                                    { return "BIGINT"; } 
-            else if (clrType.GetTypeInfo().IsEnum)                                                         { return "INTEGER"; } 
-            else if (clrType == typeof(byte[]))                                                            { return "BLOB"; } 
-            else if (clrType == typeof(Guid))                                                              { return "VARCHAR(36)"; } 
-            else if (clrType == typeof(Uri))                                                               { return "VARCHAR"; } 
+            else if (clrType == typeof(Single) || clrType == typeof(Double) || clrType == typeof(Decimal))               { return "REAL"; } 
+            else if (clrType == typeof(String) || clrType == typeof(Guid) || clrType == typeof(Uri))                     { return "TEXT"; } 
+            else if (clrType == typeof(byte[]) || clrType.GetTypeInfo().IsAssignableFrom(typeof(Stream).GetTypeInfo()))  { return "BLOB"; } 
             else 
             {
                 throw new NotSupportedException ("Don't know about " + clrType);
