@@ -119,10 +119,11 @@ namespace SQLitePCL.pretty.Orm
             return This.PrepareStatement(SQLBuilder.DeleteUsingPrimaryKey(table, primaryKeyColumn));
         }
 
+        /*
         internal static void Delete(this IDatabaseConnection This, string table, string primaryKeyColumn, object primaryKey)
         {
             This.Execute(SQLBuilder.DeleteUsingPrimaryKey(table, primaryKeyColumn), primaryKey);
-        } 
+        }*/ 
 
         internal static void DeleteAll(this IDatabaseConnection This, string table)
         {
@@ -140,6 +141,7 @@ namespace SQLitePCL.pretty.Orm
             return This.PrepareStatement(SQLBuilder.FindByRowID(tableName));
         }
 
+        /*
         /// <summary>
         /// Finds a row by it's SQLite rowid.
         /// </summary>
@@ -150,7 +152,7 @@ namespace SQLitePCL.pretty.Orm
         internal static IEnumerable<IReadOnlyList<IResultSetValue>> FindByRowId(this IDatabaseConnection This, string tableName, long rowid)
         {
             return This.Query(SQLBuilder.FindByRowID(tableName), rowid);
-        }
+        }*/
 
         /// <summary>
         /// Gets the table column info.

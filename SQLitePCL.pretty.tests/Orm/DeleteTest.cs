@@ -76,7 +76,7 @@ namespace SQLitePCL.pretty.tests
                 var items = Enumerable.Range (0, count).Select(i => new TestTable { Datum = 1000 + i, Test = "Hello World" });
                 var first = db.InsertAll(table, items).First();
 
-                var deleted = db.Delete(table, 1);
+                var deleted = db.Delete(table, first);
 
                 Assert.AreEqual(deleted.Id, first.Id);
                 Assert.AreEqual(count - 1, db.Count(table.CreateQuery()));
@@ -95,15 +95,11 @@ namespace SQLitePCL.pretty.tests
                 var items = Enumerable.Range(0, count).Select(i => new TestTable { Datum = 1000 + i, Test = "Hello World" });
                 db.InsertAll(table, items);
 
-                try
-                {
-                    var deleted = db.Delete(table, 348597);
-                    Assert.Fail();
-                }
-                catch (Exception e)
-                {
-                    Assert.AreEqual(count, db.Count(table.CreateQuery()));
-                } 
+                var notInTable = new TestTable { Id = 348597,  Datum = 1000, Test = "Hello World" };
+                var deleted = db.Delete(table, notInTable);
+                Assert.IsNull(deleted);
+               
+                Assert.AreEqual(count, db.Count(table.CreateQuery()));
             }
         }
 

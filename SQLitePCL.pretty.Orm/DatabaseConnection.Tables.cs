@@ -25,6 +25,7 @@ namespace SQLitePCL.pretty.Orm
 {
     internal static partial class DatabaseConnection
     {
+        /*
         /// <summary>
         /// Renames the table;
         /// </summary>
@@ -35,7 +36,7 @@ namespace SQLitePCL.pretty.Orm
         internal static void Rename(this IDatabaseConnection This, string table, string newName)
         {
             This.Execute(SQLBuilder.AlterTableRename(table, newName));
-        }
+        }*/
 
         /// <summary>
         /// Drops the table.

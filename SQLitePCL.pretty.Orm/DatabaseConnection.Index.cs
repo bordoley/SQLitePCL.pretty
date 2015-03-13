@@ -11,6 +11,7 @@ namespace SQLitePCL.pretty.Orm
             This.Execute(SQLBuilder.CreateIndex(indexName, tableName, columnNames, unique));
         }
 
+        /*
         internal static void CreateIndex(this IDatabaseConnection This, string indexName, string tableName, string columnName, bool unique)
         {
             This.Execute(SQLBuilder.CreateIndex(indexName, tableName, columnName, unique));
@@ -24,8 +25,9 @@ namespace SQLitePCL.pretty.Orm
         internal static void CreateIndex(this IDatabaseConnection This, string tableName, IEnumerable<string> columnNames, bool unique)
         {
             This.Execute(SQLBuilder.CreateIndex(tableName,columnNames, unique));
-        }
+        }*/
 
+        /*
         /// <summary>
         /// Rebuilds all indexes in all attached databases.
         /// </summary>
@@ -47,7 +49,7 @@ namespace SQLitePCL.pretty.Orm
         internal static void ReIndex(this IDatabaseConnection This, string name)
         {
             This.Execute(SQLBuilder.ReIndexWithName(name));
-        }
+        }*/
 
         internal static IEnumerable<IndexInfo> GetIndexInfo(this IDatabaseConnection This, string tableName)
         {

@@ -170,7 +170,7 @@ namespace SQLitePCL.pretty.Orm
 
         public static Task InitTableAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping)
         {
-            return This.Use(db => db.InitTable(tableMapping));
+            return This.InitTableAsync(tableMapping, CancellationToken.None);
         }
             
         private static void MigrateTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
@@ -229,26 +229,28 @@ namespace SQLitePCL.pretty.Orm
             }
         }
 
+        /*
         public static T Find<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
         {
             var primaryKey = tableMapping.GetPrimaryKey(obj);
             return This.Find(tableMapping, primaryKey);
-        }
+        }*/
 
         public static T Find<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey)
         {
-            return This.FindAll(tableMapping, new object[] { primaryKey }).First();
+            return This.FindAll(tableMapping, new object[] { primaryKey }).FirstOrDefault();
         }
 
+        /*
         public static Task<T> FindAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
         {
-            return This.Use(db => db.Find(tableMapping, obj));
+            return This.Find(tableMapping, obj, CancellationToken.None);
         }
 
         public static Task<T> FindAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, T obj, CancellationToken ct)
         {
             return This.Use((db, _) => db.Find(tableMapping, obj), ct);
-        }
+        }*/
 
         public static Task<T> FindAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey, CancellationToken ct)
         {
@@ -257,10 +259,10 @@ namespace SQLitePCL.pretty.Orm
 
         public static Task<T> FindAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey)
         {
-            return This.Use(db => db.Find(tableMapping, primaryKey));
+            return This.FindAsync(tableMapping, primaryKey, CancellationToken.None);
         }
 
-        public static IEnumerable<T> FindAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable primaryKeys)
+        public static IReadOnlyList<T> FindAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable primaryKeys)
         {
             return This.YieldFindAll(tableMapping, primaryKeys).ToList();
         }
@@ -270,6 +272,7 @@ namespace SQLitePCL.pretty.Orm
             return This.Use(db => db.YieldFindAll(tableMapping, primaryKeys));
         }
 
+        /*
         public static IEnumerable<T> FindAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
             var primaryKeys = objects.Select(tableMapping.GetPrimaryKey);
@@ -280,7 +283,7 @@ namespace SQLitePCL.pretty.Orm
         {
             var primaryKeys = objects.Select(tableMapping.GetPrimaryKey);
             return This.FindAll(tableMapping, primaryKeys);
-        }
+        }*/
 
         private static ITableMappedStatement<T> PrepareFindByRowId<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
@@ -339,10 +342,10 @@ namespace SQLitePCL.pretty.Orm
 
         public static Task<T> InsertAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
         {
-            return This.Use(x => x.Insert(tableMapping, obj));
+            return This.InsertAsync(tableMapping, obj, CancellationToken.None);
         }
 
-        public static IEnumerable<T> InsertAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
+        public static IReadOnlyList<T> InsertAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
             return This.YieldInsertAll(tableMapping, objects).ToList();
         }
@@ -388,10 +391,10 @@ namespace SQLitePCL.pretty.Orm
 
         public static Task<T> InsertOrReplaceAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
         {
-            return This.Use(x => x.InsertOrReplace(tableMapping, obj));
+            return This.InsertOrReplaceAsync(tableMapping, obj, CancellationToken.None);
         }
 
-        public static IEnumerable<T> InsertOrReplaceAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
+        public static IReadOnlyList<T> InsertOrReplaceAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
             return This.YieldInsertOrReplaceAll(tableMapping, objects).ToList();
         }
@@ -440,7 +443,7 @@ namespace SQLitePCL.pretty.Orm
             return This.Use(x => x.Update<T>(tableMapping, obj));
         }
 
-        public static IEnumerable<T> UpdateAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
+        public static IReadOnlyList<T> UpdateAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
             return This.YieldUpdateAll(tableMapping, objects).ToList();
         }
@@ -474,20 +477,21 @@ namespace SQLitePCL.pretty.Orm
             }
         }
 
-        public static T Delete<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey)
+        private static T Delete<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey)
         {
-            return This.YieldDeleteAll(tableMapping, new object[] { primaryKey }).First();
+            return This.YieldDeleteAll(tableMapping, new object[] { primaryKey }).FirstOrDefault();
         }
 
-        public static Task<T> DeleteAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey, CancellationToken cancellationToken)
+        /*
+        internal static Task<T> DeleteAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey, CancellationToken cancellationToken)
         {
             return This.Use((x, ct) => x.Delete(tableMapping, primaryKey), cancellationToken);
         }
 
-        public static Task<T> DeleteAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey)
+        internal static Task<T> DeleteAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey)
         {
-            return This.Use(x => x.Delete(tableMapping, primaryKey));
-        }
+            return This.DeleteAsync(tableMapping, primaryKey, CancellationToken.None);
+        }*/
 
         public static T Delete<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
         {
@@ -502,23 +506,22 @@ namespace SQLitePCL.pretty.Orm
 
         public static Task<T> DeleteAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
         {
-            return This.Use(x => x.Delete(tableMapping, obj));
+            return This.DeleteAsync(tableMapping, obj, CancellationToken.None);
         }
-
-        public static IEnumerable<T> DeleteAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable primaryKeys)
+            
+        private static IReadOnlyList<T> DeleteAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable primaryKeys)
         {
             return This.YieldDeleteAll(tableMapping, primaryKeys).ToList();
         }
-
-        public static IObservable<T> DeleteAll<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable primaryKeys)
+            
+        private static IObservable<T> DeleteAll<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable primaryKeys)
         {
             return This.Use(db => db.YieldDeleteAll(tableMapping, primaryKeys));
         }
 
-        public static IEnumerable<T> DeleteAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
+        public static IReadOnlyList<T> DeleteAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
             var primaryKeys = objects.Select(tableMapping.GetPrimaryKey);
-
             return This.DeleteAll<T>(tableMapping, primaryKeys);
         }
 

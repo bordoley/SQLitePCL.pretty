@@ -538,9 +538,7 @@ namespace SQLitePCL.pretty
             this IAsyncDatabaseConnection This, 
             Action<IDatabaseConnection> action)
         {
-            return This.Use(db => 
-                db.RunInTransaction(_ => 
-                    action(db)));
+            return This.RunInTransactionAsync((db, _) => action(db), CancellationToken.None);
         }
 
         /// <summary>
@@ -571,7 +569,7 @@ namespace SQLitePCL.pretty
             this IAsyncDatabaseConnection This, 
             Func<IDatabaseConnection, T> f)
         {
-            return This.Use(db => db.RunInTransaction(_ => f(db)));
+            return This.RunInTransactionAsync((db,_) => f(db), CancellationToken.None);
         }
             
         /// <summary>
