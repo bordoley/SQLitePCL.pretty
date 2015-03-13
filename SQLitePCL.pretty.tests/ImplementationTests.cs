@@ -30,7 +30,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestDispose()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (x int);");
                 foreach (int i in Enumerable.Range(0, 1000))
@@ -40,7 +40,7 @@ namespace SQLitePCL.pretty.tests
 
                 IDatabaseBackup notDisposedBackup;
                 
-                using (var db2 = SQLite3.Open(":memory:"))
+                using (var db2 = SQLite3.OpenInMemory())
                 {
                     var backup = db.BackupInit("main", db2, "main");
                     backup.Dispose();
@@ -63,7 +63,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestBackupWithPageStepping()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (x int);");
                 foreach (int i in Enumerable.Range(0, 1000))
@@ -71,7 +71,7 @@ namespace SQLitePCL.pretty.tests
                     db.Execute("INSERT INTO foo (x) VALUES (?);", i);
                 }
 
-                using (var db2 = SQLite3.Open(":memory:"))
+                using (var db2 = SQLite3.OpenInMemory())
                 {
                     using (var backup = db.BackupInit("main", db2, "main"))
                     {
@@ -99,7 +99,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestBackup()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (x int);");
                 foreach (int i in Enumerable.Range(0, 1000))
@@ -107,7 +107,7 @@ namespace SQLitePCL.pretty.tests
                     db.Execute("INSERT INTO foo (x) VALUES (?);", i);
                 }
 
-                using (var db2 = SQLite3.Open(":memory:"))
+                using (var db2 = SQLite3.OpenInMemory())
                 {
                     using (var backup = db.BackupInit("main", db2, "main"))
                     {
@@ -121,7 +121,7 @@ namespace SQLitePCL.pretty.tests
                     }
                 }
 
-                using (var db3 = SQLite3.Open(":memory:"))
+                using (var db3 = SQLite3.OpenInMemory())
                 {
                     db.Backup("main", db3, "main");
                     var backupResults = Enumerable.Zip(
@@ -144,7 +144,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestCurrent()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             using (var stmt = db.PrepareStatement("SELECT 1"))
             {
                 stmt.MoveNext();
@@ -159,7 +159,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestDispose()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 var stmt = db.PrepareStatement("SELECT 1");
                 stmt.Dispose();
@@ -183,7 +183,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestBusy()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.ExecuteAll(
                     @"CREATE TABLE foo (x int);
@@ -218,7 +218,7 @@ namespace SQLitePCL.pretty.tests
                 Tuple.Create("INSERT INTO foo2 (x, y) VALUES (?, ?)", 2)
             };
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 foreach (var test in tests)
                 {
@@ -243,7 +243,7 @@ namespace SQLitePCL.pretty.tests
                 Tuple.Create("INSERT INTO foo2 (x, y) VALUES (?, ?)", false)
             };
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 foreach (var test in tests)
                 {
@@ -268,7 +268,7 @@ namespace SQLitePCL.pretty.tests
                 "SELECT x FROM foo",
             };
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 foreach (var sqlStmt in sql)
                 {
@@ -285,7 +285,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestGetBindParameters()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (x int, v int, t text, d real, b blob, q blob);");
 
@@ -322,7 +322,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestExecute()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (v int);");
                 using (var stmt = db.PrepareStatement("INSERT INTO foo (v) VALUES (?)"))
@@ -343,7 +343,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestQuery()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (v int);");
                 using (var stmt = db.PrepareStatement("INSERT INTO foo (v) VALUES (?)"))
@@ -377,7 +377,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestClearBindings()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (x int, v int);");
 
@@ -405,7 +405,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestGetColumns()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 var count = 0;
                 var stmt = db.PrepareStatement("SELECT 1 as a, 2 as a, 3 as a");
@@ -425,7 +425,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestStatus()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (x int);");
 
@@ -452,7 +452,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestBindOnDisposedStatement()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (v int);");
 
@@ -470,7 +470,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestBindObject()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (v int);");
                 using (var stmt = db.PrepareStatement("INSERT INTO foo (v) VALUES (?)"))
@@ -484,9 +484,38 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Test]
+        public void TestBindExtensions()
+        {
+            using (var db = SQLite3.OpenInMemory())
+            {
+                using (var stmt = db.PrepareStatement("SELECT ?"))
+                {
+                    stmt.Reset();
+                    stmt.ClearBindings();
+                    stmt.BindParameters[0].Bind(true);
+                    stmt.MoveNext();
+                    Assert.AreEqual(stmt.Current[0].ToBool(), true);
+
+                    stmt.Reset();
+                    stmt.ClearBindings();
+                    stmt.BindParameters[0].Bind(TimeSpan.Zero);
+                    stmt.MoveNext();
+                    Assert.AreEqual(stmt.Current[0].ToTimeSpan(), TimeSpan.Zero);
+
+                    stmt.Reset();
+                    stmt.ClearBindings();
+                    stmt.BindParameters[0].Bind(1.1m);
+                    stmt.MoveNext();
+                    Assert.AreEqual(stmt.Current[0].ToDecimal(), 1.1);
+
+                }
+            }
+        }
+
+        [Test]
         public void TestBindSQLiteValue()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (v int);");
                 using (var stmt = db.PrepareStatement("SELECT ?"))
@@ -535,7 +564,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestCount()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.ExecuteAll(
                     @"CREATE TABLE foo (x int, v int);
@@ -557,7 +586,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestBracketOp()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.ExecuteAll(
                     @"CREATE TABLE foo (x int, v int);
@@ -578,7 +607,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestColumns()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 foreach (var row in db.Query("SELECT 1 as a, 2 as b"))
                 {
@@ -601,7 +630,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestRead()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 byte[] bytes = new byte[1000];
                 Random random = new Random();
@@ -638,7 +667,7 @@ namespace SQLitePCL.pretty.tests
         {
             Stream notDisposedStream;
 
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (x blob);");
                 db.Execute("INSERT INTO foo (x) VALUES(?);", "data");
@@ -671,7 +700,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestSeek()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (x blob);");
                 db.Execute("INSERT INTO foo (x) VALUES(?);", "data");
@@ -712,7 +741,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestWrite()
         {
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 byte[] bytes = new byte[1000];
                 Random random = new Random();

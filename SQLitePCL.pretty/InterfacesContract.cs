@@ -63,7 +63,7 @@ namespace SQLitePCL.pretty
 
         public TableColumnMetadata GetTableColumnMetadata(string dbName, string tableName, string columnName)
         {
-            Contract.Requires(dbName != null);
+            // dbName may be null per the SQLite spec:  
             Contract.Requires(tableName != null);
             Contract.Requires(columnName != null);
 

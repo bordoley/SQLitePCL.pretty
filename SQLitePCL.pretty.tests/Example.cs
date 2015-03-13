@@ -32,7 +32,7 @@ namespace SQLitePCL.pretty.tests
         public void DoExample()
         {
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream")))
-            using (var db = SQLite3.Open(":memory:"))
+            using (var db = SQLite3.OpenInMemory())
             {
                 db.ExecuteAll(
                     @"CREATE TABLE foo (w int, x float, y string, z blob);
@@ -74,7 +74,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public async Task DoExampleAsync()
         {
-            using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+            using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream")))
             {
                 await db.ExecuteAllAsync(

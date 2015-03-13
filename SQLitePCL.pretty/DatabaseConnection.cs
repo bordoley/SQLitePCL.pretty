@@ -782,6 +782,16 @@ namespace SQLitePCL.pretty
 
             return This.GetTableColumnMetadata(columnInfo.DatabaseName, columnInfo.TableName, columnInfo.OriginName);
         }*/
+
+        /// <summary>
+        /// Executes the SQLite VACUUM command
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <seealso href="https://www.sqlite.org/lang_vacuum.html"/>
+        public static void Vacuum(this IDatabaseConnection This)
+        {
+            This.Execute(SQLBuilder.Vacuum);
+        }
     }
 
     /// <summary>

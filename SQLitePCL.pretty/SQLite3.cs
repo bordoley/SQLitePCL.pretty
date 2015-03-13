@@ -152,6 +152,16 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
+        /// Opens an in memory SQLite database. This is useful for testing.
+        /// </summary>
+        /// <returns>A <see cref="SQLiteDatabaseConnection"/> instance.</returns>
+        /// <seealso href="https://sqlite.org/c3ref/open.html"/>
+        public static SQLiteDatabaseConnection OpenInMemory()
+        {
+            return SQLite3.Open(":memory:");
+        }
+
+        /// <summary>
         /// Opens a SQLite database.
         /// </summary>
         /// <param name="filename">The database filename.</param>

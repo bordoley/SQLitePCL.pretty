@@ -92,7 +92,11 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Returns metadata about a specific column of a specific database table,
         /// </summary>
-        /// <param name="dbName">The database name.</param>
+        /// <param name="dbName">
+        ///     The database name.  If null, then all attached databases are searched 
+        ///     for the table using the same algorithm used by the database engine to 
+        ///     resolve unqualified table references.
+        /// </param>
         /// <param name="tableName">The table name.</param>
         /// <param name="columnName">The column name.</param>
         /// <returns>The column metadata.</returns>

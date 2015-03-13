@@ -64,6 +64,11 @@ namespace SQLitePCL.pretty
             return ToSQLiteValue((long)This);
         }
 
+        /// <summary>
+        /// Converts an <see cref="short"/> to an <see cref="ISQLiteValue"/>.
+        /// </summary>
+        /// <param name="This">The value to convert</param>
+        /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this short This)
         {
             return ToSQLiteValue((long)This);
@@ -119,6 +124,11 @@ namespace SQLitePCL.pretty
             return ToSQLiteValue((long)(Convert.ChangeType(This, typeof(long))));
         }
 
+        /// <summary>
+        /// Converts an <see cref="UInt16"/> to an <see cref="ISQLiteValue"/>.
+        /// </summary>
+        /// <param name="This">The value to convert</param>
+        /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this UInt16 This)
         {
             return Convert.ToInt64(This).ToSQLiteValue();
@@ -144,6 +154,11 @@ namespace SQLitePCL.pretty
             return new FloatValue(This);
         }
 
+        /// <summary>
+        /// Converts an <see cref="float"/> to an <see cref="ISQLiteValue"/>.
+        /// </summary>
+        /// <param name="This">The value to convert</param>
+        /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this float This)
         {
             return Convert.ToDouble(This).ToSQLiteValue();
@@ -171,27 +186,62 @@ namespace SQLitePCL.pretty
             return new BlobValue(This);
         }
 
+        /// <summary>
+        /// Converts an <see cref="TimeSpan"/> to an <see cref="ISQLiteValue"/>.
+        /// </summary>
+        /// <param name="This">The value to convert</param>
+        /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this TimeSpan This)
         {
             return This.Ticks.ToSQLiteValue();
         }
 
+        /// <summary>
+        /// Converts an <see cref="DateTime"/> to an <see cref="ISQLiteValue"/>.
+        /// </summary>
+        /// <param name="This">The value to convert</param>
+        /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this DateTime This)
         {
             return This.Ticks.ToSQLiteValue();
         }
 
+        /// <summary>
+        /// Converts an <see cref="DateTimeOffset"/> to an <see cref="ISQLiteValue"/>.
+        /// </summary>
+        /// <param name="This">The value to convert</param>
+        /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this DateTimeOffset This)
         {
             return This.ToOffset(TimeSpan.Zero).Ticks.ToSQLiteValue();
         }
 
+        /// <summary>
+        /// Converts an <see cref="decimal"/> to an <see cref="ISQLiteValue"/>.
+        /// </summary>
+        /// <param name="This">The value to convert</param>
+        /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this decimal This)
         {
             return Convert.ToDouble(This).ToSQLiteValue();
         }            
 
+        /// <summary>
+        /// Converts an <see cref="Guid"/> to an <see cref="ISQLiteValue"/>.
+        /// </summary>
+        /// <param name="This">The value to convert</param>
+        /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this Guid This)
+        {
+            return This.ToString().ToSQLiteValue();
+        }
+
+        /// <summary>
+        /// Converts an <see cref="Uri"/> to an <see cref="ISQLiteValue"/>.
+        /// </summary>
+        /// <param name="This">The value to convert</param>
+        /// <returns>A ISQLiteValue representing the value.</returns>
+        public static ISQLiteValue ToSQLiteValue(this Uri This)
         {
             return This.ToString().ToSQLiteValue();
         }
@@ -239,65 +289,110 @@ namespace SQLitePCL.pretty
             }
         }
 
+        /// <summary>
+        /// Returns the SQLiteValue as a <see cref="bool"/>. 
+        /// </summary>
         public static bool ToBool(this ISQLiteValue value)
         {
             return value.ToInt() != 0;
         }
 
+        /// <summary>
+        /// Returns the SQLiteValue as a <see cref="float"/>. 
+        /// </summary>
         public static float ToFloat(this ISQLiteValue value)
         {
             return (float) value.ToDouble();
         }
 
+        /// <summary>
+        /// Returns the SQLiteValue as a <see cref="TimeSpan"/>. 
+        /// </summary>
         public static TimeSpan ToTimeSpan(this ISQLiteValue value)
         {
             return new TimeSpan(value.ToInt64());
         }
 
+        /// <summary>
+        /// Returns the SQLiteValue as a <see cref="DateTime"/>. 
+        /// </summary>
         public static DateTime ToDateTime(this ISQLiteValue value)
         {
             return new DateTime (value.ToInt64());
         }
 
+        /// <summary>
+        /// Returns the SQLiteValue as a <see cref="DateTimeOffset"/>. 
+        /// </summary>
         public static DateTimeOffset ToDateTimeOffset(this ISQLiteValue value)
         {
             return new DateTimeOffset(value.ToInt64(), TimeSpan.Zero);
         }
 
-        public static UInt32 ToUInt32(this ISQLiteValue value)
+        /// <summary>
+        /// Returns the SQLiteValue as a <see cref="uint"/>. 
+        /// </summary>
+        public static uint ToUInt32(this ISQLiteValue value)
         {
             return (uint) value.ToInt64();
         }
 
+        /// <summary>
+        /// Returns the SQLiteValue as a <see cref="decimal"/>. 
+        /// </summary>
         public static decimal ToDecimal(this ISQLiteValue value)
         {
             return (decimal) value.ToDouble();
         }
 
+        /// <summary>
+        /// Returns the SQLiteValue as a <see cref="byte"/>. 
+        /// </summary>
         public static byte ToByte(this ISQLiteValue value)
         {
             return (byte) value.ToInt();
         }
 
+        /// <summary>
+        /// Returns the SQLiteValue as a <see cref="UInt16"/>. 
+        /// </summary>
         public static UInt16 ToUInt16(this ISQLiteValue value)
         {
             return (ushort) value.ToInt();
         }
 
+        /// <summary>
+        /// Returns the SQLiteValue as a <see cref="short"/>. 
+        /// </summary>
         public static short ToShort(this ISQLiteValue value)
         {
             return (short) value.ToInt();
         }
 
+        /// <summary>
+        /// Returns the SQLiteValue as a <see cref="sbyte"/>. 
+        /// </summary>
         public static sbyte ToSByte(this ISQLiteValue value)
         {
             return (sbyte) value.ToInt();
         }
 
+        /// <summary>
+        /// Returns the SQLiteValue as a <see cref="Guid"/>. 
+        /// </summary>
         public static Guid ToGuid(this ISQLiteValue value)
         {
             var text = value.ToString();
             return new Guid(text);
+        }
+
+        /// <summary>
+        /// Returns the SQLiteValue as a <see cref="Uri"/>. 
+        /// </summary>
+        public static Uri ToUri(this ISQLiteValue value)
+        {
+            var text = value.ToString();
+            return new Uri(text);
         }
 
         internal static object ToObject(this ISQLiteValue value, Type clrType)
@@ -323,7 +418,7 @@ namespace SQLitePCL.pretty
             // FIXME: Bonus points clrType == Stream
             else if (clrType == typeof(byte[]))         { return value.ToBlob(); } 
             else if (clrType == typeof(Guid))           { return value.ToGuid(); } 
-
+            else if (clrType == typeof(Uri))            { return value.ToUri(); } 
             else 
             {
                 throw new NotSupportedException ("Don't know how to read " + clrType);

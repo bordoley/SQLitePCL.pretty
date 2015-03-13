@@ -104,7 +104,15 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Causes the database connection to not participate in shared cache mode even if it is enabled.
         /// </summary>
-        PrivateCache = raw.SQLITE_OPEN_PRIVATECACHE
+        PrivateCache = raw.SQLITE_OPEN_PRIVATECACHE,
+
+        ProtectionComplete = 0x00100000,
+
+        ProtectionCompleteUnlessOpen = 0x00200000,
+
+        ProtectionCompleteUntilFirstUserAuthentication = 0x00300000,
+
+        ProtectionNone = 0x00400000
     }
 
     /// <summary>
