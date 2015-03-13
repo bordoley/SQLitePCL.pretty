@@ -70,6 +70,10 @@ namespace SQLitePCL.pretty.tests
                 var resultGuid = await db.Query("SELECT ?", guid).SelectScalarGuid().FirstAsync();
                 Assert.AreEqual(resultGuid , guid);
 
+                var uri = new Uri("http://www.example.com/path/to/resource");
+                var resultUri = await db.Query("SELECT ?", uri).SelectScalarUri().FirstAsync();
+                Assert.AreEqual(resultUri, uri);
+
                 var blob = Encoding.UTF8.GetBytes("ab");
                 var resultBlob = await db.Query("SELECT ?", blob).SelectScalarBlob().FirstAsync();
                 Assert.AreEqual(Encoding.UTF8.GetString(resultBlob), "ab");

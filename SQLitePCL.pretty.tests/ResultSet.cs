@@ -38,6 +38,10 @@ namespace SQLitePCL.pretty.tests
                 query = db.Query("SELECT ?", guid);
                 Assert.AreEqual(query.SelectScalarGuid().First(), guid);
 
+                var uri = new Uri("http://www.example.com/path/to/resource");
+                query = db.Query("SELECT ?", uri);
+                Assert.AreEqual(query.SelectScalarUri().First(), uri);
+
                 var blob = Encoding.UTF8.GetBytes("ab");
                 var resultBlob = db.Query("SELECT ?", blob).SelectScalarBlob().First();
                 Assert.AreEqual(Encoding.UTF8.GetString(resultBlob), "ab");

@@ -69,6 +69,9 @@ namespace SQLitePCL.pretty.tests
 
             sbyte testSByte = 1;
             Assert.AreEqual(testSByte, testSByte.ToSQLiteValue().ToSByte());
+
+            Uri uri = new Uri("http://www.example.com/path/to/resource?querystring#fragment");
+            Assert.AreEqual(uri, uri.ToSQLiteValue().ToUri());
         }
 
         [Test]
