@@ -46,7 +46,7 @@ namespace SQLitePCL.pretty.tests
                 string testString = "\u2329\u221E\u232A";
                 db.Insert(table, (new Product { Name = testString }));
 
-                var p =  db.Find(table, 1).First();
+                var p =  db.Find(table, 1);
                 Assert.AreEqual (testString, p.Name);
             }
         }

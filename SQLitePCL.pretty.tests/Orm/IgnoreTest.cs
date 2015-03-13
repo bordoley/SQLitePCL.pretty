@@ -95,7 +95,7 @@ namespace SQLitePCL.pretty.tests
                 var o = new TestObj { Text = "Hello", IgnoredText = "World" };
                 var result = db.Insert(table, o);
 
-                var oo = db.Find(table, result.Id).First();
+                var oo = db.Find(table, result.Id);
                 Assert.AreEqual(o.Text, oo.Text);
                 Assert.IsNull(oo.IgnoredText);
             }

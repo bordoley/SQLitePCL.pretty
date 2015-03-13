@@ -222,29 +222,39 @@ namespace SQLitePCL.pretty.Orm
             {
                 foreach (var primaryKey in primaryKeys)
                 {
-                    var result = findStmt.Query(primaryKey).First();
+                    var result = findStmt.Query(primaryKey).FirstOrDefault();
                     yield return result;
                 }
             }
         }
 
-        public static IEnumerable<T> Find<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
+        public static T Find<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
         {
             var primaryKey = tableMapping.GetPrimaryKey(obj);
             return This.Find(tableMapping, primaryKey);
         }
 
-        public static IEnumerable<T> Find<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey)
+        public static T Find<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey)
         {
-            return This.FindAll(tableMapping, new object[] { primaryKey });
+            return This.FindAll(tableMapping, new object[] { primaryKey }).First();
         }
 
-        public static IObservable<T> Find<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
+        public static Task<T> FindAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
         {
             return This.Use(db => db.Find(tableMapping, obj));
         }
 
-        public static IObservable<T> Find<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey)
+        public static Task<T> FindAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, T obj, CancellationToken ct)
+        {
+            return This.Use((db, _) => db.Find(tableMapping, obj), ct);
+        }
+
+        public static Task<T> FindAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey, CancellationToken ct)
+        {
+            return This.Use((db, _) => db.Find(tableMapping, primaryKey), ct);
+        }
+
+        public static Task<T> FindAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey)
         {
             return This.Use(db => db.Find(tableMapping, primaryKey));
         }
@@ -407,7 +417,6 @@ namespace SQLitePCL.pretty.Orm
             {
                 foreach (var obj in objects)
                 {
-                    // FIXME: This is broken update can fail to affect any rows
                     updateAllStmt.Execute(obj);
                     var rowId = This.LastInsertedRowId;
                     yield return findStmt.Query(rowId).First();
@@ -454,9 +463,11 @@ namespace SQLitePCL.pretty.Orm
             {
                 foreach (var primaryKey in primaryKeys)
                 {
-                    // FIXME: This is broken update find can fail in this case
-                    var result = findStmt.Query(primaryKey).First();
-                    deleteStmt.Execute(primaryKey);
+                    var result = findStmt.Query(primaryKey).Select(x =>
+                        {
+                            deleteStmt.Execute(primaryKey);
+                            return x;
+                        }).FirstOrDefault();
                     yield return result;
                 }
             }
@@ -674,6 +685,7 @@ namespace SQLitePCL.pretty.Orm
             else if (clrType.GetTypeInfo().IsEnum)                                                         { return "INTEGER"; } 
             else if (clrType == typeof(byte[]))                                                            { return "BLOB"; } 
             else if (clrType == typeof(Guid))                                                              { return "VARCHAR(36)"; } 
+            else if (clrType == typeof(Uri))                                                               { return "VARCHAR"; } 
             else 
             {
                 throw new NotSupportedException ("Don't know about " + clrType);
