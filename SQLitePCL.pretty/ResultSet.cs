@@ -32,7 +32,7 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<IResultSetValue> SelectScalar(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.Select(x => x[0]);
@@ -42,7 +42,7 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row as a <see cref="int"/>.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<int> SelectScalarInt(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToInt());
@@ -52,7 +52,7 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row as a <see cref="long"/>.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<long> SelectScalarInt64(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToInt64());
@@ -62,7 +62,7 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row as a <see cref="string"/>.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<string> SelectScalarString(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToString());
@@ -72,7 +72,7 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row as a <see cref="byte"/> array.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<byte[]> SelectScalarBlob(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToBlob());
@@ -82,7 +82,7 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row as a <see cref="double"/>.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<double> SelectScalarDouble(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToDouble());
@@ -92,7 +92,7 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row as a <see cref="bool"/>.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<bool> SelectScalarBool(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToBool());
@@ -102,7 +102,7 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row as a <see cref="float"/>.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<float> SelectScalarFloat(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToFloat());
@@ -112,7 +112,7 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row as a <see cref="TimeSpan"/>.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<TimeSpan> SelectScalarTimeSpan(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToTimeSpan());
@@ -122,7 +122,7 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row as a <see cref="DateTime"/>.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<DateTime> SelectScalarDateTime(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToDateTime());
@@ -132,7 +132,7 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row as a <see cref="DateTimeOffset"/>.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<DateTimeOffset> SelectScalarDateTimeOffset(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToDateTimeOffset());
@@ -142,7 +142,7 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row as a <see cref="uint"/>.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<uint> SelectScalarUInt32(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToUInt32());
@@ -152,7 +152,7 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row as a <see cref="decimal"/>.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<decimal> SelectScalarDecimal(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToDecimal());
@@ -162,7 +162,7 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row as a <see cref="byte"/>.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<byte> SelectScalarByte(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToByte());
@@ -172,7 +172,7 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row as a <see cref="UInt16"/>.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<UInt16> SelectScalarUInt16(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToUInt16());
@@ -182,7 +182,7 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row as a <see cref="short"/>.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<short> SelectScalarShort(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToShort());
@@ -192,7 +192,7 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row as a <see cref="sbyte"/>.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<sbyte> SelectScalarSByte(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToSByte());
@@ -202,10 +202,20 @@ namespace SQLitePCL.pretty
         /// Selects the value in the first column of the result set row as a <see cref="Guid"/>.
         /// </summary>
         /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">This.</param>
+        /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<Guid> SelectScalarGuid(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
             return This.SelectScalar().Select(x => x.ToGuid());
+        }
+
+        /// <summary>
+        /// Selects the value in the first column of the result set row as a <see cref="Uri"/>.
+        /// </summary>
+        /// <returns>An IEnumerable of the scalar values.</returns>
+        /// <param name="This">An enumerable of result set rows.</param>
+        public static IEnumerable<Uri> SelectScalarUri(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
+        {
+            return This.SelectScalar().Select(x => x.ToUri());
         }
 
         /// <summary>
