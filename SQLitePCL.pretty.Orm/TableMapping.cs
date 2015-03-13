@@ -655,14 +655,12 @@ namespace SQLitePCL.pretty.Orm
 
             var hasNotNullConstraint = isPK || IsMarkedNotNull(prop);
 
-            var maxStringLength = MaxStringLength(prop);
-
-            return new TableColumnMetadata(columnType.GetSqlType(maxStringLength), collation, hasNotNullConstraint, isPK, isAutoInc);
+            return new TableColumnMetadata(columnType.GetSqlType(), collation, hasNotNullConstraint, isPK, isAutoInc);
         }
 
         private const int DefaultMaxStringLength = 140;
 
-        private static string GetSqlType(this Type clrType, int? maxStringLen)
+        private static string GetSqlType(this Type clrType)
         {
             if (clrType == typeof(Boolean) || 
                 clrType == typeof(Byte)    || 
@@ -677,7 +675,6 @@ namespace SQLitePCL.pretty.Orm
             } 
                 
             else if (clrType == typeof(Single) || clrType == typeof(Double) || clrType == typeof(Decimal)) { return "FLOAT"; } 
-            else if (clrType == typeof(String) && maxStringLen.HasValue)                                   { return "VARCHAR(" + maxStringLen.Value + ")";  }
             else if (clrType == typeof(String))                                                            { return "VARCHAR"; } 
             else if (clrType == typeof(TimeSpan))                                                          { return "BIGINT"; } 
             else if (clrType == typeof(DateTime))                                                          { return "BIGINT"; } 
@@ -718,17 +715,6 @@ namespace SQLitePCL.pretty.Orm
         {
             var attrs = p.GetCustomAttributes(typeof(IndexedAttribute), true);
             return attrs.Cast<IndexedAttribute>();
-        }
-
-        private static int? MaxStringLength(this PropertyInfo prop)
-        {
-            var attrs = prop.GetCustomAttributes(typeof(MaxLengthAttribute), true);
-            if (attrs.Count() > 0)
-            {
-                return ((MaxLengthAttribute) attrs.First()).Value;
-            }
-
-            return null;
         }
 
         private static bool IsMarkedNotNull(this MemberInfo p)

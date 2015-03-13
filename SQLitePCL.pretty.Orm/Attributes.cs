@@ -99,19 +99,6 @@ namespace SQLitePCL.pretty.Orm.Attributes
     }
 
     [AttributeUsage (AttributeTargets.Property)]
-    public sealed class MaxLengthAttribute : Attribute
-    {
-        private readonly int _value;
-
-        public MaxLengthAttribute (int length)
-        {
-            _value = length;
-        }
-
-        public int Value { get { return _value; } }
-    }
-
-    [AttributeUsage (AttributeTargets.Property)]
     public sealed class CollationAttribute: Attribute
     {
         private readonly string _value;
