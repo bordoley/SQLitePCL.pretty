@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>SQLitePCL.pretty.Orm</id>
+    <version>0.0.12-pre2</version>
+    <title>SQLitePCL.pretty.Orm</title>
+    <authors>David Bordoley</authors>
+    <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/bordoley/SQLitePCL.pretty</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>Async API for SQLitePCL.pretty</summary>
+    <description>Provides a simple table mapping ORM similar to the one provided by SQLite-Net.</description>
+    <tags>portable sqlite pcl rx reactive LINQ orm</tags>
+    <references>
+      <reference file="SQLitePCL.pretty.Orm.dll" />
+    </references>
+    <dependencies>
+      <dependency id="SQLitePCL.pretty" version="0.0.12-pre2" />
+      <dependency id="SQLitePCL.pretty.Async" version="0.0.12-pre2" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="SQLitePCL.pretty.Orm\bin\Release\SQLitePCL.pretty.Orm.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10+Xamarin.iOS10" />
+    <file src="SQLitePCL.pretty.Orm\bin\Release\SQLitePCL.pretty.Orm.xml" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10+Xamarin.iOS10" />
+    <file src="SQLitePCL.pretty.Orm\bin\Release\CodeContracts\SQLitePCL.pretty.Orm.Contracts.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10+Xamarin.iOS10" />
+  </files>
+</package>
