@@ -236,6 +236,16 @@ namespace SQLitePCL.pretty
             return This.ToString().ToSQLiteValue();
         }
 
+        /// <summary>
+        /// Converts an <see cref="Uri"/> to an <see cref="ISQLiteValue"/>.
+        /// </summary>
+        /// <param name="This">The value to convert</param>
+        /// <returns>A ISQLiteValue representing the value.</returns>
+        public static ISQLiteValue ToSQLiteValue(this Uri This)
+        {
+            return This.ToString().ToSQLiteValue();
+        }
+
         internal static ISQLiteValue ToSQLiteValue(this sqlite3_value This)
         {
             return new NativeValue(This);
@@ -376,6 +386,15 @@ namespace SQLitePCL.pretty
             return new Guid(text);
         }
 
+        /// <summary>
+        /// Returns the SQLiteValue as a <see cref="Uri"/>. 
+        /// </summary>
+        public static Uri ToUri(this ISQLiteValue value)
+        {
+            var text = value.ToString();
+            return new Uri(text);
+        }
+
         internal static object ToObject(this ISQLiteValue value, Type clrType)
         {
             if (value.SQLiteType == SQLiteType.Null)    { return null; } 
@@ -399,7 +418,7 @@ namespace SQLitePCL.pretty
             // FIXME: Bonus points clrType == Stream
             else if (clrType == typeof(byte[]))         { return value.ToBlob(); } 
             else if (clrType == typeof(Guid))           { return value.ToGuid(); } 
-
+            else if (clrType == typeof(Uri))            { return value.ToUri(); } 
             else 
             {
                 throw new NotSupportedException ("Don't know how to read " + clrType);

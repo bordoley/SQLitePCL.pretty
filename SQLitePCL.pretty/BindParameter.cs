@@ -103,7 +103,17 @@ namespace SQLitePCL.pretty
             // FIXME: Stream.Length is Int64, better to take max int
             This.BindZeroBlob((int) value.Length);
         }
-            
+
+        /// <summary>
+        /// Bind the parameter to a <see cref="Uri"/>.
+        /// </summary>
+        /// <param name="This">The bind parameter.</param>
+        /// <param name="value">A <see cref="Stream"/>.</param>
+        public static void Bind(this IBindParameter This, Uri value)
+        {
+            This.Bind(value.ToString());
+        }
+                    
         /// <summary>
         /// Bind the parameter to a value based upon its runtime type.
         /// </summary>
@@ -148,6 +158,7 @@ namespace SQLitePCL.pretty
             else if (obj is DateTimeOffset)                                                   { This.Bind((DateTimeOffset) obj); }
             else if (obj is Guid)                                                             { This.Bind((Guid) obj); }
             else if (obj is Stream)                                                           { This.Bind((Stream) obj); }
+            else if (obj is Uri)                                                              { This.Bind((Uri) obj); }
             else
             {
                 throw new ArgumentException("Invalid type conversion" + t);
