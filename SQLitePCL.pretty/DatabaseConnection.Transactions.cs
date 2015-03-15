@@ -22,6 +22,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -64,6 +65,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         public static void BeginTransaction(this IDatabaseConnection This)
         {
+            Contract.Requires(This != null);
             This.Execute(SQLBuilder.BeginTransaction);
         }
 
@@ -74,6 +76,7 @@ namespace SQLitePCL.pretty
         /// <param name="mode">The transaction mode.</param>
         public static void BeginTransaction(this IDatabaseConnection This, TransactionMode mode)
         {
+            Contract.Requires(This != null);
             This.Execute(SQLBuilder.BeginTransactionWithMode(mode));
         }
 
@@ -84,6 +87,8 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         public static string SaveTransactionPoint(this IDatabaseConnection This)
         {
+            Contract.Requires(This != null);
+
             var savePoint = "S" + _rand.Value.Next (short.MaxValue);
             This.Execute(SQLBuilder.SavePoint(savePoint));
             return savePoint;
@@ -97,6 +102,9 @@ namespace SQLitePCL.pretty
         /// <seealso href="https://www.sqlite.org/lang_savepoint.html"/>
         public static void Release(this IDatabaseConnection This, string savepoint)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(savepoint != null);
+
             This.Execute(SQLBuilder.Release(savepoint));
         }
 
@@ -106,6 +114,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         public static void Commit(this IDatabaseConnection This)
         {
+            Contract.Requires(This != null);
             This.Execute(SQLBuilder.Commit);
         }
 
@@ -117,6 +126,7 @@ namespace SQLitePCL.pretty
         /// <seealso href="https://www.sqlite.org/lang_transaction.html"/>
         public static void RollbackTo(this IDatabaseConnection This, string savepoint)
         {
+            Contract.Requires(This != null);
             This.Execute(SQLBuilder.RollbackTo(savepoint));
         }
 
@@ -127,6 +137,7 @@ namespace SQLitePCL.pretty
         /// <seealso href="https://www.sqlite.org/lang_transaction.html"/>
         public static void Rollback(this IDatabaseConnection This)
         {
+            Contract.Requires(This != null);
             This.Execute(SQLBuilder.Rollback);
         }
 
@@ -137,6 +148,9 @@ namespace SQLitePCL.pretty
         /// <param name="action">The Action to run in a transaction.</param>
         public static void RunInTransaction(this IDatabaseConnection This, Action<IDatabaseConnection> action)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(action != null);
+
             This.RunInTransaction<object>(db => 
                 {
                     action(db);
@@ -155,6 +169,9 @@ namespace SQLitePCL.pretty
         /// <typeparam name="T">The result type.</typeparam>
         public static T RunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, T> f)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(f != null);
+
             var savePoint = This.SaveTransactionPoint();
 
             try 
@@ -178,6 +195,9 @@ namespace SQLitePCL.pretty
         /// <param name="action">The action.</param>
         public static void TryOrRollback(this IDatabaseConnection This, Action<IDatabaseConnection> action)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(action != null);
+
             This.TryOrRollback<object>(_ => 
                 { 
                     action(This); 
@@ -194,6 +214,9 @@ namespace SQLitePCL.pretty
         /// <typeparam name="T">The result type.</typeparam>
         public static T TryOrRollback<T>(this IDatabaseConnection This, Func<IDatabaseConnection, T> f)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(f != null);
+
             try
             {
                 return f(This);

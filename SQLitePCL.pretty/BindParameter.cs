@@ -35,7 +35,8 @@ namespace SQLitePCL.pretty
         /// <param name="value">A <see cref="bool"/>.</param>
         public static void Bind(this IBindParameter This, bool value)
         {
-            This.Bind((long)(Convert.ChangeType(value, typeof(long))));
+            Contract.Requires(This != null);
+            This.Bind(Convert.ToInt64(value));
         }
 
         /// <summary>
@@ -45,6 +46,7 @@ namespace SQLitePCL.pretty
         /// <param name="value">A <see cref="TimeSpan"/>.</param>
         public static void Bind(this IBindParameter This, TimeSpan value)
         {
+            Contract.Requires(This != null);
             This.Bind(value.Ticks);
         }
 
@@ -55,6 +57,7 @@ namespace SQLitePCL.pretty
         /// <param name="value">A <see cref="DateTime"/>.</param>
         public static void Bind(this IBindParameter This, DateTime value)
         {
+            Contract.Requires(This != null);
             This.Bind(value.Ticks);
         }
 
@@ -65,6 +68,7 @@ namespace SQLitePCL.pretty
         /// <param name="value">A <see cref="DateTimeOffset"/>.</param>
         public static void Bind(this IBindParameter This, DateTimeOffset value)
         {
+            Contract.Requires(This != null);
             This.Bind(value.ToOffset(TimeSpan.Zero).Ticks);
         }
 
@@ -75,6 +79,7 @@ namespace SQLitePCL.pretty
         /// <param name="value">A <see cref="decimal"/>.</param>
         public static void Bind(this IBindParameter This, decimal value)
         {
+            Contract.Requires(This != null);
             This.Bind(Convert.ToDouble(value));
         }            
 
@@ -85,6 +90,7 @@ namespace SQLitePCL.pretty
         /// <param name="value">A <see cref="Guid"/>.</param>
         public static void Bind(this IBindParameter This, Guid value)
         {
+            Contract.Requires(This != null);
             This.Bind(value.ToString());
         }
 
@@ -95,6 +101,9 @@ namespace SQLitePCL.pretty
         /// <param name="value">A <see cref="Stream"/>.</param>
         public static void Bind(this IBindParameter This, Stream value)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(value != null);
+
             if (!value.CanRead)
             {
                 throw new ArgumentException("Stream is not readable");
@@ -111,6 +120,9 @@ namespace SQLitePCL.pretty
         /// <param name="value">A <see cref="Stream"/>.</param>
         public static void Bind(this IBindParameter This, Uri value)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(value != null);
+
             This.Bind(value.ToString());
         }
                     

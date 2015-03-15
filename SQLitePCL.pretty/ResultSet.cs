@@ -35,7 +35,8 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<IResultSetValue> SelectScalar(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
-            return This.Select(x => x[0]);
+            Contract.Requires(This != null);
+            return This.Select(x => x.First());
         }
 
         /// <summary>
@@ -45,6 +46,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<int> SelectScalarInt(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToInt());
         }
 
@@ -55,6 +57,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<long> SelectScalarInt64(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToInt64());
         }
 
@@ -65,6 +68,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<string> SelectScalarString(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToString());
         }
 
@@ -75,6 +79,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<byte[]> SelectScalarBlob(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToBlob());
         }
 
@@ -85,6 +90,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<double> SelectScalarDouble(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToDouble());
         }
 
@@ -95,6 +101,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<bool> SelectScalarBool(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToBool());
         }
 
@@ -105,6 +112,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<float> SelectScalarFloat(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToFloat());
         }
 
@@ -115,6 +123,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<TimeSpan> SelectScalarTimeSpan(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToTimeSpan());
         }
 
@@ -125,6 +134,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<DateTime> SelectScalarDateTime(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToDateTime());
         }
 
@@ -135,6 +145,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<DateTimeOffset> SelectScalarDateTimeOffset(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToDateTimeOffset());
         }
 
@@ -145,6 +156,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<uint> SelectScalarUInt32(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToUInt32());
         }
 
@@ -155,6 +167,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<decimal> SelectScalarDecimal(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToDecimal());
         }
 
@@ -165,6 +178,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<byte> SelectScalarByte(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToByte());
         }
 
@@ -175,6 +189,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<UInt16> SelectScalarUInt16(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToUInt16());
         }
 
@@ -185,6 +200,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<short> SelectScalarShort(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToShort());
         }
 
@@ -195,6 +211,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<sbyte> SelectScalarSByte(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToSByte());
         }
 
@@ -205,6 +222,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<Guid> SelectScalarGuid(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToGuid());
         }
 
@@ -215,6 +233,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<Uri> SelectScalarUri(this IEnumerable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToUri());
         }
 

@@ -61,7 +61,7 @@ namespace SQLitePCL.pretty
         /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this int This)
         {
-            return ToSQLiteValue((long)This);
+            return Convert.ToInt64(This).ToSQLiteValue();
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace SQLitePCL.pretty
         /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this short This)
         {
-            return ToSQLiteValue((long)This);
+            return Convert.ToInt64(This).ToSQLiteValue();
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace SQLitePCL.pretty
         /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this bool This)
         {
-            return ToSQLiteValue((long)(Convert.ChangeType(This, typeof(long))));
+            return Convert.ToInt64(This).ToSQLiteValue();
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace SQLitePCL.pretty
         /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this byte This)
         {
-            return ToSQLiteValue((long)(Convert.ChangeType(This, typeof(long))));
+            return Convert.ToInt64(This).ToSQLiteValue();
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace SQLitePCL.pretty
         /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this char This)
         {
-            return ToSQLiteValue((long)(Convert.ChangeType(This, typeof(long))));
+            return Convert.ToInt64(This).ToSQLiteValue();
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace SQLitePCL.pretty
         /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this sbyte This)
         {
-            return ToSQLiteValue((long)(Convert.ChangeType(This, typeof(long))));
+            return Convert.ToInt64(This).ToSQLiteValue();
         }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace SQLitePCL.pretty
         /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this UInt32 This)
         {
-            return ToSQLiteValue((long)(Convert.ChangeType(This, typeof(long))));
+            return Convert.ToInt64(This).ToSQLiteValue();
         }
 
         /// <summary>
@@ -243,6 +243,7 @@ namespace SQLitePCL.pretty
         /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this Uri This)
         {
+            Contract.Requires(This != null);
             return This.ToString().ToSQLiteValue();
         }
 
@@ -292,106 +293,121 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Returns the SQLiteValue as a <see cref="bool"/>. 
         /// </summary>
-        public static bool ToBool(this ISQLiteValue value)
+        public static bool ToBool(this ISQLiteValue This)
         {
-            return value.ToInt() != 0;
+            Contract.Requires(This != null);
+            return Convert.ToBoolean(This.ToInt64());
         }
 
         /// <summary>
         /// Returns the SQLiteValue as a <see cref="float"/>. 
         /// </summary>
-        public static float ToFloat(this ISQLiteValue value)
+        public static float ToFloat(this ISQLiteValue This)
         {
-            return (float) value.ToDouble();
+            Contract.Requires(This != null);
+            return (float) This.ToDouble();
         }
 
         /// <summary>
         /// Returns the SQLiteValue as a <see cref="TimeSpan"/>. 
         /// </summary>
-        public static TimeSpan ToTimeSpan(this ISQLiteValue value)
+        public static TimeSpan ToTimeSpan(this ISQLiteValue This)
         {
-            return new TimeSpan(value.ToInt64());
+            Contract.Requires(This != null);
+            return new TimeSpan(This.ToInt64());
         }
 
         /// <summary>
         /// Returns the SQLiteValue as a <see cref="DateTime"/>. 
         /// </summary>
-        public static DateTime ToDateTime(this ISQLiteValue value)
+        public static DateTime ToDateTime(this ISQLiteValue This)
         {
-            return new DateTime (value.ToInt64());
+            Contract.Requires(This != null);
+            return new DateTime (This.ToInt64());
         }
 
         /// <summary>
         /// Returns the SQLiteValue as a <see cref="DateTimeOffset"/>. 
         /// </summary>
-        public static DateTimeOffset ToDateTimeOffset(this ISQLiteValue value)
+        public static DateTimeOffset ToDateTimeOffset(this ISQLiteValue This)
         {
-            return new DateTimeOffset(value.ToInt64(), TimeSpan.Zero);
+            Contract.Requires(This != null);
+            return new DateTimeOffset(This.ToInt64(), TimeSpan.Zero);
         }
 
         /// <summary>
         /// Returns the SQLiteValue as a <see cref="uint"/>. 
         /// </summary>
-        public static uint ToUInt32(this ISQLiteValue value)
+        public static uint ToUInt32(this ISQLiteValue This)
         {
-            return (uint) value.ToInt64();
+            Contract.Requires(This != null);
+            return Convert.ToUInt32(This.ToInt64());
         }
 
         /// <summary>
         /// Returns the SQLiteValue as a <see cref="decimal"/>. 
         /// </summary>
-        public static decimal ToDecimal(this ISQLiteValue value)
+        public static decimal ToDecimal(this ISQLiteValue This)
         {
-            return (decimal) value.ToDouble();
+            Contract.Requires(This != null);
+            return Convert.ToDecimal(This.ToDouble());
         }
 
         /// <summary>
         /// Returns the SQLiteValue as a <see cref="byte"/>. 
         /// </summary>
-        public static byte ToByte(this ISQLiteValue value)
+        public static byte ToByte(this ISQLiteValue This)
         {
-            return (byte) value.ToInt();
+            Contract.Requires(This != null);
+            return Convert.ToByte(This.ToInt64());
         }
 
         /// <summary>
         /// Returns the SQLiteValue as a <see cref="UInt16"/>. 
         /// </summary>
-        public static UInt16 ToUInt16(this ISQLiteValue value)
+        public static UInt16 ToUInt16(this ISQLiteValue This)
         {
-            return (ushort) value.ToInt();
+            Contract.Requires(This != null);
+            return Convert.ToUInt16(This.ToInt64());
         }
 
         /// <summary>
         /// Returns the SQLiteValue as a <see cref="short"/>. 
         /// </summary>
-        public static short ToShort(this ISQLiteValue value)
+        public static short ToShort(this ISQLiteValue This)
         {
-            return (short) value.ToInt();
+            Contract.Requires(This != null);
+            return Convert.ToInt16(This.ToInt64());
         }
 
         /// <summary>
         /// Returns the SQLiteValue as a <see cref="sbyte"/>. 
         /// </summary>
-        public static sbyte ToSByte(this ISQLiteValue value)
+        public static sbyte ToSByte(this ISQLiteValue This)
         {
-            return (sbyte) value.ToInt();
+            Contract.Requires(This != null);
+            return Convert.ToSByte(This.ToInt64());
         }
 
         /// <summary>
         /// Returns the SQLiteValue as a <see cref="Guid"/>. 
         /// </summary>
-        public static Guid ToGuid(this ISQLiteValue value)
+        public static Guid ToGuid(this ISQLiteValue This)
         {
-            var text = value.ToString();
+            Contract.Requires(This != null);
+
+            var text = This.ToString();
             return new Guid(text);
         }
 
         /// <summary>
         /// Returns the SQLiteValue as a <see cref="Uri"/>. 
         /// </summary>
-        public static Uri ToUri(this ISQLiteValue value)
+        public static Uri ToUri(this ISQLiteValue This)
         {
-            var text = value.ToString();
+            Contract.Requires(This != null);
+
+            var text = This.ToString();
             return new Uri(text);
         }
 
@@ -414,8 +430,6 @@ namespace SQLitePCL.pretty
             else if (clrType == typeof(UInt16))         { return value.ToUInt16(); } 
             else if (clrType == typeof(Int16))          { return value.ToShort(); } 
             else if (clrType == typeof(sbyte))          { return value.ToSByte(); } 
-
-            // FIXME: Bonus points clrType == Stream
             else if (clrType == typeof(byte[]))         { return value.ToBlob(); } 
             else if (clrType == typeof(Guid))           { return value.ToGuid(); } 
             else if (clrType == typeof(Uri))            { return value.ToUri(); } 

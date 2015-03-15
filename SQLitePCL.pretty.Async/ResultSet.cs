@@ -19,6 +19,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Reactive.Linq;
 
 namespace SQLitePCL.pretty
@@ -34,8 +35,9 @@ namespace SQLitePCL.pretty
         /// <returns>An IObservable of the scalar values.</returns>
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<IResultSetValue> SelectScalar(this IObservable<IReadOnlyList<IResultSetValue>> This)
-        {
-            return This.Select(x => x[0]);
+        {   
+            Contract.Requires(This != null);
+            return This.Select(x => x.First());
         }
 
         /// <summary>
@@ -45,6 +47,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<int> SelectScalarInt(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToInt());
         }
 
@@ -55,6 +58,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<long> SelectScalarInt64(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToInt64());
         }
 
@@ -65,6 +69,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<string> SelectScalarString(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToString());
         }
 
@@ -75,6 +80,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<byte[]> SelectScalarBlob(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToBlob());
         }
 
@@ -85,6 +91,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<double> SelectScalarDouble(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToDouble());
         }
 
@@ -95,6 +102,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<bool> SelectScalarBool(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToBool());
         }
 
@@ -105,6 +113,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<float> SelectScalarFloat(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToFloat());
         }
 
@@ -115,6 +124,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<TimeSpan> SelectScalarTimeSpan(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToTimeSpan());
         }
 
@@ -125,6 +135,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<DateTime> SelectScalarDateTime(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToDateTime());
         }
 
@@ -135,6 +146,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<DateTimeOffset> SelectScalarDateTimeOffset(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToDateTimeOffset());
         }
 
@@ -145,6 +157,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<uint> SelectScalarUInt32(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToUInt32());
         }
 
@@ -155,6 +168,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<decimal> SelectScalarDecimal(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToDecimal());
         }
 
@@ -165,6 +179,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<byte> SelectScalarByte(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToByte());
         }
 
@@ -175,6 +190,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<UInt16> SelectScalarUInt16(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToUInt16());
         }
 
@@ -185,6 +201,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<short> SelectScalarShort(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToShort());
         }
 
@@ -195,6 +212,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<sbyte> SelectScalarSByte(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToSByte());
         }
 
@@ -205,6 +223,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<Guid> SelectScalarGuid(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToGuid());
         }
 
@@ -215,6 +234,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">An observable of result set rows.</param>
         public static IObservable<Uri> SelectScalarUri(this IObservable<IReadOnlyList<IResultSetValue>> This)
         {
+            Contract.Requires(This != null);
             return This.SelectScalar().Select(x => x.ToUri());
         }
     }

@@ -790,6 +790,7 @@ namespace SQLitePCL.pretty
         /// <seealso href="https://www.sqlite.org/lang_vacuum.html"/>
         public static void Vacuum(this IDatabaseConnection This)
         {
+            Contract.Requires(This != null);
             This.Execute(SQLBuilder.Vacuum);
         }
     }
