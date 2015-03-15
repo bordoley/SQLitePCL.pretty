@@ -147,6 +147,7 @@
     <Compile Include="TableColumnMetadata.cs" />
     <Compile Include="SQLBuilder.cs" />
     <Compile Include="DatabaseConnection.Transactions.cs" />
+    <Compile Include="Stack.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="SQLitePCL.raw">

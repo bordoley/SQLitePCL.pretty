@@ -1,4 +1,5 @@
 ﻿// Copyright (c) 2015 David Bordoley
+// Copyright (c) 2009-2015 Krueger Systems, Inc.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +27,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace SQLitePCL.pretty
@@ -55,9 +57,60 @@ namespace SQLitePCL.pretty
         Exclusive
     }    
 
+    internal class StackRef
+    {
+        public StackRef()
+        {
+            this.Stack = Stack<string>.Empty;
+        }
+
+        public Stack<string> Stack { get; set; }
+    }
+
     public static partial class DatabaseConnection
     {
         private static readonly ThreadLocal<Random> _rand = new ThreadLocal<Random>(() => new Random());
+
+        private static readonly ConditionalWeakTable<IDatabaseConnection, StackRef> transactionStackTable = 
+            new ConditionalWeakTable<IDatabaseConnection, StackRef>();
+
+
+        private static StackRef GetTransactionStackRef(this IDatabaseConnection This)
+        {
+            return transactionStackTable.GetValue(This, _ => new StackRef());
+        }
+
+        private static Stack<string> GetTransactionStack(this IDatabaseConnection This)
+        {
+            return This.GetTransactionStackRef().Stack;
+        }
+
+        private static void ResetTransactionStack(this IDatabaseConnection This)
+        {
+            This.GetTransactionStackRef().Stack = Stack<string>.Empty;
+        }
+
+        private static void PushSavePoint(this IDatabaseConnection This, string savepoint)
+        {
+            var stackref = This.GetTransactionStackRef();
+            stackref.Stack = This.GetTransactionStack().Push(savepoint);
+        }
+
+        private static void PopTransactionStackToSavePoint(this IDatabaseConnection This, string savepoint)
+        {
+            var transactionStack = This.GetTransactionStack();
+            var result = transactionStack;
+            while (result.Head != savepoint)
+            {
+                if (result.IsEmpty())
+                { 
+                    throw new ArgumentException("savePoint is not valid, and should be the result of a call to SaveTransactionPoint.", "savePoint");
+                }
+                result = result.Tail;
+            }
+
+            This.GetTransactionStackRef().Stack = result;
+        }
 
         /// <summary>
         /// Begins a SQLite transaction using the default transaction mode.
@@ -65,8 +118,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         public static void BeginTransaction(this IDatabaseConnection This)
         {
-            Contract.Requires(This != null);
-            This.Execute(SQLBuilder.BeginTransaction);
+            This.BeginTransaction(TransactionMode.Deferred);
         }
 
         /// <summary>
@@ -77,7 +129,12 @@ namespace SQLitePCL.pretty
         public static void BeginTransaction(this IDatabaseConnection This, TransactionMode mode)
         {
             Contract.Requires(This != null);
+
+            var transactionStack = This.GetTransactionStack();
+            if (!transactionStack.IsEmpty()) { throw new InvalidOperationException(); }
+
             This.Execute(SQLBuilder.BeginTransactionWithMode(mode));
+            This.PushSavePoint(SQLBuilder.BeginTransaction);
         }
 
         /// <summary>
@@ -91,6 +148,7 @@ namespace SQLitePCL.pretty
 
             var savePoint = "S" + _rand.Value.Next (short.MaxValue);
             This.Execute(SQLBuilder.SavePoint(savePoint));
+            This.PushSavePoint(savePoint);
             return savePoint;
         }
 
@@ -100,11 +158,12 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="savepoint">The savepoint</param>
         /// <seealso href="https://www.sqlite.org/lang_savepoint.html"/>
-        public static void Release(this IDatabaseConnection This, string savepoint)
+        public static void ReleaseTransaction(this IDatabaseConnection This, string savepoint)
         {
             Contract.Requires(This != null);
             Contract.Requires(savepoint != null);
 
+            This.PopTransactionStackToSavePoint(savepoint);
             This.Execute(SQLBuilder.Release(savepoint));
         }
 
@@ -112,10 +171,12 @@ namespace SQLitePCL.pretty
         /// Commits the current transaction.
         /// </summary>
         /// <param name="This">The database connection.</param>
-        public static void Commit(this IDatabaseConnection This)
+        public static void CommitTransaction(this IDatabaseConnection This)
         {
             Contract.Requires(This != null);
-            This.Execute(SQLBuilder.Commit);
+
+            This.ResetTransactionStack();
+            This.Execute(SQLBuilder.CommitTransaction);
         }
 
         /// <summary>
@@ -124,10 +185,12 @@ namespace SQLitePCL.pretty
         /// <param name="This">This.</param>
         /// <param name="savepoint">The savepoint.</param>
         /// <seealso href="https://www.sqlite.org/lang_transaction.html"/>
-        public static void RollbackTo(this IDatabaseConnection This, string savepoint)
+        public static void RollbackTransactionTo(this IDatabaseConnection This, string savepoint)
         {
             Contract.Requires(This != null);
-            This.Execute(SQLBuilder.RollbackTo(savepoint));
+
+            This.PopTransactionStackToSavePoint(savepoint);
+            This.Execute(SQLBuilder.RollbackTransactionTo(savepoint));
         }
 
         /// <summary>
@@ -135,10 +198,11 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <param name="This">The database connection.</param>
         /// <seealso href="https://www.sqlite.org/lang_transaction.html"/>
-        public static void Rollback(this IDatabaseConnection This)
+        public static void RollbackTransaction(this IDatabaseConnection This)
         {
             Contract.Requires(This != null);
-            This.Execute(SQLBuilder.Rollback);
+            This.ResetTransactionStack();
+            This.Execute(SQLBuilder.RollbackTransaction);
         }
 
         /// <summary>
@@ -172,17 +236,31 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(f != null);
 
+            bool shouldDoFullRollBack = false;
+            if (This.GetTransactionStack().IsEmpty())
+            {
+                shouldDoFullRollBack = true;
+                This.BeginTransaction();
+            }
+
             var savePoint = This.SaveTransactionPoint();
 
-            try 
+            try
             {
                 var retval = f(This);
-                This.Release (savePoint);
+                This.ReleaseTransaction(savePoint);
                 return retval;
-            } 
-            catch (Exception) 
+            }
+            catch (Exception)
             {
-                This.RollbackTo(savePoint);
+                if (shouldDoFullRollBack)
+                {
+                    This.RollbackTransaction();
+                }
+                else
+                {
+                    This.RollbackTransactionTo(savePoint);
+                }
                 throw;
             }
         }
@@ -223,7 +301,7 @@ namespace SQLitePCL.pretty
             }
             catch (Exception)
             {
-                Rollback(This);
+                This.RollbackTransaction();
                 throw;
             }
         }

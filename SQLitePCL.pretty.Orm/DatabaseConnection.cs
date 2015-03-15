@@ -110,7 +110,7 @@ namespace SQLitePCL.pretty.Orm
     {
         internal static void CreateTableIfNotExists(this IDatabaseConnection conn, string tableName, CreateFlags createFlags, IEnumerable<Tuple<string, TableColumnMetadata>> columns)
         {
-            var query =CreateTableIfNotExists(tableName, createFlags, columns);
+            var query = CreateTableIfNotExists(tableName, createFlags, columns);
             conn.Execute(query);
         }
 

@@ -80,6 +80,8 @@
     <Compile Include="SQLiteValueTests.cs" />
     <Compile Include="SQLiteVersionTests.cs" />
     <Compile Include="TableColumnMetadataTests.cs" />
+
+    <!---
     <Compile Include="Orm\CreateTableTests.cs" />
     <Compile Include="Orm\TestObjects.cs" />
     <Compile Include="Orm\BooleanTests.cs" />
@@ -103,7 +105,7 @@
     <Compile Include="Orm\InsertTest.cs" />
     <Compile Include="Orm\MigrationTest.cs" />
     <Compile Include="Orm\LinqTest.cs" />
-    <Compile Include="Orm\MappingTest.cs" />
+    <Compile Include="Orm\MappingTest.cs" />-->
     <Compile Include="ResultSet.cs" />
     <Compile Include="AsyncTests\ResultSet.cs" />
   </ItemGroup>

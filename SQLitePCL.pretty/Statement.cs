@@ -112,9 +112,7 @@ namespace SQLitePCL.pretty
                     This.Reset();
                     This.ClearBindings();
                     This.Bind(values);
-
-                    // Prevent the statement from being disposed when the enumerator is disposed
-                    return new NonDisposingEnumerator<IReadOnlyList<IResultSetValue>>(This);
+                    return This.Enumerate();
                 });
         }
 
@@ -130,51 +128,16 @@ namespace SQLitePCL.pretty
             return new DelegatingEnumerable<IReadOnlyList<IResultSetValue>>(() => 
                 {
                     This.Reset();
-
-                    // Prevent the statement from being disposed when the enumerator is disposed
-                    return new NonDisposingEnumerator<IReadOnlyList<IResultSetValue>>(This);
+                    return This.Enumerate();
                 });
         }
-    }
 
-    // An IEnumerator that wraps a delegate, and prevents unintentional disposing of the delegate
-    internal sealed class NonDisposingEnumerator<T> : IEnumerator<T>
-    {
-        private readonly IEnumerator<T> deleg;
-
-        internal NonDisposingEnumerator(IEnumerator<T> deleg)
+        // Prevents the statement from being disposed when the enumerator is disposed
+        private static IEnumerator<IReadOnlyList<IResultSetValue>> Enumerate(this IStatement This)
         {
-            this.deleg = deleg;
-        }
-
-        public void Dispose()
-        {
-            // Intentionally left blank
-        }
-
-        public bool MoveNext()
-        {
-            return deleg.MoveNext();
-        }
-
-        public void Reset()
-        {
-            deleg.Reset();
-        }
-
-        object IEnumerator.Current
-        {
-            get
+            while (This.MoveNext())
             {
-                return deleg.Current;
-            }
-        }
-
-        public T Current
-        {
-            get
-            {
-                return deleg.Current;
+                yield return This.Current;
             }
         }
     }

@@ -724,6 +724,34 @@ namespace SQLitePCL.pretty.Orm
             var attrs = p.GetCustomAttributes (typeof (NotNullAttribute), true);
             return attrs.Count() > 0;
         }
+
+        internal static object ToObject(this ISQLiteValue value, Type clrType)
+        {
+            if (value.SQLiteType == SQLiteType.Null)    { return null; } 
+            else if (clrType == typeof(String))         { return value.ToString(); } 
+            else if (clrType == typeof(Int32))          { return value.ToInt(); } 
+            else if (clrType == typeof(Boolean))        { return value.ToBool(); } 
+            else if (clrType == typeof(double))         { return value.ToDouble(); } 
+            else if (clrType == typeof(float))          { return value.ToFloat(); } 
+            else if (clrType == typeof(TimeSpan))       { return value.ToTimeSpan(); } 
+            else if (clrType == typeof(DateTime))       { return value.ToDateTime(); } 
+            else if (clrType == typeof(DateTimeOffset)) { return value.ToDateTimeOffset(); }
+            else if (clrType.GetTypeInfo().IsEnum)      { return value.ToInt(); } 
+            else if (clrType == typeof(Int64))          { return value.ToInt64(); } 
+            else if (clrType == typeof(UInt32))         { return value.ToUInt32(); } 
+            else if (clrType == typeof(decimal))        { return value.ToDecimal(); } 
+            else if (clrType == typeof(Byte))           { return value.ToByte(); } 
+            else if (clrType == typeof(UInt16))         { return value.ToUInt16(); } 
+            else if (clrType == typeof(Int16))          { return value.ToShort(); } 
+            else if (clrType == typeof(sbyte))          { return value.ToSByte(); } 
+            else if (clrType == typeof(byte[]))         { return value.ToBlob(); } 
+            else if (clrType == typeof(Guid))           { return value.ToGuid(); } 
+            else if (clrType == typeof(Uri))            { return value.ToUri(); } 
+            else 
+            {
+                throw new NotSupportedException ("Don't know how to read " + clrType);
+            }
+        }
     }
 
     internal sealed class TableMapping<T> : ITableMapping<T>

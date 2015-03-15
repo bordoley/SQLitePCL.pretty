@@ -728,5 +728,16 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(highwater, 0);
             }
         }
+
+        [Test]
+        public void TestVacuum()
+        {   
+            using (var db = SQLite3.OpenInMemory())
+            {
+                // VACUUM can't be called during a transaction so its a good negative confirmation test.
+                Assert.Throws<SQLiteException>(() => db.RunInTransaction(_ => db.Vacuum()));
+                db.Vacuum();
+            }
+        }
     }
 }
