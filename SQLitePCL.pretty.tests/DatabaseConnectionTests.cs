@@ -739,5 +739,58 @@ namespace SQLitePCL.pretty.tests
                 db.Vacuum();
             }
         }
+
+        [Test]
+        public void TestTransaction()
+        {
+            using (var db = SQLite3.OpenInMemory())
+            {
+                var result = db.RunInTransaction(_ =>
+                    {
+                        db.RunInTransaction(__ => db.Execute("CREATE TABLE foo (x int);"));
+                        db.TryRunInTransaction(__ =>
+                            {
+                                db.Execute("INSERT INTO foo (x) VALUES (1);");
+                                db.Execute("INSERT INTO foo (x) VALUES (2);");
+                                db.Execute("INSERT INTO foo (x) VALUES (3);");
+                            });
+                        CollectionAssert.AreEquivalent(db.Query("SELECT * FROM foo").SelectScalarInt().ToList(), new int[]{ 1, 2, 3 });
+
+                        var failedResult = db.TryRunInTransaction(__ =>
+                            {
+                                db.Execute("INSERT INTO foo (x) VALUES (1);");
+                                db.Execute("INSERT INTO foo (x) VALUES (2);");
+                                db.Execute("INSERT INTO foo (x) VALUES (3);");
+                                throw new Exception();
+                            });
+                        Assert.IsFalse(failedResult);
+                        CollectionAssert.AreEquivalent(db.Query("SELECT * FROM foo").SelectScalarInt().ToList(), new int[]{ 1, 2, 3 });
+
+                        string successResult;
+                        if(db.TryRunInTransaction(__ =>
+                            {
+                                db.Execute("INSERT INTO foo (x) VALUES (1);");
+                                db.Execute("INSERT INTO foo (x) VALUES (2);");
+                                db.Execute("INSERT INTO foo (x) VALUES (3);");
+                                return "SUCCESS";
+                            }, out successResult))
+                        {
+                            Assert.AreEqual(successResult, "SUCCESS");
+                        }
+                        else 
+                        {
+                            Assert.Fail("expect the transaction to succeed");
+                        }
+
+                        return "SUCCESS";
+                    });
+
+                Assert.AreEqual(result, "SUCCESS");
+
+                db.RunInTransaction(_ => {}, TransactionMode.Exclusive);
+                db.RunInTransaction(_ => {}, TransactionMode.Immediate);
+                Assert.Throws<ArgumentException>(() => db.RunInTransaction(_ => {}, (TransactionMode) int.MaxValue));
+            }
+        }
     }
 }

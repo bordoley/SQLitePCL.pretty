@@ -39,8 +39,6 @@ namespace SQLitePCL.pretty
               WHERE type='table'
               ORDER BY name;";
 
-        internal const string BeginTransaction = "BEGIN TRANSACTION";
-
         internal const string CommitTransaction = "COMMIT TRANSACTION";
 
         internal const string RollbackTransaction = "ROLLBACK TRANSACTION";

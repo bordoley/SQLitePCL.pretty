@@ -480,6 +480,27 @@ namespace SQLitePCL.pretty.tests
                     Assert.Throws<ArgumentException>(() => stmt.BindParameters[0].Bind(stream));
                     Assert.Throws<ArgumentException>(() => stmt.BindParameters[0].Bind(new object()));
                 }
+
+                using (var stmt = db.PrepareStatement("SELECT ?"))
+                {
+                    stmt.Reset();
+                    stmt.ClearBindings();
+                    stmt.BindParameters[0].Bind((object) DateTime.MaxValue);
+                    stmt.MoveNext();
+                    Assert.AreEqual(stmt.Current[0].ToDateTime(), DateTime.MaxValue);
+
+                    stmt.Reset();
+                    stmt.ClearBindings();
+                    stmt.BindParameters[0].Bind((object) DateTimeOffset.MaxValue);
+                    stmt.MoveNext();
+                    Assert.AreEqual(stmt.Current[0].ToDateTimeOffset(), DateTimeOffset.MaxValue);
+
+                    stmt.Reset();
+                    stmt.ClearBindings();
+                    stmt.BindParameters[0].Bind((object) TimeSpan.Zero);
+                    stmt.MoveNext();
+                    Assert.AreEqual(stmt.Current[0].ToTimeSpan(), TimeSpan.Zero);
+                }
             }
         }
 
@@ -508,6 +529,17 @@ namespace SQLitePCL.pretty.tests
                     stmt.MoveNext();
                     Assert.AreEqual(stmt.Current[0].ToDecimal(), 1.1);
 
+                    stmt.Reset();
+                    stmt.ClearBindings();
+                    stmt.BindParameters[0].Bind(DateTime.MaxValue);
+                    stmt.MoveNext();
+                    Assert.AreEqual(stmt.Current[0].ToDateTime(), DateTime.MaxValue);
+
+                    stmt.Reset();
+                    stmt.ClearBindings();
+                    stmt.BindParameters[0].Bind(DateTimeOffset.MaxValue);
+                    stmt.MoveNext();
+                    Assert.AreEqual(stmt.Current[0].ToDateTimeOffset(), DateTimeOffset.MaxValue);
                 }
             }
         }

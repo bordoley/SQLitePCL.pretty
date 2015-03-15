@@ -92,6 +92,7 @@ namespace SQLitePCL.pretty
             {
                 if (result.IsEmpty())
                 { 
+                    // This can't actually happen, since we don't expose the underlaying SaveTransactionPoint and ReleaseTransaction APIs
                     throw new ArgumentException("savePoint is not valid, and should be the result of a call to SaveTransactionPoint.", "savePoint");
                 }
                 result = result.Tail;
@@ -101,28 +102,22 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Begins a SQLite transaction using the default transaction mode.
-        /// </summary>
-        /// <param name="This">The database connection.</param>
-        public static void BeginTransaction(this IDatabaseConnection This)
-        {
-            This.BeginTransaction(TransactionMode.Deferred);
-        }
-
-        /// <summary>
         /// Begins a SQLite transaction using the specified transaction mode.
         /// </summary>
         /// <param name="This">The database connection.</param>
         /// <param name="mode">The transaction mode.</param>
-        public static void BeginTransaction(this IDatabaseConnection This, TransactionMode mode)
+        private static void BeginTransaction(this IDatabaseConnection This, TransactionMode mode)
         {
             Contract.Requires(This != null);
 
             var transactionStack = This.GetTransactionStack();
+
+            // Can't actually happen
             if (!transactionStack.IsEmpty()) { throw new InvalidOperationException(); }
 
-            This.Execute(SQLBuilder.BeginTransactionWithMode(mode));
-            This.PushSavePoint(SQLBuilder.BeginTransaction);
+            var beginTransactionString = SQLBuilder.BeginTransactionWithMode(mode);
+            This.Execute(beginTransactionString);
+            This.PushSavePoint(beginTransactionString);
         }
 
         /// <summary>
@@ -130,7 +125,7 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <returns>The savepoint name.</returns>
         /// <param name="This">The database connection.</param>
-        public static string SaveTransactionPoint(this IDatabaseConnection This)
+        private static string SaveTransactionPoint(this IDatabaseConnection This)
         {
             Contract.Requires(This != null);
 
@@ -146,7 +141,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="savepoint">The savepoint</param>
         /// <seealso href="https://www.sqlite.org/lang_savepoint.html"/>
-        public static void ReleaseTransaction(this IDatabaseConnection This, string savepoint)
+        private static void ReleaseTransaction(this IDatabaseConnection This, string savepoint)
         {
             Contract.Requires(This != null);
             Contract.Requires(savepoint != null);
@@ -159,7 +154,7 @@ namespace SQLitePCL.pretty
         /// Commits the current transaction.
         /// </summary>
         /// <param name="This">The database connection.</param>
-        public static void CommitTransaction(this IDatabaseConnection This)
+        private static void CommitTransaction(this IDatabaseConnection This)
         {
             Contract.Requires(This != null);
 
@@ -173,7 +168,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">This.</param>
         /// <param name="savepoint">The savepoint.</param>
         /// <seealso href="https://www.sqlite.org/lang_transaction.html"/>
-        public static void RollbackTransactionTo(this IDatabaseConnection This, string savepoint)
+        private static void RollbackTransactionTo(this IDatabaseConnection This, string savepoint)
         {
             Contract.Requires(This != null);
 
@@ -186,7 +181,7 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <param name="This">The database connection.</param>
         /// <seealso href="https://www.sqlite.org/lang_transaction.html"/>
-        public static void RollbackTransaction(this IDatabaseConnection This)
+        private static void RollbackTransaction(this IDatabaseConnection This)
         {
             Contract.Requires(This != null);
             This.ResetTransactionStack();
@@ -194,11 +189,19 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Runs the action <paramref name="action"/> in a transaction.
+        /// Runs the Action <paramref name="action"/> in a transaction and returns the function result.
+        /// If the database is not currently in a transaction, a new transaction is created using
+        /// the provided TransactionMode and committed. Otherwise the transaction is created within
+        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed. 
         /// </summary>
         /// <param name="This">The database connection.</param>
         /// <param name="action">The Action to run in a transaction.</param>
-        public static void RunInTransaction(this IDatabaseConnection This, Action<IDatabaseConnection> action)
+        /// <param name="mode">
+        /// The transaction mode to use begin a new transaction. Ignored if the transaction is run
+        /// within an existing transaction.
+        /// </param>
+        /// <exception cref="Exception">The exception that caused the transaction to be aborted and rolled back.</exception>
+        public static void RunInTransaction(this IDatabaseConnection This, Action<IDatabaseConnection> action, TransactionMode mode)
         {
             Contract.Requires(This != null);
             Contract.Requires(action != null);
@@ -207,28 +210,50 @@ namespace SQLitePCL.pretty
                 {
                     action(db);
                     return null;
-                });
+                }, mode);
         }
 
         /// <summary>
-        /// Runs the function <paramref name="f"/> in a transaction and returns function result.
+        /// Runs the Action <paramref name="action"/> in a transaction and returns the function result.
+        /// If the database is not currently in a transaction, a new transaction is created using
+        /// BeginTransaction with TransactionMode.Deferred and committed. Otherwise the transaction is created within
+        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed. 
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="action">The Action to run in a transaction.</param>
+        /// <exception cref="Exception">The exception that caused the transaction to be aborted and rolled back.</exception>
+        public static void RunInTransaction(this IDatabaseConnection This, Action<IDatabaseConnection> action)
+        {
+            This.RunInTransaction(action, TransactionMode.Deferred);
+        }
+
+        /// <summary>
+        /// Runs the function <paramref name="f"/> in a transaction and returns the function result.
+        /// If the database is not currently in a transaction, a new transaction is created using
+        /// the provided TransactionMode and committed. Otherwise the transaction is created within
+        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed. 
         /// </summary>
         /// <returns>The function result.</returns>
         /// <param name="This">The database connection.</param>
         /// <param name="f">
         /// The function to run in a transaction.
         /// </param>
+        /// <param name="mode">
+        /// The transaction mode to use begin a new transaction. Ignored if the transaction is run
+        /// within an existing transaction.
+        /// </param>
         /// <typeparam name="T">The result type.</typeparam>
-        public static T RunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, T> f)
+        /// <exception cref="Exception">The exception that caused the transaction to be aborted and rolled back.</exception>
+        public static T RunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, T> f, TransactionMode mode)
         {
             Contract.Requires(This != null);
             Contract.Requires(f != null);
 
-            bool shouldDoFullRollBack = false;
+            bool beganTransaction = false;
             if (This.GetTransactionStack().IsEmpty())
             {
-                shouldDoFullRollBack = true;
-                This.BeginTransaction();
+                beganTransaction = true;
+                This.BeginTransaction(mode);
             }
 
             var savePoint = This.SaveTransactionPoint();
@@ -237,11 +262,17 @@ namespace SQLitePCL.pretty
             {
                 var retval = f(This);
                 This.ReleaseTransaction(savePoint);
+
+                if (beganTransaction) 
+                { 
+                    This.CommitTransaction(); 
+                } 
+
                 return retval;
             }
             catch (Exception)
             {
-                if (shouldDoFullRollBack)
+                if (beganTransaction)
                 {
                     This.RollbackTransaction();
                 }
@@ -254,44 +285,109 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Attempt to execute the action <paramref name="action"/> and if any exception is thrown, 
-        /// executes a rollback command.
+        /// Runs the function <paramref name="f"/> in a transaction and returns the function result.
+        /// If the database is not currently in a transaction, a new transaction is created using
+        /// BeginTransaction with TransactionMode.Deferred and committed. Otherwise the transaction is created within
+        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed. 
         /// </summary>
+        /// <returns>The function result.</returns>
         /// <param name="This">The database connection.</param>
-        /// <param name="action">The action.</param>
-        public static void TryOrRollback(this IDatabaseConnection This, Action<IDatabaseConnection> action)
+        /// <param name="f">
+        /// The function to run in a transaction.
+        /// </param>
+        /// <typeparam name="T">The result type.</typeparam>
+        /// <exception cref="Exception">The exception that caused the transaction to be aborted and rolled back.</exception>
+        public static T RunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, T> f)
+        {
+            return This.RunInTransaction(f, TransactionMode.Deferred);
+        }
+
+        /// <summary>
+        /// Runs the Action <paramref name="action"/> in a transaction and returns the function result.
+        /// If the database is not currently in a transaction, a new transaction is created using
+        /// the provided TransactionMode and committed. Otherwise the transaction is created within
+        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed. 
+        /// </summary>
+        /// <returns><c>true</c>, if the transaction was committed or released <c>false</c> if it was rolledback.</returns>
+        /// <param name="This">The database connection.</param>
+        /// <param name="action">The Action to run in a transaction.</param>
+        /// <param name="mode">
+        /// The transaction mode to use begin a new transaction. Ignored if the transaction is run
+        /// within an existing transaction.
+        /// </param>
+        public static bool TryRunInTransaction(this IDatabaseConnection This, Action<IDatabaseConnection> action, TransactionMode mode)
         {
             Contract.Requires(This != null);
             Contract.Requires(action != null);
 
-            This.TryOrRollback<object>(_ => 
+            object result;
+            return This.TryRunInTransaction<object>(_ => 
                 { 
                     action(This); 
                     return null; 
-                });
+                }, mode, out result);
         }
 
         /// <summary>
-        /// Attempt to call the function <paramref name="f"/> and if any exception is thrown, 
-        /// executes a rollback command.
+        /// Runs the Action <paramref name="action"/> in a transaction and returns the function result.
+        /// If the database is not currently in a transaction, a new transaction is created using
+        /// BeginTransaction with TransactionMode.Deferred and committed. Otherwise the transaction is created within
+        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed. 
         /// </summary>
+        /// <returns><c>true</c>, if the transaction was committed or released <c>false</c> if it was rolledback.</returns>
         /// <param name="This">The database connection.</param>
-        /// <param name="f">The action.</param>
+        /// <param name="action">The Action to run in a transaction.</param>
+        public static bool TryRunInTransaction(this IDatabaseConnection This, Action<IDatabaseConnection> action)
+        {
+            return This.TryRunInTransaction(action, TransactionMode.Deferred);
+        }
+
+        /// <summary>
+        /// Runs the function <paramref name="f"/> in a transaction and returns the function result.
+        /// If the database is not currently in a transaction, a new transaction is created using
+        /// the provided TransactionMode and committed. Otherwise the transaction is created within
+        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed. 
+        /// </summary>
+        /// <returns><c>true</c>, if the transaction was committed or released <c>false</c> if it was rolledback.</returns>
+        /// <param name="This">The database connection.</param>
+        /// <param name="f">F.</param>
+        /// <param name="mode">
+        /// The transaction mode to use begin a new transaction. Ignored if the transaction is run
+        /// within an existing transaction.
+        /// </param>
+        /// <param name="result">The function result.</param>
         /// <typeparam name="T">The result type.</typeparam>
-        public static T TryOrRollback<T>(this IDatabaseConnection This, Func<IDatabaseConnection, T> f)
+        public static bool TryRunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, T> f, TransactionMode mode, out T result)
         {
             Contract.Requires(This != null);
             Contract.Requires(f != null);
 
             try
             {
-                return f(This);
+                result = This.RunInTransaction(f, mode);
+                return true;
             }
-            catch (Exception)
+            catch
             {
-                This.RollbackTransaction();
-                throw;
+                result = default(T);
+                return false;
             }
+        }
+
+        /// <summary>
+        /// Runs the function <paramref name="f"/> in a transaction and returns the function result.
+        /// If the database is not currently in a transaction, a new transaction is created using
+        /// BeginTransaction with TransactionMode.Deferred and committed. Otherwise the transaction is created within
+        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed. 
+        /// </summary>
+        /// <returns><c>true</c>, if the transaction was committed or released <c>false</c> if it was rolledback.</returns>
+        /// <param name="This">The database connection.</param>
+        /// <param name="f">F.</param>
+        /// <param name="result">The function result.</param>
+        /// <typeparam name="T">The result type.</typeparam>
+        public static bool TryRunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, T> f, out T result)
+        {
+            return This.TryRunInTransaction(f, TransactionMode.Deferred, out result);
         }
     }
 }
