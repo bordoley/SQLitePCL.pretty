@@ -167,6 +167,13 @@ namespace SQLitePCL.pretty
         }
     }
 
+    internal static class DatabaseConnectionExpando
+    {
+        private static readonly Expando<IDatabaseConnection> instance = Expando<IDatabaseConnection>.Create();
+
+        internal static Expando<IDatabaseConnection> Instance { get { return instance; } }
+    }
+
     /// <summary>
     /// Extensions methods for <see cref="IDatabaseConnection"/>
     /// </summary>

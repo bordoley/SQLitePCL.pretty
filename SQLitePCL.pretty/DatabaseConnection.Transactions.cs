@@ -57,43 +57,31 @@ namespace SQLitePCL.pretty
         Exclusive
     }    
 
-    internal class StackRef
-    {
-        public StackRef()
-        {
-            this.Stack = Stack<string>.Empty;
-        }
-
-        public Stack<string> Stack { get; set; }
-    }
-
     public static partial class DatabaseConnection
     {
+        private const string TransactionStackKey = "TransactionStack";
+
         private static readonly ThreadLocal<Random> _rand = new ThreadLocal<Random>(() => new Random());
-
-        private static readonly ConditionalWeakTable<IDatabaseConnection, StackRef> transactionStackTable = 
-            new ConditionalWeakTable<IDatabaseConnection, StackRef>();
-
-
-        private static StackRef GetTransactionStackRef(this IDatabaseConnection This)
-        {
-            return transactionStackTable.GetValue(This, _ => new StackRef());
-        }
 
         private static Stack<string> GetTransactionStack(this IDatabaseConnection This)
         {
-            return This.GetTransactionStackRef().Stack;
+            return DatabaseConnectionExpando.Instance.GetOrAddValue(This, TransactionStackKey, _ => Stack<string>.Empty);
+        }
+
+        private static void SetTransactionStack(this IDatabaseConnection This, Stack<string> stack)
+        {
+            DatabaseConnectionExpando.Instance.SetValue(This, TransactionStackKey, stack);
         }
 
         private static void ResetTransactionStack(this IDatabaseConnection This)
         {
-            This.GetTransactionStackRef().Stack = Stack<string>.Empty;
+            This.SetTransactionStack(Stack<string>.Empty);
         }
 
         private static void PushSavePoint(this IDatabaseConnection This, string savepoint)
         {
-            var stackref = This.GetTransactionStackRef();
-            stackref.Stack = This.GetTransactionStack().Push(savepoint);
+            
+            This.SetTransactionStack(This.GetTransactionStack().Push(savepoint));
         }
 
         private static void PopTransactionStackToSavePoint(this IDatabaseConnection This, string savepoint)
@@ -109,7 +97,7 @@ namespace SQLitePCL.pretty
                 result = result.Tail;
             }
 
-            This.GetTransactionStackRef().Stack = result;
+            This.SetTransactionStack(result);
         }
 
         /// <summary>

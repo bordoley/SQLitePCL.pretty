@@ -34,6 +34,8 @@ namespace SQLitePCL.pretty
     /// </summary>
     public static partial class DatabaseConnection
     {
+        private const string AsyncDatabaseConnectionKey = "AsyncDatabaseConnection";
+
         // FIXME: I picked this number fairly randomly. It would be good to do some experimentation
         // to determine if its a good default. The goal should be supporting cancelling of queries that are
         // actually blocking use of the database for a measurable period of time.
@@ -59,16 +61,26 @@ namespace SQLitePCL.pretty
                 defaultScheduler = value;
             }
         }
-
-        // Guarantee that for a given database connection there is only ever one IAsyncDatabaseConnection
-        private static readonly ConditionalWeakTable<SQLiteDatabaseConnection, IAsyncDatabaseConnection> _asyncConnections =
-            new ConditionalWeakTable<SQLiteDatabaseConnection, IAsyncDatabaseConnection>();
         
         internal static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this SQLiteDatabaseConnection This, IScheduler scheduler, int interruptInstructionCount)
         {
             Contract.Requires(This != null);
             Contract.Requires(scheduler != null);
-            return _asyncConnections.GetValue(This, conn => new AsyncDatabaseConnectionImpl(conn, scheduler, interruptInstructionCount));
+
+            IAsyncDatabaseConnection target;
+            if (DatabaseConnectionExpando.Instance.GetOrAddValue(This, AsyncDatabaseConnectionKey, _ =>
+                {
+                    // Store a WeakReference to the async connection so that we don't end up with a circular reference that prevents the 
+                    // SQLiteDatabaseConnection from being freed. 
+                    var asyncConnection = new AsyncDatabaseConnectionImpl(This, scheduler, interruptInstructionCount);
+                    return new WeakReference<IAsyncDatabaseConnection>(asyncConnection);
+                }).TryGetTarget(out target))
+            {
+                return target;
+            }
+
+            // This can't really happen. 
+            throw new InvalidOperationException();
         }
 
         /// <summary>

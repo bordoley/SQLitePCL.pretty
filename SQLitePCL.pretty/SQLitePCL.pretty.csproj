@@ -148,6 +148,7 @@
     <Compile Include="SQLBuilder.cs" />
     <Compile Include="DatabaseConnection.Transactions.cs" />
     <Compile Include="Stack.cs" />
+    <Compile Include="Expando.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="SQLitePCL.raw">
