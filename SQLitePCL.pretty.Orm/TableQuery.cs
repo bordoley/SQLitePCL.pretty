@@ -54,8 +54,15 @@ namespace SQLitePCL.pretty.Orm
             this._offset = offset;
         }
 
+        /// <summary>
+        /// The underlying <see cref="ITableMapping&lt;T&gt;"/> used to generate the query.
+        /// </summary>
         public ITableMapping<T> Mapping { get { return _mapping; } }
 
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
         public override string ToString()
         {
             var cmdText = "SELECT " + _selection + " FROM \"" + _mapping.TableName + "\"";
@@ -89,11 +96,20 @@ namespace SQLitePCL.pretty.Orm
             return cmdText;
         }
 
+        /// <summary>
+        /// Converts the query to a count query.
+        /// </summary>
+        /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
         public TableQuery<T> ToCountQuery()
         {
             return new TableQuery<T>(_mapping, "count(*)", _where, _orderBy, _limit, _offset);
         }
 
+        /// <summary>
+        /// Returns a <see cref="TableQuery&lt;T&gt;"/> that filters the result set based on a predicate.
+        /// </summary>
+        /// <param name="predExpr">A function to test each element for a condition..</param>
+        /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
         public TableQuery<T> Where(Expression<Func<T, bool>> predExpr)
         {
             if (predExpr.NodeType == ExpressionType.Lambda)
@@ -114,17 +130,33 @@ namespace SQLitePCL.pretty.Orm
             throw new NotSupportedException("Must be a predicate");
         }
 
+        /// <summary>
+        /// Returns a <see cref="TableQuery&lt;T&gt;"/> that limits the result set to a specified number of contiguous elements.
+        /// </summary>
+        /// <param name="n">The number of elements to return.</param>
+        /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
         public TableQuery<T> Take(int n)
         {
             // FIXME: Implemented this different than sqlite-net
             return new TableQuery<T>(_mapping, _selection, _where, _orderBy, n, _offset);
         }
 
+        /// <summary>
+        /// Returns a <see cref="TableQuery&lt;T&gt;"/> that skips a specified number of elements in the result set and then returns the remaining elements.
+        /// </summary>
+        /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
+        /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
         public TableQuery<T> Skip(int n)
         {
             return new TableQuery<T>(_mapping, _selection, _where, _orderBy, _limit, n);
         }
 
+        /// <summary>
+        /// Returns a <see cref="TableQuery&lt;T&gt;"/> that returns the element at a specified index in the result set.
+        /// </summary>
+        /// <returns>The <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
+        /// <param name="index">Index.</param>
+        /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
         public TableQuery<T> ElementAt(int index)
         {
             return Skip(index).Take(1);
