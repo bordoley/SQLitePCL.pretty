@@ -565,11 +565,9 @@ namespace SQLitePCL.pretty.Orm
                 pkIsAutoInc = true;
             }
 
-            var isAutoInc = prop.IsAutoIncrement() || pkIsAutoInc;
-
             var hasNotNullConstraint = isPK || IsMarkedNotNull(prop);
 
-            return new TableColumnMetadata(columnType.GetSqlType(), collation, hasNotNullConstraint, isPK, isAutoInc);
+            return new TableColumnMetadata(columnType.GetSqlType(), collation, hasNotNullConstraint, isPK, pkIsAutoInc);
         }
 
         private const int DefaultMaxStringLength = 140;
@@ -611,16 +609,10 @@ namespace SQLitePCL.pretty.Orm
         {
             var attrs = p.GetCustomAttributes (typeof(CollationAttribute), true);
             if (attrs.Count() > 0) {
-                return ((CollationAttribute)attrs.First()).Value;
+                return ((CollationAttribute)attrs.First()).Name;
             } else {
                 return string.Empty;
             }
-        }
-
-        private static bool IsAutoIncrement (this MemberInfo p)
-        {
-            var attrs = p.GetCustomAttributes (typeof(AutoIncrementAttribute), true);
-            return attrs.Count() > 0;
         }
 
         private static IEnumerable<IndexedAttribute> GetIndexes(this MemberInfo p)
