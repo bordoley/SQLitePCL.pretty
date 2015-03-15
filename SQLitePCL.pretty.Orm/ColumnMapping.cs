@@ -3,6 +3,9 @@ using System.Reflection;
 
 namespace SQLitePCL.pretty.Orm
 {
+    /// <summary>
+    /// Provides the mapping between a columns SQL and CLR representation.
+    /// </summary>
     public sealed class ColumnMapping: IEquatable<ColumnMapping>
     {
         /// <summary>
@@ -38,10 +41,19 @@ namespace SQLitePCL.pretty.Orm
             this.metadata = metadata;
         }
 
+        /// <summary>
+        /// The CLR <see cref="Type"/> of the column.
+        /// </summary>
         public Type ClrType { get { return clrType; } }
 
+        /// <summary>
+        /// The <see cref="PropertyInfo"/> of the column.
+        /// </summary>
         public PropertyInfo Property { get { return property; } }
 
+        /// <summary>
+        /// The <see cref="TableColumnMetadata"/> of the column. 
+        /// </summary>
         public TableColumnMetadata Metadata { get { return metadata; } }
 
         /// <inheritdoc/>

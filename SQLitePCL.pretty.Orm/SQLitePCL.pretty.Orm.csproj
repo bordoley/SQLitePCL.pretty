@@ -43,6 +43,7 @@
     <Compile Include="Interfaces.cs" />
     <Compile Include="Ordering.cs" />
     <Compile Include="ColumnMapping.cs" />
+    <Compile Include="IndexInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>
