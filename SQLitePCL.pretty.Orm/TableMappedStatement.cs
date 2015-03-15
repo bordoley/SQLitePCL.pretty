@@ -7,13 +7,18 @@ namespace SQLitePCL.pretty.Orm
 {
     public interface ITableMappedStatement<T> : IStatement
     {
-        void Bind(T obj);
+        ITableMapping<T> Mapping { get; }
 
         T Current { get; } 
     }
 
     public static class TableMappedStatement
     { 
+        public static void Bind<T>(this ITableMappedStatement<T> This, T obj)
+        {
+            This.Bind(This.Mapping, obj);
+        }
+
         public static void Execute<T>(this ITableMappedStatement<T> This, T obj)
         {
             Contract.Requires(This != null);
@@ -92,10 +97,7 @@ namespace SQLitePCL.pretty.Orm
             this.mapping = mapping;
         }
 
-        public void Bind(T obj)
-        {
-            deleg.Bind(mapping, obj);
-        }
+        public ITableMapping<T> Mapping { get { return mapping; } }
 
         public void ClearBindings()
         {

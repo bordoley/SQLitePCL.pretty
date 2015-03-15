@@ -27,8 +27,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SQLitePCL.pretty.Orm
 {
@@ -45,7 +48,7 @@ namespace SQLitePCL.pretty.Orm
 
         public string ColumnName { get { return _columnName; } }
         public bool Ascending { get { return _ascending; }  }
-    }        
+    }    
 
     public sealed class TableQuery<T>
     {
@@ -65,132 +68,84 @@ namespace SQLitePCL.pretty.Orm
             this._limit = limit;
             this._offset = offset;
         }
-            
-        internal string Selection { get { return _selection; } }
 
-        internal ITableMapping<T> Mapping { get { return _mapping; } }
-
-        internal Expression Where { get { return _where; } }
-
-        internal IReadOnlyList<Ordering> OrderBy { get {return _orderBy; } }
-
-        internal Nullable<int> Limit { get { return _limit; } }        
-
-        internal Nullable<int> Offset { get { return _offset; } }
+        public ITableMapping<T> Mapping { get { return _mapping; } }
 
         public override string ToString()
         {
-            var cmdText = "SELECT " + _selection + " FROM \"" + this.Mapping.TableName + "\"";
+            var cmdText = "SELECT " + _selection + " FROM \"" + _mapping.TableName + "\"";
 
             if (this._where != null)
             {
-                var w = TableQuery.CompileExpr(this.Where);
+                var w = CompileExpr(_where);
                 cmdText += " WHERE " + w;
             }
 
-            if (this.OrderBy.Count > 0)
+            if (_orderBy.Count > 0)
             {
-                var t = string.Join(", ", this.OrderBy.Select(o => "\"" + o.ColumnName + "\"" + (o.Ascending ? "" : " DESC")).ToArray());
+                var t = string.Join(", ", _orderBy.Select(o => "\"" + o.ColumnName + "\"" + (o.Ascending ? "" : " DESC")).ToArray());
                 cmdText += " ORDER BY " + t;
             }
 
-            if (this.Limit.HasValue)
+            if (_limit.HasValue)
             {
-                cmdText += " LIMIT " + this.Limit.Value;
+                cmdText += " LIMIT " + _limit.Value;
             }
 
-            if (this.Offset.HasValue)
+            if (_offset.HasValue)
             {
-                if (!this.Limit.HasValue)
+                if (!_limit.HasValue)
                 {
                     cmdText += " LIMIT -1 ";
                 }
-                cmdText += " OFFSET " + this.Offset.Value;
+                cmdText += " OFFSET " + _offset.Value;
             }
 
             return cmdText;
         }
-    }
 
-    public static class TableQuery
-    {
-        public static ITableMappedStatement<T> PrepareQuery<T>(this IDatabaseConnection This, TableQuery<T> query)
+        public TableQuery<T> ToCountQuery()
         {
-            return new TableMappedStatement<T>(This.PrepareStatement(query.ToString()), query.Mapping);
+            return new TableQuery<T>(_mapping, "count(*)", _where, _orderBy, _limit, _offset);
         }
 
-        public static IEnumerable<T> Query<T>(this IDatabaseConnection This, TableQuery<T> query)
-        {
-            return This.Query(query.ToString()).Select(query.Mapping.ToObject);
-        }
-
-        public static IEnumerable<T> Query<T>(this IDatabaseConnection This, TableQuery<T> query, params object[] values)
-        {
-            return This.Query(query.ToString(), values).Select(query.Mapping.ToObject);
-        }
-
-        public static IObservable<T> Query<T>(this IAsyncDatabaseConnection This, TableQuery<T> query)
-        {
-            return This.Query(query.ToString()).Select(query.Mapping.ToObject);
-        }
-
-        public static IStatement PrepareCount<T>(this IDatabaseConnection This, TableQuery<T> query)
-        {
-            return This.PrepareStatement(query.Count());
-        }
-
-        public static int Count<T>(this IDatabaseConnection This, TableQuery<T> query)
-        {
-            return This.Query(query.Count()).SelectScalarInt().First();
-        }
-
-        public static int Count<T>(this IDatabaseConnection This, TableQuery<T> query, params object[] values)
-        {
-            return This.Query(query.Count(), values).SelectScalarInt().First();
-        }
-                    
-        private static string Count<T>(this TableQuery<T> This)
-        {
-            return (new TableQuery<T>(This.Mapping, "count(*)", This.Where, This.OrderBy, This.Limit, This.Offset)).ToString();
-        }
-
-        public static TableQuery<T> Where<T>(this TableQuery<T> This, Expression<Func<T, bool>> predExpr)
+        public TableQuery<T> Where(Expression<Func<T, bool>> predExpr)
         {
             if (predExpr.NodeType == ExpressionType.Lambda)
             {
                 var lambda = (LambdaExpression) predExpr;
                 var pred = lambda.Body;
 
-                if (This.Limit != null || This.Offset != null)
+                if (_limit != null || _offset != null)
                 {
                     // FIXME: Why?
                     throw new NotSupportedException("Cannot call where after a skip or a take");
                 }
 
-                var where = This.Where == null ? pred : Expression.AndAlso(This.Where, pred);
-                return new TableQuery<T>(This.Mapping, This.Selection, where, This.OrderBy, This.Limit, This.Offset);
+                var where = _where == null ? pred : Expression.AndAlso(_where, pred);
+                return new TableQuery<T>(_mapping, _selection, where, _orderBy, _limit, _offset);
             }
 
             throw new NotSupportedException("Must be a predicate");
         }
 
-        public static TableQuery<T> Take<T>(this TableQuery<T> This, int n)
+        public TableQuery<T> Take(int n)
         {
             // FIXME: Implemented this different than sqlite-net
-            return new TableQuery<T>(This.Mapping, This.Selection, This.Where, This.OrderBy, n, This.Offset);
+            return new TableQuery<T>(_mapping, _selection, _where, _orderBy, n, _offset);
         }
 
-        public static TableQuery<T> Skip<T>(this TableQuery<T> This, int n)
+        public TableQuery<T> Skip(int n)
         {
-            return new TableQuery<T>(This.Mapping, This.Selection, This.Where, This.OrderBy, This.Limit, n);
+            return new TableQuery<T>(_mapping, _selection, _where, _orderBy, _limit, n);
         }
 
-        public static TableQuery<T> ElementAt<T>(this TableQuery<T> This, int index)
+        public TableQuery<T> ElementAt(int index)
         {
-            return This.Skip(index).Take(1);
+            return Skip(index).Take(1);
         }
 
-        private static TableQuery<T> AddOrderBy<T,TValue>(this TableQuery<T> This, Expression<Func<T, TValue>> orderExpr, bool asc)
+        private TableQuery<T> AddOrderBy<TValue>(Expression<Func<T, TValue>> orderExpr, bool asc)
         {
             if (orderExpr.NodeType == ExpressionType.Lambda)
             {
@@ -210,13 +165,13 @@ namespace SQLitePCL.pretty.Orm
 
                 if (mem != null && (mem.Expression.NodeType == ExpressionType.Parameter))
                 {
-                    var orderBy = new List<Ordering>(This.OrderBy);
+                    var orderBy = new List<Ordering>(_orderBy);
                     orderBy.Add(
                         new Ordering (
                             TableMapping.PropertyToColumnName((PropertyInfo) mem.Member),
                             asc));
 
-                    return new TableQuery<T>(This.Mapping, This.Selection, This.Where, orderBy, This.Limit, This.Offset);
+                    return new TableQuery<T>(_mapping, _selection, _where, orderBy, _limit, _offset);
                 }
 
                 throw new NotSupportedException("Order By does not support: " + orderExpr);
@@ -225,28 +180,28 @@ namespace SQLitePCL.pretty.Orm
             throw new NotSupportedException("Must be a predicate");
         }
 
-        public static TableQuery<T> OrderBy<T,TValue>(this TableQuery<T> This, Expression<Func<T, TValue>> orderExpr)
+        public TableQuery<T> OrderBy<TValue>(Expression<Func<T, TValue>> orderExpr)
         {
             // FIXME: Throw an exception if order by is not empty?
-            return This.AddOrderBy(orderExpr, true);
+            return AddOrderBy(orderExpr, true);
         }
 
-        public static TableQuery<T> OrderByDescending<T,TValue>(this TableQuery<T> This, Expression<Func<T, TValue>> orderExpr)
+        public TableQuery<T> OrderByDescending<TValue>(Expression<Func<T, TValue>> orderExpr)
         {
             // FIXME: Throw an exception if order by is not empty?
-            return This.AddOrderBy(orderExpr, false);
+            return AddOrderBy(orderExpr, false);
         }
 
-        public static TableQuery<T> ThenBy<T,TValue>(this TableQuery<T> This, Expression<Func<T, TValue>> orderExpr)
+        public TableQuery<T> ThenBy<TValue>(Expression<Func<T, TValue>> orderExpr)
         {
             // FIXME: Throw an exception if order by is empty?
-            return This.AddOrderBy(orderExpr, true);
+            return AddOrderBy(orderExpr, true);
         }
 
-        public static TableQuery<T> ThenByDescending<T,TValue>(this TableQuery<T> This, Expression<Func<T, TValue>> orderExpr)
+        public TableQuery<T> ThenByDescending<TValue>(Expression<Func<T, TValue>> orderExpr)
         {
             // FIXME: Throw an exception if order by is empty?
-            return This.AddOrderBy(orderExpr, false);
+            return AddOrderBy(orderExpr, false);
         }
 
         internal static string CompileExpr(Expression expr)
@@ -494,4 +449,67 @@ namespace SQLitePCL.pretty.Orm
             else { throw new NotSupportedException ("Cannot get SQL for: " + n); }
         }
     }
+
+    public static class TableQuery
+    {
+        public static ITableMappedStatement<T> PrepareQuery<T>(this IDatabaseConnection This, TableQuery<T> query)
+        {
+            return new TableMappedStatement<T>(This.PrepareStatement(query.ToString()), query.Mapping);
+        }
+
+        public static IEnumerable<T> Query<T>(this IDatabaseConnection This, TableQuery<T> query)
+        {
+            return This.Query(query.ToString()).Select(query.Mapping.ToObject);
+        }
+
+        public static IEnumerable<T> Query<T>(this IDatabaseConnection This, TableQuery<T> query, params object[] values)
+        {
+            return This.Query(query.ToString(), values).Select(query.Mapping.ToObject);
+        }
+
+        public static IObservable<T> Query<T>(this IAsyncDatabaseConnection This, TableQuery<T> query)
+        {
+            return This.Query(query.ToString()).Select(query.Mapping.ToObject);
+        }
+
+        public static IStatement PrepareCount<T>(this IDatabaseConnection This, TableQuery<T> query)
+        {
+            return This.PrepareStatement(query.ToCountQuery().ToString());
+        }
+
+        public static Task<IAsyncStatement> PrepareCountAsync<T>(this IAsyncDatabaseConnection This, TableQuery<T> query)
+        {
+            return This.PrepareStatementAsync(query.ToCountQuery().ToString());
+        }
+
+        public static int Count<T>(this IDatabaseConnection This, TableQuery<T> query)
+        {
+            return This.Query(query.ToCountQuery().ToString()).SelectScalarInt().First();
+        }
+
+        public static Task<int> CountAsync<T>(this IAsyncDatabaseConnection This, TableQuery<T> query)
+        {
+            return This.CountAsync(query, CancellationToken.None);
+        }
+
+        public static Task<int> CountAsync<T>(this IAsyncDatabaseConnection This, TableQuery<T> query, CancellationToken ct)
+        {
+            return This.Query(query.ToCountQuery().ToString()).SelectScalarInt().FirstAsync().ToTask(ct);
+        }
+
+        public static int Count<T>(this IDatabaseConnection This, TableQuery<T> query, params object[] values)
+        {
+            return This.Query(query.ToCountQuery().ToString(), values).SelectScalarInt().First();
+        }
+
+        public static Task<int> CountAsync<T>(this IAsyncDatabaseConnection This, TableQuery<T> query, params object[] values)
+        {
+            return This.CountAsync(query, CancellationToken.None, values);
+        }
+
+        public static Task<int> CountAsync<T>(this IAsyncDatabaseConnection This, TableQuery<T> query, CancellationToken ct, params object[] values)
+        {
+            return This.Query(query.ToCountQuery().ToString(), values).SelectScalarInt().FirstAsync().ToTask(ct);
+        }
+    }    
 }
