@@ -75,10 +75,6 @@ namespace SQLitePCL.pretty.Orm.Attributes
         {
         }
 
-        public IndexedAttribute(string name, bool unique) : this(name, default(int), unique)
-        {
-        }
-
         public IndexedAttribute(string name, int order) : this(name, order, false) {}
         
         public IndexedAttribute(string name, int order, bool unique)
@@ -111,6 +107,10 @@ namespace SQLitePCL.pretty.Orm.Attributes
         public string Value { get { return _value; } }
     }
 
+
+    /// <summary>
+    /// Indicates that a table column is not nullable.
+    /// </summary>
     [AttributeUsage (AttributeTargets.Property)]
     public sealed class NotNullAttribute : Attribute
     {
