@@ -35,21 +35,6 @@ using System.Threading.Tasks;
 
 namespace SQLitePCL.pretty.Orm
 {
-    internal sealed class Ordering
-    {
-        private readonly string _columnName;
-        private readonly bool _ascending;
-
-        internal Ordering(string columnName, bool ascending)
-        {
-            _columnName = columnName;
-            _ascending = ascending;
-        }
-
-        public string ColumnName { get { return _columnName; } }
-        public bool Ascending { get { return _ascending; }  }
-    }    
-
     public sealed class TableQuery<T>
     {
         private readonly string _selection;

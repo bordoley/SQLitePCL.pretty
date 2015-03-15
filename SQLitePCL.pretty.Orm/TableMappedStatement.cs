@@ -5,13 +5,6 @@ using System.Diagnostics.Contracts;
 
 namespace SQLitePCL.pretty.Orm
 {
-    public interface ITableMappedStatement<T> : IStatement
-    {
-        ITableMapping<T> Mapping { get; }
-
-        T Current { get; } 
-    }
-
     public static class TableMappedStatement
     { 
         public static void Bind<T>(this ITableMappedStatement<T> This, T obj)

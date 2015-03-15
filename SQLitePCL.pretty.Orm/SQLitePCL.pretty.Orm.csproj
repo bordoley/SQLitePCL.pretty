@@ -40,6 +40,9 @@
     <Compile Include="DatabaseConnection.Index.cs" />
     <Compile Include="DatabaseConnection.Tables.cs" />
     <Compile Include="SQLBuilder.cs" />
+    <Compile Include="Interfaces.cs" />
+    <Compile Include="Ordering.cs" />
+    <Compile Include="ColumnMapping.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>

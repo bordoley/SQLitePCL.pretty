@@ -80,7 +80,6 @@
     <Compile Include="SQLiteValueTests.cs" />
     <Compile Include="SQLiteVersionTests.cs" />
     <Compile Include="TableColumnMetadataTests.cs" />
-
     <!---
     <Compile Include="Orm\CreateTableTests.cs" />
     <Compile Include="Orm\TestObjects.cs" />
@@ -139,5 +138,6 @@
   </Target>
   <ItemGroup>
     <Folder Include="Orm\" />
+    <Folder Include="OrmTests\" />
   </ItemGroup>
 </Project>
