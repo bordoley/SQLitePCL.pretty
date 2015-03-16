@@ -22,7 +22,10 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
+using System.Reflection;
 
 namespace SQLitePCL.pretty.Orm.Attributes
 {   
@@ -205,5 +208,48 @@ namespace SQLitePCL.pretty.Orm.Attributes
     [AttributeUsage (AttributeTargets.Property)]
     public sealed class NotNullAttribute : Attribute
     {
+    }
+
+    internal static class OrmAttributes
+    {
+        internal static bool IsPrimaryKeyPart(this PropertyInfo This)
+        {
+            var attrs = This.GetCustomAttributes (typeof(PrimaryKeyAttribute), true);
+            return attrs.Count() > 0;
+        }
+
+        internal static bool HasNotNullConstraint(this PropertyInfo This)
+        {
+            var attrs = This.GetCustomAttributes<NotNullAttribute>(true);
+            return attrs.Count() > 0;
+        }
+
+        internal static string GetCollationSequence(this PropertyInfo This)
+        {
+            var attrs = This.GetCustomAttributes<CollationAttribute>(true);
+            return attrs.Count() > 0 ? attrs.First().Name : string.Empty;
+        }
+
+        internal static bool Ignore(this PropertyInfo This)
+        {
+            return This.GetCustomAttributes<IgnoreAttribute>(true).Count() > 0;
+        }
+
+        internal static IEnumerable<IndexedAttribute> GetIndexes(this PropertyInfo This)
+        {
+            return This.GetCustomAttributes<IndexedAttribute>(true);
+        }
+
+        internal static string GetColumnName(this PropertyInfo This)
+        {
+            var colAttr = This.GetCustomAttributes<ColumnAttribute>(true).FirstOrDefault();
+            return colAttr == null ? This.Name : colAttr.Name;
+        }
+
+        internal static string GetTableName(this Type This)
+        {
+            var tableAttr = This.GetTypeInfo().GetCustomAttribute<TableAttribute>(true);
+            return tableAttr != null ? tableAttr.Name : This.Name;
+        }
     }
 }

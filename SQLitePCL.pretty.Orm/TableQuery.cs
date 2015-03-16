@@ -33,8 +33,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using SQLitePCL.pretty.Orm.Attributes;
+
 namespace SQLitePCL.pretty.Orm
 {
+
+    /// <summary>
+    /// An immutable builder that allows the use of LINQ like syntax to build a SQL query that can subsequently be executed against a SQLite database.
+    /// </summary>
     public sealed class TableQuery<T>
     {
         private readonly string _selection;
@@ -185,7 +191,7 @@ namespace SQLitePCL.pretty.Orm
                     var orderBy = new List<Ordering>(_orderBy);
                     orderBy.Add(
                         new Ordering (
-                            TableMapping.PropertyToColumnName((PropertyInfo) mem.Member),
+                            ((PropertyInfo) mem.Member).GetColumnName(),
                             asc));
 
                     return new TableQuery<T>(_mapping, _selection, _where, orderBy, _limit, _offset);
@@ -352,7 +358,7 @@ namespace SQLitePCL.pretty.Orm
                 var ty = u.Type;
                 var valr = CompileExpr (u.Operand, queryArgs);
 
-                return Tuple.Create(valr.Item1, valr.Item2 != null ? ConvertTo (valr.Item2, ty) : null);
+                return Tuple.Create(valr.Item1, valr.Item2.ConvertTo (ty));
             } 
 
             else if (expr.NodeType == ExpressionType.MemberAccess) 
@@ -365,7 +371,7 @@ namespace SQLitePCL.pretty.Orm
                     // This is a column of our table, output just the column name
                     // Need to translate it if that column name is mapped
                     //
-                    var columnName = TableMapping.PropertyToColumnName((PropertyInfo) mem.Member);
+                    var columnName = ((PropertyInfo) mem.Member).GetColumnName();
                     return Tuple.Create<String, object>( "\"" + columnName + "\"", null);
                 } 
 
@@ -440,14 +446,7 @@ namespace SQLitePCL.pretty.Orm
             else { throw new NotSupportedException("Cannot compile Null-BinaryExpression with type " + expression.NodeType.ToString()); }
         }
 
-        private static object ConvertTo (object obj, Type t)
-        {
-            if (obj == null) { return null; }
 
-            var nut = Nullable.GetUnderlyingType(t) ?? t;
-            
-            return Convert.ChangeType (obj, nut);
-        }
 
         private static string GetSqlName (Expression expr)
         {
@@ -467,6 +466,9 @@ namespace SQLitePCL.pretty.Orm
         }
     }
 
+    /// <summary>
+    /// Extension methods for querying a database using instances of <see cref="TableQuery&lt;T&gt;"/>
+    /// </summary>
     public static class TableQuery
     {
         public static ITableMappedStatement<T> PrepareQuery<T>(this IDatabaseConnection This, TableQuery<T> query)

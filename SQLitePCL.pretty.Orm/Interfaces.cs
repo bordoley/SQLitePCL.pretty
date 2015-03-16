@@ -34,7 +34,7 @@ namespace SQLitePCL.pretty.Orm
 
     /// <summary>
     /// An <see cref="IStatement"/> that allows the current value to be retrieved 
-    /// as an instance T based upon an underlying table mapping.
+    /// as an instance of type T, based upon an underlying table mapping.
     /// </summary>
     public interface ITableMappedStatement<T> : IStatement
     {

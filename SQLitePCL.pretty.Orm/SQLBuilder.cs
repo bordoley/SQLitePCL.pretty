@@ -134,10 +134,10 @@ namespace SQLitePCL.pretty.Orm
         {
             string decl = "\"" + columnName + "\" " + metadata.DeclaredType + " ";
             
-            if (metadata.IsPrimaryKeyPart) 
-            {
-                decl += "PRIMARY KEY ";
-            }
+            //if (metadata.IsPrimaryKeyPart) 
+            //{
+            //    decl += "PRIMARY KEY ";
+            //}
 
             if (metadata.IsAutoIncrement) 
             {

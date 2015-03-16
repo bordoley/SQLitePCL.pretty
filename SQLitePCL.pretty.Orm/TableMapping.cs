@@ -35,14 +35,11 @@ using SQLitePCL.pretty.Orm.Attributes;
 
 namespace SQLitePCL.pretty.Orm
 {
+    /// <summary>
+    /// Extensions methods for instances of <see cref="ITableMapping"/>
+    /// </summary>
     public static class TableMapping
     {   
-        internal static string PropertyToColumnName(PropertyInfo prop)
-        {
-            var colAttr = (ColumnAttribute)prop.GetCustomAttributes(typeof(ColumnAttribute), true).FirstOrDefault();
-            return colAttr == null ? prop.Name : colAttr.Name;
-        }
-
         internal static void Bind<T>(this IStatement This, ITableMapping<T> tableMapping, T obj)
         {
             foreach (var column in tableMapping)
@@ -472,37 +469,23 @@ namespace SQLitePCL.pretty.Orm
         public static ITableMapping<T> Create<T>(Func<object> builder, Func<object, T> build)
         {
             var mappedType = typeof(T);
-
-            var tableAttr = 
-                (TableAttribute)CustomAttributeExtensions.GetCustomAttribute(mappedType.GetTypeInfo(), typeof(TableAttribute), true);
-
-            // TableAttribute name can be null
-            var tableName = tableAttr != null ? (tableAttr.Name ?? mappedType.Name) : mappedType.Name;
-
-            var props = mappedType.GetRuntimeProperties().Where(p => p.GetMethod != null && p.GetMethod.IsPublic && !p.GetMethod.IsStatic);
+            var tableName = mappedType.GetTableName();
+            var props = mappedType.GetPublicInstanceProperties();
 
             // FIXME: I wish this was immutable
             var columnToMapping = new Dictionary<string, ColumnMapping>();
 
             // map each column to it's index attributes
             var columnToIndexMapping = new Dictionary<string, IEnumerable<IndexedAttribute>>();
-            foreach (var prop in props)
+            foreach (var prop in props.Where(prop => !prop.Ignore()))
             {
-                if (prop.GetCustomAttributes(typeof(IgnoreAttribute), true).Count() == 0)
-                {
-                    var columnType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+                var name = prop.GetColumnName();
+                var columnType = prop.PropertyType.GetUnderlyingType();
+                var metadata = CreateColumnMetadata(prop);
+                var columnIndexes = prop.GetIndexes();
 
-                    var colAttr = (ColumnAttribute)prop.GetCustomAttributes(typeof(ColumnAttribute), true).FirstOrDefault();
-                    var name = colAttr == null ? prop.Name : colAttr.Name;
-
-                    var metadata = CreateColumnMetadata(prop);
-
-                    columnToMapping.Add(name, new ColumnMapping(columnType, prop, metadata));
-
-                    var columnIndexes = GetIndexes(prop);
-
-                    columnToIndexMapping.Add(name, columnIndexes);
-                }
+                columnToMapping.Add(name, new ColumnMapping(columnType, prop, metadata));
+                columnToIndexMapping.Add(name, columnIndexes);
             }
 
             // A Map of the index name to its columns and whether its unique or not
@@ -523,12 +506,12 @@ namespace SQLitePCL.pretty.Orm
 
                     if (indexAttribute.Unique != iinfo.Item1)
                     {
-                        throw new Exception("All the columns in an index must have the same value for their Unique property");
+                        throw new ArgumentException("All the columns in an index must have the same value for their Unique property");
                     }
 
                     if (iinfo.Item2.ContainsKey(indexAttribute.Order))
                     {
-                        throw new Exception("Ordered columns must have unique values for their Order property.");
+                        throw new ArgumentException("Ordered columns must have unique values for their Order property.");
                     }
 
                     iinfo.Item2.Add(indexAttribute.Order, columnIndex.Key);
@@ -544,35 +527,50 @@ namespace SQLitePCL.pretty.Orm
                     )
                 ).ToList();
 
+            var primaryKeyParts = columnToMapping.Where(x => x.Value.Metadata.IsPrimaryKeyPart).ToList();
+            if (primaryKeyParts.Count < 1)
+            {
+                throw new ArgumentException("Table mapping requires at least one primary key");
+            }
+
             return new TableMapping<T>(builder, build, tableName, columnToMapping, indexes);
         }
             
         private static TableColumnMetadata CreateColumnMetadata(PropertyInfo prop)
         {
             var definedType = prop.PropertyType;
+            var columnType = definedType.GetUnderlyingType();
+            var collation = prop.GetCollationSequence();
+            var isPK = prop.IsPrimaryKeyPart();
 
-            // If this type is Nullable<T> then Nullable.GetUnderlyingType returns the T, otherwise it returns null, so get the actual type instead
-            var columnType = Nullable.GetUnderlyingType(definedType) ?? definedType;
-            var collation = prop.Collation();
-            var isPK = prop.IsPrimaryKey();
+            var isNullableInt = (definedType == typeof(Nullable<int>)) || (definedType == typeof(Nullable<long>));
+            var isAutoInc = isPK && isNullableInt;
 
-            var pkIsAutoInc = false;
-            if (isPK && definedType.GetTypeInfo().IsGenericType &&
-                ((definedType.GetGenericTypeDefinition() == typeof(Nullable<int>)) ||
-                 (definedType.GetGenericTypeDefinition() == typeof(Nullable<long>))
-                ))
-            {
-                pkIsAutoInc = true;
-            }
+            var hasNotNullConstraint = isPK || prop.HasNotNullConstraint() || definedType.GetTypeInfo().IsValueType;
 
-            var hasNotNullConstraint = isPK || IsMarkedNotNull(prop);
-
-            return new TableColumnMetadata(columnType.GetSqlType(), collation, hasNotNullConstraint, isPK, pkIsAutoInc);
+            return new TableColumnMetadata(columnType.GetSQLiteType().ToSQLDeclaredType(), collation, hasNotNullConstraint, isPK, isAutoInc);
         }
 
-        private const int DefaultMaxStringLength = 140;
+        private static string ToSQLDeclaredType(this SQLiteType This)
+        {
+            switch (This)
+            {
+                case SQLiteType.Integer:
+                    return "INTEGER";
+                case SQLiteType.Float:
+                    return "REAL";
+                case SQLiteType.Text:
+                    return "TEXT";
+                case SQLiteType.Blob:
+                    return "BLOB";
+                case SQLiteType.Null:
+                    return "NULL";
+                default:
+                    throw new ArgumentException("Invalid SQLite type.");
+            }
+        }
 
-        private static string GetSqlType(this Type clrType)
+        private static SQLiteType GetSQLiteType(this Type clrType)
         {
             if (clrType == typeof(Boolean)        || 
                 clrType == typeof(Byte)           || 
@@ -587,44 +585,16 @@ namespace SQLitePCL.pretty.Orm
                 clrType == typeof(DateTimeOffset) ||  
                 clrType.GetTypeInfo().IsEnum)
             { 
-                return "INTEGER"; 
+                return SQLiteType.Integer; 
             } 
                 
-            else if (clrType == typeof(Single) || clrType == typeof(Double) || clrType == typeof(Decimal))               { return "REAL"; } 
-            else if (clrType == typeof(String) || clrType == typeof(Guid) || clrType == typeof(Uri))                     { return "TEXT"; } 
-            else if (clrType == typeof(byte[]) || clrType.GetTypeInfo().IsAssignableFrom(typeof(Stream).GetTypeInfo()))  { return "BLOB"; } 
+            else if (clrType == typeof(Single) || clrType == typeof(Double) || clrType == typeof(Decimal)) { return SQLiteType.Float; } 
+            else if (clrType == typeof(String) || clrType == typeof(Guid) || clrType == typeof(Uri))       { return SQLiteType.Text; } 
+            else if (clrType == typeof(byte[]) || clrType.IsSameOrSubclass(typeof(Stream)))                { return SQLiteType.Blob; } 
             else 
             {
                 throw new NotSupportedException ("Don't know about " + clrType);
             }
-        }
-
-        private static bool IsPrimaryKey (this MemberInfo p)
-        {
-            var attrs = p.GetCustomAttributes (typeof(PrimaryKeyAttribute), true);
-            return attrs.Count() > 0;
-        }
-
-        private static string Collation (this MemberInfo p)
-        {
-            var attrs = p.GetCustomAttributes (typeof(CollationAttribute), true);
-            if (attrs.Count() > 0) {
-                return ((CollationAttribute)attrs.First()).Name;
-            } else {
-                return string.Empty;
-            }
-        }
-
-        private static IEnumerable<IndexedAttribute> GetIndexes(this MemberInfo p)
-        {
-            var attrs = p.GetCustomAttributes(typeof(IndexedAttribute), true);
-            return attrs.Cast<IndexedAttribute>();
-        }
-
-        private static bool IsMarkedNotNull(this MemberInfo p)
-        {
-            var attrs = p.GetCustomAttributes (typeof (NotNullAttribute), true);
-            return attrs.Count() > 0;
         }
 
         internal static object ToObject(this ISQLiteValue value, Type clrType)
@@ -662,10 +632,7 @@ namespace SQLitePCL.pretty.Orm
         private readonly Func<object,T> build;
 
         private readonly string tableName;
-
         private readonly IReadOnlyDictionary<string, ColumnMapping> columnToMapping;
-
-        // FIXME: To implement equality correctly this should be a set
         private readonly IReadOnlyList<IndexInfo> indexes;
 
         internal TableMapping(
@@ -673,8 +640,6 @@ namespace SQLitePCL.pretty.Orm
             Func<object,T> build, 
             string tableName,
             IReadOnlyDictionary<string, ColumnMapping> columnToMapping,
-
-            // FIXME: To implement equality correctly this should be a set
             IReadOnlyList<IndexInfo> indexes)
         {
             this.builder = builder;

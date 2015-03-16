@@ -4,7 +4,7 @@ using System.Reflection;
 namespace SQLitePCL.pretty.Orm
 {
     /// <summary>
-    /// Provides the mapping between a columns SQL and CLR representation.
+    /// Provides the mapping between a column's SQL and CLR representation.
     /// </summary>
     public sealed class ColumnMapping: IEquatable<ColumnMapping>
     {
