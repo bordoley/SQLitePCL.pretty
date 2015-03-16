@@ -475,58 +475,40 @@ namespace SQLitePCL.pretty.Orm
             // FIXME: I wish this was immutable
             var columnToMapping = new Dictionary<string, ColumnMapping>();
 
-            // map each column to it's index attributes
-            var columnToIndexMapping = new Dictionary<string, IEnumerable<IndexedAttribute>>();
+            var indexes = new List<IndexInfo>();
+
+            // Add single column indexes
             foreach (var prop in props.Where(prop => !prop.Ignore()))
             {
                 var name = prop.GetColumnName();
                 var columnType = prop.PropertyType.GetUnderlyingType();
                 var metadata = CreateColumnMetadata(prop);
-                var columnIndexes = prop.GetIndexes();
-
                 columnToMapping.Add(name, new ColumnMapping(columnType, prop, metadata));
-                columnToIndexMapping.Add(name, columnIndexes);
-            }
 
-            // A Map of the index name to its columns and whether its unique or not
-            var indexToColumns = new Dictionary<string, Tuple<bool, Dictionary<int, string>>>();
-
-            foreach (var columnIndex in columnToIndexMapping)
-            {
-                foreach (var indexAttribute in columnIndex.Value)
+                var columnIndex = prop.GetColumnIndex();
+                if (columnIndex != null)
                 {
-                    var indexName = indexAttribute.Name ?? SQLBuilder.NameIndex(tableName, columnIndex.Key);
-
-                    Tuple<bool, Dictionary<int, string>> iinfo;
-                    if (!indexToColumns.TryGetValue(indexName, out iinfo))
-                    {
-                        iinfo = Tuple.Create(indexAttribute.Unique, new Dictionary<int,string>());
-                        indexToColumns.Add(indexName, iinfo);
-                    }
-
-                    if (indexAttribute.Unique != iinfo.Item1)
-                    {
-                        throw new ArgumentException("All the columns in an index must have the same value for their Unique property");
-                    }
-
-                    if (iinfo.Item2.ContainsKey(indexAttribute.Order))
-                    {
-                        throw new ArgumentException("Ordered columns must have unique values for their Order property.");
-                    }
-
-                    iinfo.Item2.Add(indexAttribute.Order, columnIndex.Key);
+                    var indexName = SQLBuilder.NameIndex(tableName, name);
+                    indexes.Add(
+                        new IndexInfo(
+                            indexName,
+                            columnIndex.Unique,
+                            new string[] { name }));
                 }
             }
- 
-            var indexes = 
-                indexToColumns.Select(x => 
-                    new IndexInfo(
-                        x.Key, 
-                        x.Value.Item1, 
-                        x.Value.Item2.OrderBy(col => col.Key).Select(col => col.Value).ToList()
-                    )
-                ).ToList();
 
+            // Add composite indexes.
+            foreach (var compositeIndex in mappedType.GetCompositeIndexes())
+            {
+                var indexName = compositeIndex.Name ?? SQLBuilder.NameIndex(tableName, compositeIndex.Columns);
+                indexes.Add(
+                    new IndexInfo(
+                        indexName,
+                        compositeIndex.Unique,
+                        compositeIndex.Columns.ToList()));
+            }
+
+            // Validate primary keys
             var primaryKeyParts = columnToMapping.Where(x => x.Value.Metadata.IsPrimaryKeyPart).ToList();
             if (primaryKeyParts.Count < 1)
             {

@@ -130,6 +130,26 @@ namespace SQLitePCL.pretty.Orm
             return "REINDEX " + name;
         }
 
+        internal static string CreateTableIfNotExists(string tableName, CreateFlags createFlags, IEnumerable<Tuple<string, TableColumnMetadata>> columns)
+        {
+            bool fts3 = (createFlags & CreateFlags.FullTextSearch3) != 0;
+            bool fts4 = (createFlags & CreateFlags.FullTextSearch4) != 0;
+            bool fts = fts3 || fts4;
+
+            var @virtual = fts ? "VIRTUAL " : string.Empty;
+            var @using = fts3 ? "USING FTS3 " : fts4 ? "USING FTS4 " : string.Empty;
+
+            // Build query.
+            var query = "CREATE " + @virtual + "TABLE IF NOT EXISTS \"" + tableName + "\" " + @using + "(\n";
+            var decls = columns.Select (c => SQLBuilder.SqlDecl(c.Item1, c.Item2));
+            var decl = string.Join (",\n", decls.ToArray ());
+            query += decl;
+            query += (",\n PRIMARY KEY (" + String.Join(", ", columns.Where(x => x.Item2.IsPrimaryKeyPart).Select(x => x.Item1)) + ")");
+            query += ")";
+
+            return query;
+        }
+
         internal static string SqlDecl (string columnName, TableColumnMetadata metadata)
         {
             string decl = "\"" + columnName + "\" " + metadata.DeclaredType + " ";

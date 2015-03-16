@@ -100,6 +100,15 @@ namespace SQLitePCL.pretty.Orm
             }
             return hash;
         }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.IndexInfo"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.IndexInfo"/>.</returns>
+        public override string ToString()
+        {
+            return string.Format("[IndexName: {0}], [Unique: {1}], [Columns: {2}]", this.Name, this.Unique, string.Join(", ", this.Columns));
+        }
     }
 }
 

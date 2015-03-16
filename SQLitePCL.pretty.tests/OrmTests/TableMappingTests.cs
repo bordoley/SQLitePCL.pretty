@@ -10,38 +10,37 @@ using Ignore = SQLitePCL.pretty.Orm.Attributes.IgnoreAttribute;
 
 namespace SQLitePCL.pretty.tests
 {
-    public class TestObjectWithAutoIncrementPrimaryKeyAndDefaultTableName
-    {
-        [PrimaryKey]
-        public long? Id { get; set; }
-
-        [Indexed()]
-        public Uri Uri { get; set; }
-
-        [Column("B")]
-        [Indexed(true)]
-        public string A { get; set; }
-
-        [Ignore]
-        public Stream Ignored { get; set; }
-
-        [NotNull]
-        [Indexed("unique_index", 0, true)]
-        public byte[] NotNull { get; set; }
-
-        [Collation("Fancy Collation")]
-        [Indexed("unique_index", 1, true)]
-        public string Collated { get; set; }
-
-        [Indexed("not_unique", 0)]
-        public DateTime Value { get; set; }
-
-        public float AFloat { get; set; }
-    }
-
     [TestFixture]
     public class TableMappingTests
     {
+
+        [CompositeIndex("NotNull", "Collated")]
+        [CompositeIndex("named", true, "Uri", "B")]
+        public class TestObjectWithAutoIncrementPrimaryKeyAndDefaultTableName
+        {
+            [PrimaryKey]
+            public long? Id { get; set; }
+
+            [Indexed()]
+            public Uri Uri { get; set; }
+
+            [Column("B")]
+            [Indexed(true)]
+            public string A { get; set; }
+
+            [Ignore]
+            public Stream Ignored { get; set; }
+
+            [NotNull]
+            public byte[] NotNull { get; set; }
+
+            [Collation("Fancy Collation")]
+            public string Collated { get; set; }
+
+            public DateTime Value { get; set; }
+
+            public float AFloat { get; set; }
+        }
 
         [Test]
         public void TestCreate()
@@ -52,6 +51,17 @@ namespace SQLitePCL.pretty.tests
 
             var expectedColumns = new string[] { "Id", "Uri", "B", "NotNull", "Collated", "Value", "AFloat" };
             CollectionAssert.AreEquivalent(expectedColumns, table.Keys);
+
+            var expectedIndexes = new IndexInfo[] 
+                {
+                    new IndexInfo("TestObjectWithAutoIncrementPrimaryKeyAndDefaultTableName_Uri", false, Enumerable.Repeat("Uri", 1).ToList()),
+                    new IndexInfo("TestObjectWithAutoIncrementPrimaryKeyAndDefaultTableName_B", true, Enumerable.Repeat("B", 1).ToList()),
+                    new IndexInfo("TestObjectWithAutoIncrementPrimaryKeyAndDefaultTableName_NotNull_Collated", false, new string[] { "NotNull", "Collated"}),
+                    new IndexInfo("named", true, new string[] { "Uri", "B"}),
+                };
+
+            var indexes = table.Indexes;
+            CollectionAssert.AreEquivalent(indexes, expectedIndexes);
 
             var idMapping = table["Id"];
             // Subtle touch, but nullables are ignored in the CLR type.
@@ -155,36 +165,15 @@ namespace SQLitePCL.pretty.tests
             public object Unsupported { get; set; }
         }
 
-        public class TestObjectWithIndexesWithTheSameOrder
+        public class TestObjectWithNoPrimaryKey
         {
-            [PrimaryKey]
-            public long? Id { get; set; }
-
-            [Indexed("i", 0)]
-            public int One { get; set; }
-
-            [Indexed("i", 0)]
-            public int Two { get; set; }
-        }
-
-        public class TestObjectWithIndexThatIsBothUniqueAndNotUnique
-        {
-            [PrimaryKey]
-            public long? Id { get; set; }
-
-            [Indexed("i", 0, true)]
-            public int One { get; set; }
-
-            [Indexed("i", 1, false)]
-            public int Two { get; set; }
         }
 
         [Test]
         public void TestCreateWithInvalidTableTypes()
         {
             Assert.Throws<NotSupportedException>(() => TableMapping.Create<TestObjectWithUnsupportedPropertyType>());
-            Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithIndexesWithTheSameOrder>());
-            Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithIndexThatIsBothUniqueAndNotUnique>());
+            Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithNoPrimaryKey>());
         }
 
     }
