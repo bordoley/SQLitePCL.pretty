@@ -473,7 +473,7 @@ namespace SQLitePCL.pretty.Orm
             var props = mappedType.GetPublicInstanceProperties();
 
             // FIXME: I wish this was immutable
-            var columnToMapping = new Dictionary<string, ColumnMapping>();
+            var columns = new Dictionary<string, ColumnMapping>();
 
             var indexes = new Dictionary<string,IndexInfo>();
 
@@ -483,7 +483,7 @@ namespace SQLitePCL.pretty.Orm
                 var name = prop.GetColumnName();
                 var columnType = prop.PropertyType.GetUnderlyingType();
                 var metadata = CreateColumnMetadata(prop);
-                columnToMapping.Add(name, new ColumnMapping(columnType, prop, metadata));
+                columns.Add(name, new ColumnMapping(columnType, prop, metadata));
 
                 var columnIndex = prop.GetColumnIndex();
                 if (columnIndex != null)
@@ -501,29 +501,30 @@ namespace SQLitePCL.pretty.Orm
             foreach (var compositeIndex in mappedType.GetCompositeIndexes())
             {
                 var indexName = compositeIndex.Name ?? SQLBuilder.NameIndex(tableName, compositeIndex.Columns);
-                var columns = compositeIndex.Columns.ToList();
+                var indexColumns = compositeIndex.Columns.ToList();
 
                 // Validate the column names
-                foreach (var column in columns)
+                foreach (var column in indexColumns)
                 {
-                    if (!columnToMapping.ContainsKey(column)) { throw new ArgumentException(column + " is not a valid column name."); }
+                    if (!columns.ContainsKey(column)) { throw new ArgumentException(column + " is not a valid column name."); }
                 }
 
                 indexes.Add(
                     indexName,
                     new IndexInfo(
                         compositeIndex.Unique,
-                        columns));
+                        indexColumns));
             }
 
             // Validate primary keys
-            var primaryKeyParts = columnToMapping.Where(x => x.Value.Metadata.IsPrimaryKeyPart).ToList();
+            // FIXME: Should it be an error to have multiple primary key parts with nullable parts? What about autoincrement?
+            var primaryKeyParts = columns.Where(x => x.Value.Metadata.IsPrimaryKeyPart).ToList();
             if (primaryKeyParts.Count < 1)
             {
                 throw new ArgumentException("Table mapping requires at least one primary key");
             }
 
-            return new TableMapping<T>(builder, build, tableName, columnToMapping, indexes);
+            return new TableMapping<T>(builder, build, tableName, columns, indexes);
         }
             
         private static TableColumnMetadata CreateColumnMetadata(PropertyInfo prop)

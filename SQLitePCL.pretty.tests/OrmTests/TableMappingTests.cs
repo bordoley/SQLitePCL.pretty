@@ -13,7 +13,6 @@ namespace SQLitePCL.pretty.tests
     [TestFixture]
     public class TableMappingTests
     {
-
         [CompositeIndex("NotNull", "Collated")]
         [CompositeIndex("named", true, "Uri", "B")]
         public class TestObjectWithAutoIncrementPrimaryKeyAndDefaultTableName
@@ -151,10 +150,17 @@ namespace SQLitePCL.pretty.tests
         public void TestCreateWithMultiplePrimaryKeyColumns()
         {   
             var table = TableMapping.Create<TestObjectWithMultiplePrimaryKeys>();
-            using (var db = SQLite3.OpenInMemory())
-            {
-                db.InitTable(table);
-            }
+            Assert.IsTrue(table.Columns["PrimaryKey1"].Metadata.HasNotNullConstraint);
+            Assert.IsTrue(table.Columns["PrimaryKey1"].Metadata.IsPrimaryKeyPart);
+            Assert.IsFalse(table.Columns["PrimaryKey1"].Metadata.IsAutoIncrement);
+
+            Assert.IsTrue(table.Columns["PrimaryKey2"].Metadata.HasNotNullConstraint);
+            Assert.IsTrue(table.Columns["PrimaryKey2"].Metadata.IsPrimaryKeyPart);
+            Assert.IsFalse(table.Columns["PrimaryKey2"].Metadata.IsAutoIncrement);
+
+            Assert.IsTrue(table.Columns["PrimaryKey3"].Metadata.HasNotNullConstraint);
+            Assert.IsTrue(table.Columns["PrimaryKey3"].Metadata.IsPrimaryKeyPart);
+            Assert.IsFalse(table.Columns["PrimaryKey3"].Metadata.IsAutoIncrement);
         }
 
         public class TestObjectWithUnsupportedPropertyType
@@ -169,13 +175,23 @@ namespace SQLitePCL.pretty.tests
         {
         }
 
+        [CompositeIndex("id", "a")] 
+        public class TestObjectWithBadCompositIndex
+        {
+            [PrimaryKey]
+            public long? Id { get; set; }
+
+        }
+
         [Test]
         public void TestCreateWithInvalidTableTypes()
         {
             Assert.Throws<NotSupportedException>(() => TableMapping.Create<TestObjectWithUnsupportedPropertyType>());
             Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithNoPrimaryKey>());
+            Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithBadCompositIndex>());
         }
 
+        [
     }
 }
 
