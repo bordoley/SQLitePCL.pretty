@@ -136,9 +136,18 @@ namespace SQLitePCL.pretty.Orm
             return This.Find(tableMapping, primaryKey);
         }*/
 
-        public static T Find<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey)
+        public static bool TryFind<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey, out T value)
         {
-            return This.FindAll(tableMapping, new object[] { primaryKey }).FirstOrDefault();
+            var result = This.FindAll(tableMapping, new object[] { primaryKey }).FirstOrDefault();
+
+            if (result != null)
+            {
+                value = result;
+                return true;
+            }
+
+            value = default(T);
+            return false;
         }
 
         /*
@@ -152,14 +161,20 @@ namespace SQLitePCL.pretty.Orm
             return This.Use((db, _) => db.Find(tableMapping, obj), ct);
         }*/
 
-        public static Task<T> FindAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey, CancellationToken ct)
+        public static IObservable<T> FindAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey)
         {
-            return This.Use((db, _) => db.Find(tableMapping, primaryKey), ct);
-        }
-
-        public static Task<T> FindAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, object primaryKey)
-        {
-            return This.FindAsync(tableMapping, primaryKey, CancellationToken.None);
+            return This.Use(db => 
+                {
+                    T result;
+                    if (db.TryFind(tableMapping, primaryKey, out result))
+                    {
+                        return Enumerable.Repeat(result, 1);
+                    }
+                    else
+                    {
+                        return Enumerable.Empty<T>();
+                    }
+                });
         }
 
         public static IReadOnlyList<T> FindAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable primaryKeys)

@@ -142,8 +142,15 @@ namespace SQLitePCL.pretty.tests
                     tableNew.Columns.Select(x => new KeyValuePair<string,TableColumnMetadata>(x.Key, x.Value.Metadata)),
                     dbColumns);
 
-                var found = db.Find(tableNew, insertedOriginal.Id);
-                Assert.AreEqual(found.NotNullReference, "default");
+                TestMutableObjectUpdated found;
+                if (db.TryFind<TestMutableObjectUpdated>(tableNew, insertedOriginal.Id, out found))
+                {
+                    Assert.AreEqual(found.NotNullReference, "default");
+                }
+                else
+                { 
+                    Assert.Fail();
+                }
             }
         }
 
@@ -151,8 +158,8 @@ namespace SQLitePCL.pretty.tests
         public void TestInsert()
         {
             var table = TableMapping.Create<TestObject>(
-                ()=> testObjectBuilder.Value, 
-                o => ((TestObject.Builder) o).Build());
+                            () => testObjectBuilder.Value, 
+                            o => ((TestObject.Builder)o).Build());
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -161,8 +168,15 @@ namespace SQLitePCL.pretty.tests
                 Assert.IsNotNull(hello.Id);
                 Assert.AreEqual(hello.Value, "Hello");
 
-                var lookupHello = db.Find(table, hello.Id);
-                Assert.AreEqual(hello, lookupHello);
+                TestObject lookupHello; 
+                if (db.TryFind(table, hello.Id, out lookupHello))
+                {
+                    Assert.AreEqual(hello, lookupHello);
+                }
+                else
+                {
+                    Assert.Fail();
+                }
 
                 Assert.Throws<SQLiteException>(() => db.Insert(table, hello));
 
@@ -178,9 +192,16 @@ namespace SQLitePCL.pretty.tests
                 Assert.IsNotNull(hello.Id);
                 Assert.AreEqual(hello.Value, "Hello");
 
-                var lookupHello = db.Find(mutableTable, hello.Id);
-                Assert.AreEqual(hello.Id, lookupHello.Id);
-                Assert.AreEqual(hello.Value, lookupHello.Value);
+                TestMutableObject lookupHello; 
+                if (db.TryFind(mutableTable, hello.Id, out lookupHello))
+                {
+                    Assert.AreEqual(hello.Id, lookupHello.Id);
+                    Assert.AreEqual(hello.Value, lookupHello.Value);
+                }
+                else
+                {
+                    Assert.Fail();
+                }
             }
         }
 
@@ -287,8 +308,8 @@ namespace SQLitePCL.pretty.tests
                 var deleted = db.Delete(table, inserted);
                 Assert.AreEqual(inserted, deleted);
 
-                var lookup = db.Find(table, inserted.Id);
-                Assert.IsNull(lookup);
+                TestObject lookup;
+                Assert.IsFalse(db.TryFind(table, inserted.Id, out lookup));
             }
         }
 
@@ -321,9 +342,16 @@ namespace SQLitePCL.pretty.tests
                     Assert.IsNull(o);
                 }
 
-                Assert.AreEqual(db.Find(table, notDeleted.Id), notDeleted);
+                TestObject found2;
+                if (db.TryFind(table, notDeleted.Id, out found2))
+                {
+                    Assert.AreEqual(found2, notDeleted);
+                }
+
                 db.DeleteAll(table);
-                Assert.IsNull(db.Find(table, notDeleted.Id));
+
+                TestObject notFound;
+                Assert.IsFalse(db.TryFind(table, notDeleted.Id, out notFound));
             }
         }
 

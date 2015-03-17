@@ -109,6 +109,7 @@
     <Compile Include="AsyncTests\ResultSet.cs" />
     <Compile Include="OrmTests\TableMappingTests.Create.cs" />
     <Compile Include="OrmTests\TableMappingTests.Sync.cs" />
+    <Compile Include="OrmTests\TableMappingTest.Async.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SQLitePCL.pretty.Async\SQLitePCL.pretty.Async.csproj">
