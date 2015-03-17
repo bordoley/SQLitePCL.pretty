@@ -481,7 +481,7 @@ namespace SQLitePCL.pretty.Orm
             foreach (var prop in props.Where(prop => !prop.Ignore()))
             {
                 var name = prop.GetColumnName();
-                var columnType = prop.PropertyType.GetUnderlyingType();
+                var columnType = prop.PropertyType;
                 var metadata = CreateColumnMetadata(prop);
                 columns.Add(name, new ColumnMapping(columnType, prop, metadata));
 
@@ -506,7 +506,10 @@ namespace SQLitePCL.pretty.Orm
                 // Validate the column names
                 foreach (var column in indexColumns)
                 {
-                    if (!columns.ContainsKey(column)) { throw new ArgumentException(column + " is not a valid column name."); }
+                    if (!columns.ContainsKey(column))
+                    {
+                        throw new ArgumentException(column + " is not a valid column name.");
+                    }
                 }
 
                 indexes.Add(
@@ -517,11 +520,17 @@ namespace SQLitePCL.pretty.Orm
             }
 
             // Validate primary keys
-            // FIXME: Should it be an error to have multiple primary key parts with nullable parts? What about autoincrement?
             var primaryKeyParts = columns.Where(x => x.Value.Metadata.IsPrimaryKeyPart).ToList();
             if (primaryKeyParts.Count < 1)
             {
                 throw new ArgumentException("Table mapping requires at least one primary key");
+            }
+            else if (primaryKeyParts.Count > 1)
+            {
+                if (primaryKeyParts.Where(x => x.Value.Metadata.IsAutoIncrement).Count() > 0)
+                {
+                    throw new ArgumentException("Composite primary keys may not include Nullable<T> properties.");
+                }
             }
 
             return new TableMapping<T>(builder, build, tableName, columns, indexes);
@@ -529,15 +538,24 @@ namespace SQLitePCL.pretty.Orm
             
         private static TableColumnMetadata CreateColumnMetadata(PropertyInfo prop)
         {
-            var definedType = prop.PropertyType;
-            var columnType = definedType.GetUnderlyingType();
+            var columnType = prop.PropertyType;
             var collation = prop.GetCollationSequence();
             var isPK = prop.IsPrimaryKeyPart();
 
-            var isNullableInt = (definedType == typeof(Nullable<int>)) || (definedType == typeof(Nullable<long>));
-            var isAutoInc = isPK && isNullableInt;
+            var isAutoInc = false;
+            if (isPK && columnType.IsNullable())
+            {
+                if (columnType != typeof(Nullable<long>))
+                {
+                    throw new ArgumentException("Nullable primary key value must be of type long.");
+                }
 
-            var hasNotNullConstraint = isPK || prop.HasNotNullConstraint() || definedType.GetTypeInfo().IsValueType;
+                // Only allow autoincrement on nullable long primary keys
+                isAutoInc = true;
+            }
+
+            // Though technically not required to be not null by SQLite, we enforce that the primary key is always not null
+            var hasNotNullConstraint = isPK || prop.HasNotNullConstraint() || columnType.GetTypeInfo().IsValueType;
 
             return new TableColumnMetadata(columnType.GetSQLiteType().ToSQLDeclaredType(), collation, hasNotNullConstraint, isPK, isAutoInc);
         }
@@ -563,6 +581,9 @@ namespace SQLitePCL.pretty.Orm
 
         private static SQLiteType GetSQLiteType(this Type clrType)
         {
+            // Just in case the clrType is nullable
+            clrType = clrType.GetUnderlyingType();
+
             if (clrType == typeof(Boolean)        || 
                 clrType == typeof(Byte)           || 
                 clrType == typeof(UInt16)         || 
@@ -590,6 +611,9 @@ namespace SQLitePCL.pretty.Orm
 
         internal static object ToObject(this ISQLiteValue value, Type clrType)
         {
+            // Just in case the clrType is nullable
+            clrType = clrType.GetUnderlyingType();
+
             if (value.SQLiteType == SQLiteType.Null)    { return null; } 
             else if (clrType == typeof(String))         { return value.ToString(); } 
             else if (clrType == typeof(Int32))          { return value.ToInt(); } 
@@ -658,8 +682,10 @@ namespace SQLitePCL.pretty.Orm
                 if (columns.TryGetValue(columnName, out columnMapping))
                 {
                     var value = resultSetValue.ToObject(columnMapping.ClrType);
-                    var prop = columnMapping.Property;
-                    prop.SetValue (builder, value, null);
+
+                    // The builder may be of a different type than type T but must use the same property names
+                    var builderProp = builder.GetType().GetTypeInfo().GetDeclaredProperty(columnMapping.Property.Name);
+                    builderProp.SetValue (builder, value, null);
                 }
             }
 

@@ -139,12 +139,20 @@ namespace SQLitePCL.pretty.Orm
             var @virtual = fts ? "VIRTUAL " : string.Empty;
             var @using = fts3 ? "USING FTS3 " : fts4 ? "USING FTS4 " : string.Empty;
 
+            // Prefer the table constraint definition for the primary key unless this is an autoincrement pk
+            var usePkTableConstraint = columns.Where(x => x.Item2.IsAutoIncrement).Count() == 0;
+
             // Build query.
             var query = "CREATE " + @virtual + "TABLE IF NOT EXISTS \"" + tableName + "\" " + @using + "(\n";
-            var decls = columns.Select (c => SQLBuilder.SqlDecl(c.Item1, c.Item2));
-            var decl = string.Join (",\n", decls.ToArray ());
+            var decls = columns.Select(c => SQLBuilder.SqlDecl(c.Item1, c.Item2));
+            var decl = string.Join(",\n", decls.ToArray());
             query += decl;
-            query += (",\n PRIMARY KEY (" + String.Join(", ", columns.Where(x => x.Item2.IsPrimaryKeyPart).Select(x => x.Item1)) + ")");
+
+            if (usePkTableConstraint)
+            {
+                query += (",\n PRIMARY KEY (" + String.Join(", ", columns.Where(x => x.Item2.IsPrimaryKeyPart).Select(x => x.Item1)) + ")");
+            }
+
             query += ")";
 
             return query;
@@ -154,14 +162,9 @@ namespace SQLitePCL.pretty.Orm
         {
             string decl = "\"" + columnName + "\" " + metadata.DeclaredType + " ";
             
-            //if (metadata.IsPrimaryKeyPart) 
-            //{
-            //    decl += "PRIMARY KEY ";
-            //}
-
-            if (metadata.IsAutoIncrement) 
+            if (metadata.IsPrimaryKeyPart && metadata.IsAutoIncrement) 
             {
-                decl += "AUTOINCREMENT ";
+                decl += "PRIMARY KEY AUTOINCREMENT ";
             }
 
             if (metadata.HasNotNullConstraint) 

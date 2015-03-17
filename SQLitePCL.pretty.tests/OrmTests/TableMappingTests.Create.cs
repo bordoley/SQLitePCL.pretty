@@ -11,7 +11,7 @@ using Ignore = SQLitePCL.pretty.Orm.Attributes.IgnoreAttribute;
 namespace SQLitePCL.pretty.tests
 {
     [TestFixture]
-    public class TableMappingTests
+    public partial class TableMappingTests
     {
         [CompositeIndex("NotNull", "Collated")]
         [CompositeIndex("named", true, "Uri", "B")]
@@ -64,7 +64,7 @@ namespace SQLitePCL.pretty.tests
 
             var idMapping = table.Columns["Id"];
             // Subtle touch, but nullables are ignored in the CLR type.
-            Assert.AreEqual(idMapping.ClrType, typeof(long));
+            Assert.AreEqual(idMapping.ClrType, typeof(Nullable<long>));
             // No way to test the PropertyInfo directly
             Assert.IsTrue(idMapping.Metadata.CollationSequence.Length == 0);
             Assert.AreEqual(idMapping.Metadata.DeclaredType, "INTEGER");
@@ -190,8 +190,6 @@ namespace SQLitePCL.pretty.tests
             Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithNoPrimaryKey>());
             Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithBadCompositIndex>());
         }
-
-        [
     }
 }
 
