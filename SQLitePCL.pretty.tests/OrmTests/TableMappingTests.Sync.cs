@@ -271,6 +271,79 @@ namespace SQLitePCL.pretty.tests
                     changed.Select(x => x.Value));
             }
         }
+
+        [Test]
+        public void TestDelete()
+        {
+            var table = TableMapping.Create<TestObject>(
+                            () => testObjectBuilder.Value, 
+                            o => ((TestObject.Builder)o).Build());
+
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+
+                var inserted = db.Insert(table, new TestObject.Builder() { Value = "Hello" }.Build());
+                var deleted = db.Delete(table, inserted);
+                Assert.AreEqual(inserted, deleted);
+
+                var lookup = db.Find(table, inserted.Id);
+                Assert.IsNull(lookup);
+            }
+        }
+
+        [Test]
+        public void TestDeleteAll()
+        {
+            var table = TableMapping.Create<TestObject>(
+                            () => testObjectBuilder.Value, 
+                            o => ((TestObject.Builder)o).Build());
+
+            using (var db = SQLite3.OpenInMemory())
+            {
+               
+                var objects = new List<TestObject>()
+                {
+                    new TestObject.Builder() { Value = "Hello1" }.Build(),
+                    new TestObject.Builder() { Value = "Hello2" }.Build(),
+                    new TestObject.Builder() { Value = "Hello3" }.Build()
+                };
+
+                db.InitTable(table);
+                var inserted = db.InsertAll(table, objects);
+                var deleted = db.DeleteAll(table, inserted);
+                CollectionAssert.AreEquivalent(inserted, deleted);
+
+                var found = db.FindAll(table, inserted.Select(x => x.Id));
+                foreach (var o in found)
+                {
+                    Assert.IsNull(o);
+                }
+            }
+        }
+
+        [Test]
+        public void TestDropTable()
+        {
+            var table = TableMapping.Create<TestObject>(
+                            () => testObjectBuilder.Value, 
+                            o => ((TestObject.Builder)o).Build());
+
+            using (var db = SQLite3.OpenInMemory())
+            {
+                var tableLookup =
+                    @"SELECT name FROM sqlite_master
+                      WHERE type='table' AND name='TestObject'
+                      ORDER BY name;";
+
+                db.InitTable(table);
+                Assert.Greater(db.Query(tableLookup).Count(), 0);
+
+                db.DropTable(table);
+                Assert.AreEqual(db.Query(tableLookup).Count(), 0);
+            }
+        }
+
     }
 }
 

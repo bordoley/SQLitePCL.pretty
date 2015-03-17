@@ -373,7 +373,7 @@ namespace SQLitePCL.pretty.Orm
         public static IReadOnlyList<T> DeleteAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
             var primaryKeys = objects.Select(tableMapping.GetPrimaryKey);
-            return This.DeleteAll<T>(tableMapping, primaryKeys);
+            return This.RunInTransaction(_ => This.DeleteAll<T>(tableMapping, primaryKeys));
         }
 
         public static IObservable<T> DeleteAll<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
