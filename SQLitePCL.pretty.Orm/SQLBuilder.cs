@@ -53,15 +53,6 @@ namespace SQLitePCL.pretty.Orm
             return string.Format("DELETE FROM \"{0}\" WHERE \"{1}\" = ?", tableName, pkColumn);
         }
 
-        internal static string Update(string tableName, IEnumerable<string> columns, string pkColumn)
-        {
-            return string.Format (
-                "UPDATE \"{0}\" SET {1} WHERE {2} = ? ", 
-                tableName, 
-                string.Join (",", columns.Where(x => x != pkColumn).Select(x => "\"" + x + "\" = :" + x).ToArray ()), 
-                pkColumn);
-        }
-
         internal static string Insert(string tableName, IEnumerable<string> columns)
         {
             return string.Format(
