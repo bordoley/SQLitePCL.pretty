@@ -310,6 +310,7 @@ namespace SQLitePCL.pretty.tests
                 };
 
                 db.InitTable(table);
+                var notDeleted = db.Insert(table, new TestObject.Builder() { Value = "NotDeleted" }.Build());
                 var inserted = db.InsertAll(table, objects);
                 var deleted = db.DeleteAll(table, inserted);
                 CollectionAssert.AreEquivalent(inserted, deleted);
@@ -319,6 +320,10 @@ namespace SQLitePCL.pretty.tests
                 {
                     Assert.IsNull(o);
                 }
+
+                Assert.AreEqual(db.Find(table, notDeleted.Id), notDeleted);
+                db.DeleteAll(table);
+                Assert.IsNull(db.Find(table, notDeleted.Id));
             }
         }
 
@@ -343,7 +348,6 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(db.Query(tableLookup).Count(), 0);
             }
         }
-
     }
 }
 
