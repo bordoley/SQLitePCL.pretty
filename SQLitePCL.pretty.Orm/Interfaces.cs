@@ -13,6 +13,8 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         String TableName { get; }
 
+
+        // FIXME: Make this IReadOnlydictionary<string, IndexInfo>
         /// <summary>
         /// Gets the table indexes.
         /// </summary>

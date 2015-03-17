@@ -501,11 +501,19 @@ namespace SQLitePCL.pretty.Orm
             foreach (var compositeIndex in mappedType.GetCompositeIndexes())
             {
                 var indexName = compositeIndex.Name ?? SQLBuilder.NameIndex(tableName, compositeIndex.Columns);
+                var columns = compositeIndex.Columns.ToList();
+
+                // Validate the column names
+                foreach (var column in columns)
+                {
+                    if (!columnToMapping.ContainsKey(column)) { throw new ArgumentException(column + " is not a valid column name."); }
+                }
+
                 indexes.Add(
                     new IndexInfo(
                         indexName,
                         compositeIndex.Unique,
-                        compositeIndex.Columns.ToList()));
+                        columns));
             }
 
             // Validate primary keys
