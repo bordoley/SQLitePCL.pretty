@@ -89,6 +89,15 @@ namespace SQLitePCL.pretty.Orm
             hash = hash * 31 + this.Metadata.GetHashCode();
             return hash;
         }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.ColumnMapping"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.ColumnMapping"/>.</returns>
+        public override string ToString()
+        {
+            return string.Format("[ColumnMapping: ClrType={0}, Property={1}, Metadata={2}]", ClrType, Property, Metadata);
+        }
     }
 
 }

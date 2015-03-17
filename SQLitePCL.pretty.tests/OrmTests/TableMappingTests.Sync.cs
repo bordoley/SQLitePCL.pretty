@@ -68,6 +68,77 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
+        [CompositeIndex(true, "Id", "Value")]
+        public sealed class TestMutableObject
+        {
+            [PrimaryKey]
+            public long? Id { get; set; }
+
+            [Indexed]
+            public string Value { get; set; }
+        }
+
+        [CompositeIndex(true, "Id", "Value")]
+        [Table("TestMutableObject")]
+        public sealed class TestMutableObjectUpdated
+        {
+            [PrimaryKey]
+            public long? Id { get; set; }
+
+            [Indexed]
+            public string Value { get; set; }
+
+            public int Another { get; set; }
+        }
+
+        [Test]
+        public void TestInitTable()
+        {
+            var table = TableMapping.Create<TestObject>(
+                            () => testObjectBuilder.Value, 
+                            o => ((TestObject.Builder)o).Build());
+
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                var dbIndexes = db.GetIndexInfo(table.TableName);
+                CollectionAssert.AreEquivalent(table.Indexes, dbIndexes);
+
+                var dbColumns = db.GetTableInfo(table.TableName);
+                CollectionAssert.AreEquivalent(
+                    table.Columns.Select(x => new KeyValuePair<string,TableColumnMetadata>(x.Key, x.Value.Metadata)),
+                    dbColumns);
+            }
+        }
+
+        [Test]
+        public void TestInitTableWithMigration()
+        {
+            var tableOriginal = TableMapping.Create<TestMutableObject>();
+            var tableNew = TableMapping.Create<TestMutableObjectUpdated>();
+
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(tableOriginal);
+                var dbIndexes = db.GetIndexInfo(tableOriginal.TableName);
+                CollectionAssert.AreEquivalent(tableOriginal.Indexes, dbIndexes);
+
+                var dbColumns = db.GetTableInfo(tableOriginal.TableName);
+                CollectionAssert.AreEquivalent(
+                    tableOriginal.Columns.Select(x => new KeyValuePair<string,TableColumnMetadata>(x.Key, x.Value.Metadata)),
+                    dbColumns);
+
+                db.InitTable(tableNew);
+                dbIndexes = db.GetIndexInfo(tableOriginal.TableName);
+                CollectionAssert.AreEquivalent(tableNew.Indexes, dbIndexes);
+
+                dbColumns = db.GetTableInfo(tableOriginal.TableName);
+                CollectionAssert.AreEquivalent(
+                    tableNew.Columns.Select(x => new KeyValuePair<string,TableColumnMetadata>(x.Key, x.Value.Metadata)),
+                    dbColumns);
+            }
+        }
+
         [Test]
         public void TestInsert()
         {
@@ -85,8 +156,20 @@ namespace SQLitePCL.pretty.tests
                 var lookupHello = db.Find(table, hello.Id);
                 Assert.AreEqual(hello, lookupHello);
             }
-        }
 
+            var mutableTable = TableMapping.Create<TestMutableObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(mutableTable);
+                var hello = db.Insert(mutableTable, new TestMutableObject() { Value = "Hello" });
+                Assert.IsNotNull(hello.Id);
+                Assert.AreEqual(hello.Value, "Hello");
+
+                var lookupHello = db.Find(mutableTable, hello.Id);
+                Assert.AreEqual(hello.Id, lookupHello.Id);
+                Assert.AreEqual(hello.Value, lookupHello.Value);
+            }
+        }
     }
 }
 

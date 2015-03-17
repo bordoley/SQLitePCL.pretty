@@ -59,6 +59,7 @@ namespace SQLitePCL.pretty.Orm
         {
             This.CreateTableIfNotExists(tableMapping.TableName, CreateFlags.None, tableMapping.Columns.Select(x => Tuple.Create(x.Key, x.Value.Metadata)));
 
+            // FIXME: Possible bug, always returns 0
             if (This.Changes == 0)
             {
                 This.MigrateTable(tableMapping);
@@ -86,19 +87,9 @@ namespace SQLitePCL.pretty.Orm
             
             var toBeAdded = new List<Tuple<string, TableColumnMetadata>> ();
 
-            // FIXME: Nasty n^2 search due to case insensitive strings. Number of columns
-            // is normally small so not that big of a deal.
             foreach (var p in tableMapping.Columns) 
             {
-                var found = false;
-
-                foreach (var c in existingCols) 
-                {
-                    found = (string.Compare (p.Key, c.Key, StringComparison.OrdinalIgnoreCase) == 0);
-                    if (found) { break; }
-                }
-
-                if (!found) { toBeAdded.Add (Tuple.Create(p.Key, p.Value.Metadata)); }
+                if (!existingCols.ContainsKey(p.Key)) { toBeAdded.Add (Tuple.Create(p.Key, p.Value.Metadata)); }
             }
             
             foreach (var p in toBeAdded) 
@@ -539,7 +530,10 @@ namespace SQLitePCL.pretty.Orm
         private static TableColumnMetadata CreateColumnMetadata(PropertyInfo prop)
         {
             var columnType = prop.PropertyType;
-            var collation = prop.GetCollationSequence();
+
+            // Default SQLite collation sequence is always binary (i think)
+            var collation = prop.GetCollationSequence() ?? "BINARY";
+
             var isPK = prop.IsPrimaryKeyPart();
 
             var isAutoInc = false;

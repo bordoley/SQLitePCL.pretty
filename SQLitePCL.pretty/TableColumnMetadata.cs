@@ -217,5 +217,14 @@ namespace SQLitePCL.pretty
 
             return this.CompareTo((TableColumnMetadata)obj);
         }
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.TableColumnMetadata"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.TableColumnMetadata"/>.</returns>
+        public override string ToString()
+        {
+            return string.Format("[TableColumnMetadata: DeclaredType={0}, CollationSequence={1}, HasNotNullConstraint={2}, IsPrimaryKeyPart={3}, IsAutoIncrement={4}]", DeclaredType, CollationSequence, HasNotNullConstraint, IsPrimaryKeyPart, IsAutoIncrement);
+        }
     }
 }

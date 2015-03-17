@@ -244,8 +244,7 @@ namespace SQLitePCL.pretty.Orm.Attributes
 
         internal static string GetCollationSequence(this PropertyInfo This)
         {
-            var attrs = This.GetCustomAttributes<CollationAttribute>(true);
-            return attrs.Count() > 0 ? attrs.First().Name : string.Empty;
+            return This.GetCustomAttributes<CollationAttribute>(true).Select(x => x.Name).FirstOrDefault();
         }
 
         internal static bool Ignore(this PropertyInfo This)

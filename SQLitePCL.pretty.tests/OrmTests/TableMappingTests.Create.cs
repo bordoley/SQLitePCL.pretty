@@ -66,7 +66,7 @@ namespace SQLitePCL.pretty.tests
             // Subtle touch, but nullables are ignored in the CLR type.
             Assert.AreEqual(idMapping.ClrType, typeof(Nullable<long>));
             // No way to test the PropertyInfo directly
-            Assert.IsTrue(idMapping.Metadata.CollationSequence.Length == 0);
+            Assert.AreEqual(idMapping.Metadata.CollationSequence, "BINARY");
             Assert.AreEqual(idMapping.Metadata.DeclaredType, "INTEGER");
             Assert.IsTrue(idMapping.Metadata.HasNotNullConstraint);
             Assert.IsTrue(idMapping.Metadata.IsAutoIncrement);
@@ -75,7 +75,7 @@ namespace SQLitePCL.pretty.tests
             var uriMapping = table.Columns["Uri"];
             Assert.AreEqual(uriMapping.ClrType, typeof(Uri));
             // No way to test the PropertyInfo directly
-            Assert.IsTrue(uriMapping.Metadata.CollationSequence.Length == 0);
+            Assert.AreEqual(idMapping.Metadata.CollationSequence, "BINARY");
             Assert.AreEqual(uriMapping.Metadata.DeclaredType, "TEXT");
             Assert.IsFalse(uriMapping.Metadata.HasNotNullConstraint);
             Assert.IsFalse(uriMapping.Metadata.IsAutoIncrement);
@@ -84,7 +84,7 @@ namespace SQLitePCL.pretty.tests
             var bMapping = table.Columns["B"];
             Assert.AreEqual(bMapping.ClrType, typeof(string));
             // No way to test the PropertyInfo directly
-            Assert.IsTrue(bMapping.Metadata.CollationSequence.Length == 0);
+            Assert.AreEqual(idMapping.Metadata.CollationSequence, "BINARY");
             Assert.AreEqual(bMapping.Metadata.DeclaredType, "TEXT");
             Assert.IsFalse(bMapping.Metadata.HasNotNullConstraint);
             Assert.IsFalse(bMapping.Metadata.IsAutoIncrement);
@@ -95,16 +95,25 @@ namespace SQLitePCL.pretty.tests
             var notNullMapping = table.Columns["NotNull"];
             Assert.AreEqual(notNullMapping.ClrType, typeof(byte[]));
             // No way to test the PropertyInfo directly
-            Assert.IsTrue(notNullMapping.Metadata.CollationSequence.Length == 0);
+            Assert.AreEqual(notNullMapping.Metadata.CollationSequence, "BINARY");
             Assert.AreEqual(notNullMapping.Metadata.DeclaredType, "BLOB");
             Assert.IsTrue(notNullMapping.Metadata.HasNotNullConstraint);
             Assert.IsFalse(notNullMapping.Metadata.IsAutoIncrement);
             Assert.IsFalse(notNullMapping.Metadata.IsPrimaryKeyPart);
 
+            var collatedMapping = table.Columns["Collated"];
+            Assert.AreEqual(collatedMapping.ClrType, typeof(string));
+            // No way to test the PropertyInfo directly
+            Assert.AreEqual(collatedMapping.Metadata.CollationSequence, "Fancy Collation");
+            Assert.AreEqual(collatedMapping.Metadata.DeclaredType, "TEXT");
+            Assert.IsFalse(collatedMapping.Metadata.HasNotNullConstraint);
+            Assert.IsFalse(collatedMapping.Metadata.IsAutoIncrement);
+            Assert.IsFalse(collatedMapping.Metadata.IsPrimaryKeyPart);
+
             var valueMapping = table.Columns["Value"];
             Assert.AreEqual(valueMapping.ClrType, typeof(DateTime));
             // No way to test the PropertyInfo directly
-            Assert.IsTrue(valueMapping.Metadata.CollationSequence.Length == 0);
+            Assert.AreEqual(idMapping.Metadata.CollationSequence, "BINARY");
             Assert.AreEqual(valueMapping.Metadata.DeclaredType, "INTEGER");
             Assert.IsTrue(valueMapping.Metadata.HasNotNullConstraint);
             Assert.IsFalse(valueMapping.Metadata.IsAutoIncrement);
@@ -113,7 +122,7 @@ namespace SQLitePCL.pretty.tests
             var aFloatMapping = table.Columns["AFloat"];
             Assert.AreEqual(aFloatMapping.ClrType, typeof(float));
             // No way to test the PropertyInfo directly
-            Assert.IsTrue(aFloatMapping.Metadata.CollationSequence.Length == 0);
+            Assert.AreEqual(idMapping.Metadata.CollationSequence, "BINARY");
             Assert.AreEqual(aFloatMapping.Metadata.DeclaredType, "REAL");
             Assert.IsTrue(aFloatMapping.Metadata.HasNotNullConstraint);
             Assert.IsFalse(aFloatMapping.Metadata.IsAutoIncrement);
@@ -176,11 +185,25 @@ namespace SQLitePCL.pretty.tests
         }
 
         [CompositeIndex("id", "a")] 
-        public class TestObjectWithBadCompositIndex
+        public class TestObjectWithBadCompositeIndex
+        {
+            [PrimaryKey]
+            public long? Id { get; set; }
+        }
+
+        public class TestObjectWithBadCompositePrimaryKey
         {
             [PrimaryKey]
             public long? Id { get; set; }
 
+            [PrimaryKey]
+            public long? Id2 { get; set; }
+        }
+
+        public class TestObjectWithBadNullableDateTimePrimaryKey
+        {
+            [PrimaryKey]
+            public DateTime? Id { get; set; }
         }
 
         [Test]
@@ -188,7 +211,9 @@ namespace SQLitePCL.pretty.tests
         {
             Assert.Throws<NotSupportedException>(() => TableMapping.Create<TestObjectWithUnsupportedPropertyType>());
             Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithNoPrimaryKey>());
-            Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithBadCompositIndex>());
+            Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithBadCompositeIndex>());
+            Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithBadCompositePrimaryKey>());
+            Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithBadNullableDateTimePrimaryKey>());
         }
     }
 }
