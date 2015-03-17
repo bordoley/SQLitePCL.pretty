@@ -521,10 +521,7 @@ namespace SQLitePCL.pretty.Orm
             }
             else if (primaryKeyParts.Count > 1)
             {
-                if (primaryKeyParts.Where(x => x.Value.Metadata.IsAutoIncrement).Count() > 0)
-                {
-                    throw new ArgumentException("Composite primary keys may not include Nullable<T> properties.");
-                }
+                throw new ArgumentException("Table mapping only allows one primary key");
             }
 
             return new TableMapping<T>(builder, build, tableName, columns, indexes);
@@ -537,14 +534,14 @@ namespace SQLitePCL.pretty.Orm
             // Default SQLite collation sequence is always binary (i think)
             var collation = This.GetCollationSequence() ?? "BINARY";
 
-            var isPK = This.IsPrimaryKeyPart();
+            var isPK = This.IsPrimaryKey();
 
             var isAutoInc = false;
-            if (isPK && columnType.IsNullable())
+            if (isPK)
             {
                 if (columnType != typeof(Nullable<long>))
                 {
-                    throw new ArgumentException("Nullable primary key value must be of type long.");
+                    throw new ArgumentException("Primary key value must be of type Nullable<long>.");
                 }
 
                 // Only allow autoincrement on nullable long primary keys

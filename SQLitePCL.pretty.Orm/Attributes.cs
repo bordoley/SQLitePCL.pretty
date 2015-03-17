@@ -246,7 +246,7 @@ namespace SQLitePCL.pretty.Orm.Attributes
 
     internal static class OrmAttributes
     {
-        internal static bool IsPrimaryKeyPart(this PropertyInfo This)
+        internal static bool IsPrimaryKey(this PropertyInfo This)
         {
             var attrs = This.GetCustomAttributes (typeof(PrimaryKeyAttribute), true);
             return attrs.Count() > 0;

@@ -139,20 +139,11 @@ namespace SQLitePCL.pretty.Orm
             var @virtual = fts ? "VIRTUAL " : string.Empty;
             var @using = fts3 ? "USING FTS3 " : fts4 ? "USING FTS4 " : string.Empty;
 
-            // Prefer the table constraint definition for the primary key unless this is an autoincrement pk
-            var usePkTableConstraint = columns.Where(x => x.Value.Metadata.IsAutoIncrement).Count() == 0;
-
             // Build query.
             var query = "CREATE " + @virtual + "TABLE IF NOT EXISTS \"" + tableName + "\" " + @using + "(\n";
             var decls = columns.Select(c => SQLBuilder.SqlDecl(c.Key, c.Value));
             var decl = string.Join(",\n", decls.ToArray());
             query += decl;
-
-            if (usePkTableConstraint)
-            {
-                query += (",\n PRIMARY KEY (" + String.Join(", ", columns.Where(x => x.Value.Metadata.IsPrimaryKeyPart).Select(x => x.Key)) + ")");
-            }
-
             query += ")";
 
             return query;

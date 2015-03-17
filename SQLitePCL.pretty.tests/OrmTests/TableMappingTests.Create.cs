@@ -143,35 +143,6 @@ namespace SQLitePCL.pretty.tests
             Assert.AreEqual(tableWithExplicitName.TableName, "ExplicitTableName");
         }
 
-        public class TestObjectWithMultiplePrimaryKeys
-        {
-            [PrimaryKey]
-            public int PrimaryKey1 { get; set;}
-
-            [PrimaryKey]
-            public string PrimaryKey2 { get; set;}
-
-            [PrimaryKey]
-            public DateTime PrimaryKey3 { get; set;}
-        }
-
-        [Test]
-        public void TestCreateWithMultiplePrimaryKeyColumns()
-        {   
-            var table = TableMapping.Create<TestObjectWithMultiplePrimaryKeys>();
-            Assert.IsTrue(table.Columns["PrimaryKey1"].Metadata.HasNotNullConstraint);
-            Assert.IsTrue(table.Columns["PrimaryKey1"].Metadata.IsPrimaryKeyPart);
-            Assert.IsFalse(table.Columns["PrimaryKey1"].Metadata.IsAutoIncrement);
-
-            Assert.IsTrue(table.Columns["PrimaryKey2"].Metadata.HasNotNullConstraint);
-            Assert.IsTrue(table.Columns["PrimaryKey2"].Metadata.IsPrimaryKeyPart);
-            Assert.IsFalse(table.Columns["PrimaryKey2"].Metadata.IsAutoIncrement);
-
-            Assert.IsTrue(table.Columns["PrimaryKey3"].Metadata.HasNotNullConstraint);
-            Assert.IsTrue(table.Columns["PrimaryKey3"].Metadata.IsPrimaryKeyPart);
-            Assert.IsFalse(table.Columns["PrimaryKey3"].Metadata.IsAutoIncrement);
-        }
-
         public class TestObjectWithUnsupportedPropertyType
         {
             [PrimaryKey]
