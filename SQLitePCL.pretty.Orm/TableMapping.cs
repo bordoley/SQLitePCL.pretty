@@ -59,7 +59,6 @@ namespace SQLitePCL.pretty.Orm
         {
             This.CreateTableIfNotExists(tableMapping.TableName, CreateFlags.None, tableMapping.Columns);
 
-            // FIXME: Possible bug, always returns 0
             if (This.Changes != 0)
             {
                 This.MigrateTable(tableMapping);
