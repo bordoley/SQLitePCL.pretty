@@ -183,6 +183,34 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(hello.Value, lookupHello.Value);
             }
         }
+
+        [Test]
+        public void TestInsertAll()
+        {
+            var table = TableMapping.Create<TestObject>(
+                ()=> testObjectBuilder.Value, 
+                o => ((TestObject.Builder) o).Build());
+
+            using (var db = SQLite3.OpenInMemory())
+            {
+               
+                var objects = new List<TestObject>()
+                    {
+                        new TestObject.Builder() { Value = "Hello1" }.Build(),
+                        new TestObject.Builder() { Value = "Hello2" }.Build(),
+                        new TestObject.Builder() { Value = "Hello3" }.Build()
+                    };
+
+                db.InitTable(table);
+                var result = db.InsertAll(table, objects);
+                CollectionAssert.AreEquivalent(
+                    result.Select(x => x.Value), 
+                    objects.Select(x => x.Value));
+                CollectionAssert.AllItemsAreUnique(result.Select(x => x.Id));
+
+                Assert.Throws<SQLiteException>(() => db.InsertAll(table, result));
+            }
+        }
     }
 }
 
