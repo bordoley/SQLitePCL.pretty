@@ -211,6 +211,66 @@ namespace SQLitePCL.pretty.tests
                 Assert.Throws<SQLiteException>(() => db.InsertAll(table, result));
             }
         }
+
+        [Test]
+        public void TestInsertOrReplace()
+        {
+            var table = TableMapping.Create<TestObject>(
+                            () => testObjectBuilder.Value, 
+                            o => ((TestObject.Builder)o).Build());
+
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+
+                var inserted = db.Insert(table, new TestObject.Builder() { Value = "Hello" }.Build());
+                var changed = new TestObject.Builder() { Id = inserted.Id, Value = "Goodbye" }.Build();
+                var replaced = db.InsertOrReplace(table, changed);
+
+                Assert.AreEqual(inserted.Id, replaced.Id);
+                Assert.AreEqual(replaced.Value, "Goodbye");
+            }
+        }
+
+        [Test]
+        public void TestInsertOrReplaceAll()
+        {
+            var table = TableMapping.Create<TestObject>(
+                ()=> testObjectBuilder.Value, 
+                o => ((TestObject.Builder) o).Build());
+
+            using (var db = SQLite3.OpenInMemory())
+            {
+               
+                var objects = new List<TestObject>()
+                    {
+                        new TestObject.Builder() { Value = "Hello1" }.Build(),
+                        new TestObject.Builder() { Value = "Hello2" }.Build(),
+                        new TestObject.Builder() { Value = "Hello3" }.Build()
+                    };
+
+                db.InitTable(table);
+                var result = db.InsertAll(table, objects);
+                CollectionAssert.AreEquivalent(
+                    result.Select(x => x.Value), 
+                    objects.Select(x => x.Value));
+                CollectionAssert.AllItemsAreUnique(result.Select(x => x.Id));
+
+                var changed = new List<TestObject>()
+                    {
+                        new TestObject.Builder() { Id = result[0].Id, Value = "Goodbye1" }.Build(),
+                        new TestObject.Builder() { Id = result[1].Id, Value = "Goodbye2" }.Build(),
+                        new TestObject.Builder() { Id = result[2].Id, Value = "Goodye3" }.Build()
+                    };
+                var replaced = db.InsertOrReplaceAll(table, changed);
+                CollectionAssert.AreEquivalent(
+                    replaced.Select(x => x.Id),
+                    result.Select(x => x.Id));
+                CollectionAssert.AreEquivalent(
+                    replaced.Select(x => x.Value),
+                    changed.Select(x => x.Value));
+            }
+        }
     }
 }
 
