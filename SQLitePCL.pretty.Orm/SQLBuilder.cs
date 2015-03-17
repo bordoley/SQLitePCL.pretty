@@ -43,9 +43,9 @@ namespace SQLitePCL.pretty.Orm
             return string.Format("SELECT * FROM \"{0}\" WHERE ROWID = ?", tableName);
         }
 
-        internal static string AlterTableAddColumn(string tableName, string columnName, TableColumnMetadata metadata)
+        internal static string AlterTableAddColumn(string tableName, string columnName, ColumnMapping columnMapping)
         {
-            return string.Format("ALTER TABLE \"{0}\" ADD COLUMN {1}", tableName, SqlDecl(columnName, metadata));
+            return string.Format("ALTER TABLE \"{0}\" ADD COLUMN {1}", tableName, SqlDecl(columnName, columnMapping));
         }
 
         internal static string DeleteUsingPrimaryKey(string tableName, string pkColumn)
@@ -130,7 +130,7 @@ namespace SQLitePCL.pretty.Orm
             return "REINDEX " + name;
         }
 
-        internal static string CreateTableIfNotExists(string tableName, CreateFlags createFlags, IEnumerable<Tuple<string, TableColumnMetadata>> columns)
+        internal static string CreateTableIfNotExists(string tableName, CreateFlags createFlags, IReadOnlyDictionary<string, ColumnMapping> columns)
         {
             bool fts3 = (createFlags & CreateFlags.FullTextSearch3) != 0;
             bool fts4 = (createFlags & CreateFlags.FullTextSearch4) != 0;
@@ -140,17 +140,17 @@ namespace SQLitePCL.pretty.Orm
             var @using = fts3 ? "USING FTS3 " : fts4 ? "USING FTS4 " : string.Empty;
 
             // Prefer the table constraint definition for the primary key unless this is an autoincrement pk
-            var usePkTableConstraint = columns.Where(x => x.Item2.IsAutoIncrement).Count() == 0;
+            var usePkTableConstraint = columns.Where(x => x.Value.Metadata.IsAutoIncrement).Count() == 0;
 
             // Build query.
             var query = "CREATE " + @virtual + "TABLE IF NOT EXISTS \"" + tableName + "\" " + @using + "(\n";
-            var decls = columns.Select(c => SQLBuilder.SqlDecl(c.Item1, c.Item2));
+            var decls = columns.Select(c => SQLBuilder.SqlDecl(c.Key, c.Value));
             var decl = string.Join(",\n", decls.ToArray());
             query += decl;
 
             if (usePkTableConstraint)
             {
-                query += (",\n PRIMARY KEY (" + String.Join(", ", columns.Where(x => x.Item2.IsPrimaryKeyPart).Select(x => x.Item1)) + ")");
+                query += (",\n PRIMARY KEY (" + String.Join(", ", columns.Where(x => x.Value.Metadata.IsPrimaryKeyPart).Select(x => x.Key)) + ")");
             }
 
             query += ")";
@@ -158,23 +158,23 @@ namespace SQLitePCL.pretty.Orm
             return query;
         }
 
-        internal static string SqlDecl (string columnName, TableColumnMetadata metadata)
+        internal static string SqlDecl (string columnName, ColumnMapping columnMapping)
         {
-            string decl = "\"" + columnName + "\" " + metadata.DeclaredType + " ";
-            
-            if (metadata.IsPrimaryKeyPart && metadata.IsAutoIncrement) 
+            string decl = "\"" + columnName + "\" " + columnMapping.Metadata.DeclaredType + " ";
+
+            // Only specify a column as primary key if it is autoincrement
+            if (columnMapping.Metadata.IsPrimaryKeyPart && columnMapping.Metadata.IsAutoIncrement) 
             {
-                decl += "PRIMARY KEY AUTOINCREMENT ";
+                decl += "PRIMARY KEY AUTOINCREMENT NOT NULL ";
+            }
+            else if (columnMapping.Metadata.HasNotNullConstraint) 
+            {
+                decl += "NOT NULL DEFAULT \"" + columnMapping.DefaultValue.ToString() + "\" ";
             }
 
-            if (metadata.HasNotNullConstraint) 
+            if (!string.IsNullOrEmpty (columnMapping.Metadata.CollationSequence)) 
             {
-                decl += "NOT NULL ";
-            }
-
-            if (!string.IsNullOrEmpty (metadata.CollationSequence)) 
-            {
-                decl += "COLLATE " + metadata.CollationSequence + " ";
+                decl += "COLLATE " + columnMapping.Metadata.CollationSequence + " ";
             }
             
             return decl;

@@ -57,10 +57,10 @@ namespace SQLitePCL.pretty.Orm
             
         public static void InitTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
-            This.CreateTableIfNotExists(tableMapping.TableName, CreateFlags.None, tableMapping.Columns.Select(x => Tuple.Create(x.Key, x.Value.Metadata)));
+            This.CreateTableIfNotExists(tableMapping.TableName, CreateFlags.None, tableMapping.Columns);
 
             // FIXME: Possible bug, always returns 0
-            if (This.Changes == 0)
+            if (This.Changes != 0)
             {
                 This.MigrateTable(tableMapping);
             }
@@ -85,16 +85,16 @@ namespace SQLitePCL.pretty.Orm
         {
             var existingCols = This.GetTableInfo(tableMapping.TableName);
             
-            var toBeAdded = new List<Tuple<string, TableColumnMetadata>> ();
+            var toBeAdded = new List<KeyValuePair<string, ColumnMapping>> ();
 
             foreach (var p in tableMapping.Columns) 
             {
-                if (!existingCols.ContainsKey(p.Key)) { toBeAdded.Add (Tuple.Create(p.Key, p.Value.Metadata)); }
+                if (!existingCols.ContainsKey(p.Key)) { toBeAdded.Add (p); }
             }
             
             foreach (var p in toBeAdded) 
             {
-                This.Execute (SQLBuilder.AlterTableAddColumn(tableMapping.TableName, p.Item1, p.Item2));
+                This.Execute (SQLBuilder.AlterTableAddColumn(tableMapping.TableName, p.Key, p.Value));
             }
         }
 
@@ -473,8 +473,9 @@ namespace SQLitePCL.pretty.Orm
             {
                 var name = prop.GetColumnName();
                 var columnType = prop.PropertyType;
-                var metadata = CreateColumnMetadata(prop);
-                columns.Add(name, new ColumnMapping(columnType, prop, metadata));
+                var metadata = prop.CreateColumnMetadata();
+                var defaultValue = prop.GetDefaultValue();
+                columns.Add(name, new ColumnMapping(columnType, defaultValue, prop, metadata));
 
                 var columnIndex = prop.GetColumnIndex();
                 if (columnIndex != null)
@@ -527,14 +528,14 @@ namespace SQLitePCL.pretty.Orm
             return new TableMapping<T>(builder, build, tableName, columns, indexes);
         }
             
-        private static TableColumnMetadata CreateColumnMetadata(PropertyInfo prop)
+        private static TableColumnMetadata CreateColumnMetadata(this PropertyInfo This)
         {
-            var columnType = prop.PropertyType;
+            var columnType = This.PropertyType;
 
             // Default SQLite collation sequence is always binary (i think)
-            var collation = prop.GetCollationSequence() ?? "BINARY";
+            var collation = This.GetCollationSequence() ?? "BINARY";
 
-            var isPK = prop.IsPrimaryKeyPart();
+            var isPK = This.IsPrimaryKeyPart();
 
             var isAutoInc = false;
             if (isPK && columnType.IsNullable())
@@ -549,7 +550,7 @@ namespace SQLitePCL.pretty.Orm
             }
 
             // Though technically not required to be not null by SQLite, we enforce that the primary key is always not null
-            var hasNotNullConstraint = isPK || prop.HasNotNullConstraint() || columnType.GetTypeInfo().IsValueType;
+            var hasNotNullConstraint = isPK || This.HasNotNullConstraint() || columnType.GetTypeInfo().IsValueType;
 
             return new TableColumnMetadata(columnType.GetSQLiteType().ToSQLDeclaredType(), collation, hasNotNullConstraint, isPK, isAutoInc);
         }

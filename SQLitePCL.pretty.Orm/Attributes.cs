@@ -226,6 +226,22 @@ namespace SQLitePCL.pretty.Orm.Attributes
     [AttributeUsage (AttributeTargets.Property)]
     public sealed class NotNullAttribute : Attribute
     {
+        private object defaultValue;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SQLitePCL.pretty.Orm.Attributes.NotNullAttribute"/> class.
+        /// </summary>
+        /// <param name="defaultValue">The default value to use if the table is migrated.</param>
+        public NotNullAttribute(object defaultValue)
+        {
+            Contract.Requires(defaultValue != null);
+            this.defaultValue = defaultValue;
+        }
+
+        /// <summary>
+        /// The default value to use if the table is migrated.
+        /// </summary>
+        public object DefaultValue { get { return defaultValue; } }
     }
 
     internal static class OrmAttributes
@@ -272,6 +288,15 @@ namespace SQLitePCL.pretty.Orm.Attributes
         internal static IEnumerable<CompositeIndexAttribute> GetCompositeIndexes(this Type This)
         {
             return This.GetTypeInfo().GetCustomAttributes<CompositeIndexAttribute>(true);
+        }
+
+        internal static object GetDefaultValue(this PropertyInfo This)
+        {
+            var notNullAttribute = This.GetCustomAttributes<NotNullAttribute>(true).FirstOrDefault();
+                 
+            if      (notNullAttribute!= null)                     { return notNullAttribute.DefaultValue; }
+            else if (This.PropertyType.GetTypeInfo().IsValueType) { return Activator.CreateInstance(This.PropertyType); }
+            else                                                  { return null; }
         }
     }
 }

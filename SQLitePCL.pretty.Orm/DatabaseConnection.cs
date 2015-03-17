@@ -38,7 +38,7 @@ namespace SQLitePCL.pretty.Orm
 
     internal static partial class DatabaseConnection
     {
-        internal static void CreateTableIfNotExists(this IDatabaseConnection conn, string tableName, CreateFlags createFlags, IEnumerable<Tuple<string, TableColumnMetadata>> columns)
+        internal static void CreateTableIfNotExists(this IDatabaseConnection conn, string tableName, CreateFlags createFlags, IReadOnlyDictionary<string, ColumnMapping> columns)
         {
             var query = SQLBuilder.CreateTableIfNotExists(tableName, createFlags, columns);
             conn.Execute(query);

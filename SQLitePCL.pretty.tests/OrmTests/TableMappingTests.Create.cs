@@ -30,7 +30,7 @@ namespace SQLitePCL.pretty.tests
             [Ignore]
             public Stream Ignored { get; set; }
 
-            [NotNull]
+            [NotNull("")]
             public byte[] NotNull { get; set; }
 
             [Collation("Fancy Collation")]

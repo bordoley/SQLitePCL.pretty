@@ -89,6 +89,9 @@ namespace SQLitePCL.pretty.tests
             public string Value { get; set; }
 
             public int Another { get; set; }
+
+            [NotNull("default")]
+            public string NotNullReference { get; set; }
         }
 
         [Test]
@@ -128,6 +131,8 @@ namespace SQLitePCL.pretty.tests
                     tableOriginal.Columns.Select(x => new KeyValuePair<string,TableColumnMetadata>(x.Key, x.Value.Metadata)),
                     dbColumns);
 
+                var insertedOriginal = db.Insert(tableOriginal, new TestMutableObject() { Value = "test" });
+
                 db.InitTable(tableNew);
                 dbIndexes = db.GetIndexInfo(tableOriginal.TableName);
                 CollectionAssert.AreEquivalent(tableNew.Indexes, dbIndexes);
@@ -136,6 +141,9 @@ namespace SQLitePCL.pretty.tests
                 CollectionAssert.AreEquivalent(
                     tableNew.Columns.Select(x => new KeyValuePair<string,TableColumnMetadata>(x.Key, x.Value.Metadata)),
                     dbColumns);
+
+                var found = db.Find(tableNew, insertedOriginal.Id);
+                Assert.AreEqual(found.NotNullReference, "default");
             }
         }
 

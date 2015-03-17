@@ -31,12 +31,14 @@ namespace SQLitePCL.pretty.Orm
         }
 
         private readonly Type clrType;
+        private readonly object defaultValue;
         private readonly PropertyInfo property;
         private readonly TableColumnMetadata metadata;
 
-        internal ColumnMapping(Type clrType, PropertyInfo property, TableColumnMetadata metadata)
+        internal ColumnMapping(Type clrType, object defaultValue, PropertyInfo property, TableColumnMetadata metadata)
         {
             this.clrType = clrType;
+            this.defaultValue = defaultValue;
             this.property = property;
             this.metadata = metadata;
         }
@@ -45,6 +47,12 @@ namespace SQLitePCL.pretty.Orm
         /// The CLR <see cref="Type"/> of the column.
         /// </summary>
         public Type ClrType { get { return clrType; } }
+
+
+        /// <summary>
+        /// The default value of the ClrType as specified by the user.
+        /// </summary>
+        public object DefaultValue { get { return defaultValue; } }
 
         /// <summary>
         /// The <see cref="PropertyInfo"/> of the column.
@@ -70,6 +78,7 @@ namespace SQLitePCL.pretty.Orm
             }
 
             return this.ClrType == other.ClrType &&
+                (this.defaultValue == null ? (other.DefaultValue == null) : this.DefaultValue.Equals(other.defaultValue)) &&
                 this.Property == other.Property &&
                 this.Metadata == other.Metadata;
         }
@@ -85,6 +94,7 @@ namespace SQLitePCL.pretty.Orm
         {
             int hash = 17;
             hash = hash * 31 + this.ClrType.GetHashCode();
+            hash = hash * 31 + (this.DefaultValue ?? 0).GetHashCode();
             hash = hash * 31 + this.Property.GetHashCode();
             hash = hash * 31 + this.Metadata.GetHashCode();
             return hash;
