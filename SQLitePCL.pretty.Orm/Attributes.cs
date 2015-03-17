@@ -99,21 +99,17 @@ namespace SQLitePCL.pretty.Orm.Attributes
         private readonly bool unique;
         private readonly string name;
 
-        // FIXME: Add constructors that take Expressions and use reflection to get the property info to column name mappings
-
         /// <summary>
         /// Creates a non-unique index across one or more columns
         /// </summary>
-        /// <param name="name">The index name.</param>
         /// <param name="columns">The mapped column names.</param>
         public CompositeIndexAttribute(params string[] columns) : this(false, columns) 
         {
         }
 
         /// <summary>
-        /// Creates anindex across one or more columns
+        /// Creates an index across one or more columns
         /// </summary>
-        /// <param name="name">The index name.</param>
         /// <param name="unique">Whether the index is unique.</param>
         /// <param name="columns">The mapped column names.</param>
         public CompositeIndexAttribute(bool unique, params string[] columns)
