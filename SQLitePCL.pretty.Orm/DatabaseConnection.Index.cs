@@ -51,23 +51,33 @@ namespace SQLitePCL.pretty.Orm
             This.Execute(SQLBuilder.ReIndexWithName(name));
         }*/
 
-        internal static IEnumerable<IndexInfo> GetIndexInfo(this IDatabaseConnection This, string tableName)
+        internal static IReadOnlyDictionary<string, IndexInfo> GetIndexInfo(this IDatabaseConnection This, string tableName)
         {
             return This.RunInTransaction(db =>
-                db.Query(SQLBuilder.ListIndexes(tableName))
-                    .Select(row => 
-                        {
-                            var indexName = row[1].ToString();
-                            var unique = row[2].ToBool();
+                {
+                    var retval = new Dictionary<string,IndexInfo>();
 
-                            var columns = 
-                                db.Query(SQLBuilder.IndexInfo(indexName))
-                                  .Select(x => Tuple.Create(x[0].ToInt(),x[2].ToString()))
-                                  .OrderBy(x => x.Item1)
-                                  .Select(x => x.Item2)
-                                  .ToList();
-                            return new IndexInfo(indexName, unique, columns);
-                        }).ToList());
+                    db.Query(SQLBuilder.ListIndexes(tableName))
+                        .Select(row => 
+                            {
+                                var indexName = row[1].ToString();
+                                var unique = row[2].ToBool();
+
+                                var columns = 
+                                    db.Query(SQLBuilder.IndexInfo(indexName))
+                                      .Select(x => Tuple.Create(x[0].ToInt(),x[2].ToString()))
+                                      .OrderBy(x => x.Item1)
+                                      .Select(x => x.Item2)
+                                      .ToList();
+
+                                retval.Add(indexName, new IndexInfo(unique, columns));
+
+                                return row;
+                            }).LastOrDefault();
+
+                    return retval;
+                });
+            
         }
     }
 }

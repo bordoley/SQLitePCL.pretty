@@ -6,19 +6,19 @@ namespace SQLitePCL.pretty.Orm
     /// <summary>
     /// The mapping of a type to a SQL Table.
     /// </summary>
-    public interface ITableMapping : IReadOnlyDictionary<string, ColumnMapping>
+    public interface ITableMapping
     {
         /// <summary>
         /// Gets the name of the table.
         /// </summary>
         String TableName { get; }
 
+        IReadOnlyDictionary<string, ColumnMapping> Columns { get; }
 
-        // FIXME: Make this IReadOnlydictionary<string, IndexInfo>
         /// <summary>
         /// Gets the table indexes.
         /// </summary>
-        IEnumerable<IndexInfo> Indexes { get; }
+        IReadOnlyDictionary<string, IndexInfo> Indexes { get; }
     }
 
     /// <summary>

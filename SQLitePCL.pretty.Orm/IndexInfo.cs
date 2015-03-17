@@ -31,21 +31,14 @@ namespace SQLitePCL.pretty.Orm
             return !(x == y);
         }
 
-        private readonly string name;
         private readonly bool unique;
         private readonly IReadOnlyList<string> columns;
 
-        internal IndexInfo(string name, bool unique, IReadOnlyList<string> columns)
+        internal IndexInfo(bool unique, IReadOnlyList<string> columns)
         {
-            this.name = name;
             this.unique = unique;
             this.columns = columns;
         }
-
-        /// <summary>
-        /// The name of the index.
-        /// </summary>
-        public string Name { get { return name; } }
 
         /// <summary>
         /// Whether the index is unique or not.
@@ -65,8 +58,7 @@ namespace SQLitePCL.pretty.Orm
         /// <see cref="SQLitePCL.pretty.Orm.IndexInfo"/>; otherwise, <c>false</c>.</returns>
         public bool Equals(IndexInfo other)
         {
-            return (this.Name == other.Name) && 
-                (this.Unique == other.Unique) &&
+            return (this.Unique == other.Unique) &&
                 // FIXME: Ideally we use immutable lists that implement correct equality semantics
                 (this.Columns.SequenceEqual(other.Columns));
         }
@@ -90,7 +82,6 @@ namespace SQLitePCL.pretty.Orm
         public override int GetHashCode()
         {
             int hash = 17;
-            hash = hash * 31 + this.Name.GetHashCode();
             hash = hash * 31 + this.Unique.GetHashCode();
 
             // FIXME: This sucks. Prefer to use actual immutable collections.
@@ -107,7 +98,7 @@ namespace SQLitePCL.pretty.Orm
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.IndexInfo"/>.</returns>
         public override string ToString()
         {
-            return string.Format("[IndexName: {0}], [Unique: {1}], [Columns: {2}]", this.Name, this.Unique, string.Join(", ", this.Columns));
+            return string.Format("[[Unique: {0}], [Columns: {1}]", this.Unique, string.Join(", ", this.Columns));
         }
     }
 }

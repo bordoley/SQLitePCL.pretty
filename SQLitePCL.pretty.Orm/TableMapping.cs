@@ -42,7 +42,7 @@ namespace SQLitePCL.pretty.Orm
     {   
         internal static void Bind<T>(this IStatement This, ITableMapping<T> tableMapping, T obj)
         {
-            foreach (var column in tableMapping)
+            foreach (var column in tableMapping.Columns)
             {
                 var key = ":" + column.Key;
                 var value = column.Value.Property.GetValue(obj);
@@ -57,7 +57,7 @@ namespace SQLitePCL.pretty.Orm
             
         public static void InitTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
-            This.CreateTableIfNotExists(tableMapping.TableName, CreateFlags.None, tableMapping.Select(x => Tuple.Create(x.Key, x.Value.Metadata)));
+            This.CreateTableIfNotExists(tableMapping.TableName, CreateFlags.None, tableMapping.Columns.Select(x => Tuple.Create(x.Key, x.Value.Metadata)));
 
             if (This.Changes == 0)
             {
@@ -66,7 +66,7 @@ namespace SQLitePCL.pretty.Orm
 
             foreach (var index in tableMapping.Indexes) 
             {
-                This.CreateIndex(index.Name, tableMapping.TableName, index.Columns, index.Unique);
+                This.CreateIndex(index.Key, tableMapping.TableName, index.Value.Columns, index.Value.Unique);
             }
         }
 
@@ -88,7 +88,7 @@ namespace SQLitePCL.pretty.Orm
 
             // FIXME: Nasty n^2 search due to case insensitive strings. Number of columns
             // is normally small so not that big of a deal.
-            foreach (var p in tableMapping) 
+            foreach (var p in tableMapping.Columns) 
             {
                 var found = false;
 
@@ -204,18 +204,18 @@ namespace SQLitePCL.pretty.Orm
         {
             return primaryKeyColumn.GetValue(This, mapping => 
                 // Intentionally throw if the column doesn't have a primary key
-                mapping.Where(x => x.Value.Metadata.IsPrimaryKeyPart).Select(x => x.Key).First());
+                mapping.Columns.Where(x => x.Value.Metadata.IsPrimaryKeyPart).Select(x => x.Key).First());
         }
 
         private static object GetPrimaryKey<T>(this ITableMapping<T> This, T obj)
         {
-            var primaryKeyPropery = This[This.PrimaryKeyColumn()].Property;
+            var primaryKeyPropery = This.Columns[This.PrimaryKeyColumn()].Property;
             return primaryKeyPropery.GetValue(obj);
         } 
 
         private static string Insert<T>(this ITableMapping<T> tableMapping)
         {
-            return SQLBuilder.Insert(tableMapping.TableName, tableMapping.Select(x => x.Key));
+            return SQLBuilder.Insert(tableMapping.TableName, tableMapping.Columns.Select(x => x.Key));
         }
  
         public static ITableMappedStatement<T> PrepareInsert<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
@@ -264,7 +264,7 @@ namespace SQLitePCL.pretty.Orm
 
         private static string InsertOrReplace<T>(this ITableMapping<T> tableMapping)
         {
-            return SQLBuilder.InsertOrReplace(tableMapping.TableName, tableMapping.Select(x => x.Key));     
+            return SQLBuilder.InsertOrReplace(tableMapping.TableName, tableMapping.Columns.Select(x => x.Key));     
         }
 
         public static ITableMappedStatement<T> PrepareInsertOrReplace<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
@@ -313,7 +313,7 @@ namespace SQLitePCL.pretty.Orm
 
         private static string Update<T>(this ITableMapping<T> tableMapping)
         {
-            return SQLBuilder.Update(tableMapping.TableName, tableMapping.Select(x => x.Key), tableMapping.PrimaryKeyColumn());     
+            return SQLBuilder.Update(tableMapping.TableName, tableMapping.Columns.Select(x => x.Key), tableMapping.PrimaryKeyColumn());     
         }
             
         public static ITableMappedStatement<T> PrepareUpdate<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
@@ -475,7 +475,7 @@ namespace SQLitePCL.pretty.Orm
             // FIXME: I wish this was immutable
             var columnToMapping = new Dictionary<string, ColumnMapping>();
 
-            var indexes = new List<IndexInfo>();
+            var indexes = new Dictionary<string,IndexInfo>();
 
             // Add single column indexes
             foreach (var prop in props.Where(prop => !prop.Ignore()))
@@ -490,8 +490,8 @@ namespace SQLitePCL.pretty.Orm
                 {
                     var indexName = SQLBuilder.NameIndex(tableName, name);
                     indexes.Add(
+                        indexName,
                         new IndexInfo(
-                            indexName,
                             columnIndex.Unique,
                             new string[] { name }));
                 }
@@ -510,8 +510,8 @@ namespace SQLitePCL.pretty.Orm
                 }
 
                 indexes.Add(
+                    indexName,
                     new IndexInfo(
-                        indexName,
                         compositeIndex.Unique,
                         columns));
             }
@@ -622,28 +622,28 @@ namespace SQLitePCL.pretty.Orm
         private readonly Func<object,T> build;
 
         private readonly string tableName;
-        private readonly IReadOnlyDictionary<string, ColumnMapping> columnToMapping;
-        private readonly IReadOnlyList<IndexInfo> indexes;
+        private readonly IReadOnlyDictionary<string, ColumnMapping> columns;
+        private readonly IReadOnlyDictionary<string, IndexInfo> indexes;
 
         internal TableMapping(
             Func<object> builder, 
             Func<object,T> build, 
             string tableName,
-            IReadOnlyDictionary<string, ColumnMapping> columnToMapping,
-            IReadOnlyList<IndexInfo> indexes)
+            IReadOnlyDictionary<string, ColumnMapping> columns,
+            IReadOnlyDictionary<string, IndexInfo> indexes)
         {
             this.builder = builder;
             this.build = build;
             this.tableName = tableName;
-            this.columnToMapping = columnToMapping;
+            this.columns = columns;
             this.indexes = indexes;
         }
 
         public String TableName { get { return tableName; } }
 
-        public IEnumerable<IndexInfo> Indexes { get { return indexes.AsEnumerable(); } }
+        public IReadOnlyDictionary<string, IndexInfo> Indexes { get { return indexes; } }
 
-        public ColumnMapping this [string column] { get  { return columnToMapping[column]; } }
+        public IReadOnlyDictionary<string,ColumnMapping> Columns { get { return columns; } }
 
         public T ToObject(IReadOnlyList<IResultSetValue> row)
         {
@@ -654,7 +654,7 @@ namespace SQLitePCL.pretty.Orm
                 var columnName = resultSetValue.ColumnInfo.OriginName;
                 ColumnMapping columnMapping; 
 
-                if (columnToMapping.TryGetValue(columnName, out columnMapping))
+                if (columns.TryGetValue(columnName, out columnMapping))
                 {
                     var value = resultSetValue.ToObject(columnMapping.ClrType);
                     var prop = columnMapping.Property;
@@ -663,50 +663,6 @@ namespace SQLitePCL.pretty.Orm
             }
 
             return build(builder);
-        }
-
-        public IEnumerator<KeyValuePair<string, ColumnMapping>> GetEnumerator()
-        {
-            return this.columnToMapping.GetEnumerator();
-        }
-            
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
-
-        public bool ContainsKey(string key)
-        {
-            return this.columnToMapping.ContainsKey(key);
-        }
-
-        public bool TryGetValue(string column, out ColumnMapping mapping)
-        {
-            return this.columnToMapping.TryGetValue(column, out mapping);
-        }
-
-        public IEnumerable<string> Keys
-        {
-            get
-            {
-                return this.columnToMapping.Keys;
-            }
-        }
-
-        public IEnumerable<ColumnMapping> Values
-        {
-            get
-            {
-                return this.columnToMapping.Values;
-            }
-        }
-
-        public int Count
-        {
-            get
-            {
-                return this.columnToMapping.Count;
-            }
         }
     }
 }

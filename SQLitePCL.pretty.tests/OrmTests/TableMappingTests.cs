@@ -50,20 +50,20 @@ namespace SQLitePCL.pretty.tests
             Assert.AreEqual(table.TableName, "TestObjectWithAutoIncrementPrimaryKeyAndDefaultTableName");
 
             var expectedColumns = new string[] { "Id", "Uri", "B", "NotNull", "Collated", "Value", "AFloat" };
-            CollectionAssert.AreEquivalent(expectedColumns, table.Keys);
+            CollectionAssert.AreEquivalent(expectedColumns, table.Columns.Keys);
 
-            var expectedIndexes = new IndexInfo[] 
+            var expectedIndexes = new Dictionary<string,IndexInfo> 
                 {
-                    new IndexInfo("TestObjectWithAutoIncrementPrimaryKeyAndDefaultTableName_Uri", false, Enumerable.Repeat("Uri", 1).ToList()),
-                    new IndexInfo("TestObjectWithAutoIncrementPrimaryKeyAndDefaultTableName_B", true, Enumerable.Repeat("B", 1).ToList()),
-                    new IndexInfo("TestObjectWithAutoIncrementPrimaryKeyAndDefaultTableName_NotNull_Collated", false, new string[] { "NotNull", "Collated"}),
-                    new IndexInfo("named", true, new string[] { "Uri", "B"}),
+                    { "TestObjectWithAutoIncrementPrimaryKeyAndDefaultTableName_Uri", new IndexInfo(false, new string[] { "Uri" }) },
+                    { "TestObjectWithAutoIncrementPrimaryKeyAndDefaultTableName_B",   new IndexInfo(true, new string[] { "B" }) },
+                    { "TestObjectWithAutoIncrementPrimaryKeyAndDefaultTableName_NotNull_Collated", new IndexInfo(false, new string[] { "NotNull", "Collated" }) },
+                    { "named", new IndexInfo(true, new string[] { "Uri", "B"}) }
                 };
 
             var indexes = table.Indexes;
             CollectionAssert.AreEquivalent(indexes, expectedIndexes);
 
-            var idMapping = table["Id"];
+            var idMapping = table.Columns["Id"];
             // Subtle touch, but nullables are ignored in the CLR type.
             Assert.AreEqual(idMapping.ClrType, typeof(long));
             // No way to test the PropertyInfo directly
@@ -73,7 +73,7 @@ namespace SQLitePCL.pretty.tests
             Assert.IsTrue(idMapping.Metadata.IsAutoIncrement);
             Assert.IsTrue(idMapping.Metadata.IsPrimaryKeyPart);
 
-            var uriMapping = table["Uri"];
+            var uriMapping = table.Columns["Uri"];
             Assert.AreEqual(uriMapping.ClrType, typeof(Uri));
             // No way to test the PropertyInfo directly
             Assert.IsTrue(uriMapping.Metadata.CollationSequence.Length == 0);
@@ -82,7 +82,7 @@ namespace SQLitePCL.pretty.tests
             Assert.IsFalse(uriMapping.Metadata.IsAutoIncrement);
             Assert.IsFalse(uriMapping.Metadata.IsPrimaryKeyPart);
 
-            var bMapping = table["B"];
+            var bMapping = table.Columns["B"];
             Assert.AreEqual(bMapping.ClrType, typeof(string));
             // No way to test the PropertyInfo directly
             Assert.IsTrue(bMapping.Metadata.CollationSequence.Length == 0);
@@ -91,9 +91,9 @@ namespace SQLitePCL.pretty.tests
             Assert.IsFalse(bMapping.Metadata.IsAutoIncrement);
             Assert.IsFalse(bMapping.Metadata.IsPrimaryKeyPart);
 
-            Assert.False(table.ContainsKey("Ignored"));
+            Assert.False(table.Columns.ContainsKey("Ignored"));
 
-            var notNullMapping = table["NotNull"];
+            var notNullMapping = table.Columns["NotNull"];
             Assert.AreEqual(notNullMapping.ClrType, typeof(byte[]));
             // No way to test the PropertyInfo directly
             Assert.IsTrue(notNullMapping.Metadata.CollationSequence.Length == 0);
@@ -102,7 +102,7 @@ namespace SQLitePCL.pretty.tests
             Assert.IsFalse(notNullMapping.Metadata.IsAutoIncrement);
             Assert.IsFalse(notNullMapping.Metadata.IsPrimaryKeyPart);
 
-            var valueMapping = table["Value"];
+            var valueMapping = table.Columns["Value"];
             Assert.AreEqual(valueMapping.ClrType, typeof(DateTime));
             // No way to test the PropertyInfo directly
             Assert.IsTrue(valueMapping.Metadata.CollationSequence.Length == 0);
@@ -111,7 +111,7 @@ namespace SQLitePCL.pretty.tests
             Assert.IsFalse(valueMapping.Metadata.IsAutoIncrement);
             Assert.IsFalse(valueMapping.Metadata.IsPrimaryKeyPart);
 
-            var aFloatMapping = table["AFloat"];
+            var aFloatMapping = table.Columns["AFloat"];
             Assert.AreEqual(aFloatMapping.ClrType, typeof(float));
             // No way to test the PropertyInfo directly
             Assert.IsTrue(aFloatMapping.Metadata.CollationSequence.Length == 0);
