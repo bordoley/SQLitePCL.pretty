@@ -57,17 +57,20 @@ namespace SQLitePCL.pretty.Orm
             
         public static void InitTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
-            This.CreateTableIfNotExists(tableMapping.TableName, CreateFlags.None, tableMapping.Columns);
+            This.RunInTransaction(_ =>
+                {
+                    This.CreateTableIfNotExists(tableMapping.TableName, CreateFlags.None, tableMapping.Columns);
 
-            if (This.Changes != 0)
-            {
-                This.MigrateTable(tableMapping);
-            }
+                    if (This.Changes != 0)
+                    {
+                        This.MigrateTable(tableMapping);
+                    }
 
-            foreach (var index in tableMapping.Indexes) 
-            {
-                This.CreateIndex(index.Key, tableMapping.TableName, index.Value.Columns, index.Value.Unique);
-            }
+                    foreach (var index in tableMapping.Indexes) 
+                    {
+                        This.CreateIndex(index.Key, tableMapping.TableName, index.Value.Columns, index.Value.Unique);
+                    }
+                });
         }
 
         public static Task InitTableAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, CancellationToken cancellationToken)

@@ -163,6 +163,11 @@ namespace SQLitePCL.pretty.tests
 
                 var lookupHello = db.Find(table, hello.Id);
                 Assert.AreEqual(hello, lookupHello);
+
+                Assert.Throws<SQLiteException>(() => db.Insert(table, hello));
+
+                var objectWithId = new TestObject.Builder() { Id = 100, Value = "Hello" }.Build();
+                Assert.AreEqual(objectWithId, db.Insert(table, objectWithId));
             }
 
             var mutableTable = TableMapping.Create<TestMutableObject>();
