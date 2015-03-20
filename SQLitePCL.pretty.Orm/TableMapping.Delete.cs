@@ -54,10 +54,14 @@ namespace SQLitePCL.pretty.Orm
                             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
         }
 
-        public static Task<IReadOnlyDictionary<long,T>> DeleteAllAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects, CancellationToken ct)
+        public static Task<IReadOnlyDictionary<long,T>> DeleteAllAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<long> primaryKeys, CancellationToken ct)
         {
-            var primaryKeys = objects.Select(tableMapping.GetPrimaryKey);
             return This.Use((db,_) => db.DeleteAll<T>(tableMapping, primaryKeys), ct);
+        }
+
+        public static Task<IReadOnlyDictionary<long,T>> DeleteAllAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<long> primaryKeys)
+        {
+            return This.DeleteAllAsync(tableMapping, primaryKeys, CancellationToken.None);
         }
 
         public static void DeleteAllRows<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
@@ -65,9 +69,14 @@ namespace SQLitePCL.pretty.Orm
             This.DeleteAll(tableMapping.TableName);
         }
 
+        public static Task DeleteAllRowsAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, CancellationToken ct)
+        {
+            return This.Use((db, _) => db.DeleteAllRows(tableMapping), ct);
+        }
+
         public static Task DeleteAllRowsAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping)
         {
-            return This.Use(db => db.DeleteAllRows(tableMapping));
+            return This.DeleteAllRowsAsync(tableMapping, CancellationToken.None);
         }
     }
 }

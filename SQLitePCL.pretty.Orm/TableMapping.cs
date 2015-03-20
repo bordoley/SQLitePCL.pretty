@@ -112,12 +112,6 @@ namespace SQLitePCL.pretty.Orm
             return primaryKeyColumn.GetValue(This, mapping => 
                 // Intentionally throw if the column doesn't have a primary key
                 mapping.Columns.Where(x => x.Value.Metadata.IsPrimaryKeyPart).Select(x => x.Key).First());
-        }
-
-        private static long GetPrimaryKey<T>(this ITableMapping<T> This, T obj)
-        {
-            var primaryKeyPropery = This.Columns[This.PrimaryKeyColumn()].Property;
-            return (long) primaryKeyPropery.GetValue(obj);
         } 
 
         public static void DropTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
@@ -125,9 +119,14 @@ namespace SQLitePCL.pretty.Orm
             This.DropTable(tableMapping.TableName);
         }
 
+        public static Task DropTableAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, CancellationToken ct)
+        {
+            return This.Use((db, _) => db.DropTable(tableMapping), ct);
+        }
+
         public static Task DropTableAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping)
         {
-            return This.Use(db => db.DropTable(tableMapping));
+            return This.DropTableAsync(tableMapping, CancellationToken.None);
         }
 
         public static ITableMapping<T> Create<T>()
