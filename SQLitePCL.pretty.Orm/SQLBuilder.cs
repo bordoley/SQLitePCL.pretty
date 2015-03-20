@@ -97,14 +97,17 @@ namespace SQLitePCL.pretty.Orm
             return query;
         }
 
-        internal static string SqlDecl (string columnName, ColumnMapping columnMapping)
+        internal static string SqlDecl(string columnName, ColumnMapping columnMapping)
         {
             string decl = "\"" + columnName + "\" " + columnMapping.Metadata.DeclaredType + " ";
 
-            // Only specify a column as primary key if it is autoincrement
-            if (columnMapping.Metadata.IsPrimaryKeyPart && columnMapping.Metadata.IsAutoIncrement) 
+            if (columnMapping.Metadata.IsPrimaryKeyPart && columnMapping.Metadata.IsAutoIncrement)
             {
                 decl += "PRIMARY KEY AUTOINCREMENT NOT NULL ";
+            }
+            else if (columnMapping.Metadata.IsPrimaryKeyPart)
+            {
+                decl += "PRIMARY KEY NOT NULL ";
             }
             else if (columnMapping.Metadata.HasNotNullConstraint) 
             {

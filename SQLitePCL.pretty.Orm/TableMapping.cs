@@ -49,7 +49,7 @@ namespace SQLitePCL.pretty.Orm
             }
         }
 
-        public static TableQuery<T> CreateQuery<T>(this ITableMapping<T> This)
+        public static TableQuery<T> Query<T>(this ITableMapping<T> This)
         {
             return new TableQuery<T>(This, "*", null, new List<Ordering>(), null, null);
         }
@@ -218,13 +218,20 @@ namespace SQLitePCL.pretty.Orm
             var isAutoInc = false;
             if (isPK)
             {
-                if (columnType != typeof(Nullable<long>))
+                // Only use autoincrement if the primary key is nullable otherwise.
+                if (columnType == typeof(Nullable<long>))
+                {
+                    isAutoInc = true;
+
+                } 
+                else if (columnType == typeof(long))
+                {
+                    isAutoInc = false;
+                }
+                else
                 {
                     throw new ArgumentException("Primary key value must be of type Nullable<long>.");
                 }
-
-                // Only allow autoincrement on nullable long primary keys
-                isAutoInc = true;
             }
 
             // Though technically not required to be not null by SQLite, we enforce that the primary key is always not null

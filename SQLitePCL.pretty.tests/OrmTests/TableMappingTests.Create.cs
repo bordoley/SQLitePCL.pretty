@@ -143,6 +143,27 @@ namespace SQLitePCL.pretty.tests
             Assert.AreEqual(tableWithExplicitName.TableName, "ExplicitTableName");
         }
 
+        public class TestObjectWithNonAutoIncrementPrimaryKey
+        {
+            [PrimaryKey]
+            public long Id { get; set; }
+        }
+
+        [Test]
+        public void TestCreateWithNonAutoIncrementPrimaryKey()
+        {
+            var table = TableMapping.Create<TestObjectWithNonAutoIncrementPrimaryKey>();
+
+            var id = table.Columns["Id"];
+            Assert.AreEqual(id.ClrType, typeof(long));
+            // No way to test the PropertyInfo directly
+            Assert.AreEqual(id.Metadata.CollationSequence, "BINARY");
+            Assert.AreEqual(id.Metadata.DeclaredType, "INTEGER");
+            Assert.IsTrue(id.Metadata.HasNotNullConstraint);
+            Assert.IsFalse(id.Metadata.IsAutoIncrement);
+            Assert.IsTrue(id.Metadata.IsPrimaryKeyPart);
+        }
+
         public class TestObjectWithUnsupportedPropertyType
         {
             [PrimaryKey]

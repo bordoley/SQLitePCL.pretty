@@ -106,7 +106,7 @@ namespace SQLitePCL.pretty.Orm
         /// Converts the query to a count query.
         /// </summary>
         /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
-        public TableQuery<T> ToCountQuery()
+        public TableQuery<T> Count()
         {
             return new TableQuery<T>(_mapping, "count(*)", _where, _orderBy, _limit, _offset);
         }
@@ -446,8 +446,6 @@ namespace SQLitePCL.pretty.Orm
             else { throw new NotSupportedException("Cannot compile Null-BinaryExpression with type " + expression.NodeType.ToString()); }
         }
 
-
-
         private static string GetSqlName (Expression expr)
         {
             var n = expr.NodeType;
@@ -471,7 +469,7 @@ namespace SQLitePCL.pretty.Orm
     /// </summary>
     public static class TableQuery
     {
-        public static ITableMappedStatement<T> PrepareQuery<T>(this IDatabaseConnection This, TableQuery<T> query)
+        public static ITableMappedStatement<T> PrepareStatement<T>(this IDatabaseConnection This, TableQuery<T> query)
         {
             return new TableMappedStatement<T>(This.PrepareStatement(query.ToString()), query.Mapping);
         }
@@ -491,19 +489,19 @@ namespace SQLitePCL.pretty.Orm
             return This.Query(query.ToString()).Select(query.Mapping.ToObject);
         }
 
-        public static IStatement PrepareCount<T>(this IDatabaseConnection This, TableQuery<T> query)
+        public static IStatement PrepareCountStatement<T>(this IDatabaseConnection This, TableQuery<T> query)
         {
-            return This.PrepareStatement(query.ToCountQuery().ToString());
+            return This.PrepareStatement(query.Count().ToString());
         }
 
-        public static Task<IAsyncStatement> PrepareCountAsync<T>(this IAsyncDatabaseConnection This, TableQuery<T> query)
+        public static Task<IAsyncStatement> PrepareCountStatemenAsync<T>(this IAsyncDatabaseConnection This, TableQuery<T> query)
         {
-            return This.PrepareStatementAsync(query.ToCountQuery().ToString());
+            return This.PrepareStatementAsync(query.Count().ToString());
         }
 
         public static int Count<T>(this IDatabaseConnection This, TableQuery<T> query)
         {
-            return This.Query(query.ToCountQuery().ToString()).SelectScalarInt().First();
+            return This.Query(query.Count().ToString()).SelectScalarInt().First();
         }
 
         public static Task<int> CountAsync<T>(this IAsyncDatabaseConnection This, TableQuery<T> query)
@@ -513,12 +511,12 @@ namespace SQLitePCL.pretty.Orm
 
         public static Task<int> CountAsync<T>(this IAsyncDatabaseConnection This, TableQuery<T> query, CancellationToken ct)
         {
-            return This.Query(query.ToCountQuery().ToString()).SelectScalarInt().FirstAsync().ToTask(ct);
+            return This.Query(query.Count().ToString()).SelectScalarInt().FirstAsync().ToTask(ct);
         }
 
         public static int Count<T>(this IDatabaseConnection This, TableQuery<T> query, params object[] values)
         {
-            return This.Query(query.ToCountQuery().ToString(), values).SelectScalarInt().First();
+            return This.Query(query.Count().ToString(), values).SelectScalarInt().First();
         }
 
         public static Task<int> CountAsync<T>(this IAsyncDatabaseConnection This, TableQuery<T> query, params object[] values)
@@ -528,7 +526,7 @@ namespace SQLitePCL.pretty.Orm
 
         public static Task<int> CountAsync<T>(this IAsyncDatabaseConnection This, TableQuery<T> query, CancellationToken ct, params object[] values)
         {
-            return This.Query(query.ToCountQuery().ToString(), values).SelectScalarInt().FirstAsync().ToTask(ct);
+            return This.Query(query.Count().ToString(), values).SelectScalarInt().FirstAsync().ToTask(ct);
         }
     }    
 }
