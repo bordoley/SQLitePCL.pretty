@@ -37,18 +37,6 @@ namespace SQLitePCL.pretty.Orm
             return This.YieldInsertOrReplaceAll(tableMapping, new T[] {obj}).First().Value;
         }
 
-        // These are internal for now. Probably will be removed. More likely than not an insert will want to wrapped in a larger transaction.
-        // Using the async inserts is terrible for perf as you jump threads.
-        internal static Task<T> InsertOrReplaceAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, T obj, CancellationToken cancellationToken)
-        {
-            return This.Use((x, ct) => x.InsertOrReplace(tableMapping, obj), cancellationToken);
-        }
-
-        internal static Task<T> InsertOrReplaceAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
-        {
-            return This.InsertOrReplaceAsync(tableMapping, obj, CancellationToken.None);
-        }
-
         public static IReadOnlyDictionary<T,T> InsertOrReplaceAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
             return This.RunInTransaction(_ => 
