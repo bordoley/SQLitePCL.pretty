@@ -143,7 +143,7 @@ namespace SQLitePCL.pretty.tests
                     dbColumns);
 
                 TestMutableObjectUpdated found;
-                if (db.TryFind<TestMutableObjectUpdated>(tableNew, insertedOriginal.Id, out found))
+                if (db.TryFind<TestMutableObjectUpdated>(tableNew, insertedOriginal.Id.Value, out found))
                 {
                     Assert.AreEqual(found.NotNullReference, "default");
                 }
@@ -169,7 +169,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(hello.Value, "Hello");
 
                 TestObject lookupHello; 
-                if (db.TryFind(table, hello.Id, out lookupHello))
+                if (db.TryFind(table, hello.Id.Value, out lookupHello))
                 {
                     Assert.AreEqual(hello, lookupHello);
                 }
@@ -193,7 +193,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(hello.Value, "Hello");
 
                 TestMutableObject lookupHello; 
-                if (db.TryFind(mutableTable, hello.Id, out lookupHello))
+                if (db.TryFind(mutableTable, hello.Id.Value, out lookupHello))
                 {
                     Assert.AreEqual(hello.Id, lookupHello.Id);
                     Assert.AreEqual(hello.Value, lookupHello.Value);
@@ -225,11 +225,11 @@ namespace SQLitePCL.pretty.tests
                 db.InitTable(table);
                 var result = db.InsertAll(table, objects);
                 CollectionAssert.AreEquivalent(
-                    result.Select(x => x.Value), 
+                    result.Values.Select(x => x.Value), 
                     objects.Select(x => x.Value));
-                CollectionAssert.AllItemsAreUnique(result.Select(x => x.Id));
+                CollectionAssert.AllItemsAreUnique(result.Values.Select(x => x.Id));
 
-                Assert.Throws<SQLiteException>(() => db.InsertAll(table, result));
+                Assert.Throws<SQLiteException>(() => db.InsertAll(table, result.Values));
             }
         }
 
@@ -273,22 +273,22 @@ namespace SQLitePCL.pretty.tests
                 db.InitTable(table);
                 var result = db.InsertAll(table, objects);
                 CollectionAssert.AreEquivalent(
-                    result.Select(x => x.Value), 
+                    result.Values.Select(x => x.Value), 
                     objects.Select(x => x.Value));
-                CollectionAssert.AllItemsAreUnique(result.Select(x => x.Id));
+                CollectionAssert.AllItemsAreUnique(result.Values.Select(x => x.Id));
 
                 var changed = new List<TestObject>()
                     {
-                        new TestObject.Builder() { Id = result[0].Id, Value = "Goodbye1" }.Build(),
-                        new TestObject.Builder() { Id = result[1].Id, Value = "Goodbye2" }.Build(),
-                        new TestObject.Builder() { Id = result[2].Id, Value = "Goodye3" }.Build()
+                        new TestObject.Builder() { Id = result.Values.ElementAt(0).Id, Value = "Goodbye1" }.Build(),
+                        new TestObject.Builder() { Id = result.Values.ElementAt(1).Id, Value = "Goodbye2" }.Build(),
+                        new TestObject.Builder() { Id = result.Values.ElementAt(2).Id, Value = "Goodye3" }.Build()
                     };
                 var replaced = db.InsertOrReplaceAll(table, changed);
                 CollectionAssert.AreEquivalent(
-                    replaced.Select(x => x.Id),
-                    result.Select(x => x.Id));
+                    replaced.Values.Select(x => x.Id),
+                    result.Values.Select(x => x.Id));
                 CollectionAssert.AreEquivalent(
-                    replaced.Select(x => x.Value),
+                    replaced.Values.Select(x => x.Value),
                     changed.Select(x => x.Value));
             }
         }
@@ -305,11 +305,18 @@ namespace SQLitePCL.pretty.tests
                 db.InitTable(table);
 
                 var inserted = db.Insert(table, new TestObject.Builder() { Value = "Hello" }.Build());
-                var deleted = db.Delete(table, inserted);
-                Assert.AreEqual(inserted, deleted);
+                TestObject deleted;
+                if (db.TryDelete(table, inserted.Id.Value, out deleted))
+                {
+                    Assert.AreEqual(inserted, deleted);
+                }
+                else
+                {
+                    Assert.Fail();
+                }
 
                 TestObject lookup;
-                Assert.IsFalse(db.TryFind(table, inserted.Id, out lookup));
+                Assert.IsFalse(db.TryFind(table, inserted.Id.Value, out lookup));
             }
         }
 
@@ -333,25 +340,22 @@ namespace SQLitePCL.pretty.tests
                 db.InitTable(table);
                 var notDeleted = db.Insert(table, new TestObject.Builder() { Value = "NotDeleted" }.Build());
                 var inserted = db.InsertAll(table, objects);
-                var deleted = db.DeleteAll(table, inserted);
-                CollectionAssert.AreEquivalent(inserted, deleted);
+                var deleted = db.DeleteAll(table, inserted.Values.Select(x => x.Id.Value));
+                CollectionAssert.AreEquivalent(inserted.Values, deleted.Values);
 
-                var found = db.FindAll(table, inserted.Select(x => x.Id));
-                foreach (var o in found)
-                {
-                    Assert.IsNull(o);
-                }
+                var found = db.FindAll(table, inserted.Values.Select(x => x.Id.Value));
+                Assert.IsEmpty(found);
 
                 TestObject found2;
-                if (db.TryFind(table, notDeleted.Id, out found2))
+                if (db.TryFind(table, notDeleted.Id.Value, out found2))
                 {
                     Assert.AreEqual(found2, notDeleted);
                 }
 
-                db.DeleteAll(table);
+                db.DeleteAllRows(table);
 
                 TestObject notFound;
-                Assert.IsFalse(db.TryFind(table, notDeleted.Id, out notFound));
+                Assert.IsFalse(db.TryFind(table, notDeleted.Id.Value, out notFound));
             }
         }
 
