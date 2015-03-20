@@ -25,30 +25,6 @@ namespace SQLitePCL.pretty.Orm
 {
     internal static partial class DatabaseConnection
     {
-        /*
-        /// <summary>
-        /// Renames the table;
-        /// </summary>
-        /// <param name="This">The database connection.</param>
-        /// <param name="table">The table name.</param>
-        /// <param name="newName">The new table name.</param>
-        /// <seealso href="https://www.sqlite.org/lang_altertable.html"/>
-        internal static void Rename(this IDatabaseConnection This, string table, string newName)
-        {
-            This.Execute(SQLBuilder.AlterTableRename(table, newName));
-        }*/
-
-        /// <summary>
-        /// Drops the table.
-        /// </summary>
-        /// <param name="This">The database connection.</param>
-        /// <param name="table">The table name.</param>
-        /// <seealso href="https://www.sqlite.org/lang_droptable.html"/>
-        internal static void DropTable(this IDatabaseConnection This, string table)
-        {
-            This.Execute(SQLBuilder.DropTable(table));
-        }
-
         /// <summary>
         /// Drops the table if it exists. Otherwise this is a no-op.
         /// </summary>

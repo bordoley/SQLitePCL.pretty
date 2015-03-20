@@ -53,7 +53,8 @@ namespace SQLitePCL.pretty.Orm
         {
             return new TableQuery<T>(This, "*", null, new List<Ordering>(), null, null);
         }
-            
+
+               
         public static void InitTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
             This.RunInTransaction(_ =>
@@ -114,19 +115,19 @@ namespace SQLitePCL.pretty.Orm
                 mapping.Columns.Where(x => x.Value.Metadata.IsPrimaryKeyPart).Select(x => x.Key).First());
         } 
 
-        public static void DropTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
+        public static void DropTableIfExists<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
-            This.DropTable(tableMapping.TableName);
+            This.DropTableIfExists(tableMapping.TableName);
         }
 
-        public static Task DropTableAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, CancellationToken ct)
+        public static Task DropTableIfExistsAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, CancellationToken ct)
         {
-            return This.Use((db, _) => db.DropTable(tableMapping), ct);
+            return This.Use((db, _) => db.DropTableIfExists(tableMapping), ct);
         }
 
-        public static Task DropTableAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping)
+        public static Task DropTableIfExistsAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping)
         {
-            return This.DropTableAsync(tableMapping, CancellationToken.None);
+            return This.DropTableIfExistsAsync(tableMapping, CancellationToken.None);
         }
 
         public static ITableMapping<T> Create<T>()

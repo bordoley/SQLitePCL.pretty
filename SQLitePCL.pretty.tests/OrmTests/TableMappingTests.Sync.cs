@@ -236,6 +236,11 @@ namespace SQLitePCL.pretty.tests
                     Assert.Fail();
                 }
 
+                if (db.TryDelete(table, 1000000, out deleted))
+                {
+                    Assert.Fail();
+                }
+
                 TestObject lookup;
                 Assert.IsFalse(db.TryFind(table, inserted.Id.Value, out lookup));
             }
@@ -294,10 +299,13 @@ namespace SQLitePCL.pretty.tests
                       WHERE type='table' AND name='TestObject'
                       ORDER BY name;";
 
+                // Table doesn't exist
+                db.DropTableIfExists(table);
+
                 db.InitTable(table);
                 Assert.Greater(db.Query(tableLookup).Count(), 0);
 
-                db.DropTable(table);
+                db.DropTableIfExists(table);
                 Assert.AreEqual(db.Query(tableLookup).Count(), 0);
             }
         }

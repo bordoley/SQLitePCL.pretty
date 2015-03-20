@@ -6,26 +6,14 @@ namespace SQLitePCL.pretty.Orm
 {
     internal static class SQLBuilder
     {
-        internal const string ReIndex = "REINDEX";
-
-        internal static string AlterTableRename(string table, string newName)
-        {
-            return string.Format("ALTER TABLE \"{0}\" RENAME TO \"{1}\"", table, newName);
-        }
-
         internal static string DeleteAll(string tableName)
         {
             return string.Format("DELETE FROM \"{0}\"", tableName);
         }
 
-        internal static string DropTable(string tableName)
-        {
-            return string.Format("DROP TABLE \"{0}\"", tableName);
-        }
-
         internal static string DropTableIfExists(string tableName)
         {
-            return string.Format("DROP TABLE If EXISTS \"{0}\"", tableName);
+            return string.Format("DROP TABLE IF EXISTS \"{0}\"", tableName);
         }
 
         internal static string GetTableInfo (string tableName)
@@ -53,17 +41,6 @@ namespace SQLitePCL.pretty.Orm
             return string.Format("DELETE FROM \"{0}\" WHERE \"{1}\" = ?", tableName, pkColumn);
         }
 
-        internal static string Insert(string tableName, IEnumerable<string> columns)
-        {
-            return string.Format(
-                "INSERT INTO \"{0}\" ({1}) VALUES ({2})",
-                tableName,
-                string.Join(",", columns.Select(x => "\"" + x + "\"")),
-
-                // FIXME: Might need to quote this for some cases. Test!!!
-                string.Join(",", columns.Select(x => ":" + x)));
-        }
-
         internal static string InsertOrReplace(string tableName, IEnumerable<string> columns)
         {
             return string.Format(
@@ -79,21 +56,6 @@ namespace SQLitePCL.pretty.Orm
         {
             const string sqlFormat = "CREATE {2} INDEX IF NOT EXISTS \"{3}\" ON \"{0}\"(\"{1}\")";
             return String.Format(sqlFormat, tableName, string.Join ("\", \"", columnNames), unique ? "UNIQUE" : "", indexName);
-        }
-
-        internal static string CreateIndex(string indexName, string tableName, string columnName, bool unique)
-        {
-            return CreateIndex(indexName, tableName, new string[] { columnName }, unique);
-        }
-
-        internal static string CreateIndex(string tableName, string columnName, bool unique)
-        {
-            return CreateIndex(NameIndex(tableName, new String[] { columnName}), tableName, columnName, unique);
-        }
-
-        internal static string CreateIndex(string tableName, IEnumerable<string> columnNames, bool unique)
-        {
-            return CreateIndex(NameIndex(tableName, columnNames), tableName, columnNames, unique);
         }
 
         internal static string NameIndex(string tableName, IEnumerable<string> columnNames)
@@ -114,11 +76,6 @@ namespace SQLitePCL.pretty.Orm
         internal static string IndexInfo(string indexName)
         {
             return string.Format("PRAGMA INDEX_INFO (\"{0}\")", indexName);
-        }
-
-        internal static string ReIndexWithName(string name)
-        {
-            return "REINDEX " + name;
         }
 
         internal static string CreateTableIfNotExists(string tableName, CreateFlags createFlags, IReadOnlyDictionary<string, ColumnMapping> columns)
