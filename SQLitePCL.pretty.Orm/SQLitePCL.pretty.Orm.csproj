@@ -47,7 +47,6 @@
     <Compile Include="Reflection.cs" />
     <Compile Include="TableMapping.Find.cs" />
     <Compile Include="TableMapping.Delete.cs" />
-    <Compile Include="TableMapping.Insert.cs" />
     <Compile Include="TableMapping.InsertOrReplace.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
