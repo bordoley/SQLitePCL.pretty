@@ -15,11 +15,9 @@ namespace SQLitePCL.pretty.Orm
         /// <param name="This">The database connection</param>
         /// <param name="tableMapping">The table mapping.</param>
         /// <typeparam name="T">The mapped type</typeparam>
-        public static ITableMappedStatement<T> PrepareDeleteStatement<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
+        public static IStatement PrepareDeleteStatement<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
-            return new TableMappedStatement<T>(
-                This.PrepareDelete(tableMapping.TableName, tableMapping.PrimaryKeyColumn()), 
-                tableMapping);   
+            return This.PrepareDelete(tableMapping.TableName, tableMapping.PrimaryKeyColumn());   
         }
 
         private static IEnumerable<KeyValuePair<long,T>> YieldDeleteAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<long> primaryKeys)
