@@ -42,6 +42,16 @@ namespace SQLitePCL.pretty.Orm
 {
     public static partial class QueryBuilder
     {
+        public static bool Is<T>(this T This, object nullish)
+        {
+            return This == null;
+        }
+
+        public static bool IsNot<T>(this T This, object nullish)
+        {
+            return This != null;
+        }
+
         public static SelectQuery<T> Select<T>(this ITableMapping<T> This)
         {
             return new SelectQuery<T>(This.TableName, null);
@@ -75,6 +85,9 @@ namespace SQLitePCL.pretty.Orm
                 var rightExpr = CompileExpr(bin.Right);
 
                 return "(" + leftExpr + " " + GetSqlName(bin) + " " + rightExpr + ")";
+
+                // FIXME: Need to handle null comparison correctly, probably via some extension methods
+                // like obj.Is(null), obj.IsNot(null);
             }
             else if (expr is ParameterExpression)
             {
@@ -282,30 +295,7 @@ namespace SQLitePCL.pretty.Orm
 
         private static Tuple<String,object> CompileExpr(Expression expr, List<object> queryArgs)
         {
-            if (expr is BinaryExpression)
-            {
-                var bin = (BinaryExpression)expr;
-                
-                var leftr = CompileExpr(bin.Left, queryArgs);
-                var rightr = CompileExpr(bin.Right, queryArgs);
 
-                //If either side is a parameter and is null,then handle the other side specially (for "is null"/"is not null")
-                string text;
-
-                if (leftr.Item1 == "?" && leftr.Item2 == null)
-                {
-                    text = CompileNullBinaryExpression(bin, rightr.Item1);
-                }
-                else if (rightr.Item1 == "?" && rightr.Item2 == null)
-                {
-                    text = CompileNullBinaryExpression(bin, leftr.Item1);
-                }
-                else
-                {
-                    text = "(" + leftr.Item1 + " " + GetSqlName(bin) + " " + rightr.Item1 + ")";
-                }
-                return Tuple.Create<String, object>(text, null);
-            }
            
 
             else if (expr.NodeType == ExpressionType.Convert) 
@@ -393,13 +383,6 @@ namespace SQLitePCL.pretty.Orm
             }
 
             throw new NotSupportedException ("Cannot compile: " + expr.NodeType.ToString ());
-        }
-
-        private static string CompileNullBinaryExpression(BinaryExpression expression, string parameter)
-        {
-            if (expression.NodeType == ExpressionType.Equal)         { return "(" + parameter + " is ?)"; }
-            else if (expression.NodeType == ExpressionType.NotEqual) { return "(" + parameter + " is not ?)"; }
-            else { throw new NotSupportedException("Cannot compile Null-BinaryExpression with type " + expression.NodeType.ToString()); }
         }
     }*/
 

@@ -17,19 +17,9 @@
 
 using System;
 
-#if USE_NUNIT
-
 using NUnit.Framework;
 using TestClass = NUnit.Framework.TestFixtureAttribute;
 using TestMethod = NUnit.Framework.TestAttribute;
-
-#elif WINDOWS_PHONE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#elif NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-#else
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-#endif
 
 namespace SQLitePCL.pretty.tests
 {
