@@ -136,13 +136,11 @@
     <Compile Include="TableMapping.cs" />
     <Compile Include="Attributes.cs" />
     <Compile Include="DatabaseConnection.cs" />
-    <Compile Include="TableQuery.cs" />
     <Compile Include="TableMappedStatement.cs" />
     <Compile Include="DatabaseConnection.Index.cs" />
     <Compile Include="DatabaseConnection.Tables.cs" />
     <Compile Include="SQLBuilder.cs" />
     <Compile Include="Interfaces.cs" />
-    <Compile Include="Ordering.cs" />
     <Compile Include="ColumnMapping.cs" />
     <Compile Include="IndexInfo.cs" />
     <Compile Include="Reflection.cs" />
@@ -150,6 +148,11 @@
     <Compile Include="TableMapping.Delete.cs" />
     <Compile Include="TableMapping.InsertOrReplace.cs" />
     <Compile Include="ForeignKeyConstraint.cs" />
+    <Compile Include="QueryBuilder.cs" />
+    <Compile Include="QueryBuilder.Count.cs" />
+    <Compile Include="QueryBuilder.Limit.cs" />
+    <Compile Include="QueryBuilder.OrderBy.cs" />
+    <Compile Include="QueryBuilder.Select.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>
@@ -174,6 +177,9 @@
     </Reference>
     <Reference Include="System.Reactive.PlatformServices">
       <HintPath>..\packages\Rx-PlatformServices.2.2.5\lib\portable-net45+winrt45+wp8+wpa81\System.Reactive.PlatformServices.dll</HintPath>
+    </Reference>
+    <Reference Include="SQLitePCL.raw">
+      <HintPath>..\packages\SQLitePCL.raw.0.8.0-pre1\lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10+Xamarin.iOS10\SQLitePCL.raw.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

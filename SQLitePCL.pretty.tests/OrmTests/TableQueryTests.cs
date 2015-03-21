@@ -7,20 +7,9 @@ using SQLitePCL.pretty.Orm;
 using SQLitePCL.pretty.Orm.Attributes;
 
 namespace SQLitePCL.pretty.tests
-{/*
-    [TestFixture]
-    public class TableQueryTests
-    {
-        public class TestObject
-        {
-            [PrimaryKey]
-            public long? Id { get; set; }
-            public bool Flag { get; set; }
-            public int Cost { get; set;}
-            public String Name { get; set; }
-        }
+{
 
-
+        /*
         [Test]
         public void TestWhereAnd()
         {
