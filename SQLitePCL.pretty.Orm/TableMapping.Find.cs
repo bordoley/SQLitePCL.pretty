@@ -21,6 +21,13 @@ namespace SQLitePCL.pretty.Orm
                 });
         }
 
+        /// <summary>
+        /// Prepares a SQLite statement that can be bound to an object primary key to retrieve an instance from the database.
+        /// </summary>
+        /// <returns>A prepared statement.</returns>
+        /// <param name="This">The database connection</param>
+        /// <param name="tableMapping">The table mapping.</param>
+        /// <typeparam name="T">The mapped type</typeparam>
         public static ITableMappedStatement<T> PrepareFindStatement<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
             return new TableMappedStatement<T>(This.PrepareStatement(tableMapping.Find()), tableMapping);   
@@ -38,6 +45,15 @@ namespace SQLitePCL.pretty.Orm
             }
         }
 
+        /// <summary>
+        /// Tries to find an object in the database with the provided primary key.
+        /// </summary>
+        /// <returns><c>true</c>, if an object was found, <c>false</c> otherwise.</returns>
+        /// <param name="This">The database connection.</param>
+        /// <param name="tableMapping">The table mapping.</param>
+        /// <param name="primaryKey">A primary key.</param>
+        /// <param name="value">If found in the database, the found object.</param>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static bool TryFind<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, long primaryKey, out T value)
         {
             var result = This.YieldFindAll(tableMapping, new long[] { primaryKey }).FirstOrDefault();
@@ -52,6 +68,14 @@ namespace SQLitePCL.pretty.Orm
             return false;
         }
 
+        /// <summary>
+        /// Finds all object instances specified by their primary keys.
+        /// </summary>
+        /// <returns>A dictionary mapping the primary key to its value if found in the database.</returns>
+        /// <param name="This">The database connection.</param>
+        /// <param name="tableMapping">The table mapping.</param>
+        /// <param name="primaryKeys">An IEnumerable of primary keys to find.</param>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static IReadOnlyDictionary<long,T> FindAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<long> primaryKeys)
         {
             return This.YieldFindAll(tableMapping, primaryKeys)
@@ -59,6 +83,15 @@ namespace SQLitePCL.pretty.Orm
                        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
 
+        /// <summary>
+        /// Finds all object instances specified by their primary keys.
+        /// </summary>
+        /// <returns>A task that completes with a dictionary mapping the primary key to its value if found in the database.</returns>
+        /// <param name="This">The database connection.</param>
+        /// <param name="tableMapping">The table mapping.</param>
+        /// <param name="primaryKeys">An IEnumerable of primary keys to find.</param>
+        /// <param name="ct">A cancellation token that can be used to cancel the operation</param>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static Task<IReadOnlyDictionary<long,T>> FindAllAsync<T>(
             this IAsyncDatabaseConnection This, 
             ITableMapping<T> tableMapping, 
@@ -68,6 +101,14 @@ namespace SQLitePCL.pretty.Orm
             return This.Use((db,_) => db.FindAll(tableMapping, primaryKeys), ct);
         }
 
+        /// <summary>
+        /// Finds all object instances specified by their primary keys.
+        /// </summary>
+        /// <returns>A task that completes with a dictionary mapping the primary key to its value if found in the database.</returns>
+        /// <param name="This">The database connection.</param>
+        /// <param name="tableMapping">The table mapping.</param>
+        /// <param name="primaryKeys">An IEnumerable of primary keys to find.</param>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static Task<IReadOnlyDictionary<long,T>> FindAllAsync<T>(
             this IAsyncDatabaseConnection This, 
             ITableMapping<T> tableMapping, 
@@ -75,7 +116,6 @@ namespace SQLitePCL.pretty.Orm
         {
             return This.FindAllAsync(tableMapping, primaryKeys, CancellationToken.None);
         }
-
     }
 }
 

@@ -2,6 +2,7 @@
 
 namespace SQLitePCL.pretty.Orm
 {
+    /*
     internal sealed class Ordering : IEquatable<Ordering>
     {
         public static bool operator ==(Ordering x, Ordering y)
@@ -57,6 +58,6 @@ namespace SQLitePCL.pretty.Orm
             hash = hash * 31 + this.ColumnName.GetHashCode();
             return hash;
         }
-    } 
+    } */
 }
 

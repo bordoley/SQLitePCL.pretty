@@ -47,11 +47,6 @@ namespace SQLitePCL.pretty.Orm
         /// The underlying <see cref="ITableMapping&lt;T&gt;"/> used to map the result set to an instance of T.
         /// </summary>
         ITableMapping<T> Mapping { get; }
-
-        /// <summary>
-        /// Gets the current result value at the current position of the statement enumerator.
-        /// </summary>
-        new T Current { get; } 
     }
 }
 

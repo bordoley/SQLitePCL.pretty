@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
+using System.Reactive.Linq;
 
 namespace SQLitePCL.pretty.Orm
 {
@@ -10,14 +12,13 @@ namespace SQLitePCL.pretty.Orm
     /// </summary>
     public static class TableMappedStatement
     {
-        /*
         /// <summary>
         /// Binds the statement bind variables by name to the corresponding properties on the object <paramref name="obj"/>.
         /// </summary>
         /// <param name="This">The statement.</param>
         /// <param name="obj">The object to bind.</param>
         /// <typeparam name="T">The mapped type.</typeparam>
-         static void Bind<T>(this ITableMappedStatement<T> This, T obj)
+        public static void Bind<T>(this ITableMappedStatement<T> This, T obj)
         {
             This.Bind(This.Mapping, obj);
         }
@@ -39,14 +40,6 @@ namespace SQLitePCL.pretty.Orm
             This.ClearBindings();
             This.Bind(obj);
             This.MoveNext();
-        }*/
-
-        private static IEnumerator<T> Enumerate<T>(this ITableMappedStatement<T> This)
-        {
-            while (This.MoveNext())
-            {
-                yield return This.Current;
-            }
         }
 
         /// <summary>
@@ -58,14 +51,7 @@ namespace SQLitePCL.pretty.Orm
         public static IEnumerable<T> Query<T>(this ITableMappedStatement<T> This)
         {
             Contract.Requires(This != null);
-
-            return new DelegatingEnumerable<T>(() => 
-                {
-                    This.Reset();
-
-                    // Prevent the statement from being disposed when the enumerator is disposed
-                    return This.Enumerate();
-                });
+            return ((IStatement) This).Query().Select(This.Mapping.ToObject);
         }
 
         /// <summary>
@@ -81,15 +67,7 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(This != null);
             Contract.Requires(values != null);
 
-            return new DelegatingEnumerable<T>(() => 
-                {
-                    This.Reset();
-                    This.ClearBindings();
-                    This.Bind(values);
-
-                    // Prevent the statement from being disposed when the enumerator is disposed
-                    return This.Enumerate();
-                });
+            return ((IStatement) This).Query(values).Select(This.Mapping.ToObject);
         }
     }
 
@@ -184,14 +162,6 @@ namespace SQLitePCL.pretty.Orm
             get
             {
                 return deleg.Current;
-            }
-        }
-
-        T ITableMappedStatement<T>.Current
-        {
-            get
-            {
-                return mapping.ToObject(((IEnumerator<IReadOnlyList<IResultSetValue>>) this).Current);
             }
         }
     }

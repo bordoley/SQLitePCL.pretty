@@ -49,12 +49,19 @@ namespace SQLitePCL.pretty.Orm
             }
         }
 
+        /*
         internal static TableQuery<T> Query<T>(this ITableMapping<T> This)
         {
             return new TableQuery<T>(This, "*", null, new List<Ordering>(), null, null);
-        }
+        }*/
 
-               
+                                                                
+        /// <summary>
+        /// Creates or migrate a table in the database for the given table mapping, creating indexes if needed.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="tableMapping">The table mapping.</param>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static void InitTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
             This.RunInTransaction(_ =>
@@ -73,11 +80,26 @@ namespace SQLitePCL.pretty.Orm
                 });
         }
 
+        /// <summary>
+        /// Creates or migrate a table in the database for the given table mapping, creating indexes if needed.
+        /// </summary>
+        /// <returns>A task that completes once the table is succesfully created and is ready for use.</returns>
+        /// <param name="This">The database connection</param>
+        /// <param name="tableMapping">The table mapping.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static Task InitTableAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, CancellationToken cancellationToken)
         {
             return This.Use((db, ct) => db.InitTable(tableMapping), cancellationToken);
         }
 
+        /// <summary>
+        /// Creates or migrate a table in the database for the given table mapping, creating indexes if needed.
+        /// </summary>
+        /// <returns>A task that completes once the table is succesfully created and is ready for use.</returns>
+        /// <param name="This">The database connection</param>
+        /// <param name="tableMapping">The table mapping.</param>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static Task InitTableAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping)
         {
             return This.InitTableAsync(tableMapping, CancellationToken.None);
@@ -115,21 +137,46 @@ namespace SQLitePCL.pretty.Orm
                 mapping.Columns.Where(x => x.Value.Metadata.IsPrimaryKeyPart).Select(x => x.Key).First());
         } 
 
+        /// <summary>
+        /// Drops the table if exists.
+        /// </summary>
+        /// <param name="This">This.</param>
+        /// <param name="tableMapping">Table mapping.</param>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static void DropTableIfExists<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
             This.DropTableIfExists(tableMapping.TableName);
         }
 
+        /// <summary>
+        /// Drops the table if exists async.
+        /// </summary>
+        /// <returns>The table if exists async.</returns>
+        /// <param name="This">This.</param>
+        /// <param name="tableMapping">Table mapping.</param>
+        /// <param name="ct">Ct.</param>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static Task DropTableIfExistsAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, CancellationToken ct)
         {
             return This.Use((db, _) => db.DropTableIfExists(tableMapping), ct);
         }
 
+        /// <summary>
+        /// Drops the table if exists async.
+        /// </summary>
+        /// <returns>The table if exists async.</returns>
+        /// <param name="This">This.</param>
+        /// <param name="tableMapping">Table mapping.</param>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static Task DropTableIfExistsAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping)
         {
             return This.DropTableIfExistsAsync(tableMapping, CancellationToken.None);
         }
 
+        /// <summary>
+        /// Create a table mapping for a mutable type.
+        /// </summary>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static ITableMapping<T> Create<T>()
         {
             Func<object> builder = () => Activator.CreateInstance<T>();
@@ -138,6 +185,13 @@ namespace SQLitePCL.pretty.Orm
             return TableMapping.Create(builder, build);
         }
             
+        /// <summary>
+        /// Creates a table mapping instance that will use the given builder to build new instances.
+        /// </summary>
+        /// <param name="builder">A builder provider that provides builder instances used to build a new result. This function may
+        /// either always return a new builder instance or may return a builder with thread affinity to a single thread.</param>
+        /// <param name="build">A function to call with the builder object that returns a result object.</param>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static ITableMapping<T> Create<T>(Func<object> builder, Func<object, T> build)
         {
             var mappedType = typeof(T);
@@ -347,12 +401,29 @@ namespace SQLitePCL.pretty.Orm
             this.indexes = indexes;
         }
 
+        /// <summary>
+        /// Gets the name of the table.
+        /// </summary>
+        /// <value>The name of the table.</value>
         public String TableName { get { return tableName; } }
 
+        /// <summary>
+        /// Gets the table indexes.
+        /// </summary>
+        /// <value>The indexes.</value>
         public IReadOnlyDictionary<string, IndexInfo> Indexes { get { return indexes; } }
 
+        /// <summary>
+        /// Gets the table columns.
+        /// </summary>
+        /// <value>The columns.</value>
         public IReadOnlyDictionary<string,ColumnMapping> Columns { get { return columns; } }
 
+        /// <summary>
+        /// Converts a result set row to an instance of type T.
+        /// </summary>
+        /// <returns>An instance of type T.</returns>
+        /// <param name="row">The result set row.</param>
         public T ToObject(IReadOnlyList<IResultSetValue> row)
         {
             var builder = this.builder();

@@ -38,6 +38,7 @@ using SQLitePCL.pretty.Orm.Attributes;
 
 namespace SQLitePCL.pretty.Orm
 {
+/*
     /// <summary>
     /// An immutable builder that allows the use of LINQ like syntax to build a SQL query that can subsequently be executed against a SQLite database.
     /// </summary>
@@ -497,5 +498,5 @@ namespace SQLitePCL.pretty.Orm
         {
             return This.PrepareStatement(query.Count().ToString());
         }
-    }    
+    }  */  
 }

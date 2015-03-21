@@ -7,7 +7,7 @@ using SQLitePCL.pretty.Orm;
 using SQLitePCL.pretty.Orm.Attributes;
 
 namespace SQLitePCL.pretty.tests
-{
+{/*
     [TestFixture]
     public class TableQueryTests
     {
@@ -630,6 +630,6 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(db.Query(query, "A", "B").SelectScalarInt().First(), 3);
             }
         }
-    }
+    }*/
 }
 
