@@ -51,9 +51,7 @@ namespace SQLitePCL.pretty.tests
 
             var query13 = table.Select().Where(x => x.Name.Equals("bob"));
 
-            var query14 = table.Select().Where(x => "bob".Equals(x.Name.ToLower()));
-
-            var query15 = table.Select().Where(x => "bob".Equals(x.Name.ToUpper()));
+            var query14 = table.Select().Where(x => x.Name == null);
 
             var result = query1.ToString();
             result = query2.ToString();
@@ -69,7 +67,6 @@ namespace SQLitePCL.pretty.tests
             result = query12.ToString();
             result = query13.ToString();
             result = query14.ToString();
-            result = query15.ToString();
         }
     }
 }

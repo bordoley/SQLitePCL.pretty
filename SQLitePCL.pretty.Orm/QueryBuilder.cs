@@ -93,7 +93,7 @@ namespace SQLitePCL.pretty.Orm
                 }
                 else
                 {
-                    return member.EvaluateExpression().ConvertToSQLiteValue().ToString(); 
+                    return member.EvaluateExpression().ConvertToSQLiteValue().ToSqlString();
                 }
             }
             else if (expr.NodeType == ExpressionType.Not)
@@ -104,9 +104,7 @@ namespace SQLitePCL.pretty.Orm
             else if (expr is ConstantExpression) 
             {
                 var c = (ConstantExpression) expr;
-
-                // FIXME: Need to deal with quoted strings
-                return ConvertToSQLiteValue(c.Value).ToString();
+                return c.Value.ConvertToSQLiteValue().ToSqlString();
             }
             else if (expr is MethodCallExpression)
             {
@@ -156,16 +154,6 @@ namespace SQLitePCL.pretty.Orm
                 {
                     return "(" + obj + " = (" + args[0] + "))";
                 } 
-
-                else if (call.Method.Name == "ToLower" && args.Length == 0) 
-                {
-                    return "(LOWER(" + obj + "))"; 
-                } 
-
-                else if (call.Method.Name == "ToUpper" && args.Length == 0) 
-                {
-                    return "(UPPER(" + obj + "))"; 
-                } 
             }
 
             throw new NotSupportedException("Cannot compile: " + expr.NodeType.ToString());
@@ -197,6 +185,20 @@ namespace SQLitePCL.pretty.Orm
             }
 
             throw new NotSupportedException("Cannot compile: " + expr.NodeType.ToString());
+        }
+
+        private static string ToSqlString(this ISQLiteValue value)
+        {
+            switch (value.SQLiteType)
+            {
+                case SQLiteType.Null:  
+                    return "NULL";
+                case SQLiteType.Text:
+                case SQLiteType.Blob:  
+                    return "\"" + value.ToString() + "\"";
+                default:
+                    return value.ToString();
+            }
         }
 
         private static ISQLiteValue ConvertToSQLiteValue(this object This)
