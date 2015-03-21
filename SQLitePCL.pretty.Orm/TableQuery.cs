@@ -205,25 +205,25 @@ namespace SQLitePCL.pretty.Orm
 
         public TableQuery<T> OrderBy<TValue>(Expression<Func<T, TValue>> orderExpr)
         {
-            // FIXME: Throw an exception if order by is not empty?
+            if (this._orderBy.Count != 0) { throw new NotSupportedException("OrderBy can only be called once"); };
             return AddOrderBy(orderExpr, true);
         }
 
         public TableQuery<T> OrderByDescending<TValue>(Expression<Func<T, TValue>> orderExpr)
         {
-            // FIXME: Throw an exception if order by is not empty?
+            if (this._orderBy.Count != 0) { throw new NotSupportedException("OrderBy can only be called once"); };
             return AddOrderBy(orderExpr, false);
         }
 
         public TableQuery<T> ThenBy<TValue>(Expression<Func<T, TValue>> orderExpr)
         {
-            // FIXME: Throw an exception if order by is empty?
+            if (this._orderBy.Count == 0) { throw new NotSupportedException("Must call OrderBy before ThenBy"); };
             return AddOrderBy(orderExpr, true);
         }
 
         public TableQuery<T> ThenByDescending<TValue>(Expression<Func<T, TValue>> orderExpr)
         {
-            // FIXME: Throw an exception if order by is empty?
+            if (this._orderBy.Count == 0) { throw new NotSupportedException("Must call OrderBy before ThenBy"); };
             return AddOrderBy(orderExpr, false);
         }
 

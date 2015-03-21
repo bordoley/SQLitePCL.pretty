@@ -235,7 +235,10 @@ namespace SQLitePCL.pretty.Orm
             }
 
             // Though technically not required to be not null by SQLite, we enforce that the primary key is always not null
-            var hasNotNullConstraint = isPK || This.HasNotNullConstraint() || columnType.GetTypeInfo().IsValueType;
+            var hasNotNullConstraint = 
+                isPK || 
+                This.HasNotNullConstraint() || 
+                (columnType.GetTypeInfo().IsValueType && !columnType.IsNullable());
 
             return new TableColumnMetadata(columnType.GetSQLiteType().ToSQLDeclaredType(), collation, hasNotNullConstraint, isPK, isAutoInc);
         }
