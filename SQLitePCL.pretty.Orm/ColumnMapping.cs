@@ -16,6 +16,11 @@ namespace SQLitePCL.pretty.Orm
         /// <returns><see langword="true"/> if the two instances are equal to each other; otherwise,  <see langword="false"/>.</returns>
         public static bool operator ==(ColumnMapping x, ColumnMapping y)
         {
+            if (object.ReferenceEquals(x, null))
+            {
+                 return object.ReferenceEquals(y, null);
+            }
+
             return x.Equals(y);
         }
 
@@ -34,13 +39,15 @@ namespace SQLitePCL.pretty.Orm
         private readonly object defaultValue;
         private readonly PropertyInfo property;
         private readonly TableColumnMetadata metadata;
+        private readonly ForeignKeyConstraint foreignKeyConstraint;
 
-        internal ColumnMapping(Type clrType, object defaultValue, PropertyInfo property, TableColumnMetadata metadata)
+        internal ColumnMapping(Type clrType, object defaultValue, PropertyInfo property, TableColumnMetadata metadata, ForeignKeyConstraint foreignKeyConstraint)
         {
             this.clrType = clrType;
             this.defaultValue = defaultValue;
             this.property = property;
             this.metadata = metadata;
+            this.foreignKeyConstraint = foreignKeyConstraint;
         }
 
         /// <summary>
@@ -64,6 +71,11 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         public TableColumnMetadata Metadata { get { return metadata; } }
 
+        /// <summary>
+        /// Gets the foreign key constraint on the column or null.
+        /// </summary>
+        public ForeignKeyConstraint ForeignKeyConstraint { get { return foreignKeyConstraint; } }
+
         /// <inheritdoc/>
         public bool Equals(ColumnMapping other)
         {
@@ -78,9 +90,10 @@ namespace SQLitePCL.pretty.Orm
             }
 
             return this.ClrType == other.ClrType &&
-                (this.defaultValue == null ? (other.DefaultValue == null) : this.DefaultValue.Equals(other.defaultValue)) &&
+                (this.DefaultValue == null ? (other.DefaultValue == null) : this.DefaultValue.Equals(other.defaultValue)) &&
                 this.Property == other.Property &&
-                this.Metadata == other.Metadata;
+                this.Metadata == other.Metadata &&
+                (this.ForeignKeyConstraint == null) ? (other.ForeignKeyConstraint == null) : this.ForeignKeyConstraint.Equals(other.ForeignKeyConstraint);
         }
 
         /// <inheritdoc/>
@@ -97,6 +110,7 @@ namespace SQLitePCL.pretty.Orm
             hash = hash * 31 + (this.DefaultValue ?? 0).GetHashCode();
             hash = hash * 31 + this.Property.GetHashCode();
             hash = hash * 31 + this.Metadata.GetHashCode();
+            hash = hash * 31 + (this.ForeignKeyConstraint ?? ((object) 0)).GetHashCode();
             return hash;
         }
 

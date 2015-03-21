@@ -7,6 +7,11 @@ namespace SQLitePCL.pretty.Orm
     {
         public static bool operator ==(Ordering x, Ordering y)
         {
+            if (object.ReferenceEquals(x, null))
+            {
+                 return object.ReferenceEquals(y, null);
+            }
+
             return x.Equals(y);
         }
 

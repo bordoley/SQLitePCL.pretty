@@ -228,21 +228,18 @@ namespace SQLitePCL.pretty.Orm
             // Add single column indexes
             foreach (var prop in props.Where(prop => !prop.Ignore()))
             {
-                var name = prop.GetColumnName();
-                var columnType = prop.PropertyType;
-                var metadata = prop.CreateColumnMetadata();
-                var defaultValue = prop.GetDefaultValue();
-                columns.Add(name, new ColumnMapping(columnType, defaultValue, prop, metadata));
+                var columnMapping = prop.GetColumnMapping();
+                columns.Add(columnMapping.Key, columnMapping.Value);
 
                 var columnIndex = prop.GetColumnIndex();
                 if (columnIndex != null)
                 {
-                    var indexName = SQLBuilder.NameIndex(tableName, name);
+                    var indexName = SQLBuilder.NameIndex(tableName, columnMapping.Key);
                     indexes.Add(
                         indexName,
                         new IndexInfo(
                             columnIndex.Unique,
-                            new string[] { name }));
+                            new string[] { columnMapping.Key }));
                 }
             }
 
@@ -281,6 +278,26 @@ namespace SQLitePCL.pretty.Orm
 
             return new TableMapping<T>(builder, build, tableName, columns, indexes);
         }
+
+        private static KeyValuePair<string,ColumnMapping> GetColumnMapping(this PropertyInfo This)
+        {
+            var name = This.GetColumnName();
+            var columnType = This.PropertyType;
+            var metadata = This.CreateColumnMetadata();
+            var defaultValue = This.GetDefaultValue();
+            var fkConstraint = This.GetForeignKeyConstraint();
+
+            if (fkConstraint != null)
+            {
+                // Only use autoincrement if the primary key is nullable otherwise.
+                if ((columnType != typeof(Nullable<long>)) && (columnType != typeof(long)))
+                {
+                    throw new ArgumentException("Foreign key value must be of type long or Nullable<long>.");
+                }
+            }
+
+            return new KeyValuePair<string,ColumnMapping>(name, new ColumnMapping(columnType, defaultValue, This, metadata, fkConstraint));
+        }
             
         private static TableColumnMetadata CreateColumnMetadata(this PropertyInfo This)
         {
@@ -298,7 +315,6 @@ namespace SQLitePCL.pretty.Orm
                 if (columnType == typeof(Nullable<long>))
                 {
                     isAutoInc = true;
-
                 } 
                 else if (columnType == typeof(long))
                 {
@@ -306,7 +322,7 @@ namespace SQLitePCL.pretty.Orm
                 }
                 else
                 {
-                    throw new ArgumentException("Primary key value must be of type Nullable<long>.");
+                    throw new ArgumentException("Primary key value must be of type long or Nullable<long>.");
                 }
             }
 

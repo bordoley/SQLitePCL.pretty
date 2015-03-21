@@ -92,6 +92,15 @@ namespace SQLitePCL.pretty.Orm
             var decls = columns.Select(c => SQLBuilder.SqlDecl(c.Key, c.Value));
             var decl = string.Join(",\n", decls.ToArray());
             query += decl;
+            var fkconstraints = 
+                string.Join(
+                    ",\n", 
+                    columns.Where(x => x.Value.ForeignKeyConstraint != null).Select(x =>
+                        string.Format("FOREIGN KEY(\"{0}\") REFERENCES \"{1}\"(\"{2}\")",
+                             x.Key, 
+                             x.Value.ForeignKeyConstraint.TableName,
+                             x.Value.ForeignKeyConstraint.ColumnName)));
+            query += (fkconstraints.Length != 0) ? "," + fkconstraints : "";
             query += ")";
 
             return query;

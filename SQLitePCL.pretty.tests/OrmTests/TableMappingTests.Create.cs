@@ -218,6 +218,47 @@ namespace SQLitePCL.pretty.tests
             Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithBadCompositePrimaryKey>());
             Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithBadNullableDateTimePrimaryKey>());
         }
+
+
+        public class TestParentObject
+        {
+            [PrimaryKey]
+            public long Id { get; set; }
+        }
+
+        public class TestChildObject
+        {
+            [PrimaryKey]
+            public long Id { get; set; }
+
+            [ForeignKey(typeof(TestParentObject))]
+            public long ParentId { get; set; }
+        }
+
+        [Test]
+        public void TestForeignKeyConstraints()
+        {
+            var childTable = TableMapping.Create<TestChildObject>();
+            var parentTable = TableMapping.Create<TestParentObject>();
+
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(parentTable);
+                db.InitTable(childTable);
+
+                // Foreign Key constraint
+                Assert.Throws<SQLiteException>(() => db.InsertOrReplace(childTable, new TestChildObject(){ ParentId = 1 }));
+                Assert.AreEqual(db.Query("SELECT count(*) FROM " + childTable.TableName).SelectScalarInt().First(), 0);
+
+                db.InsertOrReplace(parentTable, new TestParentObject() { Id = 100 });
+                db.InsertOrReplace(childTable, new TestChildObject() { ParentId = 100 });
+                Assert.AreEqual(db.Query("SELECT count(*) FROM " + childTable.TableName).SelectScalarInt().First(), 1);
+
+                // Foreign Key Constraint causes delete to fail
+                TestParentObject deleted;
+                Assert.Throws<SQLiteException>(() => db.TryDelete(parentTable, 100, out deleted));
+            }
+        } 
     }
 }
 

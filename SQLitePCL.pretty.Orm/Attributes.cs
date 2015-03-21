@@ -244,6 +244,26 @@ namespace SQLitePCL.pretty.Orm.Attributes
         public object DefaultValue { get { return defaultValue; } }
     }
 
+    [AttributeUsage (AttributeTargets.Property)]
+    public sealed class ForeignKeyAttribute : Attribute
+    {
+        private readonly ForeignKeyConstraint constraint;
+
+        public ForeignKeyAttribute(Type typ)
+        {
+            var tableName = typ.GetTableName();
+            var columnName = typ.GetPublicInstanceProperties().Where(x => x.IsPrimaryKey()).Select(x => x.GetColumnName()).First();
+            this.constraint = new ForeignKeyConstraint(tableName, columnName);
+        }
+
+        public ForeignKeyAttribute(string tableName, string columnName)
+        {
+            this.constraint = new ForeignKeyConstraint(tableName, columnName);
+        }
+
+        public ForeignKeyConstraint Value { get { return constraint; } }
+    }
+
     internal static class OrmAttributes
     {
         internal static bool IsPrimaryKey(this PropertyInfo This)
@@ -297,6 +317,12 @@ namespace SQLitePCL.pretty.Orm.Attributes
             if      (notNullAttribute!= null)                     { return notNullAttribute.DefaultValue; }
             else if (This.PropertyType.GetTypeInfo().IsValueType) { return Activator.CreateInstance(This.PropertyType); }
             else                                                  { return null; }
+        }
+
+        internal static ForeignKeyConstraint GetForeignKeyConstraint(this PropertyInfo This)
+        {
+            var fkAttr = This.GetCustomAttributes<ForeignKeyAttribute>(true).FirstOrDefault();
+            return fkAttr != null ? fkAttr.Value : null;
         }
     }
 }

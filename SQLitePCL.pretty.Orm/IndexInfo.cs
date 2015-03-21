@@ -17,6 +17,11 @@ namespace SQLitePCL.pretty.Orm
         /// <returns><see langword="true"/> if the two instances are equal to each other; otherwise,  <see langword="false"/>.</returns>
         public static bool operator ==(IndexInfo x, IndexInfo y)
         {
+            if (object.ReferenceEquals(x, null))
+            {
+                 return object.ReferenceEquals(y, null);
+            }
+
             return x.Equals(y);
         }
 
