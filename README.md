@@ -15,6 +15,7 @@ SQLitePCL.raw includes a set of extension methods in a package called SQLitePCL.
 Use the NuGet packages:
 * [SQLitePCL.pretty](http://www.nuget.org/packages/SQLitePCL.pretty/)
 * [SQlitePCL.pretty.Async](http://www.nuget.org/packages/SQLitePCL.pretty.Async/)
+* [SQLitePCL.pretty.Orm](https://www.nuget.org/packages/SQLitePCL.pretty.Orm/)
 
 # How stable is this project?
 
@@ -103,6 +104,95 @@ using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream")
             .Do(str => { Console.WriteLine(str); });
 }
 ```
+
+# But I absolutely must have an ORM
+
+SQLitePCL.pretty has a very simple table mapping ORM, available in the SQLitePCL.pretty.Orm package on nuget. It supports inserting both new and existing objects, and finding and deleting objects by primary key, from SQLite database tables. Notably, the ORM is designed to make working with immutable data types much easier by supporting the builder pattern for deserializing database objects. Below is a simplish example:
+
+```CSharp
+
+    public void Example()
+    {
+        var table = TableMapping.Create<TestObject>(
+                        () => testObjectBuilder.Value, 
+                        o => ((TestObject.Builder)o).Build());
+
+        using (var db = SQLite3.OpenInMemory())
+        {
+            db.InitTable(table);
+
+            var inserted = db.InsertOrReplace(table, new TestObject.Builder() { Value = "Hello" }.Build());
+            
+            TestObject found;
+            if (!db.TryFind(table, inserted.Id, out found))
+            {
+                throw new Exception("item not found");
+            }
+            
+            TestObject deleted;
+            if (!db.TryDelete(table, inserted.Id, out deleted))
+            {
+                throw new Exception("deletion failed");
+            }
+        }
+    }
+
+    // Per thread builder to limit the number of instances.
+    private static readonly ThreadLocal<TestObject.Builder> testObjectBuilder = new 
+            ThreadLocal<TestObject.Builder>(() => new TestObject.Builder());
+
+    public sealed class TestObject : IEquatable<TestObject>
+    {
+        public class Builder
+        {
+            private long? id;
+            private string value;
+
+            public long? Id { get { return id; } set { this.id = value; } }
+            public string Value { get { return value; } set { this.value = value; } }
+
+            public TestObject Build()
+            {
+                return new TestObject(id, value);
+            }
+        }
+
+        private long? id;
+        private string value; 
+
+        private TestObject(long? id, string value)
+        {
+            this.id = id;
+            this.value = value;
+        }
+
+        [PrimaryKey]
+        public long? Id { get { return id; } }
+
+        public string Value { get { return value; } }
+
+        public bool Equals(TestObject other)
+        {
+            return this.Id == other.Id && 
+                this.Value == other.Value;
+        }
+
+        public override bool Equals(object other)
+        {
+            return other is TestObject && this.Equals((TestObject)other);
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 17;
+            hash = hash * 31 + this.Id.GetHashCode();
+            hash = hash * 31 + this.Value.GetHashCode();
+
+            return hash;
+        }
+    }
+```
+
 # How does this compare to...
 ## [SQLitePCL.raw](https://github.com/ericsink/SQLitePCL.raw)
 
@@ -119,6 +209,4 @@ SQLitePCL is the original PCL library release by MSOpenTech. Stylistically, this
 
 ## [SQLite-Net](https://github.com/praeclarum/sqlite-net)
 
-SQLite-Net provides a higher level C# API than SQLitePCL.pretty. SQLite-Net includes APIs for creating tables, indexes, etc. and also features a light weight ORM. In contrast SQLitePCL.pretty only provides a wrapper around the SQLite C api. CRUD operations on the underlying database use SQL directly and its the users responsibility to marshall their objects in and out of the database.
-
-It would be an interesting project to port/fork the SQLite-Net ORM ontop of the SQLitePCL.pretty database primitives.
+SQLite-Net provides an ORM similar to the one provided by SQLitePCL.pretty to manipulate database objects. The most notable difference, is that SQLite-Net supports linq based querying of a database which is not yet supported (maybe never) by SQLitePCL.pretty. On the converse, SQLitePCL.pretty is more friendly to functional programmers who want to persist immutable objects to a SQLite database.
