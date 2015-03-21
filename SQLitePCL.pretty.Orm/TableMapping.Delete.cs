@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +18,9 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type</typeparam>
         public static IStatement PrepareDeleteStatement<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+           
             return This.PrepareDelete(tableMapping.TableName, tableMapping.PrimaryKeyColumn());   
         }
 
@@ -48,6 +52,9 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static bool TryDelete<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, long primaryKey, out T deleted)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+           
             var result = This.YieldDeleteAll(tableMapping, new long[] { primaryKey }).FirstOrDefault();
             if (result.Value != null)
             {
@@ -71,6 +78,10 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>       
         public static IReadOnlyDictionary<long,T> DeleteAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<long> primaryKeys)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+            Contract.Requires(primaryKeys != null);
+
             return This.RunInTransaction(_ => 
                         This.YieldDeleteAll(tableMapping, primaryKeys)
                             .Where(kvp => kvp.Value != null)
@@ -88,6 +99,10 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static Task<IReadOnlyDictionary<long,T>> DeleteAllAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<long> primaryKeys, CancellationToken ct)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+            Contract.Requires(primaryKeys != null);
+
             return This.Use((db,_) => db.DeleteAll<T>(tableMapping, primaryKeys), ct);
         }
 
@@ -101,6 +116,10 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static Task<IReadOnlyDictionary<long,T>> DeleteAllAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<long> primaryKeys)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+            Contract.Requires(primaryKeys != null);
+
             return This.DeleteAllAsync(tableMapping, primaryKeys, CancellationToken.None);
         }
 
@@ -112,6 +131,9 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static void DeleteAllRows<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+      
             This.DeleteAll(tableMapping.TableName);
         }
 
@@ -125,6 +147,9 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static Task DeleteAllRowsAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, CancellationToken ct)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+
             return This.Use((db, _) => db.DeleteAllRows(tableMapping), ct);
         }
 
@@ -137,6 +162,9 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static Task DeleteAllRowsAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+
             return This.DeleteAllRowsAsync(tableMapping, CancellationToken.None);
         }
     }

@@ -2,21 +2,21 @@
 <package >
   <metadata>
     <id>SQLitePCL.pretty.Orm</id>
-    <version>0.0.12-pre2</version>
+    <version>0.0.12-pre3</version>
     <title>SQLitePCL.pretty.Orm</title>
     <authors>David Bordoley</authors>
     <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/bordoley/SQLitePCL.pretty</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>Table mapping ORM for SQLitePCL.pretty</summary>
-    <description>Provides a simple table mapping ORM similar to the one provided by SQLite-Net.</description>
+    <description>Provides a simple table mapping ORM for SQLitePCL.pretty.</description>
     <tags>portable sqlite pcl rx reactive LINQ orm</tags>
     <references>
       <reference file="SQLitePCL.pretty.Orm.dll" />
     </references>
     <dependencies>
-      <dependency id="SQLitePCL.pretty" version="0.0.12-pre2" />
-      <dependency id="SQLitePCL.pretty.Async" version="0.0.12-pre2" />
+      <dependency id="SQLitePCL.pretty" version="0.0.12-pre3" />
+      <dependency id="SQLitePCL.pretty.Async" version="0.0.12-pre3" />
     </dependencies>
   </metadata>
   <files>

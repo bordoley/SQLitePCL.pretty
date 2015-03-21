@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,6 +23,8 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type</typeparam>
         public static ITableMappedStatement<T> PrepareInsertOrReplaceStatement<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
             return new TableMappedStatement<T>(This.PrepareStatement(tableMapping.InsertOrReplace()), tableMapping);   
         }
 
@@ -49,6 +52,10 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>     
         public static T InsertOrReplace<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+            Contract.Requires(obj != null);
+
             return This.YieldInsertOrReplaceAll(tableMapping, new T[] {obj}).First().Value;
         }
 
@@ -62,6 +69,10 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam> 
         public static IReadOnlyDictionary<T,T> InsertOrReplaceAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+            Contract.Requires(objects != null);
+
             return This.RunInTransaction(_ => 
                 This.YieldInsertOrReplaceAll(tableMapping, objects).ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
         }
@@ -81,6 +92,10 @@ namespace SQLitePCL.pretty.Orm
             IEnumerable<T> objects,
             CancellationToken ct)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+            Contract.Requires(objects != null);
+
             return This.Use((db, _) => db.InsertOrReplaceAll(tableMapping, objects), ct);
         }
 
@@ -97,6 +112,10 @@ namespace SQLitePCL.pretty.Orm
             ITableMapping<T> tableMapping,
             IEnumerable<T> objects)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+            Contract.Requires(objects != null);
+
             return This.InsertOrReplaceAllAsync(tableMapping, objects, CancellationToken.None);
         }
     }

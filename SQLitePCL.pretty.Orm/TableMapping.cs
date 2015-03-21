@@ -24,6 +24,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
 using System.IO;
 using System.Linq;
@@ -64,6 +65,9 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static void InitTable<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+
             This.RunInTransaction(_ =>
                 {
                     This.CreateTableIfNotExists(tableMapping.TableName, CreateFlags.None, tableMapping.Columns);
@@ -90,6 +94,9 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static Task InitTableAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, CancellationToken cancellationToken)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+
             return This.Use((db, ct) => db.InitTable(tableMapping), cancellationToken);
         }
 
@@ -102,6 +109,9 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static Task InitTableAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+
             return This.InitTableAsync(tableMapping, CancellationToken.None);
         }
             
@@ -145,6 +155,9 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static void DropTableIfExists<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+
             This.DropTableIfExists(tableMapping.TableName);
         }
 
@@ -158,6 +171,9 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static Task DropTableIfExistsAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping, CancellationToken ct)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+
             return This.Use((db, _) => db.DropTableIfExists(tableMapping), ct);
         }
 
@@ -170,6 +186,9 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static Task DropTableIfExistsAsync<T>(this IAsyncDatabaseConnection This, ITableMapping<T> tableMapping)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+
             return This.DropTableIfExistsAsync(tableMapping, CancellationToken.None);
         }
 
@@ -194,6 +213,9 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static ITableMapping<T> Create<T>(Func<object> builder, Func<object, T> build)
         {
+            Contract.Requires(builder != null);
+            Contract.Requires(build != null);
+
             var mappedType = typeof(T);
             var tableName = mappedType.GetTableName();
             var props = mappedType.GetPublicInstanceProperties();

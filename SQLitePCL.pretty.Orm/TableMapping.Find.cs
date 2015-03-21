@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -30,6 +31,9 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type</typeparam>
         public static ITableMappedStatement<T> PrepareFindStatement<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+
             return new TableMappedStatement<T>(This.PrepareStatement(tableMapping.Find()), tableMapping);   
         }
 
@@ -56,6 +60,9 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static bool TryFind<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, long primaryKey, out T value)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+
             var result = This.YieldFindAll(tableMapping, new long[] { primaryKey }).FirstOrDefault();
 
             if (result.Value != null)
@@ -78,6 +85,10 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static IReadOnlyDictionary<long,T> FindAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<long> primaryKeys)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+            Contract.Requires(primaryKeys != null);
+
             return This.YieldFindAll(tableMapping, primaryKeys)
                        .Where(kvp => kvp.Value != null)
                        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
@@ -98,6 +109,10 @@ namespace SQLitePCL.pretty.Orm
             IEnumerable<long> primaryKeys, 
             CancellationToken ct)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+            Contract.Requires(primaryKeys != null);
+
             return This.Use((db,_) => db.FindAll(tableMapping, primaryKeys), ct);
         }
 
@@ -114,6 +129,10 @@ namespace SQLitePCL.pretty.Orm
             ITableMapping<T> tableMapping, 
             IEnumerable<long> primaryKeys)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+            Contract.Requires(primaryKeys != null);
+
             return This.FindAllAsync(tableMapping, primaryKeys, CancellationToken.None);
         }
     }

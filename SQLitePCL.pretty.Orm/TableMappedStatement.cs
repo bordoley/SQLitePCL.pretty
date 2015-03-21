@@ -20,6 +20,9 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static void Bind<T>(this ITableMappedStatement<T> This, T obj)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(obj != null);
+
             This.Bind(This.Mapping, obj);
         }
 
