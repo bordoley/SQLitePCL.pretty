@@ -24,6 +24,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
@@ -37,11 +38,10 @@ using SQLitePCL.pretty.Orm.Attributes;
 
 namespace SQLitePCL.pretty.Orm
 {
-
     /// <summary>
     /// An immutable builder that allows the use of LINQ like syntax to build a SQL query that can subsequently be executed against a SQLite database.
     /// </summary>
-    public sealed class TableQuery<T>
+    internal sealed class TableQuery<T>
     {
         private readonly string _selection;
         private readonly ITableMapping<T> _mapping;
@@ -106,9 +106,9 @@ namespace SQLitePCL.pretty.Orm
         /// Converts the query to a count query.
         /// </summary>
         /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
-        public TableQuery<T> Count()
+        public string Count()
         {
-            return new TableQuery<T>(_mapping, "count(*)", _where, _orderBy, _limit, _offset);
+            return new TableQuery<T>(_mapping, "count(*)", _where, _orderBy, _limit, _offset).ToString();
         }
 
         /// <summary>
@@ -125,7 +125,6 @@ namespace SQLitePCL.pretty.Orm
 
                 if (_limit != null || _offset != null)
                 {
-                    // FIXME: Why?
                     throw new NotSupportedException("Cannot call where after a skip or a take");
                 }
 
@@ -467,7 +466,7 @@ namespace SQLitePCL.pretty.Orm
     /// <summary>
     /// Extension methods for querying a database using instances of <see cref="TableQuery&lt;T&gt;"/>
     /// </summary>
-    public static class TableQuery
+    internal static class TableQuery
     {
         public static ITableMappedStatement<T> PrepareStatement<T>(this IDatabaseConnection This, TableQuery<T> query)
         {
@@ -489,44 +488,14 @@ namespace SQLitePCL.pretty.Orm
             return This.Query(query.ToString()).Select(query.Mapping.ToObject);
         }
 
+        public static IObservable<T> Query<T>(this IAsyncDatabaseConnection This, TableQuery<T> query, params object[] values)
+        {
+            return This.Query(query.ToString(), values).Select(query.Mapping.ToObject);
+        }
+
         public static IStatement PrepareCountStatement<T>(this IDatabaseConnection This, TableQuery<T> query)
         {
             return This.PrepareStatement(query.Count().ToString());
-        }
-
-        public static Task<IAsyncStatement> PrepareCountStatemenAsync<T>(this IAsyncDatabaseConnection This, TableQuery<T> query)
-        {
-            return This.PrepareStatementAsync(query.Count().ToString());
-        }
-
-        public static int Count<T>(this IDatabaseConnection This, TableQuery<T> query)
-        {
-            return This.Query(query.Count().ToString()).SelectScalarInt().First();
-        }
-
-        public static Task<int> CountAsync<T>(this IAsyncDatabaseConnection This, TableQuery<T> query)
-        {
-            return This.CountAsync(query, CancellationToken.None);
-        }
-
-        public static Task<int> CountAsync<T>(this IAsyncDatabaseConnection This, TableQuery<T> query, CancellationToken ct)
-        {
-            return This.Query(query.Count().ToString()).SelectScalarInt().FirstAsync().ToTask(ct);
-        }
-
-        public static int Count<T>(this IDatabaseConnection This, TableQuery<T> query, params object[] values)
-        {
-            return This.Query(query.Count().ToString(), values).SelectScalarInt().First();
-        }
-
-        public static Task<int> CountAsync<T>(this IAsyncDatabaseConnection This, TableQuery<T> query, params object[] values)
-        {
-            return This.CountAsync(query, CancellationToken.None, values);
-        }
-
-        public static Task<int> CountAsync<T>(this IAsyncDatabaseConnection This, TableQuery<T> query, CancellationToken ct, params object[] values)
-        {
-            return This.Query(query.Count().ToString(), values).SelectScalarInt().FirstAsync().ToTask(ct);
         }
     }    
 }

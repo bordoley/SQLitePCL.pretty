@@ -49,7 +49,7 @@ namespace SQLitePCL.pretty.Orm
             }
         }
 
-        public static TableQuery<T> Query<T>(this ITableMapping<T> This)
+        internal static TableQuery<T> Query<T>(this ITableMapping<T> This)
         {
             return new TableQuery<T>(This, "*", null, new List<Ordering>(), null, null);
         }

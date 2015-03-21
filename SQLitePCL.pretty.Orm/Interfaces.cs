@@ -13,6 +13,9 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         String TableName { get; }
 
+        /// <summary>
+        /// Gets the table columns.
+        /// </summary>
         IReadOnlyDictionary<string, ColumnMapping> Columns { get; }
 
         /// <summary>

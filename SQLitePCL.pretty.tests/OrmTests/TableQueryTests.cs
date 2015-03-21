@@ -20,6 +20,27 @@ namespace SQLitePCL.pretty.tests
             public String Name { get; set; }
         }
 
+
+        [Test]
+        public void TestWhereAnd()
+        {
+            var table = TableMapping.Create<TestObject>();
+            var query = table.Query().Where(x => x.Flag == true && x.Name != "BOB");
+
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+
+                db.InsertOrReplaceAll(table, new TestObject[] {
+                    new TestObject(){ Flag = true, Name = "BOB" },
+                    new TestObject(){ Flag = true, Name = "John" },
+                });
+
+                Assert.AreEqual(
+                    db.Query(query.Count()).SelectScalarInt().First(), 1);
+            }
+        }
+
         [Test]
         public void TestWhereBoolean()
         {
@@ -45,6 +66,7 @@ namespace SQLitePCL.pretty.tests
         public void TestWhereNot()
         {
             var table = TableMapping.Create<TestObject>();
+
             var whereFlagEqualsQuery = table.Query().Where(x => x.Flag == default(bool));
 
             using (var db = SQLite3.OpenInMemory())
@@ -73,7 +95,7 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject(){ Cost = 20, Name = "A" });
                 db.InsertOrReplace(table, new TestObject(){ Cost = 10 });
             
-                Assert.AreEqual(2, db.Count(table.Query()));
+                Assert.AreEqual(2, db.Query(table.Query().Count()).SelectScalarInt().First());
 
                 var query = table.Query().Where(p => p.Cost > default(int));
                 var r = db.Query(query, 15).ToList();
@@ -576,6 +598,36 @@ namespace SQLitePCL.pretty.tests
 
                 Assert.AreEqual(
                     db.Query(table.Query().OrderBy(x => x.Cost).ElementAt(2)).First().Cost, 3);
+            }
+        }
+
+
+        public class MappedTestObject
+        {
+            [PrimaryKey]
+            public long? Id { get; set; }
+
+            [Column("BColumn")]
+            public string AColumn { get; set; }
+        }
+
+        [Test]
+        public void TestQueryWithMappedTableNameAndColumns()
+        {
+            var table = TableMapping.Create<MappedTestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                var query = table.Query().Where(x => x.AColumn != default(string) || x.AColumn == default(string)).Count();
+                db.InitTable(table);
+                db.InsertOrReplaceAll(table, new MappedTestObject[] {
+                    new MappedTestObject() { AColumn = "A" },
+                    new MappedTestObject() { AColumn = "A" },
+                    new MappedTestObject() { AColumn = "B" },
+                    new MappedTestObject() { AColumn = "B" },
+                    new MappedTestObject() { AColumn = "C" },
+                });
+
+                Assert.AreEqual(db.Query(query, "A", "B").SelectScalarInt().First(), 3);
             }
         }
     }

@@ -10,13 +10,14 @@ namespace SQLitePCL.pretty.Orm
     /// </summary>
     public static class TableMappedStatement
     {
+        /*
         /// <summary>
         /// Binds the statement bind variables by name to the corresponding properties on the object <paramref name="obj"/>.
         /// </summary>
         /// <param name="This">The statement.</param>
         /// <param name="obj">The object to bind.</param>
         /// <typeparam name="T">The mapped type.</typeparam>
-        public static void Bind<T>(this ITableMappedStatement<T> This, T obj)
+         static void Bind<T>(this ITableMappedStatement<T> This, T obj)
         {
             This.Bind(This.Mapping, obj);
         }
@@ -38,7 +39,7 @@ namespace SQLitePCL.pretty.Orm
             This.ClearBindings();
             This.Bind(obj);
             This.MoveNext();
-        }
+        }*/
 
         private static IEnumerator<T> Enumerate<T>(this ITableMappedStatement<T> This)
         {
