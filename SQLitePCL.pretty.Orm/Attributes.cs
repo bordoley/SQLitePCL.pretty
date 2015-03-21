@@ -244,23 +244,43 @@ namespace SQLitePCL.pretty.Orm.Attributes
         public object DefaultValue { get { return defaultValue; } }
     }
 
+    /// <summary>
+    /// Indicates that a column is a foreign key constraint.
+    /// </summary>
     [AttributeUsage (AttributeTargets.Property)]
     public sealed class ForeignKeyAttribute : Attribute
     {
         private readonly ForeignKeyConstraint constraint;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SQLitePCL.pretty.Orm.Attributes.ForeignKeyAttribute"/> class.
+        /// </summary>
+        /// <param name="typ">The class whose primary key constrains the property.</param>
         public ForeignKeyAttribute(Type typ)
         {
+            Contract.Requires(typ != null);
+
             var tableName = typ.GetTableName();
             var columnName = typ.GetPublicInstanceProperties().Where(x => x.IsPrimaryKey()).Select(x => x.GetColumnName()).First();
             this.constraint = new ForeignKeyConstraint(tableName, columnName);
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SQLitePCL.pretty.Orm.Attributes.ForeignKeyAttribute"/> class.
+        /// </summary>
+        /// <param name="tableName">The foreign key table.</param>
+        /// <param name="columnName">The foreign key column.</param>
         public ForeignKeyAttribute(string tableName, string columnName)
         {
+            Contract.Requires(tableName != null);
+            Contract.Requires(columnName != null);
+
             this.constraint = new ForeignKeyConstraint(tableName, columnName);
         }
 
+        /// <summary>
+        /// Gets the foreign key constraint value.
+        /// </summary>
         public ForeignKeyConstraint Value { get { return constraint; } }
     }
 

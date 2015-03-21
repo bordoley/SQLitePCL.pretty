@@ -235,11 +235,22 @@ namespace SQLitePCL.pretty.tests
             public long ParentId { get; set; }
         }
 
+        public class TestBadChildObject
+        {
+            [PrimaryKey]
+            public long Id { get; set; }
+
+            [ForeignKey(typeof(TestParentObject))]
+            public string ParentId { get; set; }
+        }
+
         [Test]
         public void TestForeignKeyConstraints()
         {
             var childTable = TableMapping.Create<TestChildObject>();
             var parentTable = TableMapping.Create<TestParentObject>();
+
+            Assert.Throws<ArgumentException>(() => TableMapping.Create<TestBadChildObject>());
 
             using (var db = SQLite3.OpenInMemory())
             {

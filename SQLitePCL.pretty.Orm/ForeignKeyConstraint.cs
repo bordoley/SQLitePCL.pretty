@@ -2,6 +2,9 @@
 
 namespace SQLitePCL.pretty.Orm
 {
+    /// <summary>
+    /// Foreign key constraint table, column name tuple.
+    /// </summary>
     public sealed class ForeignKeyConstraint : IEquatable<ForeignKeyConstraint>
     {
         /// <summary>
@@ -40,8 +43,14 @@ namespace SQLitePCL.pretty.Orm
             this.columnName = columnName;
         }
 
+        /// <summary>
+        /// Gets the foreign key constraing table name.
+        /// </summary>
         public string TableName { get { return tableName; } }
 
+        /// <summary>
+        /// Gets the foreign key constraing column name.
+        /// </summary>
         public string ColumnName { get { return columnName; } }
 
         /// <inheritdoc/>
