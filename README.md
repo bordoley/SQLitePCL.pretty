@@ -15,6 +15,7 @@ SQLitePCL.raw includes a set of extension methods in a package called SQLitePCL.
 Use the NuGet packages:
 * [SQLitePCL.pretty](http://www.nuget.org/packages/SQLitePCL.pretty/)
 * [SQlitePCL.pretty.Async](http://www.nuget.org/packages/SQLitePCL.pretty.Async/)
+* [SQLitePCL.pretty.Orm](https://www.nuget.org/packages/SQLitePCL.pretty.Orm/)
 
 # How stable is this project?
 
