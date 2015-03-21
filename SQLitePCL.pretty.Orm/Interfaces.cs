@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 
 namespace SQLitePCL.pretty.Orm
 {
@@ -27,6 +28,7 @@ namespace SQLitePCL.pretty.Orm
     /// <summary>
     /// The mapping of a type <see typeparamref="T"/> to a SQL Table.
     /// </summary>
+    [ContractClass(typeof(ITableMappingContract<>))]
     public interface ITableMapping<T> : ITableMapping
     {
         /// <summary>
@@ -47,6 +49,40 @@ namespace SQLitePCL.pretty.Orm
         /// The underlying <see cref="ITableMapping&lt;T&gt;"/> used to map the result set to an instance of T.
         /// </summary>
         ITableMapping<T> Mapping { get; }
+    }
+
+    [ContractClassFor(typeof(ITableMapping<>))]
+    internal abstract class ITableMappingContract<T> : ITableMapping<T>
+    {
+        public T ToObject(IReadOnlyList<IResultSetValue> row)
+        {
+            Contract.Requires(row != null);
+            return default(T);
+        }
+
+        public string TableName
+        {
+            get
+            {
+                return default(string);
+            }
+        }
+
+        public IReadOnlyDictionary<string, ColumnMapping> Columns
+        {
+            get
+            {
+                return default(IReadOnlyDictionary<string, ColumnMapping>);
+            }
+        }
+
+        public IReadOnlyDictionary<string, IndexInfo> Indexes
+        {
+            get
+            {
+                return default(IReadOnlyDictionary<string, IndexInfo>);
+            }
+        }
     }
 }
 
