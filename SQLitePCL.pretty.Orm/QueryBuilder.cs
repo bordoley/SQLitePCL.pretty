@@ -42,14 +42,28 @@ namespace SQLitePCL.pretty.Orm
 {
     public static partial class QueryBuilder
     {
-        public static bool Is(this object This, object other = null)
+        public static bool Is<T>(this T This, T other = null)
+            where T: class
         {
-            return This == other;
+            return This.Equals(other);
         }
 
-        public static bool IsNot(this object This, object other = null)
+        public static bool Is<T>(this Nullable<T> This, Nullable<T> other = null)
+            where T: struct
         {
-            return This != other;
+            return This.Equals(other);
+        }
+
+        public static bool IsNot<T>(this T This, T other = null)
+            where T: class
+        {
+            return !This.Equals(other);
+        }
+
+        public static bool IsNot<T>(this Nullable<T> This, Nullable<T> other = null)
+            where T: struct
+        {
+            return !This.Equals(other);
         }
 
         public static SelectQuery<T> Select<T>(this ITableMapping<T> This)
@@ -85,9 +99,6 @@ namespace SQLitePCL.pretty.Orm
                 var rightExpr = CompileExpr(bin.Right);
 
                 return "(" + leftExpr + " " + GetSqlName(bin) + " " + rightExpr + ")";
-
-                // FIXME: Need to handle null comparison correctly, probably via some extension methods
-                // like obj.Is(null), obj.IsNot(null);
             }
             else if (expr is ParameterExpression)
             {
@@ -314,17 +325,7 @@ namespace SQLitePCL.pretty.Orm
         {
             else if (expr.NodeType == ExpressionType.MemberAccess) 
             {
-                var mem = (MemberExpression)expr;
-                
-                if (mem.Expression!=null && mem.Expression.NodeType == ExpressionType.Parameter) 
-                {
-                    //
-                    // This is a column of our table, output just the column name
-                    // Need to translate it if that column name is mapped
-                    //
-                    var columnName = ((PropertyInfo) mem.Member).GetColumnName();
-                    return Tuple.Create<String, object>( "\"" + columnName + "\"", null);
-                } 
+\\
 
                 else 
                 {

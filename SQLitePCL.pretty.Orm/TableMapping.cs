@@ -49,14 +49,7 @@ namespace SQLitePCL.pretty.Orm
                 This.BindParameters[key].Bind(value);
             }
         }
-
-        /*
-        internal static TableQuery<T> Query<T>(this ITableMapping<T> This)
-        {
-            return new TableQuery<T>(This, "*", null, new List<Ordering>(), null, null);
-        }*/
-
-                                                                
+                                                                        
         /// <summary>
         /// Creates or migrate a table in the database for the given table mapping, creating indexes if needed.
         /// </summary>
