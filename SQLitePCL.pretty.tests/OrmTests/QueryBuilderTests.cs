@@ -51,7 +51,13 @@ namespace SQLitePCL.pretty.tests
 
             var query13 = table.Select().Where(x => x.Name.Equals("bob"));
 
-            var query14 = table.Select().Where(x => x.Name == null);
+            var query14 = table.Select().Where(x => x.Name.Is(null));
+            var query15 = table.Select().Where(x => x.Name.IsNot(null));
+            var query16 = table.Select().Where<object>((x, y) => x.Name.IsNot(y));
+
+            object falseyObj = false;
+            var query17 = table.Select().Where(x => x.Flag == (bool) falsey);
+
 
             var result = query1.ToString();
             result = query2.ToString();
@@ -67,6 +73,9 @@ namespace SQLitePCL.pretty.tests
             result = query12.ToString();
             result = query13.ToString();
             result = query14.ToString();
+            result = query15.ToString();
+            result = query16.ToString();
+            result = query17.ToString();
         }
     }
 }

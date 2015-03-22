@@ -42,14 +42,14 @@ namespace SQLitePCL.pretty.Orm
 {
     public static partial class QueryBuilder
     {
-        public static bool Is<T>(this T This, object nullish)
+        public static bool Is(this object This, object other = null)
         {
-            return This == null;
+            return This == other;
         }
 
-        public static bool IsNot<T>(this T This, object nullish)
+        public static bool IsNot(this object This, object other = null)
         {
-            return This != null;
+            return This != other;
         }
 
         public static SelectQuery<T> Select<T>(this ITableMapping<T> This)
@@ -112,12 +112,11 @@ namespace SQLitePCL.pretty.Orm
             else if (expr.NodeType == ExpressionType.Not)
             {
                 var operandExpr = ((UnaryExpression) expr).Operand;
-                return "NOT(" + EvaluateExpression(operandExpr) + ")";
+                return "NOT(" + operandExpr.EvaluateExpression().ConvertToSQLiteValue().ToSqlString() + ")";
             } 
             else if (expr is ConstantExpression) 
             {
-                var c = (ConstantExpression) expr;
-                return c.Value.ConvertToSQLiteValue().ToSqlString();
+                return expr.EvaluateExpression().ConvertToSQLiteValue().ToSqlString();
             }
             else if (expr is MethodCallExpression)
             {
@@ -166,8 +165,26 @@ namespace SQLitePCL.pretty.Orm
                 else if (call.Method.Name == "Equals" && args.Length == 1) 
                 {
                     return "(" + obj + " = (" + args[0] + "))";
-                } 
+                }
+
+                else if (call.Method.Name == "Is" && args.Length == 2)
+                {
+                    return "(" + args[0] + " IS " + args[1] + ")";
+                }
+
+                else if (call.Method.Name == "IsNot" && args.Length == 2)
+                {
+                    return "(" + args[0] + " IS NOT " + args[1] + ")";
+                }
             }
+            else if (expr.NodeType == ExpressionType.Convert) 
+            {
+                var u = (UnaryExpression) expr;
+                var ty = u.Type;
+                var value = EvaluateExpression(u.Operand);
+
+                return value.ConvertTo(ty).ConvertToSQLiteValue().ToSqlString();
+            } 
 
             throw new NotSupportedException("Cannot compile: " + expr.NodeType.ToString());
         }
@@ -176,7 +193,7 @@ namespace SQLitePCL.pretty.Orm
         {
             if (expr is ConstantExpression)
             {
-                var c = (ConstantExpression)expr;
+                var c = (ConstantExpression) expr;
                 return c.Value;
             }
             else if (expr is MemberExpression)
