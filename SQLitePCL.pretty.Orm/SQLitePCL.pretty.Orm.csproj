@@ -152,7 +152,7 @@
     <Compile Include="QueryBuilder.Count.cs" />
     <Compile Include="QueryBuilder.Limit.cs" />
     <Compile Include="QueryBuilder.OrderBy.cs" />
-    <Compile Include="QueryBuilder.Select.cs" />
+    <Compile Include="QueryBuilder.Where.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>

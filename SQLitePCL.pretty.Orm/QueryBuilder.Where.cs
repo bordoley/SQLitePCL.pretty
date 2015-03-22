@@ -7,13 +7,13 @@ namespace SQLitePCL.pretty.Orm
 {
     public static partial class QueryBuilder
     {
-        public sealed class SelectQuery<T>
+        public sealed class WhereQuery<T>
         {
             private const string selection = "*";
             private readonly string table;
             private readonly Expression where;
 
-            internal SelectQuery(string table, Expression where)
+            internal WhereQuery(string table, Expression where)
             {
                 this.table = table;
                 this.where = where;
@@ -36,46 +36,46 @@ namespace SQLitePCL.pretty.Orm
                 return new OrderByQuery<T>(table, selection, where, orderBy);
             }
 
-            public SelectQuery<T> Where<U,V,W,X,Y,Z>(Expression<Func<T,U,V,W,X,Y,Z,bool>> predExpr)
+            public WhereQuery<T> Where<U,V,W,X,Y,Z>(Expression<Func<T,U,V,W,X,Y,Z,bool>> predExpr)
             {
                 return this.Where((LambdaExpression) predExpr);
             }
 
-            public SelectQuery<T> Where<U,V,W,X,Y>(Expression<Func<T,U,V,W,X,Y,bool>> predExpr)
+            public WhereQuery<T> Where<U,V,W,X,Y>(Expression<Func<T,U,V,W,X,Y,bool>> predExpr)
             {
                 return this.Where((LambdaExpression) predExpr);
             }
 
-            public SelectQuery<T> Where<U,V,W,X>(Expression<Func<T,U,V,W,X,bool>> predExpr)
+            public WhereQuery<T> Where<U,V,W,X>(Expression<Func<T,U,V,W,X,bool>> predExpr)
             {
                 return this.Where((LambdaExpression) predExpr);
             }
 
-            public SelectQuery<T> Where<U,V,W>(Expression<Func<T,U,V,W,bool>> predExpr)
+            public WhereQuery<T> Where<U,V,W>(Expression<Func<T,U,V,W,bool>> predExpr)
             {
                 return this.Where((LambdaExpression) predExpr);
             }
 
-            public SelectQuery<T> Where<U,V>(Expression<Func<T,U,V,bool>> predExpr)
+            public WhereQuery<T> Where<U,V>(Expression<Func<T,U,V,bool>> predExpr)
             {
                 return this.Where((LambdaExpression) predExpr);
             }
 
-            public SelectQuery<T> Where<U>(Expression<Func<T,U,bool>> predExpr)
+            public WhereQuery<T> Where<U>(Expression<Func<T,U,bool>> predExpr)
             {
                 return this.Where((LambdaExpression) predExpr);
             }
 
-            public SelectQuery<T> Where(Expression<Func<T, bool>> predExpr)
+            public WhereQuery<T> Where(Expression<Func<T, bool>> predExpr)
             {
                 return this.Where((LambdaExpression) predExpr);
             }
 
-            private SelectQuery<T> Where(LambdaExpression lambda)
+            private WhereQuery<T> Where(LambdaExpression lambda)
             {
                 var pred = lambda.Body;
                 var where = this.where == null ? pred : Expression.AndAlso(this.where, pred);
-                return new SelectQuery<T>(table, where);
+                return new WhereQuery<T>(table, where);
             }
 
             /// <summary>

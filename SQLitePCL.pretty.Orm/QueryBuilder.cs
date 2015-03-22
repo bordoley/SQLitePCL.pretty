@@ -66,9 +66,9 @@ namespace SQLitePCL.pretty.Orm
             return !This.Equals(other);
         }
 
-        public static SelectQuery<T> Select<T>(this ITableMapping<T> This)
+        public static WhereQuery<T> Select<T>(this ITableMapping<T> This)
         {
-            return new SelectQuery<T>(This.TableName, null);
+            return new WhereQuery<T>(This.TableName, null);
         }
 
         //public static CountQuery<long> Count(this ITableMapping This)
