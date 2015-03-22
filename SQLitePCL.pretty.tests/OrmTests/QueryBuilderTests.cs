@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace SQLitePCL.pretty.tests
 {
     [TestFixture]
-    public class QueryBuilderTests
+    public class QueryBuilder_SelectQuery_Tests
     {
         public class TestObject
         {
@@ -22,17 +22,142 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Test]
-        public void TestSelectQuery()
+        public void TestWhereGreaterThanPropertyValue()
         {
             var table = TableMapping.Create<TestObject>();
-            var query1 = table.Select().Where<int>((x, cost) => x.Cost == cost);
-            var query2 = table.Select().Where<int>((x, cost) => x.Cost == cost).Where<bool>((x, flag) => flag != x.Flag);
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Cost = 0 });
+                db.InsertOrReplace(table, new TestObject() { Cost = 6 });
+
+                var aTuple = Tuple.Create("key", 1);
+                var query = table.Select().Where(x => x.Cost <= aTuple.Item2).ToString();
+
+                Assert.AreEqual(db.Query(query).Select(table.ToObject).Count(), 1);
+            }
+        }
+
+        [Test]
+        public void TestWhereLessThanConstant()
+        {
+            var table = TableMapping.Create<TestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Cost = 0 });
+                db.InsertOrReplace(table, new TestObject() { Cost = 6 });
+
+                var query = table.Select().Where(x => x.Cost < 5).ToString();
+
+                Assert.AreEqual(db.Query(query).Select(table.ToObject).Count(), 1);
+            }
+        }
+
+        [Test]
+        public void TestWhereLessThanOrEqualToBindParam()
+        {
+            var table = TableMapping.Create<TestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Cost = 0 });
+                db.InsertOrReplace(table, new TestObject() { Cost = 6 });
+                db.InsertOrReplace(table, new TestObject() { Cost = 7 });
+
+                var query = table.Select().Where<int>((x, cost) => x.Cost <= cost).ToString();
+
+                Assert.AreEqual(db.Query(query, 6).Select(table.ToObject).Count(), 2);
+                Assert.AreEqual(db.Query(query, 5).Select(table.ToObject).Count(), 1);
+                Assert.AreEqual(db.Query(query, 7).Select(table.ToObject).Count(), 3);
+                Assert.AreEqual(db.Query(query, 6).Select(table.ToObject).Count(), 2);
+            }
+        }
+
+        [Test]
+        public void TestMultipleBindParams()
+        {
+            var table = TableMapping.Create<TestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Cost = 0, Flag = true, Name = "bob" });
+                db.InsertOrReplace(table, new TestObject() { Cost = 6, Flag = false, Name = null });
+                db.InsertOrReplace(table, new TestObject() { Cost = 7, Flag = true, Name = "bob" });
+
+                var query = 
+                    table.Select()
+                         .Where<int, bool, string>((x, cost, flag, name) => 
+                            x.Cost > cost && x.Flag == flag && x.Name.IsNot(name))
+                         .ToString();
+
+                Assert.AreEqual(db.Query(query, 0, false, null).Select(table.ToObject).Count(), 0);
+                Assert.AreEqual(db.Query(query, 0, true, null).Select(table.ToObject).Count(), 1);
+                Assert.AreEqual(db.Query(query, -1, true, null).Select(table.ToObject).Count(), 2);
+            }
+        }
+
+        [Test]
+        public void TestMultipleBindParamsBoundByName()
+        {
+            var table = TableMapping.Create<TestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Cost = 0, Flag = true, Name = "bob" });
+                db.InsertOrReplace(table, new TestObject() { Cost = 6, Flag = false, Name = null });
+                db.InsertOrReplace(table, new TestObject() { Cost = 7, Flag = true, Name = "bob" });
+
+                var query = 
+                    table.Select()
+                         .Where<int, bool, string>((x, cost, flag, name) => 
+                            x.Cost > cost && x.Flag == flag && x.Name.IsNot(name))
+                         .ToString();
+
+                using (var stmt = db.PrepareStatement(query))
+                {
+                    stmt.BindParameters[":cost"].Bind(0);
+                    stmt.BindParameters[":flag"].Bind(true);
+                    stmt.BindParameters[":name"].BindNull();
+
+                    Assert.AreEqual(stmt.Query().Count(), 1);
+                }
+            }
+        }
+
+        [Test]
+        public void TestMultipleWhereCalls()
+        {
+            var table = TableMapping.Create<TestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Cost = 0, Flag = true });
+                db.InsertOrReplace(table, new TestObject() { Cost = 6, Flag = false });
+                db.InsertOrReplace(table, new TestObject() { Cost = 7, Flag = true });
+
+                var query =
+                    table.Select()
+                         .Where<int>((x, cost) => x.Cost < cost).Where<bool>((x, flag) => x.Flag != flag)
+                         .ToString();
+
+                Assert.AreEqual(db.Query(query, 7, false).Select(table.ToObject).Count(), 1);
+                Assert.AreEqual(db.Query(query, 7, true).Select(table.ToObject).Count(), 1);
+                Assert.AreEqual(db.Query(query, 8, false).Select(table.ToObject).Count(), 2);
+            }
+        }
+
+        public void TestSelectQuery()
+        {
+
+            var table = TableMapping.Create<TestObject>();
+
+
             var query3 = table.Select().Where<int,bool>((x, cost, flag) => x.Cost == cost || flag != x.Flag);
             var query4 = table.Select().Where<int,bool>((x, cost, flag) => x.Cost == cost || flag != x.Flag && x.Cost > cost);
-            var query5 = table.Select().Where(x => x.Cost < 5).OrderBy(x => x.Cost).Skip(7).Take(4);
+            //.OrderBy(x => x.Cost).Skip(7).Take(4);
 
-            var aTuple = Tuple.Create("key", 1);
-            var query6 = table.Select().Where(x => x.Cost <= aTuple.Item2);
+
 
             var aUri = new Uri("http://www.example.com/path/to/a/resource");
             var query7 = table.Select().Where(x => x.Name == aUri.AbsolutePath);
@@ -59,12 +184,9 @@ namespace SQLitePCL.pretty.tests
             var query17 = table.Select().Where(x => x.Flag == (bool) falsey);
 
 
-            var result = query1.ToString();
-            result = query2.ToString();
+            var 
             result = query3.ToString();
             result = query4.ToString();
-            result = query5.ToString();
-            result = query6.ToString();
             result = query7.ToString();
             result = query8.ToString();
             result = query9.ToString();

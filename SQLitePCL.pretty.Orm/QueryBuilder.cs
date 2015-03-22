@@ -71,10 +71,10 @@ namespace SQLitePCL.pretty.Orm
             return new SelectQuery<T>(This.TableName, null);
         }
 
-        public static CountQuery<long> Count(this ITableMapping This)
-        {
-            return new CountQuery<long>(This.TableName, null);
-        }
+        //public static CountQuery<long> Count(this ITableMapping This)
+        //{
+        //    return new CountQuery<long>(This.TableName, null);
+        //}
 
         internal static string ToString(string selection, string table, Expression where, IEnumerable<Tuple<string, bool>> orderBy, int? limit, int? offset)
         {
@@ -327,36 +327,6 @@ namespace SQLitePCL.pretty.Orm
             {
 \\
 
-                else 
-                {
-                    object obj = null;
-
-                    if (mem.Expression != null) 
-                    {
-                        var r = CompileExpr (mem.Expression, queryArgs);
-
-                        if (r.Item2 == null) { throw new NotSupportedException ("Member access failed to compile expression"); }
-
-                        if (r.Item1 == "?") { queryArgs.RemoveAt (queryArgs.Count - 1); }
-                        obj = r.Item2;
-                    }
-                    
-                    //
-                    // Get the member value
-                    //
-                    object val = null;
-
-                    if (mem.Member is PropertyInfo)
-                    {
-                        var m = (PropertyInfo)mem.Member;
-                        val = m.GetValue (obj, null);
-                    } 
-
-                    else if (mem.Member is FieldInfo) 
-                    {
-                        var m = (FieldInfo)mem.Member;
-                        val = m.GetValue (obj);
-                    } 
 
                     else { throw new NotSupportedException ("MemberExpr: " + mem.Member.DeclaringType); }
                     
@@ -379,16 +349,6 @@ namespace SQLitePCL.pretty.Orm
                         sb.Append(")");
                         return Tuple.Create(sb.ToString(), val);
                     }
-
-                    else 
-                    {
-                        queryArgs.Add (val);
-                        return Tuple.Create("?", val);
-                    }
-                }
-            }
-
-            throw new NotSupportedException ("Cannot compile: " + expr.NodeType.ToString ());
         }
     }*/
 

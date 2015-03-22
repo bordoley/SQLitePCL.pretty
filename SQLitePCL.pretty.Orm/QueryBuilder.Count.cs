@@ -6,6 +6,7 @@ namespace SQLitePCL.pretty.Orm
 {
     public static partial class QueryBuilder
     {
+        /*
         public sealed class CountQuery<T>
         {
             private readonly string table;
@@ -63,7 +64,7 @@ namespace SQLitePCL.pretty.Orm
             {
                return QueryBuilder.ToString("COUNT(*)", table, where, Enumerable.Empty<Tuple<string, bool>>(), null, null); 
             }
-        }
+        }*/
     }
 }
 
