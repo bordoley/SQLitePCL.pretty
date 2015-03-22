@@ -312,18 +312,6 @@ namespace SQLitePCL.pretty.Orm
 
         private static Tuple<String,object> CompileExpr(Expression expr, List<object> queryArgs)
         {
-
-           
-
-            else if (expr.NodeType == ExpressionType.Convert) 
-            {
-                var u = (UnaryExpression) expr;
-                var ty = u.Type;
-                var valr = CompileExpr (u.Operand, queryArgs);
-
-                return Tuple.Create(valr.Item1, valr.Item2.ConvertTo (ty));
-            } 
-
             else if (expr.NodeType == ExpressionType.MemberAccess) 
             {
                 var mem = (MemberExpression)expr;
