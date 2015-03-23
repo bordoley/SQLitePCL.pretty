@@ -147,6 +147,133 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
+        [Test]
+        public void TestWhereContains()
+        {
+            var table = TableMapping.Create<TestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Name = "Bob" });
+                db.InsertOrReplace(table, new TestObject() { Name = "oBob" });
+                db.InsertOrReplace(table, new TestObject() { Name = "Bobo" });
+                db.InsertOrReplace(table, new TestObject() { Name = "Boo" });
+
+                var query = table.Select().Where(x => x.Name.Contains("bob")).ToString();
+                Assert.AreEqual(db.Query(query).Count(), 3);
+            }
+        } 
+
+        [Test]
+        public void TestWhereStartsWith()
+        {
+            var table = TableMapping.Create<TestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Name = "Bob" });
+                db.InsertOrReplace(table, new TestObject() { Name = "oBob" });
+                db.InsertOrReplace(table, new TestObject() { Name = "Bobo" });
+                db.InsertOrReplace(table, new TestObject() { Name = "Boo" });
+
+                var query = table.Select().Where(x => x.Name.StartsWith("bo")).ToString();
+                Assert.AreEqual(db.Query(query).Count(), 3);
+            }
+        }
+
+        [Test]
+        public void TestWhereEndsWith()
+        {
+            var table = TableMapping.Create<TestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Name = "Bob" });
+                db.InsertOrReplace(table, new TestObject() { Name = "oBob" });
+                db.InsertOrReplace(table, new TestObject() { Name = "Bobo" });
+                db.InsertOrReplace(table, new TestObject() { Name = "Boo" });
+
+                var query = table.Select().Where(x => x.Name.EndsWith("ob")).ToString();
+                Assert.AreEqual(db.Query(query).Count(), 2);
+            }
+        }
+
+        [Test]
+        public void TestWhereEndsIsNull()
+        {
+            var table = TableMapping.Create<TestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Cost = 100 });
+                db.InsertOrReplace(table, new TestObject() { Cost = 100, Name = "Bob" });
+
+                var query = table.Select().Where(x => x.Name.Is(null)).ToString();
+                Assert.AreEqual(db.Query(query).Count(), 1);
+            }
+        }
+
+        [Test]
+        public void TestWhereEndsIsNotNull()
+        {
+            var table = TableMapping.Create<TestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Cost = 100 });
+                db.InsertOrReplace(table, new TestObject() { Cost = 100, Name = "Bob" });
+
+                var query = table.Select().Where(x => x.Name.IsNot(null)).ToString();
+                Assert.AreEqual(db.Query(query).Count(), 1);
+            }
+        }
+
+        [Test]
+        public void TestWhereEqual()
+        {
+            var table = TableMapping.Create<TestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Cost = 100 });
+                db.InsertOrReplace(table, new TestObject() { Cost = 100, Name = "Bob" });
+
+                var query = table.Select().Where(x => x.Name.Equals("Bob")).ToString();
+                Assert.AreEqual(db.Query(query).Count(), 1);
+            }
+        }
+
+        [Test]
+        public void TestWhereNot()
+        {
+            var table = TableMapping.Create<TestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Flag = true });
+                db.InsertOrReplace(table, new TestObject() { Flag = false});
+
+                var query = table.Select().Where<bool>((x, y) => x.Flag == !y).ToString();
+                Assert.AreEqual(db.Query(query, true).Count(), 1);
+            }
+        }
+
+        [Test]
+        public void TestWhereWithCast()
+        {
+            var table = TableMapping.Create<TestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Flag = false });
+                db.InsertOrReplace(table, new TestObject() { Flag = false });
+
+                object falsey = false;
+                var query = table.Select().Where(x => x.Flag == (bool) falsey).ToString();
+                Assert.AreEqual(db.Query(query).Count(), 2);
+            }
+        }
+
         public void TestSelectQuery()
         {
 
@@ -168,12 +295,6 @@ namespace SQLitePCL.pretty.tests
             // should fail. Can't deconstruct non table mapping values.
             var query9 = table.Select().Where<Tuple<string, Tuple<int, string>>>((x, y) => x.Name == y.Item1);
 
-            var query10 = table.Select().Where(x => x.Name.Contains("bob"));
-
-            var query11 = table.Select().Where(x => x.Name.StartsWith("bob"));
-
-            var query12 = table.Select().Where(x => x.Name.EndsWith("bob"));
-
             var query13 = table.Select().Where(x => x.Name.Equals("bob"));
 
             var query14 = table.Select().Where(x => x.Name.Is(null));
@@ -190,9 +311,6 @@ namespace SQLitePCL.pretty.tests
             result = query7.ToString();
             result = query8.ToString();
             result = query9.ToString();
-            result = query10.ToString();
-            result = query11.ToString();
-            result = query12.ToString();
             result = query13.ToString();
             result = query14.ToString();
             result = query15.ToString();

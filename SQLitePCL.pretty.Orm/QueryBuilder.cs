@@ -81,7 +81,7 @@ namespace SQLitePCL.pretty.Orm
             var cmdText = 
                 "SELECT " + selection + 
                 "\nFROM \"" + table + "\"" +
-                (where != null ? "\nWHERE " + CompileExpr(where): "") +
+                (where != null ? "\nWHERE " + where.CompileExpr(): "") +
                 (orderBy.Count() > 0 ? "\nORDERBY " +  string.Join(", ", orderBy.Select(o => "\"" + o.Item1 + "\"" + (o.Item2 ? "" : " DESC"))) : "") +
                 (limit.HasValue ? "\nLIMIT " + limit.Value : "") +
                 (offset.HasValue ? "\nOFFSET " + offset.Value : "");
@@ -89,25 +89,25 @@ namespace SQLitePCL.pretty.Orm
             return cmdText;
         }
 
-        private static String CompileExpr(Expression expr)
+        private static String CompileExpr(this Expression This)
         {
-            if (expr is BinaryExpression)
+            if (This is BinaryExpression)
             {
-                var bin = (BinaryExpression) expr;
+                var bin = (BinaryExpression) This;
                 
-                var leftExpr = CompileExpr(bin.Left);
-                var rightExpr = CompileExpr(bin.Right);
+                var leftExpr = bin.Left.CompileExpr();
+                var rightExpr = bin.Right.CompileExpr();
 
                 return "(" + leftExpr + " " + GetSqlName(bin) + " " + rightExpr + ")";
             }
-            else if (expr is ParameterExpression)
+            else if (This is ParameterExpression)
             {
-                var param = (ParameterExpression)expr;
+                var param = (ParameterExpression)This;
                 return ":" + param.Name;
             }
-            else if (expr is MemberExpression)
+            else if (This is MemberExpression)
             {
-                var member = (MemberExpression) expr;
+                var member = (MemberExpression) This;
 
                 if (member.Expression != null && member.Expression.NodeType == ExpressionType.Parameter)
                 {
@@ -120,25 +120,25 @@ namespace SQLitePCL.pretty.Orm
                     return member.EvaluateExpression().ConvertToSQLiteValue().ToSqlString();
                 }
             }
-            else if (expr.NodeType == ExpressionType.Not)
+            else if (This.NodeType == ExpressionType.Not)
             {
-                var operandExpr = ((UnaryExpression) expr).Operand;
-                return "NOT(" + operandExpr.EvaluateExpression().ConvertToSQLiteValue().ToSqlString() + ")";
+                var operandExpr = ((UnaryExpression) This).Operand;
+                return "NOT(" + operandExpr.CompileExpr() + ")";
             } 
-            else if (expr is ConstantExpression) 
+            else if (This is ConstantExpression) 
             {
-                return expr.EvaluateExpression().ConvertToSQLiteValue().ToSqlString();
+                return This.EvaluateExpression().ConvertToSQLiteValue().ToSqlString();
             }
-            else if (expr is MethodCallExpression)
+            else if (This is MethodCallExpression)
             {
-                var call = (MethodCallExpression) expr;
+                var call = (MethodCallExpression) This;
                 var args = new String[call.Arguments.Count];
 
-                var obj = call.Object != null ? CompileExpr (call.Object) : null;
+                var obj = call.Object != null ? call.Object.CompileExpr() : null;
                 
                 for (var i = 0; i < args.Length; i++) 
                 {
-                    args [i] = CompileExpr (call.Arguments[i]);
+                    args [i] = call.Arguments[i].CompileExpr();
                 }
                 
                 if (call.Method.Name == "Like" && args.Length == 2) 
@@ -188,16 +188,16 @@ namespace SQLitePCL.pretty.Orm
                     return "(" + args[0] + " IS NOT " + args[1] + ")";
                 }
             }
-            else if (expr.NodeType == ExpressionType.Convert) 
+            else if (This.NodeType == ExpressionType.Convert) 
             {
-                var u = (UnaryExpression) expr;
+                var u = (UnaryExpression) This;
                 var ty = u.Type;
                 var value = EvaluateExpression(u.Operand);
 
                 return value.ConvertTo(ty).ConvertToSQLiteValue().ToSqlString();
             } 
 
-            throw new NotSupportedException("Cannot compile: " + expr.NodeType.ToString());
+            throw new NotSupportedException("Cannot compile: " + This.NodeType.ToString());
         }
 
         private static object EvaluateExpression(this Expression expr)
