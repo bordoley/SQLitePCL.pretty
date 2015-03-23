@@ -149,7 +149,6 @@
     <Compile Include="TableMapping.InsertOrReplace.cs" />
     <Compile Include="ForeignKeyConstraint.cs" />
     <Compile Include="QueryBuilder.cs" />
-    <Compile Include="QueryBuilder.Count.cs" />
     <Compile Include="QueryBuilder.Limit.cs" />
     <Compile Include="QueryBuilder.OrderBy.cs" />
     <Compile Include="QueryBuilder.Where.cs" />
