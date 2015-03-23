@@ -32,7 +32,7 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Cost = 6 });
 
                 var aTuple = Tuple.Create("key", 1);
-                var query = table.Select().Where(x => x.Cost <= aTuple.Item2).ToString();
+                var query = SqlQuery.From<TestObject>().Select().Where(x => x.Cost <= aTuple.Item2);
 
                 Assert.AreEqual(db.Query(query).Select(table.ToObject).Count(), 1);
             }
@@ -48,7 +48,7 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Cost = 0 });
                 db.InsertOrReplace(table, new TestObject() { Cost = 6 });
 
-                var query = table.Select().Where(x => x.Cost < 5).ToString();
+                var query = SqlQuery.From<TestObject>().Select().Where(x => x.Cost < 5);
 
                 Assert.AreEqual(db.Query(query).Select(table.ToObject).Count(), 1);
             }
@@ -65,7 +65,7 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Cost = 6 });
                 db.InsertOrReplace(table, new TestObject() { Cost = 7 });
 
-                var query = table.Select().Where<int>((x, cost) => x.Cost <= cost).ToString();
+                var query = SqlQuery.From<TestObject>().Select().Where<int>((x, cost) => x.Cost <= cost);
 
                 Assert.AreEqual(db.Query(query, 6).Select(table.ToObject).Count(), 2);
                 Assert.AreEqual(db.Query(query, 5).Select(table.ToObject).Count(), 1);
@@ -84,7 +84,7 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Cost = 6 });
                 db.InsertOrReplace(table, new TestObject() { Cost = 7 });
 
-                var query = table.Select().Where<int>((x, cost) => x.Cost >= cost).ToString();
+                var query = SqlQuery.From<TestObject>().Select().Where<int>((x, cost) => x.Cost >= cost);
 
                 Assert.AreEqual(db.Query(query, 6).Select(table.ToObject).Count(), 2);
                 Assert.AreEqual(db.Query(query, 5).Select(table.ToObject).Count(), 2);
@@ -103,7 +103,7 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Cost = 6, Flag = false });
                 db.InsertOrReplace(table, new TestObject() { Cost = 7, Flag = false });
 
-                var query = table.Select().Where(x => x.Cost == 0 || x.Flag == false).ToString();
+                var query = SqlQuery.From<TestObject>().Select().Where(x => x.Cost == 0 || x.Flag == false);
 
                 Assert.AreEqual(db.Query(query).Select(table.ToObject).Count(), 3);
             }
@@ -121,10 +121,9 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Cost = 7, Flag = true, Name = "bob" });
 
                 var query = 
-                    table.Select()
+                    SqlQuery.From<TestObject>().Select()
                          .Where<int, bool, string>((x, cost, flag, name) => 
-                            x.Cost > cost && x.Flag == flag && x.Name.IsNot(name))
-                         .ToString();
+                            x.Cost > cost && x.Flag == flag && x.Name.IsNot(name));
 
                 Assert.AreEqual(db.Query(query, 0, false, null).Select(table.ToObject).Count(), 0);
                 Assert.AreEqual(db.Query(query, 0, true, null).Select(table.ToObject).Count(), 1);
@@ -144,10 +143,9 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Cost = 7, Flag = true, Name = "bob" });
 
                 var query = 
-                    table.Select()
+                    SqlQuery.From<TestObject>().Select()
                          .Where<int, bool, string>((x, cost, flag, name) => 
-                            x.Cost > cost && x.Flag == flag && x.Name.IsNot(name))
-                         .ToString();
+                            x.Cost > cost && x.Flag == flag && x.Name.IsNot(name));
 
                 using (var stmt = db.PrepareStatement(query))
                 {
@@ -172,9 +170,8 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Cost = 7, Flag = true });
 
                 var query =
-                    table.Select()
-                         .Where<int>((x, cost) => x.Cost < cost).Where<bool>((x, flag) => x.Flag != flag)
-                         .ToString();
+                    SqlQuery.From<TestObject>().Select()
+                         .Where<int>((x, cost) => x.Cost < cost).Where<bool>((x, flag) => x.Flag != flag);
 
                 Assert.AreEqual(db.Query(query, 7, false).Select(table.ToObject).Count(), 1);
                 Assert.AreEqual(db.Query(query, 7, true).Select(table.ToObject).Count(), 1);
@@ -194,7 +191,7 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Name = "Bobo" });
                 db.InsertOrReplace(table, new TestObject() { Name = "Boo" });
 
-                var query = table.Select().Where(x => x.Name.Contains("bob")).ToString();
+                var query = SqlQuery.From<TestObject>().Select().Where(x => x.Name.Contains("bob"));
                 Assert.AreEqual(db.Query(query).Count(), 3);
             }
         } 
@@ -211,7 +208,7 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Name = "Bobo" });
                 db.InsertOrReplace(table, new TestObject() { Name = "Boo" });
 
-                var query = table.Select().Where(x => x.Name.StartsWith("bo")).ToString();
+                var query = SqlQuery.From<TestObject>().Select().Where(x => x.Name.StartsWith("bo"));
                 Assert.AreEqual(db.Query(query).Count(), 3);
             }
         }
@@ -228,7 +225,7 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Name = "Bobo" });
                 db.InsertOrReplace(table, new TestObject() { Name = "Boo" });
 
-                var query = table.Select().Where(x => x.Name.EndsWith("ob")).ToString();
+                var query = SqlQuery.From<TestObject>().Select().Where(x => x.Name.EndsWith("ob"));
                 Assert.AreEqual(db.Query(query).Count(), 2);
             }
         }
@@ -243,7 +240,7 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Cost = 100 });
                 db.InsertOrReplace(table, new TestObject() { Cost = 100, Name = "Bob" });
 
-                var query = table.Select().Where(x => x.Name.Is(null)).ToString();
+                var query = SqlQuery.From<TestObject>().Select().Where(x => x.Name.Is(null));
                 Assert.AreEqual(db.Query(query).Count(), 1);
             }
         }
@@ -258,7 +255,7 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Cost = 100 });
                 db.InsertOrReplace(table, new TestObject() { Cost = 100, Name = "Bob" });
 
-                var query = table.Select().Where(x => x.Name.IsNot(null)).ToString();
+                var query = SqlQuery.From<TestObject>().Select().Where(x => x.Name.IsNot(null));
                 Assert.AreEqual(db.Query(query).Count(), 1);
             }
         }
@@ -273,7 +270,7 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Cost = 100 });
                 db.InsertOrReplace(table, new TestObject() { Cost = 100, Name = "Bob" });
 
-                var query = table.Select().Where(x => x.Name.Equals("Bob")).ToString();
+                var query = SqlQuery.From<TestObject>().Select().Where(x => x.Name.Equals("Bob"));
                 Assert.AreEqual(db.Query(query).Count(), 1);
             }
         }
@@ -288,7 +285,7 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Flag = true });
                 db.InsertOrReplace(table, new TestObject() { Flag = false});
 
-                var query = table.Select().Where<bool>((x, y) => x.Flag == !y).ToString();
+                var query = SqlQuery.From<TestObject>().Select().Where<bool>((x, y) => x.Flag == !y);
                 Assert.AreEqual(db.Query(query, true).Count(), 1);
             }
         }
@@ -307,7 +304,7 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Cost = 2, Flag = false });
                 db.InsertOrReplace(table, new TestObject() { Cost = 2, Flag = true });
 
-                var query = table.Select().OrderBy(x => x.Cost).ThenByDescending(x => x.Flag).ToString();
+                var query = SqlQuery.From<TestObject>().Select().OrderBy(x => x.Cost).ThenByDescending(x => x.Flag);
                 db.Query(query).Select(table.ToObject).Aggregate(
                     new TestObject() { Cost = -1, Flag = false },
                     (acc, obj) => 
@@ -342,7 +339,7 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Cost = 2, Flag = false });
                 db.InsertOrReplace(table, new TestObject() { Cost = 2, Flag = true });
 
-                var query = table.Select().OrderBy(x => x.Cost).ThenBy(x => x.Flag).ElementAt(3).ToString();
+                var query = SqlQuery.From<TestObject>().Select().OrderBy(x => x.Cost).ThenBy(x => x.Flag).ElementAt(3);
                 var result = db.Query(query).Select(table.ToObject).First();
                 Assert.AreEqual(result.Cost, 1);
                 Assert.AreEqual(result.Flag, true);
@@ -360,7 +357,7 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(table, new TestObject() { Flag = false });
 
                 object falsey = false;
-                var query = table.Select().Where(x => x.Flag == (bool) falsey).ToString();
+                var query = SqlQuery.From<TestObject>().Select().Where(x => x.Flag == (bool) falsey);
                 Assert.AreEqual(db.Query(query).Count(), 2);
             }
         }

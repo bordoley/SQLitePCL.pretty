@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace SQLitePCL.pretty.Orm
 {
-    public static partial class QueryBuilder
+    public static partial class SqlQuery
     {
-        public sealed class LimitQuery
+        public sealed class LimitClause : ISqlQuery
         {
             private readonly string table;
             private readonly string selection;
@@ -16,7 +16,7 @@ namespace SQLitePCL.pretty.Orm
             private readonly Nullable<int> limit;
             private readonly Nullable<int> offset;
 
-            internal LimitQuery(string table, string selection, Expression where, IReadOnlyList<Tuple<string, bool>> ordering, Nullable<int> limit, Nullable<int> offset)
+            internal LimitClause(string table, string selection, Expression where, IReadOnlyList<Tuple<string, bool>> ordering, Nullable<int> limit, Nullable<int> offset)
             {
                 this.table = table;
                 this.selection = selection;
@@ -31,9 +31,9 @@ namespace SQLitePCL.pretty.Orm
             /// </summary>
             /// <param name="n">The number of elements to return.</param>
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
-            public LimitQuery Take(int n)
+            public LimitClause Take(int n)
             {
-                return new LimitQuery(table, selection, where, ordering, n, offset);
+                return new LimitClause(table, selection, where, ordering, n, offset);
             }
 
             /// <summary>
@@ -41,14 +41,19 @@ namespace SQLitePCL.pretty.Orm
             /// </summary>
             /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
-            public LimitQuery Skip(int n)
+            public LimitClause Skip(int n)
             {
-                return new LimitQuery(table, selection, where, ordering, limit, n);
+                return new LimitClause(table, selection, where, ordering, limit, n);
             }
 
             public override string ToString()
             {
-                return QueryBuilder.ToString(selection, table, where, ordering, limit, offset); 
+                return SqlQuery.ToString(selection, table, where, ordering, limit, offset); 
+            }
+
+            public string ToSql()
+            {
+                return this.ToString();
             }
         }
     }

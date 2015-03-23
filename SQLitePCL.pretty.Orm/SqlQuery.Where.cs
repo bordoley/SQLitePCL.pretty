@@ -5,77 +5,78 @@ using System.Collections.Generic;
 
 namespace SQLitePCL.pretty.Orm
 {
-    public static partial class QueryBuilder
+    public static partial class SqlQuery
     {
-        public sealed class WhereQuery<T>
+        public sealed class WhereClause<T> : ISqlQuery
         {
-            private const string selection = "*";
             private readonly string table;
+            private readonly string selection;
             private readonly Expression where;
 
-            internal WhereQuery(string table, Expression where)
+            internal WhereClause(string table, string selection, Expression where)
             {
                 this.table = table;
+                this.selection = selection;
                 this.where = where;
             }
 
-            public OrderByQuery<T> OrderBy<TValue>(Expression<Func<T, TValue>> orderExpr)
+            public OrderByClause<T> OrderBy<TValue>(Expression<Func<T, TValue>> orderExpr)
             {
                 return CreateOrderBy(orderExpr, true);
             }
 
-            public OrderByQuery<T> OrderByDescending<TValue>(Expression<Func<T, TValue>> orderExpr)
+            public OrderByClause<T> OrderByDescending<TValue>(Expression<Func<T, TValue>> orderExpr)
             {
                 return CreateOrderBy(orderExpr, false);
             }
 
-            private OrderByQuery<T> CreateOrderBy<TValue>(Expression<Func<T, TValue>> orderExpr, bool asc)
+            private OrderByClause<T> CreateOrderBy<TValue>(Expression<Func<T, TValue>> orderExpr, bool asc)
             {  
                 var orderBy = new List<Tuple<string, bool>>();
                 orderBy.Add(orderExpr.CompileOrderByExpression(asc));
-                return new OrderByQuery<T>(table, selection, where, orderBy);
+                return new OrderByClause<T>(table, selection, where, orderBy);
             }
 
-            public WhereQuery<T> Where<U,V,W,X,Y,Z>(Expression<Func<T,U,V,W,X,Y,Z,bool>> predExpr)
+            public WhereClause<T> Where<U,V,W,X,Y,Z>(Expression<Func<T,U,V,W,X,Y,Z,bool>> predExpr)
             {
                 return this.Where((LambdaExpression) predExpr);
             }
 
-            public WhereQuery<T> Where<U,V,W,X,Y>(Expression<Func<T,U,V,W,X,Y,bool>> predExpr)
+            public WhereClause<T> Where<U,V,W,X,Y>(Expression<Func<T,U,V,W,X,Y,bool>> predExpr)
             {
                 return this.Where((LambdaExpression) predExpr);
             }
 
-            public WhereQuery<T> Where<U,V,W,X>(Expression<Func<T,U,V,W,X,bool>> predExpr)
+            public WhereClause<T> Where<U,V,W,X>(Expression<Func<T,U,V,W,X,bool>> predExpr)
             {
                 return this.Where((LambdaExpression) predExpr);
             }
 
-            public WhereQuery<T> Where<U,V,W>(Expression<Func<T,U,V,W,bool>> predExpr)
+            public WhereClause<T> Where<U,V,W>(Expression<Func<T,U,V,W,bool>> predExpr)
             {
                 return this.Where((LambdaExpression) predExpr);
             }
 
-            public WhereQuery<T> Where<U,V>(Expression<Func<T,U,V,bool>> predExpr)
+            public WhereClause<T> Where<U,V>(Expression<Func<T,U,V,bool>> predExpr)
             {
                 return this.Where((LambdaExpression) predExpr);
             }
 
-            public WhereQuery<T> Where<U>(Expression<Func<T,U,bool>> predExpr)
+            public WhereClause<T> Where<U>(Expression<Func<T,U,bool>> predExpr)
             {
                 return this.Where((LambdaExpression) predExpr);
             }
 
-            public WhereQuery<T> Where(Expression<Func<T, bool>> predExpr)
+            public WhereClause<T> Where(Expression<Func<T, bool>> predExpr)
             {
                 return this.Where((LambdaExpression) predExpr);
             }
 
-            private WhereQuery<T> Where(LambdaExpression lambda)
+            private WhereClause<T> Where(LambdaExpression lambda)
             {
                 var pred = lambda.Body;
                 var where = this.where == null ? pred : Expression.AndAlso(this.where, pred);
-                return new WhereQuery<T>(table, where);
+                return new WhereClause<T>(table, selection, where);
             }
 
             /// <summary>
@@ -83,9 +84,9 @@ namespace SQLitePCL.pretty.Orm
             /// </summary>
             /// <param name="n">The number of elements to return.</param>
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
-            public LimitQuery Take(int n)
+            public LimitClause Take(int n)
             {
-                return new LimitQuery(table, selection, where, new List<Tuple<string, bool>>(), n, null);
+                return new LimitClause(table, selection, where, new List<Tuple<string, bool>>(), n, null);
             }
 
             /// <summary>
@@ -93,9 +94,9 @@ namespace SQLitePCL.pretty.Orm
             /// </summary>
             /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
-            public LimitQuery Skip(int n)
+            public LimitClause Skip(int n)
             {
-                return new LimitQuery(table, selection, where, new List<Tuple<string, bool>>(), null, n);
+                return new LimitClause(table, selection, where, new List<Tuple<string, bool>>(), null, n);
             }
 
             /// <summary>
@@ -104,14 +105,19 @@ namespace SQLitePCL.pretty.Orm
             /// <returns>The <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
             /// <param name="index">Index.</param>
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
-            public string ElementAt(int index)
+            public LimitClause ElementAt(int index)
             {
-                return Skip(index).Take(1).ToString();
+                return Skip(index).Take(1);
             }
 
             public override string ToString()
             {
-                return QueryBuilder.ToString(selection, table, where, Enumerable.Empty<Tuple<string, bool>>(), null, null); 
+                return SqlQuery.ToString(selection, table, where, Enumerable.Empty<Tuple<string, bool>>(), null, null); 
+            }
+
+            public string ToSql()
+            {
+                return this.ToString();
             }
         }
     }

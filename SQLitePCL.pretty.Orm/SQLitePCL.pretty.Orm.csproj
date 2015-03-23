@@ -148,10 +148,11 @@
     <Compile Include="TableMapping.Delete.cs" />
     <Compile Include="TableMapping.InsertOrReplace.cs" />
     <Compile Include="ForeignKeyConstraint.cs" />
-    <Compile Include="QueryBuilder.cs" />
-    <Compile Include="QueryBuilder.Limit.cs" />
-    <Compile Include="QueryBuilder.OrderBy.cs" />
-    <Compile Include="QueryBuilder.Where.cs" />
+    <Compile Include="SqlQuery.cs" />
+    <Compile Include="SqlQuery.Limit.cs" />
+    <Compile Include="SqlQuery.OrderBy.cs" />
+    <Compile Include="SqlQuery.Where.cs" />
+    <Compile Include="SqlQuery.Select.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>

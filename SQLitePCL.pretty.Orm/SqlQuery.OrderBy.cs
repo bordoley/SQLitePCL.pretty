@@ -7,16 +7,16 @@ using SQLitePCL.pretty.Orm.Attributes;
 
 namespace SQLitePCL.pretty.Orm
 {
-    public static partial class QueryBuilder
+    public static partial class SqlQuery
     {
-        public sealed class OrderByQuery<T>
+        public sealed class OrderByClause<T> : ISqlQuery
         {
             private readonly string table;
             private readonly string selection;
             private readonly Expression where;
             private readonly IReadOnlyList<Tuple<string, bool>> ordering;
 
-            internal OrderByQuery(string table, string selection, Expression where, IReadOnlyList<Tuple<string, bool>> ordering)
+            internal OrderByClause(string table, string selection, Expression where, IReadOnlyList<Tuple<string, bool>> ordering)
             {
                 this.table = table;
                 this.selection = selection;
@@ -24,12 +24,12 @@ namespace SQLitePCL.pretty.Orm
                 this.ordering = ordering;
             }
 
-            public OrderByQuery<T> ThenBy<TValue>(Expression<Func<T, TValue>> orderExpr)
+            public OrderByClause<T> ThenBy<TValue>(Expression<Func<T, TValue>> orderExpr)
             {
                 return AddOrderBy(orderExpr, true);
             }
 
-            public OrderByQuery<T> ThenByDescending<TValue>(Expression<Func<T, TValue>> orderExpr)
+            public OrderByClause<T> ThenByDescending<TValue>(Expression<Func<T, TValue>> orderExpr)
             {
                 return AddOrderBy(orderExpr, false);
             }
@@ -39,9 +39,9 @@ namespace SQLitePCL.pretty.Orm
             /// </summary>
             /// <param name="n">The number of elements to return.</param>
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
-            public LimitQuery Take(int n)
+            public LimitClause Take(int n)
             {
-                return new LimitQuery(table, selection, where, this.ordering, n, null);
+                return new LimitClause(table, selection, where, this.ordering, n, null);
             }
 
             /// <summary>
@@ -49,9 +49,9 @@ namespace SQLitePCL.pretty.Orm
             /// </summary>
             /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
-            public LimitQuery Skip(int n)
+            public LimitClause Skip(int n)
             {
-                return new LimitQuery(table, selection, where, this.ordering, null, n);
+                return new LimitClause(table, selection, where, this.ordering, null, n);
             }
 
             /// <summary>
@@ -60,21 +60,26 @@ namespace SQLitePCL.pretty.Orm
             /// <returns>The <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
             /// <param name="index">Index.</param>
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
-            public string ElementAt(int index)
+            public LimitClause ElementAt(int index)
             {
-                return Skip(index).Take(1).ToString();
+                return Skip(index).Take(1);
             }
 
-            private OrderByQuery<T> AddOrderBy<TValue>(Expression<Func<T, TValue>> orderExpr, bool asc)
+            private OrderByClause<T> AddOrderBy<TValue>(Expression<Func<T, TValue>> orderExpr, bool asc)
             {  
                 var orderBy = new List<Tuple<string, bool>>(ordering);
                 orderBy.Add(orderExpr.CompileOrderByExpression(asc));
-                return new OrderByQuery<T>(table, selection, where, orderBy);
+                return new OrderByClause<T>(table, selection, where, orderBy);
             }
 
             public override string ToString()
             {
-                return QueryBuilder.ToString(selection, table, where, ordering, null, null); 
+                return SqlQuery.ToString(selection, table, where, ordering, null, null); 
+            }
+
+            public string ToSql()
+            {
+                return this.ToString();
             }
         }
     }

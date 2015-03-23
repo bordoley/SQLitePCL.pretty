@@ -40,7 +40,7 @@ using System.IO;
 
 namespace SQLitePCL.pretty.Orm
 {
-    public static partial class QueryBuilder
+    public static partial class SqlMethods
     {
         public static bool Is<T>(this T This, T other = null)
             where T: class
@@ -65,16 +65,37 @@ namespace SQLitePCL.pretty.Orm
         {
             throw new NotSupportedException("Function should only be used in SQL expressions.");
         }
+    }
 
-        public static WhereQuery<T> Select<T>(this ITableMapping<T> This)
+    public static partial class SqlQuery
+    {
+        public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(this IDatabaseConnection This, ISqlQuery query)
         {
-            return new WhereQuery<T>(This.TableName, null);
+            return This.Query(query.ToSql());
         }
 
-        //public static CountQuery<long> Count(this ITableMapping This)
-        //{
-        //    return new CountQuery<long>(This.TableName, null);
-        //}
+        public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(
+            this IDatabaseConnection This, ISqlQuery query, params object[] values)
+        {
+            return This.Query(query.ToSql(), values);
+        }
+
+        public static IStatement PrepareStatement(this IDatabaseConnection This, ISqlQuery query)
+        {
+            return This.PrepareStatement(query.ToSql());
+        }
+
+        public static ITableMappedStatement<T> PrepareStatement<T>(this IDatabaseConnection This, ISqlQuery query, ITableMapping<T> mapping)
+        {
+            return new TableMappedStatement<T>(This.PrepareStatement(query.ToSql()), mapping);
+        }
+
+        public static SelectClause<T> From<T>()
+        {
+            var typ = typeof(T);
+            var tableName = typ.GetTableName();
+            return new SelectClause<T>(tableName);
+        }
 
         internal static string ToString(string selection, string table, Expression where, IEnumerable<Tuple<string, bool>> orderBy, int? limit, int? offset)
         {
@@ -93,10 +114,22 @@ namespace SQLitePCL.pretty.Orm
         {
             if (This is BinaryExpression)
             {
-                var bin = (BinaryExpression) This;
+                var bin = (BinaryExpression)This;
                 
                 var leftExpr = bin.Left.CompileExpr();
                 var rightExpr = bin.Right.CompileExpr();
+
+                if (rightExpr == "NULL" && bin.NodeType == ExpressionType.Equal)
+                {
+                    if (bin.NodeType == ExpressionType.Equal)
+                    {
+                        return "(" + leftExpr + "IS NULL)";
+                    }
+                    else if (rightExpr == "NULL" && bin.NodeType == ExpressionType.NotEqual)
+                    {
+                        return "(" + leftExpr + "IS NOT NULL)";
+                    }
+                }
 
                 return "(" + leftExpr + " " + GetSqlName(bin) + " " + rightExpr + ")";
             }
