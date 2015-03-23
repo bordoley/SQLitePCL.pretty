@@ -70,7 +70,42 @@ namespace SQLitePCL.pretty.tests
                 Assert.AreEqual(db.Query(query, 6).Select(table.ToObject).Count(), 2);
                 Assert.AreEqual(db.Query(query, 5).Select(table.ToObject).Count(), 1);
                 Assert.AreEqual(db.Query(query, 7).Select(table.ToObject).Count(), 3);
+            }
+        }
+
+        [Test]
+        public void TestWhereGreaterThanOrEqual()
+        {
+            var table = TableMapping.Create<TestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Cost = 0 });
+                db.InsertOrReplace(table, new TestObject() { Cost = 6 });
+                db.InsertOrReplace(table, new TestObject() { Cost = 7 });
+
+                var query = table.Select().Where<int>((x, cost) => x.Cost >= cost).ToString();
+
                 Assert.AreEqual(db.Query(query, 6).Select(table.ToObject).Count(), 2);
+                Assert.AreEqual(db.Query(query, 5).Select(table.ToObject).Count(), 2);
+                Assert.AreEqual(db.Query(query, 7).Select(table.ToObject).Count(), 1);
+            }
+        }
+
+        [Test]
+        public void TestWhereOr()
+        {
+            var table = TableMapping.Create<TestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Cost = 0, Flag = true});
+                db.InsertOrReplace(table, new TestObject() { Cost = 6, Flag = false });
+                db.InsertOrReplace(table, new TestObject() { Cost = 7, Flag = false });
+
+                var query = table.Select().Where(x => x.Cost == 0 || x.Flag == false).ToString();
+
+                Assert.AreEqual(db.Query(query).Select(table.ToObject).Count(), 3);
             }
         }
 
@@ -259,6 +294,62 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Test]
+        public void TestOrderBy()
+        {
+            var table = TableMapping.Create<TestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Cost = 0, Flag = false });
+                db.InsertOrReplace(table, new TestObject() { Cost = 0, Flag = true });
+                db.InsertOrReplace(table, new TestObject() { Cost = 1, Flag = false });
+                db.InsertOrReplace(table, new TestObject() { Cost = 1, Flag = true });
+                db.InsertOrReplace(table, new TestObject() { Cost = 2, Flag = false });
+                db.InsertOrReplace(table, new TestObject() { Cost = 2, Flag = true });
+
+                var query = table.Select().OrderBy(x => x.Cost).ThenByDescending(x => x.Flag).ToString();
+                db.Query(query).Select(table.ToObject).Aggregate(
+                    new TestObject() { Cost = -1, Flag = false },
+                    (acc, obj) => 
+                        {
+                            if (obj.Cost > acc.Cost)
+                            {
+                                Assert.IsTrue(obj.Flag);
+                                Assert.IsFalse(acc.Flag);
+                            }
+                            else
+                            {
+                                Assert.IsFalse(obj.Flag);
+                                Assert.IsTrue(acc.Flag);
+                            }
+                            return obj;
+                        });
+
+            }
+        }
+
+        [Test]
+        public void TestElementAt()
+        {
+            var table = TableMapping.Create<TestObject>();
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.InitTable(table);
+                db.InsertOrReplace(table, new TestObject() { Cost = 0, Flag = false });
+                db.InsertOrReplace(table, new TestObject() { Cost = 0, Flag = true });
+                db.InsertOrReplace(table, new TestObject() { Cost = 1, Flag = false });
+                db.InsertOrReplace(table, new TestObject() { Cost = 1, Flag = true });
+                db.InsertOrReplace(table, new TestObject() { Cost = 2, Flag = false });
+                db.InsertOrReplace(table, new TestObject() { Cost = 2, Flag = true });
+
+                var query = table.Select().OrderBy(x => x.Cost).ThenBy(x => x.Flag).ElementAt(3).ToString();
+                var result = db.Query(query).Select(table.ToObject).First();
+                Assert.AreEqual(result.Cost, 1);
+                Assert.AreEqual(result.Flag, true);
+            }
+        }
+
+        [Test]
         public void TestWhereWithCast()
         {
             var table = TableMapping.Create<TestObject>();
@@ -272,50 +363,6 @@ namespace SQLitePCL.pretty.tests
                 var query = table.Select().Where(x => x.Flag == (bool) falsey).ToString();
                 Assert.AreEqual(db.Query(query).Count(), 2);
             }
-        }
-
-        public void TestSelectQuery()
-        {
-
-            var table = TableMapping.Create<TestObject>();
-
-
-            var query3 = table.Select().Where<int,bool>((x, cost, flag) => x.Cost == cost || flag != x.Flag);
-            var query4 = table.Select().Where<int,bool>((x, cost, flag) => x.Cost == cost || flag != x.Flag && x.Cost > cost);
-            //.OrderBy(x => x.Cost).Skip(7).Take(4);
-
-
-
-            var aUri = new Uri("http://www.example.com/path/to/a/resource");
-            var query7 = table.Select().Where(x => x.Name == aUri.AbsolutePath);
-
-            var falsey = false;
-            var query8 = table.Select().Where(x => x.Flag == !falsey);
-
-            // should fail. Can't deconstruct non table mapping values.
-            var query9 = table.Select().Where<Tuple<string, Tuple<int, string>>>((x, y) => x.Name == y.Item1);
-
-            var query13 = table.Select().Where(x => x.Name.Equals("bob"));
-
-            var query14 = table.Select().Where(x => x.Name.Is(null));
-            var query15 = table.Select().Where(x => x.Name.IsNot(null));
-            var query16 = table.Select().Where<object>((x, y) => x.Name.IsNot(y));
-
-            object falseyObj = false;
-            var query17 = table.Select().Where(x => x.Flag == (bool) falsey);
-
-
-            var 
-            result = query3.ToString();
-            result = query4.ToString();
-            result = query7.ToString();
-            result = query8.ToString();
-            result = query9.ToString();
-            result = query13.ToString();
-            result = query14.ToString();
-            result = query15.ToString();
-            result = query16.ToString();
-            result = query17.ToString();
         }
     }
 }

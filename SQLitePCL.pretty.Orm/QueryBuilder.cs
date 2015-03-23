@@ -45,25 +45,25 @@ namespace SQLitePCL.pretty.Orm
         public static bool Is<T>(this T This, T other = null)
             where T: class
         {
-            return This.Equals(other);
+            throw new NotSupportedException("Function should only be used in SQL expressions.");
         }
 
         public static bool Is<T>(this Nullable<T> This, Nullable<T> other = null)
             where T: struct
         {
-            return This.Equals(other);
+            throw new NotSupportedException("Function should only be used in SQL expressions.");
         }
 
         public static bool IsNot<T>(this T This, T other = null)
             where T: class
         {
-            return !This.Equals(other);
+            throw new NotSupportedException("Function should only be used in SQL expressions.");
         }
 
         public static bool IsNot<T>(this Nullable<T> This, Nullable<T> other = null)
             where T: struct
         {
-            return !This.Equals(other);
+            throw new NotSupportedException("Function should only be used in SQL expressions.");
         }
 
         public static WhereQuery<T> Select<T>(this ITableMapping<T> This)
@@ -82,7 +82,7 @@ namespace SQLitePCL.pretty.Orm
                 "SELECT " + selection + 
                 "\nFROM \"" + table + "\"" +
                 (where != null ? "\nWHERE " + where.CompileExpr(): "") +
-                (orderBy.Count() > 0 ? "\nORDERBY " +  string.Join(", ", orderBy.Select(o => "\"" + o.Item1 + "\"" + (o.Item2 ? "" : " DESC"))) : "") +
+                (orderBy.Count() > 0 ? "\nORDER BY " +  string.Join(", ", orderBy.Select(o => "\"" + o.Item1 + "\"" + (o.Item2 ? "" : " DESC"))) : "") +
                 (limit.HasValue ? "\nLIMIT " + limit.Value : "") +
                 (offset.HasValue ? "\nOFFSET " + offset.Value : "");
                  
@@ -296,13 +296,14 @@ namespace SQLitePCL.pretty.Orm
 
         private static Tuple<string, bool> CompileOrderByExpression<T, TValue>(this Expression<Func<T, TValue>> orderExpr, bool asc)
             {
-                var lambda = (LambdaExpression) orderExpr;
+                var lambda = orderExpr;
 
                 MemberExpression mem = null;
 
                 var unary = lambda.Body as UnaryExpression;
                 if (unary != null && unary.NodeType == ExpressionType.Convert)
                 {
+
                     mem = unary.Operand as MemberExpression;
                 }
                 else
@@ -318,39 +319,4 @@ namespace SQLitePCL.pretty.Orm
                 throw new NotSupportedException("Order By does not support: " + orderExpr);
             }
     }
-
-/*
-
-        private static Tuple<String,object> CompileExpr(Expression expr, List<object> queryArgs)
-        {
-            else if (expr.NodeType == ExpressionType.MemberAccess) 
-            {
-\\
-
-
-                    else { throw new NotSupportedException ("MemberExpr: " + mem.Member.DeclaringType); }
-                    
-                    //
-                    // Work special magic for enumerables
-                    //
-                    if (val != null && val is IEnumerable && !(val is string) && !(val is IEnumerable<byte>)) 
-                    {
-                        var sb = new StringBuilder("(");
-                        var head = "";
-
-                        foreach (var a in (IEnumerable) val) 
-                        {
-                            queryArgs.Add(a);
-                            sb.Append(head);
-                            sb.Append("?");
-                            head = ",";
-                        }
-
-                        sb.Append(")");
-                        return Tuple.Create(sb.ToString(), val);
-                    }
-        }
-    }*/
-
-
 }
