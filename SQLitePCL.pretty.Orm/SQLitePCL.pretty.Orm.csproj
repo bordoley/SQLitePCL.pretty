@@ -136,8 +136,15 @@
     <Compile Include="TableMapping.cs" />
     <Compile Include="Attributes.cs" />
     <Compile Include="DatabaseConnection.cs" />
-    <Compile Include="DatabaseConnection.Index.cs" />
-    <Compile Include="DatabaseConnection.Tables.cs" />
+    <Compile Include="DatabaseConnection.Find.cs">
+      <DependentUpon>DatabaseConnection.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DatabaseConnection.Index.cs">
+      <DependentUpon>DatabaseConnection.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DatabaseConnection.Tables.cs">
+      <DependentUpon>DatabaseConnection.cs</DependentUpon>
+    </Compile>
     <Compile Include="SQLBuilder.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="ColumnMapping.cs" />
@@ -145,16 +152,32 @@
     <Compile Include="Reflection.cs" />
     <Compile Include="ForeignKeyConstraint.cs" />
     <Compile Include="SqlQuery.cs" />
-    <Compile Include="SqlQuery.Limit.cs" />
-    <Compile Include="SqlQuery.OrderBy.cs" />
-    <Compile Include="SqlQuery.Where.cs" />
+    <Compile Include="SqlQuery.Limit.cs">
+      <DependentUpon>SqlQuery.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SqlQuery.OrderBy.cs">
+      <DependentUpon>SqlQuery.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SqlQuery.Where.cs">
+      <DependentUpon>SqlQuery.cs</DependentUpon>
+    </Compile>
     <Compile Include="Statement.cs" />
-    <Compile Include="DatabaseConnection.Delete.cs" />
-    <Compile Include="DatabaseConnection.Find.cs" />
-    <Compile Include="DatabaseConnection.InsertOrReplace.cs" />
-    <Compile Include="SqlQuery.From.cs" />
+    <Compile Include="DatabaseConnection.Delete.cs">
+      <DependentUpon>DatabaseConnection.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DatabaseConnection.InsertOrReplace.cs">
+      <DependentUpon>DatabaseConnection.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SqlQuery.From.cs">
+      <DependentUpon>SqlQuery.cs</DependentUpon>
+    </Compile>
     <Compile Include="ResultSet.cs" />
-    <Compile Include="DatabaseConnection.Query.cs" />
+    <Compile Include="DatabaseConnection.Query.cs">
+      <DependentUpon>DatabaseConnection.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SqlQuery.Select.cs">
+      <DependentUpon>SqlQuery.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>

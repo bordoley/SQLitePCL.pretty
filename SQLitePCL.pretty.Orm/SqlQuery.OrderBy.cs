@@ -11,6 +11,9 @@ namespace SQLitePCL.pretty.Orm
 {
     public static partial class SqlQuery
     {
+        /// <summary>
+        /// The ORDER BY clause of a SQL query.
+        /// </summary>
         public sealed class OrderByClause<T> : ISqlQuery
         {
             private readonly WhereClause<T> whereClause;
@@ -22,12 +25,24 @@ namespace SQLitePCL.pretty.Orm
                 this.ordering = ordering;
             }
 
+            /// <summary>
+            /// Performs a subsequent ordering of the elements in a sequence in ascending order according to a key.
+            /// </summary>
+            /// <returns>An <seealso cref="OrderByClause&lt;T&gt;"/>.</returns>
+            /// <param name="orderExpr">A function to extract a key from each element.</param>
+            /// <typeparam name="TValue">The type of the key</typeparam>
             public OrderByClause<T> ThenBy<TValue>(Expression<Func<T, TValue>> orderExpr)
             {
                 Contract.Requires(orderExpr != null);
                 return AddOrderBy(orderExpr, true);
             }
 
+            /// <summary>
+            /// Performs a subsequent ordering of the elements in a sequence in descending order according to a key.
+            /// </summary>
+            /// <returns>An <seealso cref="OrderByClause&lt;T&gt;"/>.</returns>
+            /// <param name="orderExpr">A function to extract a key from each element.</param>
+            /// <typeparam name="TValue">The type of the key</typeparam>
             public OrderByClause<T> ThenByDescending<TValue>(Expression<Func<T, TValue>> orderExpr)
             {
                 Contract.Requires(orderExpr != null);
@@ -35,10 +50,10 @@ namespace SQLitePCL.pretty.Orm
             }
 
             /// <summary>
-            /// Returns a <see cref="TableQuery&lt;T&gt;"/> that limits the result set to a specified number of contiguous elements.
+            /// Returns a <see cref="LimitClause&lt;T&gt;"/> that limits the result set to a specified number of contiguous elements.
             /// </summary>
             /// <param name="n">The number of elements to return.</param>
-            /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
+            /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
             public LimitClause<T> Take(int n)
             {
                 Contract.Requires(n >= 0);
@@ -46,10 +61,10 @@ namespace SQLitePCL.pretty.Orm
             }
 
             /// <summary>
-            /// Returns a <see cref="TableQuery&lt;T&gt;"/> that skips a specified number of elements in the result set and then returns the remaining elements.
+            /// Returns a <see cref="LimitClause&lt;T&gt;"/> that skips a specified number of elements in the result set and then returns the remaining elements.
             /// </summary>
             /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
-            /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
+            /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
             public LimitClause<T> Skip(int n)
             {
                 Contract.Requires(n >= 0);
@@ -57,11 +72,10 @@ namespace SQLitePCL.pretty.Orm
             }
 
             /// <summary>
-            /// Returns a <see cref="TableQuery&lt;T&gt;"/> that returns the element at a specified index in the result set.
+            /// Returns a <see cref="LimitClause&lt;T&gt;"/> that returns the element at a specified index in the result set.
             /// </summary>
-            /// <returns>The <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
             /// <param name="index">Index.</param>
-            /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
+            /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
             public LimitClause<T> ElementAt(int index)
             {
                 Contract.Requires(index >= 0);
@@ -75,6 +89,10 @@ namespace SQLitePCL.pretty.Orm
                 return new OrderByClause<T>(whereClause, orderBy);
             }
 
+            /// <summary>
+            /// Returns a <see cref="System.String"/> that represents the current <see cref="LimitClause&lt;T&gt;"/>.
+            /// </summary>
+            /// <returns>A <see cref="System.String"/> that represents the current <see cref="LimitClause&lt;T&gt;"/>.</returns>
             public override string ToString()
             {
                 return 

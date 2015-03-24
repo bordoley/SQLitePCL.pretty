@@ -166,28 +166,6 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Test]
-        public void TestMultipleWhereCalls()
-        {
-            var orm = Orm.ResultSet.RowToObject<TestObject>();
-
-            using (var db = SQLite3.OpenInMemory())
-            {
-                db.InitTable<TestObject>();
-                db.InsertOrReplace(new TestObject() { Cost = 0, Flag = true }, orm);
-                db.InsertOrReplace(new TestObject() { Cost = 6, Flag = false }, orm);
-                db.InsertOrReplace(new TestObject() { Cost = 7, Flag = true }, orm);
-
-                var query =
-                    SqlQuery.From<TestObject>().Select()
-                         .Where<int>((x, cost) => x.Cost < cost).Where<bool>((x, flag) => x.Flag != flag);
-
-                Assert.AreEqual(db.Query(query, 7, false).Select(orm).Count(), 1);
-                Assert.AreEqual(db.Query(query, 7, true).Select(orm).Count(), 1);
-                Assert.AreEqual(db.Query(query, 8, false).Select(orm).Count(), 2);
-            }
-        }
-
-        [Test]
         public void TestWhereContains()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();

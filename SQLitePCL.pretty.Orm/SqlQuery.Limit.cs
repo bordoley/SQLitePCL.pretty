@@ -8,6 +8,9 @@ namespace SQLitePCL.pretty.Orm
 {
     public static partial class SqlQuery
     {
+        /// <summary>
+        /// The LIMIT clause of a SQL query.
+        /// </summary>
         public sealed class LimitClause<T> : ISqlQuery
         {
             private readonly OrderByClause<T> orderBy;
@@ -22,10 +25,10 @@ namespace SQLitePCL.pretty.Orm
             }
 
             /// <summary>
-            /// Returns a <see cref="TableQuery&lt;T&gt;"/> that limits the result set to a specified number of contiguous elements.
+            /// Returns a <see cref="LimitClause&lt;T&gt;"/> that limits the result set to a specified number of contiguous elements.
             /// </summary>
             /// <param name="n">The number of elements to return.</param>
-            /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
+            /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
             public LimitClause<T> Take(int n)
             {
                 Contract.Requires(n >= 0);
@@ -33,16 +36,20 @@ namespace SQLitePCL.pretty.Orm
             }
 
             /// <summary>
-            /// Returns a <see cref="TableQuery&lt;T&gt;"/> that skips a specified number of elements in the result set and then returns the remaining elements.
+            /// Returns a <see cref="LimitClause&lt;T&gt;"/> that skips a specified number of elements in the result set and then returns the remaining elements.
             /// </summary>
             /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
-            /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
+            /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
             public LimitClause<T> Skip(int n)
             {
                 Contract.Requires(n >= 0);
                 return new LimitClause<T>(orderBy, limit, n);
             }
 
+            /// <summary>
+            /// Returns a <see cref="System.String"/> that represents the current <see cref="LimitClause&lt;T&gt;"/>.
+            /// </summary>
+            /// <returns>A <see cref="System.String"/> that represents the current <see cref="LimitClause&lt;T&gt;"/>.</returns>
             public override string ToString()
             {
                 return 

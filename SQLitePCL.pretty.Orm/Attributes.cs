@@ -281,7 +281,14 @@ namespace SQLitePCL.pretty.Orm.Attributes
             this.columnName = columnName;
         }
 
+        /// <summary>
+        /// The table that constrains the annotated column.
+        /// </summary>
         public string TableName { get { return tableName; } }
+
+        /// <summary>
+        /// The column in the table that constrains the annotated column.
+        /// </summary>
         public string ColumnName { get { return columnName; } }
     }
 
