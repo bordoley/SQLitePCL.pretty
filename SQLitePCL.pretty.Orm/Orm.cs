@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using SQLitePCL.pretty.Orm.Attributes;
 using System.Reflection;
 
@@ -17,6 +18,9 @@ namespace SQLitePCL.pretty.Orm
 
         public static Func<IReadOnlyList<IResultSetValue>,T> ResultSetRowToObject<TBuilder, T>(Func<TBuilder> builder, Func<TBuilder,T> build)
         {   
+            Contract.Requires(builder != null);
+            Contract.Requires(build != null);
+
             var columns = new Dictionary<string, PropertyInfo>();
             var typ = typeof(TBuilder);
 

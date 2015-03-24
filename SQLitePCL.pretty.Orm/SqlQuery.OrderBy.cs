@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 
 using SQLitePCL.pretty.Orm.Attributes;
+using System.Diagnostics.Contracts;
 
 namespace SQLitePCL.pretty.Orm
 {
@@ -26,11 +27,13 @@ namespace SQLitePCL.pretty.Orm
 
             public OrderByClause<T> ThenBy<TValue>(Expression<Func<T, TValue>> orderExpr)
             {
+                Contract.Requires(orderExpr != null);
                 return AddOrderBy(orderExpr, true);
             }
 
             public OrderByClause<T> ThenByDescending<TValue>(Expression<Func<T, TValue>> orderExpr)
             {
+                Contract.Requires(orderExpr != null);
                 return AddOrderBy(orderExpr, false);
             }
 
@@ -41,6 +44,7 @@ namespace SQLitePCL.pretty.Orm
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
             public LimitClause Take(int n)
             {
+                Contract.Requires(n >= 0);
                 return new LimitClause(table, selection, where, this.ordering, n, null);
             }
 
@@ -51,6 +55,7 @@ namespace SQLitePCL.pretty.Orm
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
             public LimitClause Skip(int n)
             {
+                Contract.Requires(n >= 0);
                 return new LimitClause(table, selection, where, this.ordering, null, n);
             }
 
@@ -62,6 +67,7 @@ namespace SQLitePCL.pretty.Orm
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
             public LimitClause ElementAt(int index)
             {
+                Contract.Requires(index >= 0);
                 return Skip(index).Take(1);
             }
 

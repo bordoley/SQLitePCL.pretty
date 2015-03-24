@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 
@@ -33,6 +34,7 @@ namespace SQLitePCL.pretty.Orm
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
             public LimitClause Take(int n)
             {
+                Contract.Requires(n >= 0);
                 return new LimitClause(table, selection, where, ordering, n, offset);
             }
 
@@ -43,6 +45,7 @@ namespace SQLitePCL.pretty.Orm
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
             public LimitClause Skip(int n)
             {
+                Contract.Requires(n >= 0);
                 return new LimitClause(table, selection, where, ordering, limit, n);
             }
 

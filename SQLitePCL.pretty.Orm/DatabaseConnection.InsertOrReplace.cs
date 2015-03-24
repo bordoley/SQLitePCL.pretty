@@ -62,6 +62,7 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
             Contract.Requires(obj != null);
+            Contract.Requires(resultSelector != null);
 
             return This.YieldInsertOrReplaceAll(tableMapping, new T[] {obj}, resultSelector).First().Value;
         }
@@ -83,6 +84,7 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
             Contract.Requires(objects != null);
+            Contract.Requires(resultSelector != null);
 
             return This.RunInTransaction(_ => 
                 This.YieldInsertOrReplaceAll(tableMapping, objects, resultSelector)
@@ -111,6 +113,7 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
             Contract.Requires(objects != null);
+            Contract.Requires(resultSelector != null);
 
             return This.Use((db, _) => db.InsertOrReplaceAll(tableMapping, objects, resultSelector), ct);
         }
@@ -132,6 +135,7 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
             Contract.Requires(objects != null);
+            Contract.Requires(resultSelector != null);
 
             return This.InsertOrReplaceAllAsync(tableMapping, objects, resultSelector, CancellationToken.None);
         }

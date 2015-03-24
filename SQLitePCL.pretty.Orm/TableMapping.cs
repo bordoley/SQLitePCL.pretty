@@ -36,9 +36,39 @@ using SQLitePCL.pretty.Orm.Attributes;
 
 namespace SQLitePCL.pretty.Orm
 {
-    // FIXME: Implement Equality
-    public sealed class TableMapping
+    /// <summary>
+    /// A mapping of an annotated class to a SQL table.
+    /// </summary>
+    public sealed class TableMapping: IEquatable<TableMapping>
     {
+        /// <summary>
+        /// Indicates whether the two TableMapping instances are equal to each other.
+        /// </summary>
+        /// <param name="x">A TableMapping instance.</param>
+        /// <param name="y">A TableMapping instance.</param>
+        /// <returns><see langword="true"/> if the two instances are equal to each other; otherwise,  <see langword="false"/>.</returns>
+        public static bool operator ==(TableMapping x, TableMapping y)
+        {
+            if (object.ReferenceEquals(x, null))
+            {
+                 return object.ReferenceEquals(y, null);
+            }
+
+            return x.Equals(y);
+        }
+
+        /// <summary>
+        /// Indicates whether the two TableMapping instances are not equal each other.
+        /// </summary>
+        /// <param name="x">A TableMapping instance.</param>
+        /// <param name="y">A TableMapping instance.</param>
+        /// <returns><see langword="true"/> if the two instances are not equal to each other; otherwise,  <see langword="false"/>.</returns>
+        public static bool operator !=(TableMapping x, TableMapping y)
+        {
+            return !(x == y);
+        }
+
+
         /// <summary>
         /// Creates a table mapping instance that will use the given builder to build new instances.
         /// </summary>
@@ -105,22 +135,30 @@ namespace SQLitePCL.pretty.Orm
                 throw new ArgumentException("Table mapping only allows one primary key");
             }
 
-            return new TableMapping(tableName, columns, indexes);
+            return new TableMapping(mappedType, tableName, columns, indexes);
         }
 
+        private readonly Type type;
         private readonly string tableName;
         private readonly IReadOnlyDictionary<string, ColumnMapping> columns;
         private readonly IReadOnlyDictionary<string, IndexInfo> indexes;
 
         internal TableMapping(
+            Type type,
             string tableName,
             IReadOnlyDictionary<string, ColumnMapping> columns,
             IReadOnlyDictionary<string, IndexInfo> indexes)
         {
+            this.type = type;
             this.tableName = tableName;
             this.columns = columns;
             this.indexes = indexes;
         }
+
+        /// <summary>
+        /// The clr type that is mapped by the TableMapping.
+        /// </summary>
+        public Type Type { get { return type; } }
 
         /// <summary>
         /// Gets the name of the table.
@@ -139,6 +177,42 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         /// <value>The columns.</value>
         public IReadOnlyDictionary<string,ColumnMapping> Columns { get { return columns; } }
+
+        /// <inheritdoc/>
+        public bool Equals(TableMapping other)
+        {
+            if (Object.ReferenceEquals(other, null))
+            {
+                return false;
+            }
+
+            if (Object.ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return this.Type == other.Type &&
+                this.TableName == other.TableName &&
+                this.Indexes.Equivalent(other.Indexes) &&
+                this.Columns.Equivalent(other.Columns);
+        }
+
+        /// <inheritdoc/>
+        public override bool Equals(object other)
+        {
+            return other is TableMapping && this == (TableMapping)other;
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            int hash = 17;
+            hash = hash * 31 + this.Type.GetHashCode();
+            hash = hash * 31 + this.TableName.GetHashCode();
+            hash = hash * 31 + this.Indexes.GetHashCode();
+            hash = hash * 31 + this.Columns.GetHashCode();
+            return hash;
+        }
     }
 
     internal static partial class TableMappingExt
@@ -257,6 +331,16 @@ namespace SQLitePCL.pretty.Orm
             {
                 throw new NotSupportedException ("Don't know about " + clrType);
             }
+        }
+    }
+
+    internal static class EnumerableExt
+    {
+        internal static bool Equivalent<Key,Value>(this IReadOnlyDictionary<Key,Value> This, IReadOnlyDictionary<Key,Value> other)
+        {
+            return (This.Keys.Count() == other.Keys.Count()) &&
+                This.Keys.All(k => 
+                    other.ContainsKey(k) && object.Equals(other[k], This[k]));
         }
     }
 }

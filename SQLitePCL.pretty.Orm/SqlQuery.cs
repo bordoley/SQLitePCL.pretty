@@ -71,22 +71,24 @@ namespace SQLitePCL.pretty.Orm
     {
         public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(this IDatabaseConnection This, ISqlQuery query)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(query != null);
             return This.Query(query.ToSql());
         }
 
         public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(
             this IDatabaseConnection This, ISqlQuery query, params object[] values)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(query != null);
+            Contract.Requires(values != null);
             return This.Query(query.ToSql(), values);
         }
 
         public static IStatement PrepareStatement(this IDatabaseConnection This, ISqlQuery query)
         {
-            return This.PrepareStatement(query.ToSql());
-        }
-
-        public static IStatement PrepareStatement<T>(this IDatabaseConnection This, ISqlQuery query, TableMapping mapping)
-        {
+            Contract.Requires(This != null);
+            Contract.Requires(query != null);
             return This.PrepareStatement(query.ToSql());
         }
 

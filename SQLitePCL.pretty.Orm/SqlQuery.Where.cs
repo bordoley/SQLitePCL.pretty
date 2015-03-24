@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Linq;
 using System.Collections.Generic;
@@ -22,16 +23,20 @@ namespace SQLitePCL.pretty.Orm
 
             public OrderByClause<T> OrderBy<TValue>(Expression<Func<T, TValue>> orderExpr)
             {
+                Contract.Requires(orderExpr != null);
                 return CreateOrderBy(orderExpr, true);
             }
 
             public OrderByClause<T> OrderByDescending<TValue>(Expression<Func<T, TValue>> orderExpr)
             {
+                Contract.Requires(orderExpr != null);
                 return CreateOrderBy(orderExpr, false);
             }
 
             private OrderByClause<T> CreateOrderBy<TValue>(Expression<Func<T, TValue>> orderExpr, bool asc)
             {  
+                Contract.Requires(orderExpr != null);
+
                 var orderBy = new List<Tuple<string, bool>>();
                 orderBy.Add(orderExpr.CompileOrderByExpression(asc));
                 return new OrderByClause<T>(table, selection, where, orderBy);
@@ -39,36 +44,43 @@ namespace SQLitePCL.pretty.Orm
 
             public WhereClause<T> Where<U,V,W,X,Y,Z>(Expression<Func<T,U,V,W,X,Y,Z,bool>> predExpr)
             {
+                Contract.Requires(predExpr != null);
                 return this.Where((LambdaExpression) predExpr);
             }
 
             public WhereClause<T> Where<U,V,W,X,Y>(Expression<Func<T,U,V,W,X,Y,bool>> predExpr)
             {
+                Contract.Requires(predExpr != null);
                 return this.Where((LambdaExpression) predExpr);
             }
 
             public WhereClause<T> Where<U,V,W,X>(Expression<Func<T,U,V,W,X,bool>> predExpr)
             {
+                Contract.Requires(predExpr != null);
                 return this.Where((LambdaExpression) predExpr);
             }
 
             public WhereClause<T> Where<U,V,W>(Expression<Func<T,U,V,W,bool>> predExpr)
             {
+                Contract.Requires(predExpr != null);
                 return this.Where((LambdaExpression) predExpr);
             }
 
             public WhereClause<T> Where<U,V>(Expression<Func<T,U,V,bool>> predExpr)
             {
+                Contract.Requires(predExpr != null);
                 return this.Where((LambdaExpression) predExpr);
             }
 
             public WhereClause<T> Where<U>(Expression<Func<T,U,bool>> predExpr)
             {
+                Contract.Requires(predExpr != null);
                 return this.Where((LambdaExpression) predExpr);
             }
 
             public WhereClause<T> Where(Expression<Func<T, bool>> predExpr)
             {
+                Contract.Requires(predExpr != null);
                 return this.Where((LambdaExpression) predExpr);
             }
 
@@ -86,6 +98,7 @@ namespace SQLitePCL.pretty.Orm
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
             public LimitClause Take(int n)
             {
+                Contract.Requires(n >= 0);
                 return new LimitClause(table, selection, where, new List<Tuple<string, bool>>(), n, null);
             }
 
@@ -96,6 +109,7 @@ namespace SQLitePCL.pretty.Orm
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
             public LimitClause Skip(int n)
             {
+                Contract.Requires(n >= 0);
                 return new LimitClause(table, selection, where, new List<Tuple<string, bool>>(), null, n);
             }
 
@@ -107,6 +121,7 @@ namespace SQLitePCL.pretty.Orm
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
             public LimitClause ElementAt(int index)
             {
+                Contract.Requires(index >= 0);
                 return Skip(index).Take(1);
             }
 

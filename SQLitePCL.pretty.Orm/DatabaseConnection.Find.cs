@@ -70,6 +70,7 @@ namespace SQLitePCL.pretty.Orm
         {
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
+            Contract.Requires(resultSelector != null);
 
             var result = This.YieldFindAll(tableMapping, new long[] { primaryKey }, resultSelector).FirstOrDefault();
 
@@ -100,6 +101,7 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
             Contract.Requires(primaryKeys != null);
+            Contract.Requires(resultSelector != null);
 
             return This.YieldFindAll(tableMapping, primaryKeys, resultSelector)
                        .Where(kvp => kvp.Value != null)
@@ -128,6 +130,7 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
             Contract.Requires(primaryKeys != null);
+            Contract.Requires(resultSelector != null);
 
             return This.Use((db,_) => db.FindAll(tableMapping, primaryKeys, resultSelector), ct);
         }
@@ -149,6 +152,7 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
             Contract.Requires(primaryKeys != null);
+            Contract.Requires(resultSelector != null);
 
             return This.FindAllAsync(tableMapping, primaryKeys, resultSelector, CancellationToken.None);
         }

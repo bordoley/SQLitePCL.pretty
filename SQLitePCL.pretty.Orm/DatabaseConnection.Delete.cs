@@ -61,6 +61,7 @@ namespace SQLitePCL.pretty.Orm
         {
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
+            Contract.Requires(resultSelector != null);
            
             var result = This.YieldDeleteAll(tableMapping, new long[] { primaryKey }, resultSelector).FirstOrDefault();
             if (result.Value != null)
@@ -92,6 +93,7 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
             Contract.Requires(primaryKeys != null);
+            Contract.Requires(resultSelector != null);
 
             return This.RunInTransaction(_ => 
                         This.YieldDeleteAll(tableMapping, primaryKeys, resultSelector)
@@ -121,6 +123,7 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
             Contract.Requires(primaryKeys != null);
+            Contract.Requires(resultSelector != null);
 
             return This.Use((db,_) => db.DeleteAll<T>(tableMapping, primaryKeys, resultSelector), ct);
         }
@@ -142,6 +145,7 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
             Contract.Requires(primaryKeys != null);
+            Contract.Requires(resultSelector != null);
 
             return This.DeleteAllAsync(tableMapping, primaryKeys, resultSelector, CancellationToken.None);
         }
