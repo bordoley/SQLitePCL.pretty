@@ -111,86 +111,116 @@ SQLitePCL.pretty has a very simple table mapping ORM, available in the SQLitePCL
 
 ```CSharp
 
-    public void Example()
+// Per thread builder to limit the number of instances.
+private static readonly ThreadLocal<TestObject.Builder> testObjectBuilder = new 
+        ThreadLocal<TestObject.Builder>(() => new TestObject.Builder());
+
+public void Example()
+{
+    // You must provide a result selector to convert a result set row into an object.
+    // By making this an explicit parameter, SQLitePCL.pretty can support immutable object builders.
+    var resultSelector = 
+        ResultSet.RowToObject(
+            () => testObjectBuilder.Value, 
+            o => ((TestObject.Builder)o).Build());
+
+    using (var db = SQLite3.OpenInMemory())
     {
-        var table = TableMapping.Create<TestObject>(
-                        () => testObjectBuilder.Value, 
-                        o => ((TestObject.Builder)o).Build());
+        // Creates the table and indexes if they do not yet exist.
+        db.InitTable<TestObject>();
 
-        using (var db = SQLite3.OpenInMemory())
+        // Insert a new object into the database that has nullable values.
+        // InsertOrReplace returns the resulting object in the database along with
+        // its new primary key and any default values assigned by the database.
+        var inserted = 
+            db.InsertOrReplace(
+                new TestObject.Builder() { Value = "Hello" }.Build(), 
+                resultSelector);
+
+        // Lookup the object in the database.
+        TestObject found;
+        if (!db.TryFind(inserted.Id.Value, resultSelector, out found))
         {
-            db.InitTable(table);
+            throw new Exception("item not found");
+        }
 
-            var inserted = db.InsertOrReplace(table, new TestObject.Builder() { Value = "Hello" }.Build());
-            
-            TestObject found;
-            if (!db.TryFind(table, inserted.Id, out found))
-            {
-                throw new Exception("item not found");
-            }
-            
-            TestObject deleted;
-            if (!db.TryDelete(table, inserted.Id, out deleted))
-            {
-                throw new Exception("deletion failed");
-            }
+        // We can use linq like syntax to write queries against the database.
+        var query = 
+            SqlQuery.From<TestObject>()
+                    .Select()
+                    // This creates a named bind parameter ":value"
+                    .Where<string>((x, value) => x.Value.Contains(value))
+                    .OrderBy(x => x.Value)
+                    .Take(100)
+                    .Skip(0);
+
+        using (var stmt = db.PrepareStatement(query))
+        {
+            stmt.BindParameters[":value"].Bind("ell");
+            // This will throw if no results are returned
+            stmt.Query().First();
+        }
+
+        // Delete the object from the database.
+        TestObject deleted;
+        if (!db.TryDelete(inserted.Id.Value, resultSelector, out deleted))
+        {
+            throw new Exception("deletion failed");
         }
     }
+}
 
-    // Per thread builder to limit the number of instances.
-    private static readonly ThreadLocal<TestObject.Builder> testObjectBuilder = new 
-            ThreadLocal<TestObject.Builder>(() => new TestObject.Builder());
 
-    public sealed class TestObject : IEquatable<TestObject>
+public sealed class TestObject : IEquatable<TestObject>
+{
+    public class Builder
     {
-        public class Builder
-        {
-            private long? id;
-            private string value;
-
-            public long? Id { get { return id; } set { this.id = value; } }
-            public string Value { get { return value; } set { this.value = value; } }
-
-            public TestObject Build()
-            {
-                return new TestObject(id, value);
-            }
-        }
-
         private long? id;
-        private string value; 
+        private string value;
 
-        private TestObject(long? id, string value)
+        public long? Id { get { return id; } set { this.id = value; } }
+        public string Value { get { return value; } set { this.value = value; } }
+
+        public TestObject Build()
         {
-            this.id = id;
-            this.value = value;
-        }
-
-        [PrimaryKey]
-        public long? Id { get { return id; } }
-
-        public string Value { get { return value; } }
-
-        public bool Equals(TestObject other)
-        {
-            return this.Id == other.Id && 
-                this.Value == other.Value;
-        }
-
-        public override bool Equals(object other)
-        {
-            return other is TestObject && this.Equals((TestObject)other);
-        }
-
-        public override int GetHashCode()
-        {
-            int hash = 17;
-            hash = hash * 31 + this.Id.GetHashCode();
-            hash = hash * 31 + this.Value.GetHashCode();
-
-            return hash;
+            return new TestObject(id, value);
         }
     }
+
+    private long? id;
+    private string value; 
+
+    private TestObject(long? id, string value)
+    {
+        this.id = id;
+        this.value = value;
+    }
+
+    [PrimaryKey]
+    public long? Id { get { return id; } }
+
+    public string Value { get { return value; } }
+
+    public bool Equals(TestObject other)
+    {
+        return this.Id == other.Id && 
+            this.Value == other.Value;
+    }
+
+    public override bool Equals(object other)
+    {
+        return other is TestObject && this.Equals((TestObject)other);
+    }
+
+    public override int GetHashCode()
+    {
+        int hash = 17;
+        hash = hash * 31 + this.Id.GetHashCode();
+        hash = hash * 31 + this.Value.GetHashCode();
+
+        return hash;
+    }
+}
 ```
 
 # How does this compare to...
