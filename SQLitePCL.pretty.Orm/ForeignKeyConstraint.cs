@@ -5,7 +5,7 @@ namespace SQLitePCL.pretty.Orm
     /// <summary>
     /// Foreign key constraint table, column name tuple.
     /// </summary>
-    public sealed class ForeignKeyConstraint : IEquatable<ForeignKeyConstraint>
+    internal sealed class ForeignKeyConstraint : IEquatable<ForeignKeyConstraint>
     {
         /// <summary>
         /// Indicates whether the two ForeignKeyConstraint instances are equal to each other.

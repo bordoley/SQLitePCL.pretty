@@ -6,17 +6,17 @@ using System.Reflection;
 
 namespace SQLitePCL.pretty.Orm
 {
-    public static partial class Orm
+    public static partial class ResultSet
     {
-        public static Func<IReadOnlyList<IResultSetValue>,T> ResultSetRowToObject<T>()
+        public static Func<IReadOnlyList<IResultSetValue>,T> RowToObject<T>()
         {
             Func<T> builder = () => Activator.CreateInstance<T>();
             Func<T, T> build = obj => obj;
 
-            return ResultSetRowToObject(builder, build);
+            return RowToObject(builder, build);
         }
 
-        public static Func<IReadOnlyList<IResultSetValue>,T> ResultSetRowToObject<TBuilder, T>(Func<TBuilder> builder, Func<TBuilder,T> build)
+        public static Func<IReadOnlyList<IResultSetValue>,T> RowToObject<TBuilder, T>(Func<TBuilder> builder, Func<TBuilder,T> build)
         {   
             Contract.Requires(builder != null);
             Contract.Requires(build != null);

@@ -46,7 +46,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestCreate()
         {
-            var table = TableMapping.Create<TestObjectWithAutoIncrementPrimaryKeyAndDefaultTableName>();
+            var table = TableMapping.Get<TestObjectWithAutoIncrementPrimaryKeyAndDefaultTableName>();
 
             Assert.AreEqual(table.TableName, "TestObjectWithAutoIncrementPrimaryKeyAndDefaultTableName");
 
@@ -150,7 +150,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestCreateWithExplicitTableName()
         {
-            var tableWithExplicitName = TableMapping.Create<TestObjectWithExplicitTableName>();
+            var tableWithExplicitName = TableMapping.Get<TestObjectWithExplicitTableName>();
             Assert.AreEqual(tableWithExplicitName.TableName, "ExplicitTableName");
         }
 
@@ -163,7 +163,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestCreateWithNonAutoIncrementPrimaryKey()
         {
-            var table = TableMapping.Create<TestObjectWithNonAutoIncrementPrimaryKey>();
+            var table = TableMapping.Get<TestObjectWithNonAutoIncrementPrimaryKey>();
 
             var id = table.Columns["Id"];
             Assert.AreEqual(id.ClrType, typeof(long));
@@ -212,11 +212,11 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestCreateWithInvalidTableTypes()
         {
-            Assert.Throws<NotSupportedException>(() => TableMapping.Create<TestObjectWithUnsupportedPropertyType>());
-            Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithNoPrimaryKey>());
-            Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithBadCompositeIndex>());
-            Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithBadCompositePrimaryKey>());
-            Assert.Throws<ArgumentException>(() => TableMapping.Create<TestObjectWithBadNullableDateTimePrimaryKey>());
+            Assert.Throws<NotSupportedException>(() => TableMapping.Get<TestObjectWithUnsupportedPropertyType>());
+            Assert.Throws<ArgumentException>(() => TableMapping.Get<TestObjectWithNoPrimaryKey>());
+            Assert.Throws<ArgumentException>(() => TableMapping.Get<TestObjectWithBadCompositeIndex>());
+            Assert.Throws<ArgumentException>(() => TableMapping.Get<TestObjectWithBadCompositePrimaryKey>());
+            Assert.Throws<ArgumentException>(() => TableMapping.Get<TestObjectWithBadNullableDateTimePrimaryKey>());
         }
 
 
@@ -247,10 +247,10 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestForeignKeyConstraints()
         {
-            var childTableSelector = Orm.Orm.ResultSetRowToObject<TestChildObject>();
-            var parentTableSelector = Orm.Orm.ResultSetRowToObject<TestParentObject>();
+            var childTableSelector = Orm.ResultSet.RowToObject<TestChildObject>();
+            var parentTableSelector = Orm.ResultSet.RowToObject<TestParentObject>();
 
-            Assert.Throws<ArgumentException>(() => TableMapping.Create<TestBadChildObject>());
+            Assert.Throws<ArgumentException>(() => TableMapping.Get<TestBadChildObject>());
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -259,11 +259,11 @@ namespace SQLitePCL.pretty.tests
 
                 // Foreign Key constraint
                 Assert.Throws<SQLiteException>(() => db.InsertOrReplace(new TestChildObject(){ ParentId = 1 }, childTableSelector));
-                Assert.AreEqual(db.Query("SELECT count(*) FROM " + TableMapping.Create<TestChildObject>().TableName).SelectScalarInt().First(), 0);
+                Assert.AreEqual(db.Query("SELECT count(*) FROM " + TableMapping.Get<TestChildObject>().TableName).SelectScalarInt().First(), 0);
 
                 db.InsertOrReplace(new TestParentObject() { Id = 100 }, parentTableSelector);
                 db.InsertOrReplace(new TestChildObject() { ParentId = 100 }, childTableSelector);
-                Assert.AreEqual(db.Query("SELECT count(*) FROM " + TableMapping.Create<TestChildObject>().TableName).SelectScalarInt().First(), 1);
+                Assert.AreEqual(db.Query("SELECT count(*) FROM " + TableMapping.Get<TestChildObject>().TableName).SelectScalarInt().First(), 1);
 
                 // Foreign Key Constraint causes delete to fail
                 TestParentObject deleted;

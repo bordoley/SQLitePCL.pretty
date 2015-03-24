@@ -97,7 +97,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestInitTable()
         {
-            var table = TableMapping.Create<TestObject>();
+            var table = TableMapping.Get<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -115,11 +115,11 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestInitTableWithMigration()
         {
-            var tableOriginal = TableMapping.Create<TestMutableObject>();
-            var tableOriginalOrm = Orm.Orm.ResultSetRowToObject<TestMutableObject>();
+            var tableOriginal = TableMapping.Get<TestMutableObject>();
+            var tableOriginalOrm = Orm.ResultSet.RowToObject<TestMutableObject>();
 
-            var tableNew = TableMapping.Create<TestMutableObjectUpdated>();
-            var tableNewOrm = Orm.Orm.ResultSetRowToObject<TestMutableObjectUpdated>();
+            var tableNew = TableMapping.Get<TestMutableObjectUpdated>();
+            var tableNewOrm = Orm.ResultSet.RowToObject<TestMutableObjectUpdated>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -158,7 +158,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestInsertOrReplace()
         {
-            var orm = Orm.Orm.ResultSetRowToObject(
+            var orm = Orm.ResultSet.RowToObject(
                         () => testObjectBuilder.Value, 
                         o => ((TestObject.Builder)o).Build());
                             
@@ -178,7 +178,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestInsertOrReplaceAll()
         {
-            var orm = Orm.Orm.ResultSetRowToObject(
+            var orm = Orm.ResultSet.RowToObject(
                         () => testObjectBuilder.Value, 
                         o => ((TestObject.Builder)o).Build());
 
@@ -218,7 +218,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestDelete()
         {
-            var orm = Orm.Orm.ResultSetRowToObject(
+            var orm = Orm.ResultSet.RowToObject(
                         () => testObjectBuilder.Value, 
                         o => ((TestObject.Builder)o).Build());
 
@@ -250,7 +250,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestDeleteAll()
         {
-            var orm = Orm.Orm.ResultSetRowToObject(
+            var orm = Orm.ResultSet.RowToObject(
                         () => testObjectBuilder.Value, 
                         o => ((TestObject.Builder)o).Build());
 

@@ -24,7 +24,7 @@ namespace SQLitePCL.pretty.Orm
         {
             Contract.Requires(This != null);
 
-            var tableMapping = TableMapping.Create<T>();
+            var tableMapping = TableMapping.Get<T>();
             var sql = deleteQueries.GetValue(tableMapping, mapping => 
                 {
                     var primaryKeyColumn = mapping.PrimaryKeyColumn();
@@ -119,7 +119,7 @@ namespace SQLitePCL.pretty.Orm
         {
             Contract.Requires(This != null);
 
-            var tableMapping = TableMapping.Create<T>();
+            var tableMapping = TableMapping.Get<T>();
             This.Execute(SQLBuilder.DropTableIfExists(tableMapping.TableName));
         }
 
@@ -133,7 +133,7 @@ namespace SQLitePCL.pretty.Orm
         {
             Contract.Requires(This != null);
 
-            var tableMapping = TableMapping.Create<T>();
+            var tableMapping = TableMapping.Get<T>();
             This.Execute(SQLBuilder.DeleteAll(tableMapping.TableName));
         }
     }

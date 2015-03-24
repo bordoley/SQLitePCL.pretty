@@ -27,7 +27,7 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(This != null);
             Contract.Requires(obj != null);
 
-            var columns = TableMapping.Create<T>().Columns;
+            var columns = TableMapping.Get<T>().Columns;
             foreach (var column in columns)
             {
                 var key = ":" + column.Key;

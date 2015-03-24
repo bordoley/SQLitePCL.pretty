@@ -23,7 +23,7 @@ namespace SQLitePCL.pretty.Orm
         {
             Contract.Requires(This != null);
 
-            var tableMapping = TableMapping.Create<T>();
+            var tableMapping = TableMapping.Get<T>();
             var sql = findQueries.GetValue(tableMapping, mapping => 
                 {
                     var column = mapping.PrimaryKeyColumn();

@@ -250,7 +250,8 @@ namespace SQLitePCL.pretty.Orm.Attributes
     [AttributeUsage (AttributeTargets.Property)]
     public sealed class ForeignKeyAttribute : Attribute
     {
-        private readonly ForeignKeyConstraint constraint;
+        private readonly string tableName;
+        private readonly string columnName;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SQLitePCL.pretty.Orm.Attributes.ForeignKeyAttribute"/> class.
@@ -260,9 +261,10 @@ namespace SQLitePCL.pretty.Orm.Attributes
         {
             Contract.Requires(typ != null);
 
-            var tableName = typ.GetTableName();
-            var columnName = typ.GetPublicInstanceProperties().Where(x => x.IsPrimaryKey()).Select(x => x.GetColumnName()).First();
-            this.constraint = new ForeignKeyConstraint(tableName, columnName);
+            var table = TableMapping.Get(typ);
+
+            this.tableName = table.TableName;
+            this.columnName = table.PrimaryKeyColumn();
         }
 
         /// <summary>
@@ -275,13 +277,12 @@ namespace SQLitePCL.pretty.Orm.Attributes
             Contract.Requires(tableName != null);
             Contract.Requires(columnName != null);
 
-            this.constraint = new ForeignKeyConstraint(tableName, columnName);
+            this.tableName = tableName;
+            this.columnName = columnName;
         }
 
-        /// <summary>
-        /// Gets the foreign key constraint value.
-        /// </summary>
-        public ForeignKeyConstraint Value { get { return constraint; } }
+        public string TableName { get { return tableName; } }
+        public string ColumnName { get { return columnName; } }
     }
 
     internal static class OrmAttributes
@@ -341,8 +342,10 @@ namespace SQLitePCL.pretty.Orm.Attributes
 
         internal static ForeignKeyConstraint GetForeignKeyConstraint(this PropertyInfo This)
         {
-            var fkAttr = This.GetCustomAttributes<ForeignKeyAttribute>(true).FirstOrDefault();
-            return fkAttr != null ? fkAttr.Value : null;
+            return 
+                This.GetCustomAttributes<ForeignKeyAttribute>(true)
+                    .Select(x => new ForeignKeyConstraint(x.TableName, x.ColumnName))
+                    .FirstOrDefault();
         }
 
         internal static IEnumerable<PropertyInfo> GetNotIgnoredGettableProperties(this Type This)

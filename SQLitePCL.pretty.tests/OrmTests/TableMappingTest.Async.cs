@@ -18,7 +18,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public async Task TestDeleteAllAsync()
         {
-            var orm = Orm.Orm.ResultSetRowToObject(
+            var orm = Orm.ResultSet.RowToObject(
                         () => testObjectBuilder.Value,
                         o => ((TestObject.Builder)o).Build());
 

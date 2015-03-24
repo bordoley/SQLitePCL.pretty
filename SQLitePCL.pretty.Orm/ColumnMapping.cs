@@ -6,7 +6,7 @@ namespace SQLitePCL.pretty.Orm
     /// <summary>
     /// Provides the mapping between a column's SQL and CLR representation.
     /// </summary>
-    public sealed class ColumnMapping: IEquatable<ColumnMapping>
+    internal sealed class ColumnMapping: IEquatable<ColumnMapping>
     {
         /// <summary>
         /// Indicates whether the two ColumnMapping instances are equal to each other.

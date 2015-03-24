@@ -38,7 +38,7 @@ namespace SQLitePCL.pretty.Orm
 
             This.RunInTransaction(_ =>
                 {
-                    var tableMapping = TableMapping.Create<T>();
+                    var tableMapping = TableMapping.Get<T>();
                     This.CreateTableIfNotExists(tableMapping.TableName, CreateFlags.None, tableMapping.Columns);
 
                     if (This.Changes != 0)

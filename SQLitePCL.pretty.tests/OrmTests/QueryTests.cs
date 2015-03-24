@@ -24,7 +24,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestWhereGreaterThanPropertyValue()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -42,7 +42,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestWhereLessThanConstant()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -59,7 +59,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestWhereLessThanOrEqualToBindParam()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -79,7 +79,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestWhereGreaterThanOrEqual()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -99,7 +99,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestWhereOr()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -117,7 +117,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestMultipleBindParams()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -140,7 +140,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestMultipleBindParamsBoundByName()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -168,7 +168,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestMultipleWhereCalls()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -190,7 +190,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestWhereContains()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -208,7 +208,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestWhereStartsWith()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -226,7 +226,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestWhereEndsWith()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -244,7 +244,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestWhereEndsIsNull()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -260,7 +260,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestWhereEndsIsNotNull()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -276,7 +276,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestWhereEqual()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -292,7 +292,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestWhereNot()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -308,7 +308,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestOrderBy()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -344,7 +344,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestElementAt()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -366,7 +366,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestWhereWithCast()
         {
-            var orm = Orm.Orm.ResultSetRowToObject<TestObject>();
+            var orm = Orm.ResultSet.RowToObject<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {

@@ -39,7 +39,7 @@ namespace SQLitePCL.pretty.Orm
     /// <summary>
     /// A mapping of an annotated class to a SQL table.
     /// </summary>
-    public sealed class TableMapping: IEquatable<TableMapping>
+    internal sealed class TableMapping: IEquatable<TableMapping>
     {
         /// <summary>
         /// Indicates whether the two TableMapping instances are equal to each other.
@@ -75,9 +75,14 @@ namespace SQLitePCL.pretty.Orm
         /// Creates a table mapping instance that will use the given builder to build new instances.
         /// </summary>
         /// <typeparam name="T">The mapped type.</typeparam>
-        internal static TableMapping Create<T>()
+        internal static TableMapping Get<T>()
         {
-            return tableMappings.GetValue(typeof(T), t => CreateInternal(t));
+            return Get(typeof(T));
+        }
+
+        internal static TableMapping Get(Type typ)
+        {
+            return tableMappings.GetValue(typ, t => CreateInternal(t));
         }
 
         private static TableMapping CreateInternal(Type mappedType)

@@ -19,7 +19,7 @@ namespace SQLitePCL.pretty.Orm
 
             public WhereClause<T> Select()
             {
-                var table = TableMapping.Create<T>();
+                var table = TableMapping.Get<T>();
                 var columns = table.Columns.Keys.Select(col => table.TableName + "." + col).ToList();
                 return new WhereClause<T>(this, columns, null);
             }

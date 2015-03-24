@@ -7,7 +7,7 @@ namespace SQLitePCL.pretty.Orm
     /// <summary>
     /// Details about a Table index.
     /// </summary>
-    public sealed class IndexInfo : IEquatable<IndexInfo>
+    internal sealed class IndexInfo : IEquatable<IndexInfo>
     {
         /// <summary>
         /// Indicates whether the two IndexInfo instances are equal to each other.
