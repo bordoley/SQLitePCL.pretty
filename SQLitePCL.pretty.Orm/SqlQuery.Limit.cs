@@ -8,7 +8,7 @@ namespace SQLitePCL.pretty.Orm
 {
     public static partial class SqlQuery
     {
-        public sealed class LimitClause : ISqlQuery
+        public sealed class LimitClause<T> : ISqlQuery
         {
             private readonly string table;
             private readonly string selection;
@@ -32,10 +32,10 @@ namespace SQLitePCL.pretty.Orm
             /// </summary>
             /// <param name="n">The number of elements to return.</param>
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
-            public LimitClause Take(int n)
+            public LimitClause<T> Take(int n)
             {
                 Contract.Requires(n >= 0);
-                return new LimitClause(table, selection, where, ordering, n, offset);
+                return new LimitClause<T>(table, selection, where, ordering, n, offset);
             }
 
             /// <summary>
@@ -43,10 +43,10 @@ namespace SQLitePCL.pretty.Orm
             /// </summary>
             /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
-            public LimitClause Skip(int n)
+            public LimitClause<T> Skip(int n)
             {
                 Contract.Requires(n >= 0);
-                return new LimitClause(table, selection, where, ordering, limit, n);
+                return new LimitClause<T>(table, selection, where, ordering, limit, n);
             }
 
             public override string ToString()

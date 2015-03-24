@@ -96,10 +96,10 @@ namespace SQLitePCL.pretty.Orm
             /// </summary>
             /// <param name="n">The number of elements to return.</param>
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
-            public LimitClause Take(int n)
+            public LimitClause<T> Take(int n)
             {
                 Contract.Requires(n >= 0);
-                return new LimitClause(table, selection, where, new List<Tuple<string, bool>>(), n, null);
+                return new LimitClause<T>(table, selection, where, new List<Tuple<string, bool>>(), n, null);
             }
 
             /// <summary>
@@ -107,10 +107,10 @@ namespace SQLitePCL.pretty.Orm
             /// </summary>
             /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
-            public LimitClause Skip(int n)
+            public LimitClause<T> Skip(int n)
             {
                 Contract.Requires(n >= 0);
-                return new LimitClause(table, selection, where, new List<Tuple<string, bool>>(), null, n);
+                return new LimitClause<T>(table, selection, where, new List<Tuple<string, bool>>(), null, n);
             }
 
             /// <summary>
@@ -119,7 +119,7 @@ namespace SQLitePCL.pretty.Orm
             /// <returns>The <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
             /// <param name="index">Index.</param>
             /// <returns>A new <see cref="SQLitePCL.pretty.Orm.TableQuery&lt;T&gt;"/>.</returns>
-            public LimitClause ElementAt(int index)
+            public LimitClause<T> ElementAt(int index)
             {
                 Contract.Requires(index >= 0);
                 return Skip(index).Take(1);
