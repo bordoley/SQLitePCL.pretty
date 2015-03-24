@@ -223,7 +223,7 @@ public sealed class TestObject : IEquatable<TestObject>
 }
 ```
 
-# I keep on getting crashes due to EntryPointNotFoundExceptions
+# I'm getting crashes due to EntryPointNotFoundExceptions
 
 SQLite has continued to have active developement over the past few years. Unfortunately both Apple and Google aren't paying attention and have continued to ship ancient versions. SQLitePCL.raw includes optional DLLs that can be included in your application that also include a statically linked recent version of SQLite. You should use these instead, as SQLitePCL.pretty is dependent upon many modern SQLite features.
 
