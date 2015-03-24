@@ -68,14 +68,20 @@ namespace SQLitePCL.pretty.Orm
             return !(x == y);
         }
 
+        private static readonly ConditionalWeakTable<Type, TableMapping> tableMappings = 
+            new ConditionalWeakTable<Type, TableMapping>();
 
         /// <summary>
         /// Creates a table mapping instance that will use the given builder to build new instances.
         /// </summary>
         /// <typeparam name="T">The mapped type.</typeparam>
-        public static TableMapping Create<T>()
+        internal static TableMapping Create<T>()
         {
-            var mappedType = typeof(T);
+            return tableMappings.GetValue(typeof(T), t => CreateInternal(t));
+        }
+
+        private static TableMapping CreateInternal(Type mappedType)
+        {
             var tableName = mappedType.GetTableName();
             var props = mappedType.GetNotIgnoredGettableProperties();
 

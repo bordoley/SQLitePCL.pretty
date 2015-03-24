@@ -10,19 +10,13 @@ namespace SQLitePCL.pretty.Orm
     {
         public sealed class LimitClause<T> : ISqlQuery
         {
-            private readonly string table;
-            private readonly string selection;
-            private readonly Expression where;
-            private readonly IReadOnlyList<Tuple<string, bool>> ordering;
+            private readonly OrderByClause<T> orderBy;
             private readonly Nullable<int> limit;
             private readonly Nullable<int> offset;
 
-            internal LimitClause(string table, string selection, Expression where, IReadOnlyList<Tuple<string, bool>> ordering, Nullable<int> limit, Nullable<int> offset)
+            internal LimitClause(OrderByClause<T> orderBy, Nullable<int> limit, Nullable<int> offset)
             {
-                this.table = table;
-                this.selection = selection;
-                this.where = where;
-                this.ordering = ordering;
+                this.orderBy = orderBy;
                 this.limit = limit;
                 this.offset = offset;
             }
@@ -35,7 +29,7 @@ namespace SQLitePCL.pretty.Orm
             public LimitClause<T> Take(int n)
             {
                 Contract.Requires(n >= 0);
-                return new LimitClause<T>(table, selection, where, ordering, n, offset);
+                return new LimitClause<T>(orderBy, n, offset);
             }
 
             /// <summary>
@@ -46,17 +40,15 @@ namespace SQLitePCL.pretty.Orm
             public LimitClause<T> Skip(int n)
             {
                 Contract.Requires(n >= 0);
-                return new LimitClause<T>(table, selection, where, ordering, limit, n);
+                return new LimitClause<T>(orderBy, limit, n);
             }
 
             public override string ToString()
             {
-                return SqlQuery.ToString(selection, table, where, ordering, limit, offset); 
-            }
-
-            public string ToSql()
-            {
-                return this.ToString();
+                return 
+                    orderBy.ToString() +
+                    (limit.HasValue ? "\r\nLIMIT " + limit.Value : "" ) +
+                    (offset.HasValue ? "\r\nOFFSET " + offset.Value : "");
             }
         }
     }

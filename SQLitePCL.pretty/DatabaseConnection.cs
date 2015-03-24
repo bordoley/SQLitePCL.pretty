@@ -800,31 +800,6 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             This.Execute(SQLBuilder.Vacuum);
         }
-
-        /// <summary>
-        /// Drops the table if it exists. Otherwise this is a no-op.
-        /// </summary>
-        /// <param name="This">The database connection.</param>
-        /// <param name="table">The table name.</param>
-        /// <seealso href="https://www.sqlite.org/lang_droptable.html"/>
-        public static void DropTableIfExists(this IDatabaseConnection This, string table)
-        {
-            This.Execute(SQLBuilder.DropTableIfExists(table));
-        }
-
-
-        /// <summary>
-        /// Deletes all rows in a given table.
-        /// </summary>
-        /// <param name="This">The database connection.</param>
-        /// <param name="table">The table name.</param>
-        public static void DeleteAllRows(this IDatabaseConnection This, string table)
-        {
-            Contract.Requires(This != null);
-            Contract.Requires(table != null);
-      
-            This.Execute(SQLBuilder.DeleteAll(table));
-        }
     }
 
     /// <summary>

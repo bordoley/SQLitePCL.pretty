@@ -18,7 +18,6 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public async Task TestDeleteAllAsync()
         {
-            var table = TableMapping.Create<TestObject>();
             var orm = Orm.Orm.ResultSetRowToObject(
                         () => testObjectBuilder.Value,
                         o => ((TestObject.Builder)o).Build());
@@ -33,31 +32,31 @@ namespace SQLitePCL.pretty.tests
                     new TestObject.Builder() { Value = "Hello3" }.Build()
                 };
 
-                await db.InitTableAsync(table);
-                var notDeleted = await db.Use(x => x.InsertOrReplace(table, new TestObject.Builder() { Value = "NotDeleted" }.Build(), orm));
-                var inserted = await db.InsertOrReplaceAllAsync(table, objects, orm);
-                var deleted = await db.DeleteAllAsync(table, inserted.Values.Select(x => x.Id.Value), orm);
+                await db.InitTableAsync<TestObject>();
+                var notDeleted = await db.Use(x => x.InsertOrReplace(new TestObject.Builder() { Value = "NotDeleted" }.Build(), orm));
+                var inserted = await db.InsertOrReplaceAllAsync(objects, orm);
+                var deleted = await db.DeleteAllAsync(inserted.Values.Select(x => x.Id.Value), orm);
                 CollectionAssert.AreEquivalent(inserted.Values, deleted.Values);
 
-                var found = await db.FindAllAsync(table, inserted.Values.Select(x => x.Id.Value), orm);
+                var found = await db.FindAllAsync(inserted.Values.Select(x => x.Id.Value), orm);
                 Assert.IsEmpty(found);
 
                 await db.Use(x =>
                     {
                         TestObject found2;
                         
-                        if (x.TryFind(table, notDeleted.Id.Value, orm, out found2))
+                        if (x.TryFind(notDeleted.Id.Value, orm, out found2))
                         {
                             Assert.AreEqual(found2, notDeleted);
                         }
                     });
 
-                await db.DeleteAllRowsAsync(table.TableName);
+                await db.DeleteAllRowsAsync<TestObject>();
 
                 await db.Use(x =>
                     {
                         TestObject notFound;
-                        Assert.IsFalse(x.TryFind(table, notDeleted.Id.Value, orm, out notFound));
+                        Assert.IsFalse(x.TryFind(notDeleted.Id.Value, orm, out notFound));
                     });
             }
         }
@@ -65,8 +64,6 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public async Task TestDropTableAsync()
         {
-            var table = TableMapping.Create<TestObject>();
-
             using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
             {
                 var tableLookup =
@@ -75,13 +72,13 @@ namespace SQLitePCL.pretty.tests
                       ORDER BY name;";
 
                 // Table doesn't exist
-                await db.DropTableIfExistsAsync(table.TableName);
+                await db.DropTableIfExistsAsync<TestObject>();
 
-                await db.InitTableAsync(table);
+                await db.InitTableAsync<TestObject>();
                 var count = await db.Query(tableLookup).Count();
                 Assert.Greater(count, 0);
 
-                await db.DropTableIfExistsAsync(table.TableName);
+                await db.DropTableIfExistsAsync<TestObject>();
 
                 count = await db.Query(tableLookup).Count();
                 Assert.AreEqual(count, 0);

@@ -22,6 +22,8 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(build != null);
 
             var columns = new Dictionary<string, PropertyInfo>();
+            var tableName = typeof(T).GetTableName();
+
             var typ = typeof(TBuilder);
 
             var props = typ.GetNotIgnoredSettableProperties();
@@ -38,8 +40,9 @@ namespace SQLitePCL.pretty.Orm
 
                     foreach (var column in row)
                     {
+                        var columnInfo = column.ColumnInfo;
                         PropertyInfo prop;
-                        if (columns.TryGetValue(column.ColumnInfo.OriginName, out prop))
+                        if (columnInfo.TableName == tableName && columns.TryGetValue(columnInfo.OriginName, out prop))
                         {
                             var value = column.ToObject(prop.PropertyType);
                             prop.SetValue(builderInst, value, null);

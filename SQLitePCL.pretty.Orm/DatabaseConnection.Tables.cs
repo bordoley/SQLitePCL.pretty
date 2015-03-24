@@ -32,13 +32,13 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         /// <param name="This">The database connection.</param>
         /// <param name="tableMapping">The table mapping.</param>
-        public static void InitTable(this IDatabaseConnection This, TableMapping tableMapping)
+        public static void InitTable<T>(this IDatabaseConnection This)
         {
             Contract.Requires(This != null);
-            Contract.Requires(tableMapping != null);
 
             This.RunInTransaction(_ =>
                 {
+                    var tableMapping = TableMapping.Create<T>();
                     This.CreateTableIfNotExists(tableMapping.TableName, CreateFlags.None, tableMapping.Columns);
 
                     if (This.Changes != 0)
@@ -81,12 +81,10 @@ namespace SQLitePCL.pretty.Orm
         /// <param name="This">The database connection</param>
         /// <param name="tableMapping">The table mapping.</param>
         /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
-        public static Task InitTableAsync(this IAsyncDatabaseConnection This, TableMapping tableMapping, CancellationToken cancellationToken)
+        public static Task InitTableAsync<T>(this IAsyncDatabaseConnection This, CancellationToken cancellationToken)
         {
             Contract.Requires(This != null);
-            Contract.Requires(tableMapping != null);
-
-            return This.Use((db, ct) => db.InitTable(tableMapping), cancellationToken);
+            return This.Use((db, ct) => db.InitTable<T>(), cancellationToken);
         }
 
         /// <summary>
@@ -95,12 +93,10 @@ namespace SQLitePCL.pretty.Orm
         /// <returns>A task that completes once the table is succesfully created and is ready for use.</returns>
         /// <param name="This">The database connection</param>
         /// <param name="tableMapping">The table mapping.</param>
-        public static Task InitTableAsync(this IAsyncDatabaseConnection This, TableMapping tableMapping)
+        public static Task InitTableAsync<T>(this IAsyncDatabaseConnection This)
         {
             Contract.Requires(This != null);
-            Contract.Requires(tableMapping != null);
-
-            return This.InitTableAsync(tableMapping, CancellationToken.None);
+            return This.InitTableAsync<T>(CancellationToken.None);
         }
     }
 }

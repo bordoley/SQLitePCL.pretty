@@ -120,6 +120,16 @@ namespace SQLitePCL.pretty.Orm
             
             return decl;
         }
+
+        internal static string DropTableIfExists(string tableName)
+        {
+            return string.Format("DROP TABLE IF EXISTS \"{0}\"", tableName);
+        }
+
+        internal static string DeleteAll(string tableName)
+        {
+            return string.Format("DELETE FROM \"{0}\"", tableName);
+        }
     }
 }
 

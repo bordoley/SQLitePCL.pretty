@@ -4,15 +4,14 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace SQLitePCL.pretty.Orm
 {
     public static partial class DatabaseConnection
     { 
-        private static string InsertOrReplace(this TableMapping tableMapping)
-        {
-            return SQLBuilder.InsertOrReplace(tableMapping.TableName, tableMapping.Columns.Select(x => x.Key));     
-        }
+        private static readonly ConditionalWeakTable<TableMapping, string> insertOrReplaceQueries = 
+            new ConditionalWeakTable<TableMapping, string>();
 
         /// <summary>
         /// Prepares a SQLite statement that can be bound to an object of type T to insert into the database.
@@ -20,21 +19,26 @@ namespace SQLitePCL.pretty.Orm
         /// <returns>A prepared statement.</returns>
         /// <param name="This">The database connection</param>
         /// <param name="tableMapping">The table mapping.</param>
-        public static IStatement PrepareInsertOrReplaceStatement(this IDatabaseConnection This, TableMapping tableMapping)
+        public static IStatement PrepareInsertOrReplaceStatement<T>(this IDatabaseConnection This)
         {
             Contract.Requires(This != null);
-            Contract.Requires(tableMapping != null);
-            return This.PrepareStatement(tableMapping.InsertOrReplace());   
+
+            var sql = insertOrReplaceQueries.GetValue(TableMapping.Create<T>(), mapping => 
+                {
+                    var column = mapping.PrimaryKeyColumn();
+                    return SQLBuilder.InsertOrReplace(mapping.TableName, mapping.Columns.Select(x => x.Key));     
+                });
+
+            return This.PrepareStatement(sql);   
         }
 
         private static IEnumerable<KeyValuePair<TInserted, TResult>> YieldInsertOrReplaceAll<TInserted, TResult>(
             this IDatabaseConnection This, 
-            TableMapping tableMapping, 
             IEnumerable<TInserted> objects,
             Func<IReadOnlyList<IResultSetValue>,TResult> resultSelector)
         {
-            using (var insertOrReplaceStmt = This.PrepareInsertOrReplaceStatement(tableMapping))
-            using (var findStmt = This.PrepareFindByRowId(tableMapping.TableName))
+            using (var insertOrReplaceStmt = This.PrepareInsertOrReplaceStatement<TInserted>())
+            using (var findStmt = This.PrepareFindByRowId(TableMapping.Create<TInserted>().TableName))
             {
                 foreach (var obj in objects)
                 {
@@ -55,16 +59,14 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>     
         public static TResult InsertOrReplace<TInserted, TResult>(
             this IDatabaseConnection This, 
-            TableMapping tableMapping, 
             TInserted obj,
             Func<IReadOnlyList<IResultSetValue>,TResult> resultSelector)
         {
             Contract.Requires(This != null);
-            Contract.Requires(tableMapping != null);
             Contract.Requires(obj != null);
             Contract.Requires(resultSelector != null);
 
-            return This.YieldInsertOrReplaceAll(tableMapping, new TInserted[] {obj}, resultSelector).First().Value;
+            return This.YieldInsertOrReplaceAll(new TInserted[] {obj}, resultSelector).First().Value;
         }
 
         /// <summary>
@@ -77,17 +79,15 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam> 
         public static IReadOnlyDictionary<TInserted,TResult> InsertOrReplaceAll<TInserted, TResult>(
             this IDatabaseConnection This, 
-            TableMapping tableMapping, 
             IEnumerable<TInserted> objects,
             Func<IReadOnlyList<IResultSetValue>,TResult> resultSelector)
         {
             Contract.Requires(This != null);
-            Contract.Requires(tableMapping != null);
             Contract.Requires(objects != null);
             Contract.Requires(resultSelector != null);
 
             return This.RunInTransaction(_ => 
-                This.YieldInsertOrReplaceAll(tableMapping, objects, resultSelector)
+                This.YieldInsertOrReplaceAll(objects, resultSelector)
                     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
         }
      }
@@ -105,17 +105,15 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam> 
         public static Task<IReadOnlyDictionary<TInserted, TResult>> InsertOrReplaceAllAsync<TInserted, TResult>(
             this IAsyncDatabaseConnection This, 
-            TableMapping tableMapping,
             IEnumerable<TInserted> objects,
             Func<IReadOnlyList<IResultSetValue>,TResult> resultSelector,
             CancellationToken ct)
         {
             Contract.Requires(This != null);
-            Contract.Requires(tableMapping != null);
             Contract.Requires(objects != null);
             Contract.Requires(resultSelector != null);
 
-            return This.Use((db, _) => db.InsertOrReplaceAll(tableMapping, objects, resultSelector), ct);
+            return This.Use((db, _) => db.InsertOrReplaceAll(objects, resultSelector), ct);
         }
 
         /// <summary>
@@ -128,16 +126,14 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam> 
         public static Task<IReadOnlyDictionary<TInserted, TResult>> InsertOrReplaceAllAsync<TInserted, TResult>(
             this IAsyncDatabaseConnection This, 
-            TableMapping tableMapping,
             IEnumerable<TInserted> objects,
             Func<IReadOnlyList<IResultSetValue>,TResult> resultSelector)
         {
             Contract.Requires(This != null);
-            Contract.Requires(tableMapping != null);
             Contract.Requires(objects != null);
             Contract.Requires(resultSelector != null);
 
-            return This.InsertOrReplaceAllAsync(tableMapping, objects, resultSelector, CancellationToken.None);
+            return This.InsertOrReplaceAllAsync(objects, resultSelector, CancellationToken.None);
         }
     }
 }

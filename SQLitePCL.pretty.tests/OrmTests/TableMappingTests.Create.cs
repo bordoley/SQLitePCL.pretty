@@ -247,30 +247,27 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestForeignKeyConstraints()
         {
-            var childTable = TableMapping.Create<TestChildObject>();
             var childTableSelector = Orm.Orm.ResultSetRowToObject<TestChildObject>();
-
-            var parentTable = TableMapping.Create<TestParentObject>();
             var parentTableSelector = Orm.Orm.ResultSetRowToObject<TestParentObject>();
 
             Assert.Throws<ArgumentException>(() => TableMapping.Create<TestBadChildObject>());
 
             using (var db = SQLite3.OpenInMemory())
             {
-                db.InitTable(parentTable);
-                db.InitTable(childTable);
+                db.InitTable<TestChildObject>();
+                db.InitTable<TestParentObject>();
 
                 // Foreign Key constraint
-                Assert.Throws<SQLiteException>(() => db.InsertOrReplace(childTable, new TestChildObject(){ ParentId = 1 }, childTableSelector));
-                Assert.AreEqual(db.Query("SELECT count(*) FROM " + childTable.TableName).SelectScalarInt().First(), 0);
+                Assert.Throws<SQLiteException>(() => db.InsertOrReplace(new TestChildObject(){ ParentId = 1 }, childTableSelector));
+                Assert.AreEqual(db.Query("SELECT count(*) FROM " + TableMapping.Create<TestChildObject>().TableName).SelectScalarInt().First(), 0);
 
-                db.InsertOrReplace(parentTable, new TestParentObject() { Id = 100 }, parentTableSelector);
-                db.InsertOrReplace(childTable, new TestChildObject() { ParentId = 100 }, childTableSelector);
-                Assert.AreEqual(db.Query("SELECT count(*) FROM " + childTable.TableName).SelectScalarInt().First(), 1);
+                db.InsertOrReplace(new TestParentObject() { Id = 100 }, parentTableSelector);
+                db.InsertOrReplace(new TestChildObject() { ParentId = 100 }, childTableSelector);
+                Assert.AreEqual(db.Query("SELECT count(*) FROM " + TableMapping.Create<TestChildObject>().TableName).SelectScalarInt().First(), 1);
 
                 // Foreign Key Constraint causes delete to fail
                 TestParentObject deleted;
-                Assert.Throws<SQLiteException>(() => db.TryDelete(parentTable, 100, parentTableSelector, out deleted));
+                Assert.Throws<SQLiteException>(() => db.TryDelete(100, parentTableSelector, out deleted));
             }
         } 
     }

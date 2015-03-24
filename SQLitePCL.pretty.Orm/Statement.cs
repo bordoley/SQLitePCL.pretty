@@ -16,11 +16,6 @@ namespace SQLitePCL.pretty.Orm
     /// </summary>
     public static class Statement
     {
-        // FIXME: Effectively a global cached that never clears. Probably doesn't matter but maybe provide methods for removing types
-        // from the cache?
-        private static readonly ConditionalWeakTable<Type, IEnumerable<KeyValuePair<string, PropertyInfo>>> typeToColumns = 
-            new ConditionalWeakTable<Type, IEnumerable<KeyValuePair<string, PropertyInfo>>>();
-
         /// <summary>
         /// Binds the statement bind variables by name to the corresponding properties on the object <paramref name="obj"/>.
         /// </summary>
@@ -32,25 +27,13 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(This != null);
             Contract.Requires(obj != null);
 
-            var columns = typeToColumns.GetValue(typeof(T), t =>
-                {
-                    var retval = new Dictionary<string, PropertyInfo>();
-
-                    foreach (var prop in t.GetNotIgnoredGettableProperties())
-                    {
-                        var name = prop.GetColumnName();
-                        retval.Add(name, prop);
-                    }
-
-                    return retval;
-                });
-
+            var columns = TableMapping.Create<T>().Columns;
             foreach (var column in columns)
             {
                 var key = ":" + column.Key;
                 if (This.BindParameters.ContainsKey(key))
                 {
-                    var value = column.Value.GetValue(obj);
+                    var value = column.Value.Property.GetValue(obj);
                     This.BindParameters[key].Bind(value);
                 }
             }

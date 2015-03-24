@@ -6,7 +6,6 @@ namespace SQLitePCL.pretty.Orm
 {
     public interface ISqlQuery
     {
-        string ToSql();
     }
 }
 

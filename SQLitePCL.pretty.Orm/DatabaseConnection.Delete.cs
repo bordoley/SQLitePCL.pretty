@@ -4,32 +4,44 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
+
+
 namespace SQLitePCL.pretty.Orm
 {
     public static partial class DatabaseConnection
     { 
+        private static readonly ConditionalWeakTable<TableMapping, string> deleteQueries = 
+            new ConditionalWeakTable<TableMapping, string>();
+
         /// <summary>
         /// Prepares a SQLite statement that can be bound to an object primary key to delete row from the database.
         /// </summary>
         /// <returns>A prepared statement.</returns>
         /// <param name="This">The database connection</param>
         /// <param name="tableMapping">The table mapping.</param>
-        public static IStatement PrepareDeleteStatement(this IDatabaseConnection This, TableMapping tableMapping)
+        public static IStatement PrepareDeleteStatement<T>(this IDatabaseConnection This)
         {
             Contract.Requires(This != null);
-            Contract.Requires(tableMapping != null);
+
+            var tableMapping = TableMapping.Create<T>();
+            var sql = deleteQueries.GetValue(tableMapping, mapping => 
+                {
+                    var primaryKeyColumn = mapping.PrimaryKeyColumn();
+                    return SQLBuilder.DeleteUsingPrimaryKey(mapping.TableName, primaryKeyColumn);
+                });
+
            
-            return This.PrepareDelete(tableMapping.TableName, tableMapping.PrimaryKeyColumn());   
+            return This.PrepareStatement(sql);
         }
 
         private static IEnumerable<KeyValuePair<long,T>> YieldDeleteAll<T>(
             this IDatabaseConnection This, 
-            TableMapping tableMapping, 
             IEnumerable<long> primaryKeys, 
             Func<IReadOnlyList<IResultSetValue>,T> resultSelector)
         {
-            using (var deleteStmt = This.PrepareDeleteStatement(tableMapping))
-            using (var findStmt = This.PrepareFindStatement(tableMapping))
+            using (var deleteStmt = This.PrepareDeleteStatement<T>())
+            using (var findStmt = This.PrepareFindStatement<T>())
             {
                 foreach (var primaryKey in primaryKeys)
                 {
@@ -54,16 +66,14 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static bool TryDelete<T>(
             this IDatabaseConnection This, 
-            TableMapping tableMapping, 
             long primaryKey, 
             Func<IReadOnlyList<IResultSetValue>,T> resultSelector, 
             out T deleted)
         {
             Contract.Requires(This != null);
-            Contract.Requires(tableMapping != null);
             Contract.Requires(resultSelector != null);
            
-            var result = This.YieldDeleteAll(tableMapping, new long[] { primaryKey }, resultSelector).FirstOrDefault();
+            var result = This.YieldDeleteAll(new long[] { primaryKey }, resultSelector).FirstOrDefault();
             if (result.Value != null)
             {
                 deleted = result.Value;
@@ -85,20 +95,46 @@ namespace SQLitePCL.pretty.Orm
         /// <param name="primaryKeys">An IEnumerable of primary keys to delete.</param>
         /// <typeparam name="T">The mapped type.</typeparam>       
         public static IReadOnlyDictionary<long,T> DeleteAll<T>(
-            this IDatabaseConnection This, 
-            TableMapping tableMapping, 
+            this IDatabaseConnection This,  
             IEnumerable<long> primaryKeys,
             Func<IReadOnlyList<IResultSetValue>,T> resultSelector)
         {
             Contract.Requires(This != null);
-            Contract.Requires(tableMapping != null);
             Contract.Requires(primaryKeys != null);
             Contract.Requires(resultSelector != null);
 
             return This.RunInTransaction(_ => 
-                        This.YieldDeleteAll(tableMapping, primaryKeys, resultSelector)
+                        This.YieldDeleteAll(primaryKeys, resultSelector)
                             .Where(kvp => kvp.Value != null)
                             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
+        }
+
+        /// <summary>
+        /// Drops the table if it exists. Otherwise this is a no-op.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="table">The table name.</param>
+        /// <seealso href="https://www.sqlite.org/lang_droptable.html"/>
+        public static void DropTableIfExists<T>(this IDatabaseConnection This)
+        {
+            Contract.Requires(This != null);
+
+            var tableMapping = TableMapping.Create<T>();
+            This.Execute(SQLBuilder.DropTableIfExists(tableMapping.TableName));
+        }
+
+
+        /// <summary>
+        /// Deletes all rows in a given table.
+        /// </summary>
+        /// <param name="This">The database connection.</param>
+        /// <param name="table">The table name.</param>
+        public static void DeleteAllRows<T>(this IDatabaseConnection This)
+        {
+            Contract.Requires(This != null);
+
+            var tableMapping = TableMapping.Create<T>();
+            This.Execute(SQLBuilder.DeleteAll(tableMapping.TableName));
         }
     }
 
@@ -115,17 +151,15 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static Task<IReadOnlyDictionary<long,T>> DeleteAllAsync<T>(
             this IAsyncDatabaseConnection This, 
-            TableMapping tableMapping, 
             IEnumerable<long> primaryKeys, 
             Func<IReadOnlyList<IResultSetValue>,T> resultSelector,
             CancellationToken ct)
         {
             Contract.Requires(This != null);
-            Contract.Requires(tableMapping != null);
             Contract.Requires(primaryKeys != null);
             Contract.Requires(resultSelector != null);
 
-            return This.Use((db,_) => db.DeleteAll<T>(tableMapping, primaryKeys, resultSelector), ct);
+            return This.Use((db,_) => db.DeleteAll<T>(primaryKeys, resultSelector), ct);
         }
 
         /// <summary>
@@ -138,16 +172,66 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static Task<IReadOnlyDictionary<long,T>> DeleteAllAsync<T>(
             this IAsyncDatabaseConnection This, 
-            TableMapping tableMapping, 
             IEnumerable<long> primaryKeys,
             Func<IReadOnlyList<IResultSetValue>,T> resultSelector)
         {
             Contract.Requires(This != null);
-            Contract.Requires(tableMapping != null);
             Contract.Requires(primaryKeys != null);
             Contract.Requires(resultSelector != null);
 
-            return This.DeleteAllAsync(tableMapping, primaryKeys, resultSelector, CancellationToken.None);
+            return This.DeleteAllAsync(primaryKeys, resultSelector, CancellationToken.None);
+        }
+
+
+        /// <summary>
+        /// Drops the table if exists async.
+        /// </summary>
+        /// <returns>The table if exists async.</returns>
+        /// <param name="This">This.</param>
+        /// <param name="table">The table name.</param>
+        /// <param name="ct">Ct.</param>
+        public static Task DropTableIfExistsAsync<T>(this IAsyncDatabaseConnection This,  CancellationToken ct)
+        {
+            Contract.Requires(This != null);
+
+            return This.Use((db, _) => db.DropTableIfExists<T>(), ct);
+        }
+
+        /// <summary>
+        /// Drops the table if exists async.
+        /// </summary>
+        /// <returns>The table if exists async.</returns>
+        /// <param name="This">This.</param>
+        /// <param name="table">The table name.</param>
+        public static Task DropTableIfExistsAsync<T>(this IAsyncDatabaseConnection This)
+        {
+            Contract.Requires(This != null);
+            return This.DropTableIfExistsAsync<T>(CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Deletes all rows in a given table, asynchronously.
+        /// </summary>
+        /// <returns>A task that completes when all rows are deleted succesfully.</returns>
+        /// <param name="This">The database connection.</param>
+        /// <param name="table">The table name.</param>
+        /// <param name="ct">A cancellation token that can be used to cancel the operation.</param>
+        public static Task DeleteAllRowsAsync<T>(this IAsyncDatabaseConnection This, CancellationToken ct)
+        {
+            Contract.Requires(This != null);
+            return This.Use((db, _) => db.DeleteAllRows<T>(), ct);
+        }
+
+        /// <summary>
+        /// Deletes all rows in a given table, asynchronously.
+        /// </summary>
+        /// <returns>A task that completes when all rows are deleted succesfully.</returns>
+        /// <param name="This">The database connection.</param>
+        /// <param name="table">The table name.</param>
+        public static Task DeleteAllRowsAsync<T>(this IAsyncDatabaseConnection This)
+        {
+            Contract.Requires(This != null);
+            return This.DeleteAllRowsAsync<T>(CancellationToken.None);
         }
     }
 }

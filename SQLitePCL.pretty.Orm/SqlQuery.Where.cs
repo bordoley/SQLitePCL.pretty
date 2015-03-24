@@ -3,6 +3,8 @@ using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Linq;
 using System.Collections.Generic;
+using System.Reflection;
+using SQLitePCL.pretty.Orm.Attributes;
 
 namespace SQLitePCL.pretty.Orm
 {
@@ -10,14 +12,14 @@ namespace SQLitePCL.pretty.Orm
     {
         public sealed class WhereClause<T> : ISqlQuery
         {
-            private readonly string table;
-            private readonly string selection;
+            private readonly FromClause<T> from;
+            private readonly Expression select;
             private readonly Expression where;
 
-            internal WhereClause(string table, string selection, Expression where)
+            internal WhereClause(FromClause<T> from, Expression select, Expression where)
             {
-                this.table = table;
-                this.selection = selection;
+                this.from = from;
+                this.select = select;
                 this.where = where;
             }
 
@@ -39,7 +41,7 @@ namespace SQLitePCL.pretty.Orm
 
                 var orderBy = new List<Tuple<string, bool>>();
                 orderBy.Add(orderExpr.CompileOrderByExpression(asc));
-                return new OrderByClause<T>(table, selection, where, orderBy);
+                return new OrderByClause<T>(this, orderBy);
             }
 
             public WhereClause<T> Where<U,V,W,X,Y,Z>(Expression<Func<T,U,V,W,X,Y,Z,bool>> predExpr)
@@ -88,7 +90,7 @@ namespace SQLitePCL.pretty.Orm
             {
                 var pred = lambda.Body;
                 var where = this.where == null ? pred : Expression.AndAlso(this.where, pred);
-                return new WhereClause<T>(table, selection, where);
+                return new WhereClause<T>(from, select, where);
             }
 
             /// <summary>
@@ -99,7 +101,7 @@ namespace SQLitePCL.pretty.Orm
             public LimitClause<T> Take(int n)
             {
                 Contract.Requires(n >= 0);
-                return new LimitClause<T>(table, selection, where, new List<Tuple<string, bool>>(), n, null);
+                return new LimitClause<T>(new OrderByClause<T>(this, new List<Tuple<string, bool>>()), n, null);
             }
 
             /// <summary>
@@ -110,7 +112,7 @@ namespace SQLitePCL.pretty.Orm
             public LimitClause<T> Skip(int n)
             {
                 Contract.Requires(n >= 0);
-                return new LimitClause<T>(table, selection, where, new List<Tuple<string, bool>>(), null, n);
+                return new LimitClause<T>(new OrderByClause<T>(this, new List<Tuple<string, bool>>()), null, n);
             }
 
             /// <summary>
@@ -127,13 +129,134 @@ namespace SQLitePCL.pretty.Orm
 
             public override string ToString()
             {
-                return SqlQuery.ToString(selection, table, where, Enumerable.Empty<Tuple<string, bool>>(), null, null); 
+                return     
+                    "SELECT " + select.CompileWhereExpr() + 
+                    "\r\n" + from.ToString() + 
+                    (where != null ? "\r\nWHERE " + where.CompileWhereExpr() : "");
             }
+        }
 
-            public string ToSql()
+        private static String CompileWhereExpr(this Expression This)
+        {
+            if (This is BinaryExpression)
             {
-                return this.ToString();
+                var bin = (BinaryExpression)This;
+                
+                var leftExpr = bin.Left.CompileWhereExpr();
+                var rightExpr = bin.Right.CompileWhereExpr();
+
+                if (rightExpr == "NULL" && bin.NodeType == ExpressionType.Equal)
+                {
+                    if (bin.NodeType == ExpressionType.Equal)
+                    {
+                        return "(" + leftExpr + "IS NULL)";
+                    }
+                    else if (rightExpr == "NULL" && bin.NodeType == ExpressionType.NotEqual)
+                    {
+                        return "(" + leftExpr + "IS NOT NULL)";
+                    }
+                }
+
+                return "(" + leftExpr + " " + GetSqlName(bin) + " " + rightExpr + ")";
             }
+            else if (This is ParameterExpression)
+            {
+                var param = (ParameterExpression)This;
+                return ":" + param.Name;
+            }
+            else if (This is MemberExpression)
+            {
+                var member = (MemberExpression) This;
+
+                if (member.Expression != null && member.Expression.NodeType == ExpressionType.Parameter)
+                {
+                    // This is a column in the table, output the column name
+                    var columnName = ((PropertyInfo) member.Member).GetColumnName();
+                    return "\"" + columnName + "\"";
+                }
+                else
+                {
+                    return member.EvaluateExpression().ConvertToSQLiteValue().ToSqlString();
+                }
+            }
+            else if (This.NodeType == ExpressionType.Not)
+            {
+                var operandExpr = ((UnaryExpression) This).Operand;
+                return "NOT(" + operandExpr.CompileWhereExpr() + ")";
+            } 
+            else if (This is ConstantExpression) 
+            {
+                return This.EvaluateExpression().ConvertToSQLiteValue().ToSqlString();
+            }
+            else if (This is MethodCallExpression)
+            {
+                var call = (MethodCallExpression) This;
+                var args = new String[call.Arguments.Count];
+
+                var obj = call.Object != null ? call.Object.CompileWhereExpr() : null;
+                
+                for (var i = 0; i < args.Length; i++) 
+                {
+                    args [i] = call.Arguments[i].CompileWhereExpr();
+                }
+                
+                if (call.Method.Name == "Like" && args.Length == 2) 
+                {
+                    return "(" + args[0] + " LIKE " + args[1] + ")";
+                }
+
+                else if (call.Method.Name == "Contains" && args.Length == 2) 
+                {
+                    return "(" + args[1] + " IN " + args[0] + ")";
+                }
+
+                else if (call.Method.Name == "Contains" && args.Length == 1)
+                 {
+                    if (call.Object != null && call.Object.Type == typeof(string))
+                    {
+                        return "(" + obj + " LIKE ('%' || " + args[0] + " || '%'))";
+                    }
+                    else 
+                    {
+                        return "(" + args[0] + " IN " + obj + ")";
+                    }
+                }
+
+                else if (call.Method.Name == "StartsWith" && args.Length == 1) 
+                {
+                    return "(" + obj + " LIKE (" + args[0] + " || '%'))";
+                }
+
+                else if (call.Method.Name == "EndsWith" && args.Length == 1) 
+                {
+                    return "(" + obj + " LIKE ('%' || " + args[0] + "))";
+                }
+
+                else if (call.Method.Name == "Equals" && args.Length == 1) 
+                {
+                    return "(" + obj + " = (" + args[0] + "))";
+                }
+
+                else if (call.Method.Name == "Is" && args.Length == 2)
+                {
+                    return "(" + args[0] + " IS " + args[1] + ")";
+                }
+
+                else if (call.Method.Name == "IsNot" && args.Length == 2)
+                {
+                    return "(" + args[0] + " IS NOT " + args[1] + ")";
+                }
+            }
+            else if (This.NodeType == ExpressionType.Convert) 
+            {
+                var u = (UnaryExpression) This;
+                var ty = u.Type;
+                var value = EvaluateExpression(u.Operand);
+
+                return value.ConvertTo(ty).ConvertToSQLiteValue().ToSqlString();
+            } 
+
+            throw new NotSupportedException("Cannot compile: " + This.NodeType.ToString());
         }
     }
 }

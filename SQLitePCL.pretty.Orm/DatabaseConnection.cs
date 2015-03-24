@@ -44,11 +44,6 @@ namespace SQLitePCL.pretty.Orm
             conn.Execute(query);
         }
 
-        internal static IStatement PrepareDelete(this IDatabaseConnection This, string table, string primaryKeyColumn)
-        {
-            return This.PrepareStatement(SQLBuilder.DeleteUsingPrimaryKey(table, primaryKeyColumn));
-        }
-
         /// <summary>
         /// Creates a SQLite prepared statement that can be used to find a row in the table by its rowid. 
         /// </summary>

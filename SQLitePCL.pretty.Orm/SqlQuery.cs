@@ -73,7 +73,7 @@ namespace SQLitePCL.pretty.Orm
         {
             Contract.Requires(This != null);
             Contract.Requires(query != null);
-            return This.Query(query.ToSql());
+            return This.Query(query.ToString());
         }
 
         public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(
@@ -82,157 +82,21 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(This != null);
             Contract.Requires(query != null);
             Contract.Requires(values != null);
-            return This.Query(query.ToSql(), values);
+            return This.Query(query.ToString(), values);
         }
 
         public static IStatement PrepareStatement(this IDatabaseConnection This, ISqlQuery query)
         {
             Contract.Requires(This != null);
             Contract.Requires(query != null);
-            return This.PrepareStatement(query.ToSql());
+            return This.PrepareStatement(query.ToString());
         }
 
-        public static SelectClause<T> From<T>()
+        public static FromClause<T> From<T>()
         {
             var typ = typeof(T);
             var tableName = typ.GetTableName();
-            return new SelectClause<T>(tableName);
-        }
-
-        internal static string ToString(string selection, string table, Expression where, IEnumerable<Tuple<string, bool>> orderBy, int? limit, int? offset)
-        {
-            var cmdText = 
-                "SELECT " + selection + 
-                "\nFROM \"" + table + "\"" +
-                (where != null ? "\nWHERE " + where.CompileExpr(): "") +
-                (orderBy.Count() > 0 ? "\nORDER BY " +  string.Join(", ", orderBy.Select(o => "\"" + o.Item1 + "\"" + (o.Item2 ? "" : " DESC"))) : "") +
-                (limit.HasValue ? "\nLIMIT " + limit.Value : "") +
-                (offset.HasValue ? "\nOFFSET " + offset.Value : "");
-                 
-            return cmdText;
-        }
-
-        private static String CompileExpr(this Expression This)
-        {
-            if (This is BinaryExpression)
-            {
-                var bin = (BinaryExpression)This;
-                
-                var leftExpr = bin.Left.CompileExpr();
-                var rightExpr = bin.Right.CompileExpr();
-
-                if (rightExpr == "NULL" && bin.NodeType == ExpressionType.Equal)
-                {
-                    if (bin.NodeType == ExpressionType.Equal)
-                    {
-                        return "(" + leftExpr + "IS NULL)";
-                    }
-                    else if (rightExpr == "NULL" && bin.NodeType == ExpressionType.NotEqual)
-                    {
-                        return "(" + leftExpr + "IS NOT NULL)";
-                    }
-                }
-
-                return "(" + leftExpr + " " + GetSqlName(bin) + " " + rightExpr + ")";
-            }
-            else if (This is ParameterExpression)
-            {
-                var param = (ParameterExpression)This;
-                return ":" + param.Name;
-            }
-            else if (This is MemberExpression)
-            {
-                var member = (MemberExpression) This;
-
-                if (member.Expression != null && member.Expression.NodeType == ExpressionType.Parameter)
-                {
-                    // This is a column in the table, output the column name
-                    var columnName = ((PropertyInfo) member.Member).GetColumnName();
-                    return "\"" + columnName + "\"";
-                }
-                else
-                {
-                    return member.EvaluateExpression().ConvertToSQLiteValue().ToSqlString();
-                }
-            }
-            else if (This.NodeType == ExpressionType.Not)
-            {
-                var operandExpr = ((UnaryExpression) This).Operand;
-                return "NOT(" + operandExpr.CompileExpr() + ")";
-            } 
-            else if (This is ConstantExpression) 
-            {
-                return This.EvaluateExpression().ConvertToSQLiteValue().ToSqlString();
-            }
-            else if (This is MethodCallExpression)
-            {
-                var call = (MethodCallExpression) This;
-                var args = new String[call.Arguments.Count];
-
-                var obj = call.Object != null ? call.Object.CompileExpr() : null;
-                
-                for (var i = 0; i < args.Length; i++) 
-                {
-                    args [i] = call.Arguments[i].CompileExpr();
-                }
-                
-                if (call.Method.Name == "Like" && args.Length == 2) 
-                {
-                    return "(" + args[0] + " LIKE " + args[1] + ")";
-                }
-
-                else if (call.Method.Name == "Contains" && args.Length == 2) 
-                {
-                    return "(" + args[1] + " IN " + args[0] + ")";
-                }
-
-                else if (call.Method.Name == "Contains" && args.Length == 1)
-                 {
-                    if (call.Object != null && call.Object.Type == typeof(string))
-                    {
-                        return "(" + obj + " LIKE ('%' || " + args[0] + " || '%'))";
-                    }
-                    else 
-                    {
-                        return "(" + args[0] + " IN " + obj + ")";
-                    }
-                }
-
-                else if (call.Method.Name == "StartsWith" && args.Length == 1) 
-                {
-                    return "(" + obj + " LIKE (" + args[0] + " || '%'))";
-                }
-
-                else if (call.Method.Name == "EndsWith" && args.Length == 1) 
-                {
-                    return "(" + obj + " LIKE ('%' || " + args[0] + "))";
-                }
-
-                else if (call.Method.Name == "Equals" && args.Length == 1) 
-                {
-                    return "(" + obj + " = (" + args[0] + "))";
-                }
-
-                else if (call.Method.Name == "Is" && args.Length == 2)
-                {
-                    return "(" + args[0] + " IS " + args[1] + ")";
-                }
-
-                else if (call.Method.Name == "IsNot" && args.Length == 2)
-                {
-                    return "(" + args[0] + " IS NOT " + args[1] + ")";
-                }
-            }
-            else if (This.NodeType == ExpressionType.Convert) 
-            {
-                var u = (UnaryExpression) This;
-                var ty = u.Type;
-                var value = EvaluateExpression(u.Operand);
-
-                return value.ConvertTo(ty).ConvertToSQLiteValue().ToSqlString();
-            } 
-
-            throw new NotSupportedException("Cannot compile: " + This.NodeType.ToString());
+            return new FromClause<T>(tableName);
         }
 
         private static object EvaluateExpression(this Expression expr)

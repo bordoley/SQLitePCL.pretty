@@ -148,12 +148,12 @@
     <Compile Include="SqlQuery.Limit.cs" />
     <Compile Include="SqlQuery.OrderBy.cs" />
     <Compile Include="SqlQuery.Where.cs" />
-    <Compile Include="SqlQuery.Select.cs" />
     <Compile Include="Statement.cs" />
     <Compile Include="Orm.cs" />
     <Compile Include="DatabaseConnection.Delete.cs" />
     <Compile Include="DatabaseConnection.Find.cs" />
     <Compile Include="DatabaseConnection.InsertOrReplace.cs" />
+    <Compile Include="SqlQuery.From.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>

@@ -5,6 +5,7 @@ using System.Reflection;
 
 using SQLitePCL.pretty.Orm.Attributes;
 using System.Diagnostics.Contracts;
+using System.Linq;
 
 namespace SQLitePCL.pretty.Orm
 {
@@ -12,16 +13,12 @@ namespace SQLitePCL.pretty.Orm
     {
         public sealed class OrderByClause<T> : ISqlQuery
         {
-            private readonly string table;
-            private readonly string selection;
-            private readonly Expression where;
+            private readonly WhereClause<T> whereClause;
             private readonly IReadOnlyList<Tuple<string, bool>> ordering;
 
-            internal OrderByClause(string table, string selection, Expression where, IReadOnlyList<Tuple<string, bool>> ordering)
+            internal OrderByClause(WhereClause<T> whereClause, IReadOnlyList<Tuple<string, bool>> ordering)
             {
-                this.table = table;
-                this.selection = selection;
-                this.where = where;
+                this.whereClause = whereClause;
                 this.ordering = ordering;
             }
 
@@ -45,7 +42,7 @@ namespace SQLitePCL.pretty.Orm
             public LimitClause<T> Take(int n)
             {
                 Contract.Requires(n >= 0);
-                return new LimitClause<T>(table, selection, where, this.ordering, n, null);
+                return new LimitClause<T>(this, n, null);
             }
 
             /// <summary>
@@ -56,7 +53,7 @@ namespace SQLitePCL.pretty.Orm
             public LimitClause<T> Skip(int n)
             {
                 Contract.Requires(n >= 0);
-                return new LimitClause<T>(table, selection, where, this.ordering, null, n);
+                return new LimitClause<T>(this, null, n);
             }
 
             /// <summary>
@@ -75,17 +72,14 @@ namespace SQLitePCL.pretty.Orm
             {  
                 var orderBy = new List<Tuple<string, bool>>(ordering);
                 orderBy.Add(orderExpr.CompileOrderByExpression(asc));
-                return new OrderByClause<T>(table, selection, where, orderBy);
+                return new OrderByClause<T>(whereClause, orderBy);
             }
 
             public override string ToString()
             {
-                return SqlQuery.ToString(selection, table, where, ordering, null, null); 
-            }
-
-            public string ToSql()
-            {
-                return this.ToString();
+                return 
+                    whereClause.ToString() +
+                    (ordering.Count > 0 ? "\r\nORDER BY " +  string.Join(", ", ordering.Select(o => "\"" + o.Item1 + "\"" + (o.Item2 ? "" : " DESC"))) : "");
             }
         }
     }
