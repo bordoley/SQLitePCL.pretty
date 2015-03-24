@@ -13,10 +13,12 @@ namespace SQLitePCL.pretty.Orm
         public sealed class WhereClause<T> : ISqlQuery
         {
             private readonly FromClause<T> from;
-            private readonly Expression select;
+
+            // FIXME: Long term, prefer some sort of expression syntax
+            private readonly IReadOnlyList<String> select;
             private readonly Expression where;
 
-            internal WhereClause(FromClause<T> from, Expression select, Expression where)
+            internal WhereClause(FromClause<T> from, IReadOnlyList<String> select, Expression where)
             {
                 this.from = from;
                 this.select = select;
@@ -130,7 +132,7 @@ namespace SQLitePCL.pretty.Orm
             public override string ToString()
             {
                 return     
-                    "SELECT " + select.CompileWhereExpr() + 
+                    "SELECT " + string.Join(", ", select) + 
                     "\r\n" + from.ToString() + 
                     (where != null ? "\r\nWHERE " + where.CompileWhereExpr() : "");
             }

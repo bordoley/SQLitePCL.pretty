@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 
 using SQLitePCL.pretty.Orm.Attributes;
@@ -18,7 +19,9 @@ namespace SQLitePCL.pretty.Orm
 
             public WhereClause<T> Select()
             {
-                return new WhereClause<T>(this, Expression.Constant("*"), null);
+                var table = TableMapping.Create<T>();
+                var columns = table.Columns.Keys.Select(col => table.TableName + "." + col).ToList();
+                return new WhereClause<T>(this, columns, null);
             }
 
             public override string ToString()
