@@ -82,6 +82,31 @@ namespace SQLitePCL.pretty.Orm
                     (ordering.Count > 0 ? "\r\nORDER BY " +  string.Join(", ", ordering.Select(o => "\"" + o.Item1 + "\"" + (o.Item2 ? "" : " DESC"))) : "");
             }
         }
+
+        private static Tuple<string, bool> CompileOrderByExpression<T, TValue>(this Expression<Func<T, TValue>> orderExpr, bool asc)
+        {
+            var lambda = orderExpr;
+
+            MemberExpression mem = null;
+
+            var unary = lambda.Body as UnaryExpression;
+            if (unary != null && unary.NodeType == ExpressionType.Convert)
+            {
+
+                mem = unary.Operand as MemberExpression;
+            }
+            else
+            {
+                mem = lambda.Body as MemberExpression;
+            }
+
+            if (mem != null && (mem.Expression.NodeType == ExpressionType.Parameter))
+            {
+                return Tuple.Create(((PropertyInfo) mem.Member).GetColumnName(), asc);
+            }
+
+            throw new NotSupportedException("Order By does not support: " + orderExpr);
+        }
     }
 }
 

@@ -154,6 +154,7 @@
     <Compile Include="DatabaseConnection.InsertOrReplace.cs" />
     <Compile Include="SqlQuery.From.cs" />
     <Compile Include="ResultSet.cs" />
+    <Compile Include="DatabaseConnection.Query.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>

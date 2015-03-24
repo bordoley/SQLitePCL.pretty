@@ -69,29 +69,6 @@ namespace SQLitePCL.pretty.Orm
 
     public static partial class SqlQuery
     {
-        public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(this IDatabaseConnection This, ISqlQuery query)
-        {
-            Contract.Requires(This != null);
-            Contract.Requires(query != null);
-            return This.Query(query.ToString());
-        }
-
-        public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(
-            this IDatabaseConnection This, ISqlQuery query, params object[] values)
-        {
-            Contract.Requires(This != null);
-            Contract.Requires(query != null);
-            Contract.Requires(values != null);
-            return This.Query(query.ToString(), values);
-        }
-
-        public static IStatement PrepareStatement(this IDatabaseConnection This, ISqlQuery query)
-        {
-            Contract.Requires(This != null);
-            Contract.Requires(query != null);
-            return This.PrepareStatement(query.ToString());
-        }
-
         public static FromClause<T> From<T>()
         {
             var typ = typeof(T);
@@ -192,30 +169,5 @@ namespace SQLitePCL.pretty.Orm
                     throw new NotSupportedException ("Cannot get SQL for: " + n);
             }
         }
-
-        private static Tuple<string, bool> CompileOrderByExpression<T, TValue>(this Expression<Func<T, TValue>> orderExpr, bool asc)
-            {
-                var lambda = orderExpr;
-
-                MemberExpression mem = null;
-
-                var unary = lambda.Body as UnaryExpression;
-                if (unary != null && unary.NodeType == ExpressionType.Convert)
-                {
-
-                    mem = unary.Operand as MemberExpression;
-                }
-                else
-                {
-                    mem = lambda.Body as MemberExpression;
-                }
-
-                if (mem != null && (mem.Expression.NodeType == ExpressionType.Parameter))
-                {
-                    return Tuple.Create(((PropertyInfo) mem.Member).GetColumnName(), asc);
-                }
-
-                throw new NotSupportedException("Order By does not support: " + orderExpr);
-            }
     }
 }
