@@ -18,14 +18,13 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         /// <returns>A prepared statement.</returns>
         /// <param name="This">The database connection</param>
-        /// <param name="tableMapping">The table mapping.</param>
+        /// <typeparam name="T">The mapped type.</typeparam>  
         public static IStatement PrepareInsertOrReplaceStatement<T>(this IDatabaseConnection This)
         {
             Contract.Requires(This != null);
 
             var sql = insertOrReplaceQueries.GetValue(TableMapping.Get<T>(), mapping => 
                 {
-                    var column = mapping.PrimaryKeyColumn();
                     return SQLBuilder.InsertOrReplace(mapping.TableName, mapping.Columns.Select(x => x.Key));     
                 });
 
@@ -54,9 +53,9 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         /// <returns>The object inserted into the database including it's primary key.</returns>
         /// <param name="This">The database connection.</param>
-        /// <param name="tableMapping">The table mapping.</param>
         /// <param name="obj">The object to insert.</param>
-        /// <typeparam name="T">The mapped type.</typeparam>     
+        /// <param name="resultSelector">A transform function to apply to each row.</param>   
+        /// <typeparam name="T">The mapped type.</typeparam> 
         public static T InsertOrReplace<T>(
             this IDatabaseConnection This, 
             T obj,
@@ -74,8 +73,8 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         /// <returns>A dictionary mapping the provided objects to the objects that were inserted into the database.</returns>
         /// <param name="This">The database connection.</param>
-        /// <param name="tableMapping">The table mapping.</param>
         /// <param name="objects">The objects to be inserted into the database.</param>
+        /// <param name="resultSelector">A transform function to apply to each row.</param>    
         /// <typeparam name="T">The mapped type.</typeparam> 
         public static IReadOnlyDictionary<T,T> InsertOrReplaceAll<T>(
             this IDatabaseConnection This, 
@@ -99,8 +98,8 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         /// <returns>A Task that completes with a dictionary mapping the provided objects to the objects that were inserted into the database.</returns>
         /// <param name="This">The database connection.</param>
-        /// <param name="tableMapping">The table mapping.</param>
         /// <param name="objects">The objects to be inserted into the database.</param>
+        /// <param name="resultSelector">A transform function to apply to each row.</param>    
         /// <param name="ct">A cancellation token that can be used to cancel the operation</param>
         /// <typeparam name="T">The mapped type.</typeparam> 
         public static Task<IReadOnlyDictionary<T,T>> InsertOrReplaceAllAsync<T>(
@@ -121,8 +120,8 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         /// <returns>A Task that completes with a dictionary mapping the provided objects to the objects that were inserted into the database.</returns>
         /// <param name="This">The database connection.</param>
-        /// <param name="tableMapping">The table mapping.</param>
         /// <param name="objects">The objects to be inserted into the database.</param>
+        /// <param name="resultSelector">A transform function to apply to each row.</param>    
         /// <typeparam name="T">The mapped type.</typeparam> 
         public static Task<IReadOnlyDictionary<T,T>> InsertOrReplaceAllAsync<T>(
             this IAsyncDatabaseConnection This, 

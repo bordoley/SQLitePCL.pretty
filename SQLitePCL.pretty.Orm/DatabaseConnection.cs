@@ -36,6 +36,9 @@ namespace SQLitePCL.pretty.Orm
         FullTextSearch4         = 0x200     // create virtual table using FTS4
     }
 
+    /// <summary>
+    /// Extensions methods for instances of <see cref="SQLitePCL.pretty.IDatabaseConnection"/>.
+    /// </summary>
     public static partial class DatabaseConnection
     {
         internal static void CreateTableIfNotExists(this IDatabaseConnection conn, string tableName, CreateFlags createFlags, IReadOnlyDictionary<string, ColumnMapping> columns)

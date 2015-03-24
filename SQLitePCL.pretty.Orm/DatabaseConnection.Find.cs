@@ -18,7 +18,7 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         /// <returns>A prepared statement.</returns>
         /// <param name="This">The database connection</param>
-        /// <param name="tableMapping">The table mapping.</param>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static IStatement PrepareFindStatement<T>(this IDatabaseConnection This)
         {
             Contract.Requires(This != null);
@@ -53,9 +53,9 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         /// <returns><c>true</c>, if an object was found, <c>false</c> otherwise.</returns>
         /// <param name="This">The database connection.</param>
-        /// <param name="tableMapping">The table mapping.</param>
         /// <param name="primaryKey">A primary key.</param>
         /// <param name="value">If found in the database, the found object.</param>
+        /// <param name="resultSelector">A transform function to apply to each row.</param> 
         /// <typeparam name="T">The mapped type.</typeparam>
         public static bool TryFind<T>(
             this IDatabaseConnection This, 
@@ -83,8 +83,8 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         /// <returns>A dictionary mapping the primary key to its value if found in the database.</returns>
         /// <param name="This">The database connection.</param>
-        /// <param name="tableMapping">The table mapping.</param>
         /// <param name="primaryKeys">An IEnumerable of primary keys to find.</param>
+        /// <param name="resultSelector">A transform function to apply to each row.</param> 
         /// <typeparam name="T">The mapped type.</typeparam>
         public static IReadOnlyDictionary<long,T> FindAll<T>(
             this IDatabaseConnection This, 
@@ -101,6 +101,9 @@ namespace SQLitePCL.pretty.Orm
         }
      }
 
+     /// <summary>
+     /// Extension methods for instances of <see cref="SQLitePCL.pretty.IAsyncDatabaseConnection"/>.
+     /// </summary>
      public static partial class AsyncDatabaseConnection
      {
         /// <summary>
@@ -108,8 +111,8 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         /// <returns>A task that completes with a dictionary mapping the primary key to its value if found in the database.</returns>
         /// <param name="This">The database connection.</param>
-        /// <param name="tableMapping">The table mapping.</param>
         /// <param name="primaryKeys">An IEnumerable of primary keys to find.</param>
+        /// <param name="resultSelector">A transform function to apply to each row.</param> 
         /// <param name="ct">A cancellation token that can be used to cancel the operation</param>
         /// <typeparam name="T">The mapped type.</typeparam>
         public static Task<IReadOnlyDictionary<long,T>> FindAllAsync<T>(
@@ -130,8 +133,8 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         /// <returns>A task that completes with a dictionary mapping the primary key to its value if found in the database.</returns>
         /// <param name="This">The database connection.</param>
-        /// <param name="tableMapping">The table mapping.</param>
         /// <param name="primaryKeys">An IEnumerable of primary keys to find.</param>
+        /// <param name="resultSelector">A transform function to apply to each row.</param> 
         /// <typeparam name="T">The mapped type.</typeparam>
         public static Task<IReadOnlyDictionary<long,T>> FindAllAsync<T>(
             this IAsyncDatabaseConnection This, 

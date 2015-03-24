@@ -7,6 +7,9 @@ namespace SQLitePCL.pretty.Orm
 {
     public static partial class SqlQuery
     {
+        /// <summary>
+        /// The SELECT clause of a SQL query.
+        /// </summary>
         public sealed class SelectClause<T> : ISqlQuery
         {
             // FIXME: Long term, prefer some sort of expression syntax
@@ -19,42 +22,91 @@ namespace SQLitePCL.pretty.Orm
                 this.select = select;
             }
 
+            /// <summary>
+            /// Where the specified predExpr with named bind parameters.
+            /// </summary>
+            /// <param name="predExpr">Pred expr.</param>
+            /// <typeparam name="U">The 1st bind parameter.</typeparam>
+            /// <typeparam name="V">The 2nd bind parameter.</typeparam>
+            /// <typeparam name="W">The 3rd bind parameter.</typeparam>
+            /// <typeparam name="X">The 4th bind parameter.</typeparam>
+            /// <typeparam name="Y">The 5th bind parameter.</typeparam>
+            /// <typeparam name="Z">The 6th bind parameter.</typeparam>
             public WhereClause<T> Where<U,V,W,X,Y,Z>(Expression<Func<T,U,V,W,X,Y,Z,bool>> predExpr)
             {
                 Contract.Requires(predExpr != null);
                 return this.Where((LambdaExpression) predExpr);
             }
 
+            /// <summary>
+            /// Where the specified predExpr with named bind parameters.
+            /// </summary>
+            /// <param name="predExpr">Pred expr.</param>
+            /// <typeparam name="U">The 1st bind parameter.</typeparam>
+            /// <typeparam name="V">The 2nd bind parameter.</typeparam>
+            /// <typeparam name="W">The 3rd bind parameter.</typeparam>
+            /// <typeparam name="X">The 4th bind parameter.</typeparam>
+            /// <typeparam name="Y">The 5th bind parameter.</typeparam>
             public WhereClause<T> Where<U,V,W,X,Y>(Expression<Func<T,U,V,W,X,Y,bool>> predExpr)
             {
                 Contract.Requires(predExpr != null);
                 return this.Where((LambdaExpression) predExpr);
             }
 
+            /// <summary>
+            /// Where the specified predExpr with named bind parameters.
+            /// </summary>
+            /// <param name="predExpr">Pred expr.</param>
+            /// <typeparam name="U">The 1st bind parameter.</typeparam>
+            /// <typeparam name="V">The 2nd bind parameter.</typeparam>
+            /// <typeparam name="W">The 3rd bind parameter.</typeparam>
+            /// <typeparam name="X">The 4th bind parameter.</typeparam>
             public WhereClause<T> Where<U,V,W,X>(Expression<Func<T,U,V,W,X,bool>> predExpr)
             {
                 Contract.Requires(predExpr != null);
                 return this.Where((LambdaExpression) predExpr);
             }
 
+            /// <summary>
+            /// Where the specified predExpr with named bind parameters.
+            /// </summary>
+            /// <param name="predExpr">Pred expr.</param>
+            /// <typeparam name="U">The 1st bind parameter.</typeparam>
+            /// <typeparam name="V">The 2nd bind parameter.</typeparam>
+            /// <typeparam name="W">The 3rd bind parameter.</typeparam>
             public WhereClause<T> Where<U,V,W>(Expression<Func<T,U,V,W,bool>> predExpr)
             {
                 Contract.Requires(predExpr != null);
                 return this.Where((LambdaExpression) predExpr);
             }
 
+            /// <summary>
+            /// Filters the selected rows based on a predicate with named bind parameters.
+            /// </summary>
+            /// <param name="predExpr">Pred expr.</param>
+            /// <typeparam name="U">The 1st bind parameter.</typeparam>
+            /// <typeparam name="V">The 2nd bind parameter.</typeparam>
             public WhereClause<T> Where<U,V>(Expression<Func<T,U,V,bool>> predExpr)
             {
                 Contract.Requires(predExpr != null);
                 return this.Where((LambdaExpression) predExpr);
             }
 
+            /// <summary>
+            /// Filters the selected rows based on a predicate with named bind parameters.
+            /// </summary>
+            /// <param name="predExpr">Pred expr.</param>
+            /// <typeparam name="U">The 1st bind parameter.</typeparam>
             public WhereClause<T> Where<U>(Expression<Func<T,U,bool>> predExpr)
             {
                 Contract.Requires(predExpr != null);
                 return this.Where((LambdaExpression) predExpr);
             }
 
+            /// <summary>
+            /// Filters the selected rows based on a predicate.
+            /// </summary>
+            /// <param name="predExpr">Pred expr.</param>
             public WhereClause<T> Where(Expression<Func<T, bool>> predExpr)
             {
                 Contract.Requires(predExpr != null);

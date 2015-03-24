@@ -6,8 +6,17 @@ using System.Reflection;
 
 namespace SQLitePCL.pretty.Orm
 {
+    /// <summary>
+    /// Extensions methods for SQLite ResultSet rows
+    /// </summary>
     public static partial class ResultSet
     {
+
+        /// <summary>
+        /// Returns a row selector function that converts a SQLite row into an instance of the mutable type T.
+        /// </summary>
+        /// <returns>The result selector function.</returns>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static Func<IReadOnlyList<IResultSetValue>,T> RowToObject<T>()
         {
             Func<T> builder = () => Activator.CreateInstance<T>();
@@ -16,6 +25,16 @@ namespace SQLitePCL.pretty.Orm
             return RowToObject(builder, build);
         }
 
+        /// <summary>
+        /// Returns a function that convert a SQLite row into an instance of type T using the provided builder functions. The builder 
+        /// function may return the same instane of builder more than once, provided that the instance is thread local or locked such
+        /// that only a single given thread ever has access to the instance between calls to builder and build.
+        /// </summary>
+        /// <returns>The result selector function.</returns>
+        /// <param name="builder">A function that provides a builder object that can be used to build an instance of T.</param>
+        /// <param name="build">A function that builds and instance of T using the builder.</param>
+        /// <typeparam name="TBuilder">The builder type.</typeparam>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static Func<IReadOnlyList<IResultSetValue>,T> RowToObject<TBuilder, T>(Func<TBuilder> builder, Func<TBuilder,T> build)
         {   
             Contract.Requires(builder != null);

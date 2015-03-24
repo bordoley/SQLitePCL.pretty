@@ -31,7 +31,7 @@ namespace SQLitePCL.pretty.Orm
         /// Creates or migrate a table in the database for the given table mapping, creating indexes if needed.
         /// </summary>
         /// <param name="This">The database connection.</param>
-        /// <param name="tableMapping">The table mapping.</param>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static void InitTable<T>(this IDatabaseConnection This)
         {
             Contract.Requires(This != null);
@@ -79,8 +79,8 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         /// <returns>A task that completes once the table is succesfully created and is ready for use.</returns>
         /// <param name="This">The database connection</param>
-        /// <param name="tableMapping">The table mapping.</param>
         /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static Task InitTableAsync<T>(this IAsyncDatabaseConnection This, CancellationToken cancellationToken)
         {
             Contract.Requires(This != null);
@@ -92,7 +92,7 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         /// <returns>A task that completes once the table is succesfully created and is ready for use.</returns>
         /// <param name="This">The database connection</param>
-        /// <param name="tableMapping">The table mapping.</param>
+        /// <typeparam name="T">The mapped type.</typeparam>
         public static Task InitTableAsync<T>(this IAsyncDatabaseConnection This)
         {
             Contract.Requires(This != null);
