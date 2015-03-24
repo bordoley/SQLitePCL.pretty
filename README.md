@@ -209,4 +209,4 @@ SQLitePCL is the original PCL library release by MSOpenTech. Stylistically, this
 
 ## [SQLite-Net](https://github.com/praeclarum/sqlite-net)
 
-SQLite-Net provides an ORM similar to the one provided by SQLitePCL.pretty to manipulate database objects. The most notable difference, is that SQLite-Net supports linq based querying of a database which is not yet supported (maybe never) by SQLitePCL.pretty. On the converse, SQLitePCL.pretty is more friendly to functional programmers who want to persist immutable objects to a SQLite database.
+SQLite-Net provides an ORM similar to the one provided by SQLitePCL.pretty to manipulate database objects. SQLite-NET is exceptionally well tested in the wild, and should generally be your default choice when being conservative. On the converse, SQLitePCL.pretty has extensive unit test coverage and is supports many newer features available in more recent SQLite versions. 
