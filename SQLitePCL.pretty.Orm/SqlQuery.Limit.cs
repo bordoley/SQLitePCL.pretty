@@ -14,10 +14,10 @@ namespace SQLitePCL.pretty.Orm
         public sealed class LimitClause<T> : ISqlQuery
         {
             private readonly OrderByClause<T> orderBy;
-            private readonly Nullable<int> limit;
+            private readonly int limit;
             private readonly Nullable<int> offset;
 
-            internal LimitClause(OrderByClause<T> orderBy, Nullable<int> limit, Nullable<int> offset)
+            internal LimitClause(OrderByClause<T> orderBy, int limit, Nullable<int> offset)
             {
                 this.orderBy = orderBy;
                 this.limit = limit;
@@ -54,7 +54,7 @@ namespace SQLitePCL.pretty.Orm
             {
                 return 
                     orderBy.ToString() +
-                    (limit.HasValue ? "\r\nLIMIT " + limit.Value : "" ) +
+                    "\r\nLIMIT " + limit +
                     (offset.HasValue ? "\r\nOFFSET " + offset.Value : "");
             }
         }

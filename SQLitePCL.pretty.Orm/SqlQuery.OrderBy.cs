@@ -68,7 +68,9 @@ namespace SQLitePCL.pretty.Orm
             public LimitClause<T> Skip(int n)
             {
                 Contract.Requires(n >= 0);
-                return new LimitClause<T>(this, null, n);
+
+                //If the LIMIT expression evaluates to a negative value, then there is no upper bound on the number of rows returned
+                return new LimitClause<T>(this, -1, n);
             }
 
             /// <summary>
