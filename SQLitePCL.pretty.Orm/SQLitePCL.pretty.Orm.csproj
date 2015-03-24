@@ -136,7 +136,6 @@
     <Compile Include="TableMapping.cs" />
     <Compile Include="Attributes.cs" />
     <Compile Include="DatabaseConnection.cs" />
-    <Compile Include="TableMappedStatement.cs" />
     <Compile Include="DatabaseConnection.Index.cs" />
     <Compile Include="DatabaseConnection.Tables.cs" />
     <Compile Include="SQLBuilder.cs" />
@@ -144,15 +143,17 @@
     <Compile Include="ColumnMapping.cs" />
     <Compile Include="IndexInfo.cs" />
     <Compile Include="Reflection.cs" />
-    <Compile Include="TableMapping.Find.cs" />
-    <Compile Include="TableMapping.Delete.cs" />
-    <Compile Include="TableMapping.InsertOrReplace.cs" />
     <Compile Include="ForeignKeyConstraint.cs" />
     <Compile Include="SqlQuery.cs" />
     <Compile Include="SqlQuery.Limit.cs" />
     <Compile Include="SqlQuery.OrderBy.cs" />
     <Compile Include="SqlQuery.Where.cs" />
     <Compile Include="SqlQuery.Select.cs" />
+    <Compile Include="Statement.cs" />
+    <Compile Include="Orm.cs" />
+    <Compile Include="DatabaseConnection.Delete.cs" />
+    <Compile Include="DatabaseConnection.Find.cs" />
+    <Compile Include="DatabaseConnection.InsertOrReplace.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>

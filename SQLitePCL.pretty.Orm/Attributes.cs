@@ -303,7 +303,7 @@ namespace SQLitePCL.pretty.Orm.Attributes
             return This.GetCustomAttributes<CollationAttribute>(true).Select(x => x.Name).FirstOrDefault();
         }
 
-        internal static bool Ignore(this PropertyInfo This)
+        private static bool Ignore(this PropertyInfo This)
         {
             return This.GetCustomAttributes<IgnoreAttribute>(true).Count() > 0;
         }
@@ -343,6 +343,16 @@ namespace SQLitePCL.pretty.Orm.Attributes
         {
             var fkAttr = This.GetCustomAttributes<ForeignKeyAttribute>(true).FirstOrDefault();
             return fkAttr != null ? fkAttr.Value : null;
+        }
+
+        internal static IEnumerable<PropertyInfo> GetNotIgnoredGettableProperties(this Type This)
+        {
+            return This.GetPublicInstanceProperties().Where(x => !x.Ignore());
+        }
+
+        internal static IEnumerable<PropertyInfo> GetNotIgnoredSettableProperties(this Type This)
+        {
+            return This.GetPublicInstanceSettableProperties().Where(x => !x.Ignore());
         }
     }
 }

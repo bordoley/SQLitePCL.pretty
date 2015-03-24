@@ -20,20 +20,87 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace SQLitePCL.pretty.Orm
 {
-    internal static partial class DatabaseConnection
+    public static partial class DatabaseConnection
     {
         /// <summary>
-        /// Drops the table if it exists. Otherwise this is a no-op.
+        /// Creates or migrate a table in the database for the given table mapping, creating indexes if needed.
         /// </summary>
         /// <param name="This">The database connection.</param>
-        /// <param name="table">The table name.</param>
-        /// <seealso href="https://www.sqlite.org/lang_droptable.html"/>
-        internal static void DropTableIfExists(this IDatabaseConnection This, string table)
+        /// <param name="tableMapping">The table mapping.</param>
+        public static void InitTable(this IDatabaseConnection This, TableMapping tableMapping)
         {
-            This.Execute(SQLBuilder.DropTableIfExists(table));
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+
+            This.RunInTransaction(_ =>
+                {
+                    This.CreateTableIfNotExists(tableMapping.TableName, CreateFlags.None, tableMapping.Columns);
+
+                    if (This.Changes != 0)
+                    {
+                        This.MigrateTable(tableMapping);
+                    }
+
+                    foreach (var index in tableMapping.Indexes) 
+                    {
+                        This.CreateIndex(index.Key, tableMapping.TableName, index.Value.Columns, index.Value.Unique);
+                    }
+                });
+        }
+
+
+        private static void MigrateTable(this IDatabaseConnection This, TableMapping tableMapping)
+        {
+            var existingCols = This.GetTableInfo(tableMapping.TableName);
+            
+            var toBeAdded = new List<KeyValuePair<string, ColumnMapping>> ();
+
+            foreach (var p in tableMapping.Columns) 
+            {
+                if (!existingCols.ContainsKey(p.Key)) { toBeAdded.Add (p); }
+            }
+            
+            foreach (var p in toBeAdded) 
+            {
+                This.Execute (SQLBuilder.AlterTableAddColumn(tableMapping.TableName, p.Key, p.Value));
+            }
+        }
+    }
+
+    public static partial class AsyncDatabaseConnection
+    {
+        /// <summary>
+        /// Creates or migrate a table in the database for the given table mapping, creating indexes if needed.
+        /// </summary>
+        /// <returns>A task that completes once the table is succesfully created and is ready for use.</returns>
+        /// <param name="This">The database connection</param>
+        /// <param name="tableMapping">The table mapping.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
+        public static Task InitTableAsync(this IAsyncDatabaseConnection This, TableMapping tableMapping, CancellationToken cancellationToken)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+
+            return This.Use((db, ct) => db.InitTable(tableMapping), cancellationToken);
+        }
+
+        /// <summary>
+        /// Creates or migrate a table in the database for the given table mapping, creating indexes if needed.
+        /// </summary>
+        /// <returns>A task that completes once the table is succesfully created and is ready for use.</returns>
+        /// <param name="This">The database connection</param>
+        /// <param name="tableMapping">The table mapping.</param>
+        public static Task InitTableAsync(this IAsyncDatabaseConnection This, TableMapping tableMapping)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(tableMapping != null);
+
+            return This.InitTableAsync(tableMapping, CancellationToken.None);
         }
     }
 }

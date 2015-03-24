@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace SQLitePCL.pretty.Orm
 {
-    internal static partial class DatabaseConnection
+    public static partial class DatabaseConnection
     {   
         internal static void CreateIndex(this IDatabaseConnection This, string indexName, string tableName, IEnumerable<string> columnNames, bool unique)
         {

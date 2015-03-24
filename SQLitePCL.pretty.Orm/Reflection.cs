@@ -37,6 +37,10 @@ namespace SQLitePCL.pretty.Orm
             return This.GetRuntimeProperties().Where(p => p.GetMethod != null && p.GetMethod.IsPublic && !p.GetMethod.IsStatic);
         }
 
+        internal static IEnumerable<PropertyInfo> GetPublicInstanceSettableProperties(this Type This)
+        {
+            return This.GetRuntimeProperties().Where(p => p.SetMethod != null && p.SetMethod.IsPublic && !p.SetMethod.IsStatic);
+        }
     }
 }
 

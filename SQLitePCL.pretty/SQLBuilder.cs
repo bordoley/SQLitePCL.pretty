@@ -74,6 +74,16 @@ namespace SQLitePCL.pretty
         {
             return "ROLLBACK TRANSACTION TO " + savepoint;
         }
+
+        internal static string DropTableIfExists(string tableName)
+        {
+            return string.Format("DROP TABLE IF EXISTS \"{0}\"", tableName);
+        }
+
+        internal static string DeleteAll(string tableName)
+        {
+            return string.Format("DELETE FROM \"{0}\"", tableName);
+        }
     } 
 }
 

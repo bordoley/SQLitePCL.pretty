@@ -539,6 +539,64 @@ namespace SQLitePCL.pretty
             Contract.Requires(f != null);
             return This.Use((conn, ct) => f(conn));
         }
+
+        /// <summary>
+        /// Drops the table if exists async.
+        /// </summary>
+        /// <returns>The table if exists async.</returns>
+        /// <param name="This">This.</param>
+        /// <param name="table">The table name.</param>
+        /// <param name="ct">Ct.</param>
+        public static Task DropTableIfExistsAsync(this IAsyncDatabaseConnection This, string table, CancellationToken ct)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(table != null);
+
+            return This.Use((db, _) => db.DropTableIfExists(table), ct);
+        }
+
+        /// <summary>
+        /// Drops the table if exists async.
+        /// </summary>
+        /// <returns>The table if exists async.</returns>
+        /// <param name="This">This.</param>
+        /// <param name="table">The table name.</param>
+        public static Task DropTableIfExistsAsync(this IAsyncDatabaseConnection This, string table)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(table != null);
+
+            return This.DropTableIfExistsAsync(table, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Deletes all rows in a given table, asynchronously.
+        /// </summary>
+        /// <returns>A task that completes when all rows are deleted succesfully.</returns>
+        /// <param name="This">The database connection.</param>
+        /// <param name="table">The table name.</param>
+        /// <param name="ct">A cancellation token that can be used to cancel the operation.</param>
+        public static Task DeleteAllRowsAsync(this IAsyncDatabaseConnection This, string table, CancellationToken ct)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(table != null);
+
+            return This.Use((db, _) => db.DeleteAllRows(table), ct);
+        }
+
+        /// <summary>
+        /// Deletes all rows in a given table, asynchronously.
+        /// </summary>
+        /// <returns>A task that completes when all rows are deleted succesfully.</returns>
+        /// <param name="This">The database connection.</param>
+        /// <param name="table">The table name.</param>
+        public static Task DeleteAllRowsAsync(this IAsyncDatabaseConnection This, string table)
+        {
+            Contract.Requires(This != null);
+            Contract.Requires(table != null);
+
+            return This.DeleteAllRowsAsync(table, CancellationToken.None);
+        }
     }
 
     internal sealed class AsyncDatabaseConnectionImpl : IAsyncDatabaseConnection

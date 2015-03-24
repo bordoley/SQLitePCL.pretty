@@ -36,7 +36,7 @@ namespace SQLitePCL.pretty.Orm
         FullTextSearch4         = 0x200     // create virtual table using FTS4
     }
 
-    internal static partial class DatabaseConnection
+    public static partial class DatabaseConnection
     {
         internal static void CreateTableIfNotExists(this IDatabaseConnection conn, string tableName, CreateFlags createFlags, IReadOnlyDictionary<string, ColumnMapping> columns)
         {
@@ -49,17 +49,6 @@ namespace SQLitePCL.pretty.Orm
             return This.PrepareStatement(SQLBuilder.DeleteUsingPrimaryKey(table, primaryKeyColumn));
         }
 
-        /*
-        internal static void Delete(this IDatabaseConnection This, string table, string primaryKeyColumn, object primaryKey)
-        {
-            This.Execute(SQLBuilder.DeleteUsingPrimaryKey(table, primaryKeyColumn), primaryKey);
-        }*/ 
-
-        internal static void DeleteAll(this IDatabaseConnection This, string table)
-        {
-            This.Execute(SQLBuilder.DeleteAll(table));
-        }
-
         /// <summary>
         /// Creates a SQLite prepared statement that can be used to find a row in the table by its rowid. 
         /// </summary>
@@ -70,19 +59,6 @@ namespace SQLitePCL.pretty.Orm
         {
             return This.PrepareStatement(SQLBuilder.FindByRowID(tableName));
         }
-
-        /*
-        /// <summary>
-        /// Finds a row by it's SQLite rowid.
-        /// </summary>
-        /// <returns>An IEnumerable that contains either 1 or 0 results depending on whether the rowid was found in the table.</returns>
-        /// <param name="This">The database connection.</param>
-        /// <param name="tableName">The table name.</param>
-        /// <param name="rowid">The rowid of the row to fetch.</param>
-        internal static IEnumerable<IReadOnlyList<IResultSetValue>> FindByRowId(this IDatabaseConnection This, string tableName, long rowid)
-        {
-            return This.Query(SQLBuilder.FindByRowID(tableName), rowid);
-        }*/
 
         /// <summary>
         /// Gets the table column info.

@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace SQLitePCL.pretty.Orm
 {
-    public static partial class TableMapping
+    public static partial class DatabaseConnection
     { 
-        private static string InsertOrReplace<T>(this ITableMapping<T> tableMapping)
+        private static string InsertOrReplace(this TableMapping tableMapping)
         {
             return SQLBuilder.InsertOrReplace(tableMapping.TableName, tableMapping.Columns.Select(x => x.Key));     
         }
@@ -20,24 +20,27 @@ namespace SQLitePCL.pretty.Orm
         /// <returns>A prepared statement.</returns>
         /// <param name="This">The database connection</param>
         /// <param name="tableMapping">The table mapping.</param>
-        /// <typeparam name="T">The mapped type</typeparam>
-        public static ITableMappedStatement<T> PrepareInsertOrReplaceStatement<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
+        public static IStatement PrepareInsertOrReplaceStatement(this IDatabaseConnection This, TableMapping tableMapping)
         {
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
-            return new TableMappedStatement<T>(This.PrepareStatement(tableMapping.InsertOrReplace()), tableMapping);   
+            return This.PrepareStatement(tableMapping.InsertOrReplace());   
         }
 
-        private static IEnumerable<KeyValuePair<T,T>> YieldInsertOrReplaceAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
+        private static IEnumerable<KeyValuePair<T,T>> YieldInsertOrReplaceAll<T>(
+            this IDatabaseConnection This, 
+            TableMapping tableMapping, 
+            IEnumerable<T> objects,
+            Func<IReadOnlyList<IResultSetValue>,T> resultSelector)
         {
             using (var insertOrReplaceStmt = This.PrepareInsertOrReplaceStatement(tableMapping))
-            using (var findStmt = This.PrepareFindByRowId(tableMapping))
+            using (var findStmt = This.PrepareFindByRowId(tableMapping.TableName))
             {
                 foreach (var obj in objects)
                 {
-                    insertOrReplaceStmt.Execute(obj);
+                    insertOrReplaceStmt.ExecuteWithProperties(obj);
                     var rowId = This.LastInsertedRowId;
-                    yield return new KeyValuePair<T,T>(obj, findStmt.Query(rowId).First());
+                    yield return new KeyValuePair<T,T>(obj, findStmt.Query(rowId).Select(resultSelector).First());
                 } 
             }
         }
@@ -50,13 +53,17 @@ namespace SQLitePCL.pretty.Orm
         /// <param name="tableMapping">The table mapping.</param>
         /// <param name="obj">The object to insert.</param>
         /// <typeparam name="T">The mapped type.</typeparam>     
-        public static T InsertOrReplace<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, T obj)
+        public static T InsertOrReplace<T>(
+            this IDatabaseConnection This, 
+            TableMapping tableMapping, 
+            T obj,
+            Func<IReadOnlyList<IResultSetValue>,T> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
             Contract.Requires(obj != null);
 
-            return This.YieldInsertOrReplaceAll(tableMapping, new T[] {obj}).First().Value;
+            return This.YieldInsertOrReplaceAll(tableMapping, new T[] {obj}, resultSelector).First().Value;
         }
 
         /// <summary>
@@ -67,16 +74,24 @@ namespace SQLitePCL.pretty.Orm
         /// <param name="tableMapping">The table mapping.</param>
         /// <param name="objects">The objects to be inserted into the database.</param>
         /// <typeparam name="T">The mapped type.</typeparam> 
-        public static IReadOnlyDictionary<T,T> InsertOrReplaceAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<T> objects)
+        public static IReadOnlyDictionary<T,T> InsertOrReplaceAll<T>(
+            this IDatabaseConnection This, 
+            TableMapping tableMapping, 
+            IEnumerable<T> objects,
+            Func<IReadOnlyList<IResultSetValue>,T> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
             Contract.Requires(objects != null);
 
             return This.RunInTransaction(_ => 
-                This.YieldInsertOrReplaceAll(tableMapping, objects).ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
+                This.YieldInsertOrReplaceAll(tableMapping, objects, resultSelector)
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
         }
+     }
 
+     public static partial class AsyncDatabaseConnection
+     {
         /// <summary>
         /// Inserts the objects into the database, replacing existing entries if the given primary keys already exist.
         /// </summary>
@@ -88,15 +103,16 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam> 
         public static Task<IReadOnlyDictionary<T,T>> InsertOrReplaceAllAsync<T>(
             this IAsyncDatabaseConnection This, 
-            ITableMapping<T> tableMapping,
+            TableMapping tableMapping,
             IEnumerable<T> objects,
+            Func<IReadOnlyList<IResultSetValue>,T> resultSelector,
             CancellationToken ct)
         {
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
             Contract.Requires(objects != null);
 
-            return This.Use((db, _) => db.InsertOrReplaceAll(tableMapping, objects), ct);
+            return This.Use((db, _) => db.InsertOrReplaceAll(tableMapping, objects, resultSelector), ct);
         }
 
         /// <summary>
@@ -109,14 +125,15 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam> 
         public static Task<IReadOnlyDictionary<T,T>> InsertOrReplaceAllAsync<T>(
             this IAsyncDatabaseConnection This, 
-            ITableMapping<T> tableMapping,
-            IEnumerable<T> objects)
+            TableMapping tableMapping,
+            IEnumerable<T> objects,
+            Func<IReadOnlyList<IResultSetValue>,T> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
             Contract.Requires(objects != null);
 
-            return This.InsertOrReplaceAllAsync(tableMapping, objects, CancellationToken.None);
+            return This.InsertOrReplaceAllAsync(tableMapping, objects, resultSelector, CancellationToken.None);
         }
     }
 }

@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace SQLitePCL.pretty.Orm
 {
-    public static partial class TableMapping
+    public static partial class DatabaseConnection
     { 
-        private static readonly ConditionalWeakTable<ITableMapping, string> find = 
-            new ConditionalWeakTable<ITableMapping, string>();
+        private static readonly ConditionalWeakTable<TableMapping, string> find = 
+            new ConditionalWeakTable<TableMapping, string>();
 
-        private static string Find(this ITableMapping This)
+        private static string Find(this TableMapping This)
         {
             return find.GetValue(This, mapping => 
                 {
@@ -28,22 +28,25 @@ namespace SQLitePCL.pretty.Orm
         /// <returns>A prepared statement.</returns>
         /// <param name="This">The database connection</param>
         /// <param name="tableMapping">The table mapping.</param>
-        /// <typeparam name="T">The mapped type</typeparam>
-        public static ITableMappedStatement<T> PrepareFindStatement<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping)
+        public static IStatement PrepareFindStatement(this IDatabaseConnection This, TableMapping tableMapping)
         {
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
 
-            return new TableMappedStatement<T>(This.PrepareStatement(tableMapping.Find()), tableMapping);   
+            return This.PrepareStatement(tableMapping.Find());   
         }
 
-        private static IEnumerable<KeyValuePair<long,T>> YieldFindAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<long> primaryKeys)
+        private static IEnumerable<KeyValuePair<long,T>> YieldFindAll<T>(
+            this IDatabaseConnection This, 
+            TableMapping tableMapping, 
+            IEnumerable<long> primaryKeys,
+            Func<IReadOnlyList<IResultSetValue>,T> resultSelector)
         {
             using (var findStmt = This.PrepareFindStatement(tableMapping))
             {
                 foreach (var primaryKey in primaryKeys)
                 {
-                    var result = findStmt.Query(primaryKey).FirstOrDefault();
+                    var result = findStmt.Query(primaryKey).Select(resultSelector).FirstOrDefault();
                     yield return new KeyValuePair<long,T>(primaryKey, result);
                 }
             }
@@ -58,12 +61,17 @@ namespace SQLitePCL.pretty.Orm
         /// <param name="primaryKey">A primary key.</param>
         /// <param name="value">If found in the database, the found object.</param>
         /// <typeparam name="T">The mapped type.</typeparam>
-        public static bool TryFind<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, long primaryKey, out T value)
+        public static bool TryFind<T>(
+            this IDatabaseConnection This, 
+            TableMapping tableMapping, 
+            long primaryKey, 
+            Func<IReadOnlyList<IResultSetValue>,T> resultSelector,
+            out T value)
         {
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
 
-            var result = This.YieldFindAll(tableMapping, new long[] { primaryKey }).FirstOrDefault();
+            var result = This.YieldFindAll(tableMapping, new long[] { primaryKey }, resultSelector).FirstOrDefault();
 
             if (result.Value != null)
             {
@@ -83,17 +91,24 @@ namespace SQLitePCL.pretty.Orm
         /// <param name="tableMapping">The table mapping.</param>
         /// <param name="primaryKeys">An IEnumerable of primary keys to find.</param>
         /// <typeparam name="T">The mapped type.</typeparam>
-        public static IReadOnlyDictionary<long,T> FindAll<T>(this IDatabaseConnection This, ITableMapping<T> tableMapping, IEnumerable<long> primaryKeys)
+        public static IReadOnlyDictionary<long,T> FindAll<T>(
+            this IDatabaseConnection This, 
+            TableMapping tableMapping, 
+            IEnumerable<long> primaryKeys,
+            Func<IReadOnlyList<IResultSetValue>,T> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
             Contract.Requires(primaryKeys != null);
 
-            return This.YieldFindAll(tableMapping, primaryKeys)
+            return This.YieldFindAll(tableMapping, primaryKeys, resultSelector)
                        .Where(kvp => kvp.Value != null)
                        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
+     }
 
+     public static partial class AsyncDatabaseConnection
+     {
         /// <summary>
         /// Finds all object instances specified by their primary keys.
         /// </summary>
@@ -105,15 +120,16 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static Task<IReadOnlyDictionary<long,T>> FindAllAsync<T>(
             this IAsyncDatabaseConnection This, 
-            ITableMapping<T> tableMapping, 
+            TableMapping tableMapping, 
             IEnumerable<long> primaryKeys, 
+            Func<IReadOnlyList<IResultSetValue>,T> resultSelector,
             CancellationToken ct)
         {
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
             Contract.Requires(primaryKeys != null);
 
-            return This.Use((db,_) => db.FindAll(tableMapping, primaryKeys), ct);
+            return This.Use((db,_) => db.FindAll(tableMapping, primaryKeys, resultSelector), ct);
         }
 
         /// <summary>
@@ -126,14 +142,15 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static Task<IReadOnlyDictionary<long,T>> FindAllAsync<T>(
             this IAsyncDatabaseConnection This, 
-            ITableMapping<T> tableMapping, 
-            IEnumerable<long> primaryKeys)
+            TableMapping tableMapping, 
+            IEnumerable<long> primaryKeys,
+            Func<IReadOnlyList<IResultSetValue>,T> resultSelector)
         {
             Contract.Requires(This != null);
             Contract.Requires(tableMapping != null);
             Contract.Requires(primaryKeys != null);
 
-            return This.FindAllAsync(tableMapping, primaryKeys, CancellationToken.None);
+            return This.FindAllAsync(tableMapping, primaryKeys, resultSelector, CancellationToken.None);
         }
     }
 }

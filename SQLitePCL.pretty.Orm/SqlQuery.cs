@@ -85,9 +85,9 @@ namespace SQLitePCL.pretty.Orm
             return This.PrepareStatement(query.ToSql());
         }
 
-        public static ITableMappedStatement<T> PrepareStatement<T>(this IDatabaseConnection This, ISqlQuery query, ITableMapping<T> mapping)
+        public static IStatement PrepareStatement<T>(this IDatabaseConnection This, ISqlQuery query, TableMapping mapping)
         {
-            return new TableMappedStatement<T>(This.PrepareStatement(query.ToSql()), mapping);
+            return This.PrepareStatement(query.ToSql());
         }
 
         public static SelectClause<T> From<T>()

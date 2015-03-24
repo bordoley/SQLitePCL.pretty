@@ -97,9 +97,7 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestInitTable()
         {
-            var table = TableMapping.Create<TestObject>(
-                            () => testObjectBuilder.Value, 
-                            o => ((TestObject.Builder)o).Build());
+            var table = TableMapping.Create<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -118,7 +116,10 @@ namespace SQLitePCL.pretty.tests
         public void TestInitTableWithMigration()
         {
             var tableOriginal = TableMapping.Create<TestMutableObject>();
+            var tableOriginalOrm = Orm.Orm.ResultSetRowToObject<TestMutableObject>();
+
             var tableNew = TableMapping.Create<TestMutableObjectUpdated>();
+            var tableNewOrm = Orm.Orm.ResultSetRowToObject<TestMutableObjectUpdated>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -131,7 +132,7 @@ namespace SQLitePCL.pretty.tests
                     tableOriginal.Columns.Select(x => new KeyValuePair<string,TableColumnMetadata>(x.Key, x.Value.Metadata)),
                     dbColumns);
 
-                var insertedOriginal = db.InsertOrReplace(tableOriginal, new TestMutableObject() { Value = "test" });
+                var insertedOriginal = db.InsertOrReplace(tableOriginal, new TestMutableObject() { Value = "test" }, tableOriginalOrm);
 
                 db.InitTable(tableNew);
                 dbIndexes = db.GetIndexInfo(tableOriginal.TableName);
@@ -143,7 +144,7 @@ namespace SQLitePCL.pretty.tests
                     dbColumns);
 
                 TestMutableObjectUpdated found;
-                if (db.TryFind<TestMutableObjectUpdated>(tableNew, insertedOriginal.Id.Value, out found))
+                if (db.TryFind<TestMutableObjectUpdated>(tableNew, insertedOriginal.Id.Value, tableNewOrm, out found))
                 {
                     Assert.AreEqual(found.NotNullReference, "default");
                 }
@@ -157,17 +158,19 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestInsertOrReplace()
         {
-            var table = TableMapping.Create<TestObject>(
-                            () => testObjectBuilder.Value, 
-                            o => ((TestObject.Builder)o).Build());
+            var table = TableMapping.Create<TestObject>();
+            var orm = Orm.Orm.ResultSetRowToObject(
+                        () => testObjectBuilder.Value, 
+                        o => ((TestObject.Builder)o).Build());
+                            
 
             using (var db = SQLite3.OpenInMemory())
             {
                 db.InitTable(table);
 
-                var inserted = db.InsertOrReplace(table, new TestObject.Builder() { Value = "Hello" }.Build());
+                var inserted = db.InsertOrReplace(table, new TestObject.Builder() { Value = "Hello" }.Build(), orm);
                 var changed = new TestObject.Builder() { Id = inserted.Id, Value = "Goodbye" }.Build();
-                var replaced = db.InsertOrReplace(table, changed);
+                var replaced = db.InsertOrReplace(table, changed, orm);
 
                 Assert.AreEqual(inserted.Id, replaced.Id);
                 Assert.AreEqual(replaced.Value, "Goodbye");
@@ -177,9 +180,10 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestInsertOrReplaceAll()
         {
-            var table = TableMapping.Create<TestObject>(
-                ()=> testObjectBuilder.Value, 
-                o => ((TestObject.Builder) o).Build());
+            var table = TableMapping.Create<TestObject>();
+            var orm = Orm.Orm.ResultSetRowToObject(
+                        () => testObjectBuilder.Value, 
+                        o => ((TestObject.Builder)o).Build());
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -192,7 +196,7 @@ namespace SQLitePCL.pretty.tests
                     };
 
                 db.InitTable(table);
-                var result = db.InsertOrReplaceAll(table, objects);
+                var result = db.InsertOrReplaceAll(table, objects, orm);
                 CollectionAssert.AreEquivalent(
                     result.Values.Select(x => x.Value), 
                     objects.Select(x => x.Value));
@@ -204,7 +208,7 @@ namespace SQLitePCL.pretty.tests
                         new TestObject.Builder() { Id = result.Values.ElementAt(1).Id, Value = "Goodbye2" }.Build(),
                         new TestObject.Builder() { Id = result.Values.ElementAt(2).Id, Value = "Goodye3" }.Build()
                     };
-                var replaced = db.InsertOrReplaceAll(table, changed);
+                var replaced = db.InsertOrReplaceAll(table, changed,orm);
                 CollectionAssert.AreEquivalent(
                     replaced.Values.Select(x => x.Id),
                     result.Values.Select(x => x.Id));
@@ -217,17 +221,18 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void TestDelete()
         {
-            var table = TableMapping.Create<TestObject>(
-                            () => testObjectBuilder.Value, 
-                            o => ((TestObject.Builder)o).Build());
+            var table = TableMapping.Create<TestObject>();
+            var orm = Orm.Orm.ResultSetRowToObject(
+                        () => testObjectBuilder.Value, 
+                        o => ((TestObject.Builder)o).Build());
 
             using (var db = SQLite3.OpenInMemory())
             {
                 db.InitTable(table);
 
-                var inserted = db.InsertOrReplace(table, new TestObject.Builder() { Value = "Hello" }.Build());
+                var inserted = db.InsertOrReplace(table, new TestObject.Builder() { Value = "Hello" }.Build(), orm);
                 TestObject deleted;
-                if (db.TryDelete(table, inserted.Id.Value, out deleted))
+                if (db.TryDelete(table, inserted.Id.Value, orm, out deleted))
                 {
                     Assert.AreEqual(inserted, deleted);
                 }
@@ -236,22 +241,23 @@ namespace SQLitePCL.pretty.tests
                     Assert.Fail();
                 }
 
-                if (db.TryDelete(table, 1000000, out deleted))
+                if (db.TryDelete(table, 1000000, orm, out deleted))
                 {
                     Assert.Fail();
                 }
 
                 TestObject lookup;
-                Assert.IsFalse(db.TryFind(table, inserted.Id.Value, out lookup));
+                Assert.IsFalse(db.TryFind(table, inserted.Id.Value, orm, out lookup));
             }
         }
 
         [Test]
         public void TestDeleteAll()
         {
-            var table = TableMapping.Create<TestObject>(
-                            () => testObjectBuilder.Value, 
-                            o => ((TestObject.Builder)o).Build());
+            var table = TableMapping.Create<TestObject>();
+            var orm = Orm.Orm.ResultSetRowToObject(
+                        () => testObjectBuilder.Value, 
+                        o => ((TestObject.Builder)o).Build());
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -264,33 +270,31 @@ namespace SQLitePCL.pretty.tests
                 };
 
                 db.InitTable(table);
-                var notDeleted = db.InsertOrReplace(table, new TestObject.Builder() { Value = "NotDeleted" }.Build());
-                var inserted = db.InsertOrReplaceAll(table, objects);
-                var deleted = db.DeleteAll(table, inserted.Values.Select(x => x.Id.Value));
+                var notDeleted = db.InsertOrReplace(table, new TestObject.Builder() { Value = "NotDeleted" }.Build(), orm);
+                var inserted = db.InsertOrReplaceAll(table, objects, orm);
+                var deleted = db.DeleteAll(table, inserted.Values.Select(x => x.Id.Value), orm);
                 CollectionAssert.AreEquivalent(inserted.Values, deleted.Values);
 
-                var found = db.FindAll(table, inserted.Values.Select(x => x.Id.Value));
+                var found = db.FindAll(table, inserted.Values.Select(x => x.Id.Value), orm);
                 Assert.IsEmpty(found);
 
                 TestObject found2;
-                if (db.TryFind(table, notDeleted.Id.Value, out found2))
+                if (db.TryFind(table, notDeleted.Id.Value, orm, out found2))
                 {
                     Assert.AreEqual(found2, notDeleted);
                 }
 
-                db.DeleteAllRows(table);
+                db.DeleteAllRows(table.TableName);
 
                 TestObject notFound;
-                Assert.IsFalse(db.TryFind(table, notDeleted.Id.Value, out notFound));
+                Assert.IsFalse(db.TryFind(table, notDeleted.Id.Value, orm, out notFound));
             }
         }
 
         [Test]
         public void TestDropTable()
         {
-            var table = TableMapping.Create<TestObject>(
-                            () => testObjectBuilder.Value, 
-                            o => ((TestObject.Builder)o).Build());
+            var table = TableMapping.Create<TestObject>();
 
             using (var db = SQLite3.OpenInMemory())
             {
@@ -300,12 +304,12 @@ namespace SQLitePCL.pretty.tests
                       ORDER BY name;";
 
                 // Table doesn't exist
-                db.DropTableIfExists(table);
+                db.DropTableIfExists(table.TableName);
 
                 db.InitTable(table);
                 Assert.Greater(db.Query(tableLookup).Count(), 0);
 
-                db.DropTableIfExists(table);
+                db.DropTableIfExists(table.TableName);
                 Assert.AreEqual(db.Query(tableLookup).Count(), 0);
             }
         }

@@ -6,16 +6,6 @@ namespace SQLitePCL.pretty.Orm
 {
     internal static class SQLBuilder
     {
-        internal static string DeleteAll(string tableName)
-        {
-            return string.Format("DELETE FROM \"{0}\"", tableName);
-        }
-
-        internal static string DropTableIfExists(string tableName)
-        {
-            return string.Format("DROP TABLE IF EXISTS \"{0}\"", tableName);
-        }
-
         internal static string GetTableInfo (string tableName)
         {
             return "PRAGMA TABLE_INFO(\"" + tableName + "\")";         

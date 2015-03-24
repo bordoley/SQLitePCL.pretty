@@ -85,7 +85,6 @@
     <Compile Include="OrmTests\TableMappingTests.Create.cs" />
     <Compile Include="OrmTests\TableMappingTests.Sync.cs" />
     <Compile Include="OrmTests\TableMappingTest.Async.cs" />
-    <Compile Include="OrmTests\TableQueryTests.cs" />
     <Compile Include="OrmTests\QueryTests.cs" />
   </ItemGroup>
   <ItemGroup>
