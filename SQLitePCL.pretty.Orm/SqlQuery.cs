@@ -36,68 +36,11 @@ using System.Threading.Tasks;
 
 using SQLitePCL.pretty;
 using SQLitePCL.pretty.Orm.Attributes;
+using SQLitePCL.pretty.Orm.Sql;
 using System.IO;
 
 namespace SQLitePCL.pretty.Orm
 {
-    /// <summary>
-    /// Methods that are intended to be used <see cref="SqlQuery.WhereClause&lt;T&gt;"/> expressions. 
-    /// </summary>
-    public static partial class SqlMethods
-    {
-        /// <summary>
-        /// SQLite IS expression.
-        /// </summary>
-        /// <returns>This method always throws a <see cref="System.NotSupportedException"/>.</returns>
-        /// <param name="This">This.</param>
-        /// <param name="other">Other.</param>
-        /// <typeparam name="T">The type.</typeparam>
-        public static bool Is<T>(this T This, T other = null)
-            where T: class
-        {
-            throw new NotSupportedException("Function should only be used in SQL expressions.");
-        }
-
-        /// <summary>
-        /// SQLite IS expression.
-        /// </summary>
-        /// <returns>This method always throws a <see cref="System.NotSupportedException"/>.</returns>
-        /// <param name="This">This.</param>
-        /// <param name="other">Other.</param>
-        /// <typeparam name="T">The type.</typeparam>
-        public static bool Is<T>(this Nullable<T> This, Nullable<T> other = null)
-            where T: struct
-        {
-            throw new NotSupportedException("Function should only be used in SQL expressions.");
-        }
-
-        /// <summary>
-        /// SQLite IS NOT expression.
-        /// </summary>
-        /// <returns>This method always throws a <see cref="System.NotSupportedException"/>.</returns>
-        /// <param name="This">This.</param>
-        /// <param name="other">Other.</param>
-        /// <typeparam name="T">The type.</typeparam>
-        public static bool IsNot<T>(this T This, T other = null)
-            where T: class
-        {
-            throw new NotSupportedException("Function should only be used in SQL expressions.");
-        }
-
-        /// <summary>
-        /// SQLite IS NOT expression.
-        /// </summary>
-        /// <returns>This method always throws a <see cref="System.NotSupportedException"/>.</returns>
-        /// <param name="This">This.</param>
-        /// <param name="other">Other.</param>
-        /// <typeparam name="T">The type.</typeparam>
-        public static bool IsNot<T>(this Nullable<T> This, Nullable<T> other = null)
-            where T: struct
-        {
-            throw new NotSupportedException("Function should only be used in SQL expressions.");
-        }
-    }
-
     /// <summary>
     /// DSL for generating SQLite queries using LINQ like method chaining.
     /// </summary>
@@ -109,103 +52,44 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The type of the table.</typeparam>
         public static FromClause<T> From<T>()
         {
-            var typ = typeof(T);
-            var tableName = typ.GetTableName();
-            return new FromClause<T>(tableName);
+            return new FromClause<T>(
+                SqlCompiler.CompileFromClause(typeof(T)));
         }
 
-        private static object EvaluateExpression(this Expression expr)
+        /// <summary>
+        /// Query data from two tables.
+        /// </summary>
+        /// <typeparam name="T1">The type of the first table.</typeparam>
+        /// <typeparam name="T2">The type of the second table.</typeparam>
+        public static FromClause<T1,T2> From<T1,T2>()
         {
-            if (expr is ConstantExpression)
-            {
-                var c = (ConstantExpression) expr;
-                return c.Value;
-            }
-            else if (expr is MemberExpression)
-            {
-                var memberExpr = (MemberExpression) expr;
-                var obj = EvaluateExpression(memberExpr.Expression);
-               
-                if (memberExpr.Member is PropertyInfo)
-                {
-                    var m = (PropertyInfo) memberExpr.Member;
-                    return m.GetValue(obj, null);
-                }
-
-                else if (memberExpr.Member is FieldInfo)
-                {
-                    var m = (FieldInfo) memberExpr.Member;
-                    return m.GetValue(obj);
-                }
-            }
-
-            throw new NotSupportedException("Cannot compile: " + expr.NodeType.ToString());
+            return new FromClause<T1,T2>(
+                SqlCompiler.CompileFromClause(typeof(T1), typeof(T2)));
         }
 
-        private static string ToSqlString(this ISQLiteValue value)
+        /// <summary>
+        /// Query data from two tables.
+        /// </summary>
+        /// <typeparam name="T1">The type of the first table.</typeparam>
+        /// <typeparam name="T2">The type of the second table.</typeparam>
+        /// <typeparam name="T3">The type of the third table.</typeparam>
+        public static FromClause<T1,T2,T3> From<T1,T2,T3>()
         {
-            switch (value.SQLiteType)
-            {
-                case SQLiteType.Null:  
-                    return "NULL";
-                case SQLiteType.Text:
-                case SQLiteType.Blob:  
-                    return "\"" + value.ToString() + "\"";
-                default:
-                    return value.ToString();
-            }
+            return new FromClause<T1,T2,T3>(
+                SqlCompiler.CompileFromClause(typeof(T1), typeof(T2), typeof(T3)));
         }
 
-        private static ISQLiteValue ConvertToSQLiteValue(this object This)
+        /// <summary>
+        /// Query data from two tables.
+        /// </summary>
+        /// <typeparam name="T1">The type of the first table.</typeparam>
+        /// <typeparam name="T2">The type of the second table.</typeparam>
+        /// <typeparam name="T3">The type of the third table.</typeparam>
+        /// <typeparam name="T4">The type of the fourth table.</typeparam>
+        public static FromClause<T1,T2,T3,T4> From<T1,T2,T3,T4>()
         {
-            if (This == null) { return SQLiteValue.Null; }
-                
-            Type t = This.GetType();
-
-            if (typeof(string) == t)                                                          { return ((string) This).ToSQLiteValue(); }
-            else if (
-                (typeof(Int32) == t)
-                || (typeof(Boolean) == t)
-                || (typeof(Byte) == t)
-                || (typeof(UInt16) == t)
-                || (typeof(Int16) == t)
-                || (typeof(sbyte) == t)
-                || (typeof(Int64) == t)
-                || (typeof(UInt32) == t))                                                     { return ((long)(Convert.ChangeType(This, typeof(long)))).ToSQLiteValue(); }
-            else if ((typeof(double) == t) || (typeof(float) == t) || (typeof(decimal) == t)) { return ((double)(Convert.ChangeType(This, typeof(double)))).ToSQLiteValue(); }
-            else if (typeof(byte[]) == t)                                                     { return ((byte[]) This).ToSQLiteValue(); }
-            else if (t.GetTypeInfo().ImplementedInterfaces.Contains(typeof(ISQLiteValue)))    { return (ISQLiteValue) This; }
-            else if (This is TimeSpan)                                                        { return ((TimeSpan) This).ToSQLiteValue(); }
-            else if (This is DateTime)                                                        { return ((DateTime) This).ToSQLiteValue(); }
-            else if (This is DateTimeOffset)                                                  { return ((DateTimeOffset) This).ToSQLiteValue(); }
-            else if (This is Guid)                                                            { return ((Guid) This).ToSQLiteValue(); }
-            //else if (obj is Stream)                                                         { return ((Stream) obj); }
-            else if (This is Uri)                                                             { return ((Uri) This).ToSQLiteValue(); }
-            else
-            {
-                throw new ArgumentException("Invalid type conversion" + t);
-            }
-        }
-
-        private static string GetSqlName(Expression prop)
-        {
-            var n = prop.NodeType;
-
-            switch (n)
-            {
-                case ExpressionType.GreaterThan:        return ">";
-                case ExpressionType.GreaterThanOrEqual: return ">=";
-                case ExpressionType.LessThan:           return "<";
-                case ExpressionType.LessThanOrEqual:    return "<=";
-                case ExpressionType.And:                return "&";
-                case ExpressionType.AndAlso:            return "and";
-                case ExpressionType.Or:                 return "|";
-                case ExpressionType.OrElse:             return "or";
-                case ExpressionType.Equal:              return "=";
-                case ExpressionType.NotEqual:           return "!=";
-                default:
-                    throw new NotSupportedException ("Cannot get SQL for: " + n);
-            }
+            return new FromClause<T1,T2,T3,T4>(
+                SqlCompiler.CompileFromClause(typeof(T1), typeof(T2), typeof(T3), typeof(T4)));
         }
     }
 }

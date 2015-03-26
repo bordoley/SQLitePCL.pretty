@@ -161,6 +161,9 @@
     <Compile Include="SqlQuery.OrderBy.cs">
       <DependentUpon>SqlQuery.cs</DependentUpon>
     </Compile>
+    <Compile Include="SqlQuery.Select.cs">
+      <DependentUpon>SqlQuery.cs</DependentUpon>
+    </Compile>
     <Compile Include="SqlQuery.Where.cs">
       <DependentUpon>SqlQuery.cs</DependentUpon>
     </Compile>
@@ -178,7 +181,10 @@
     <Compile Include="DatabaseConnection.Query.cs">
       <DependentUpon>DatabaseConnection.cs</DependentUpon>
     </Compile>
-    <Compile Include="SqlQuery.Select.cs">
+    <Compile Include="SqlMethods.cs">
+      <DependentUpon>SqlQuery.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SqlCompiler.cs">
       <DependentUpon>SqlQuery.cs</DependentUpon>
     </Compile>
   </ItemGroup>

@@ -1,33 +1,78 @@
 ﻿using System;
-namespace SQLitePCL.pretty.Orm
+using System.Linq.Expressions;
+
+
+namespace SQLitePCL.pretty.Orm.Sql
 {
-    public static partial class SqlQuery
+    internal static partial class SqlCompiler
     {
-        /// <summary>
-        /// The OFFSET clause of a SQL query.
-        /// </summary>
-        public sealed class OffsetClause<T> : ISqlQuery
+        internal static String CompileOffsetClause(this Expression This)
         {
-            private readonly LimitClause<T> limit;
-            private readonly int offset;
+            return "OFFSET " + This.CompileExpr();
+        }
+    }
 
-            internal OffsetClause(LimitClause<T> limit, int offset)
-            {
-                this.limit = limit;
-                this.offset = offset;
-            }
+    /// <summary>
+    /// The OFFSET clause of a SQL query.
+    /// </summary>
+    public abstract class OffsetClause : ISqlQuery
+    {
+        private readonly LimitClause limit;
+        private readonly string offset;
 
-            /// <summary>
-            /// Returns a <see cref="System.String"/> that represents the current <see cref="OffsetClause&lt;T&gt;"/>.
-            /// </summary>
-            /// <returns>A <see cref="System.String"/> that represents the current <see cref="OffsetClause&lt;T&gt;"/>.</returns>
+        internal OffsetClause(LimitClause limit, string offset)
+        {
+            this.limit = limit;
+            this.offset = offset;
+        }
 
-            public override string ToString()
-            {
-                return 
-                    limit.ToString() +
-                    "\r\nOFFSET " + offset;
-            }
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.OffsetClause"/>.
+        /// </summary>
+        /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.OffsetClause"/>.</returns>
+        public override string ToString()
+        {
+            return limit + "\r\n" + offset;
+        }
+    }
+
+    /// <summary>
+    /// The OFFSET clause of a SQL query.
+    /// </summary>
+    public sealed class OffsetClause<T> : OffsetClause
+    {
+        internal OffsetClause(LimitClause limit, string offset) : base(limit, offset)
+        {
+        }
+    }
+
+    /// <summary>
+    /// The OFFSET clause of a SQL query.
+    /// </summary>
+    public sealed class OffsetClause<T1,T2> : OffsetClause
+    {
+        internal OffsetClause(LimitClause limit, string offset) : base(limit, offset)
+        {
+        }
+    }
+
+    /// <summary>
+    /// The OFFSET clause of a SQL query.
+    /// </summary>
+    public sealed class OffsetClause<T1,T2,T3> : OffsetClause
+    {
+        internal OffsetClause(LimitClause limit, string offset) : base(limit, offset)
+        {
+        }
+    }
+
+    /// <summary>
+    /// The OFFSET clause of a SQL query.
+    /// </summary>
+    public sealed class OffsetClause<T1,T2,T3,T4> : OffsetClause
+    {
+        internal OffsetClause(LimitClause limit, string offset) : base(limit, offset)
+        {
         }
     }
 }

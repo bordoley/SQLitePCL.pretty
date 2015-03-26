@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
+using SQLitePCL.pretty.Orm.Sql;
+
 namespace SQLitePCL.pretty.Orm
 {
     public static partial class DatabaseConnection
