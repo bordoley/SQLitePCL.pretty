@@ -57,31 +57,29 @@ namespace SQLitePCL.pretty.Orm
             public LimitClause<T> Take(int n)
             {
                 Contract.Requires(n >= 0);
-                return new LimitClause<T>(this, n, null);
+                return new LimitClause<T>(this, n);
             }
 
             /// <summary>
-            /// Returns a <see cref="LimitClause&lt;T&gt;"/> that skips a specified number of elements in the result set and then returns the remaining elements.
+            /// Returns a <see cref="OffsetClause&lt;T&gt;"/> that skips a specified number of elements in the result set and then returns the remaining elements.
             /// </summary>
             /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
-            /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-            public LimitClause<T> Skip(int n)
+            /// <returns>A new <see cref="OffsetClause&lt;T&gt;"/>.</returns>
+            public OffsetClause<T> Skip(int n)
             {
-                Contract.Requires(n >= 0);
-
                 //If the LIMIT expression evaluates to a negative value, then there is no upper bound on the number of rows returned
-                return new LimitClause<T>(this, -1, n);
+                return new LimitClause<T>(this, -1).Skip(n);
             }
 
             /// <summary>
-            /// Returns a <see cref="LimitClause&lt;T&gt;"/> that returns the element at a specified index in the result set.
+            /// Returns a <see cref="OffsetClause&lt;T&gt;"/> that returns the element at a specified index in the result set.
             /// </summary>
-            /// <param name="index">Index.</param>
-            /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-            public LimitClause<T> ElementAt(int index)
+            /// <param name="index">The index of the element to retrieve.</param>
+            /// <returns>A new <see cref="OffsetClause&lt;T&gt;"/>.</returns>
+            public OffsetClause<T> ElementAt(int index)
             {
                 Contract.Requires(index >= 0);
-                return Skip(index).Take(1);
+                return this.Take(1).Skip(index);
             }
 
             private OrderByClause<T> AddOrderBy<TValue>(Expression<Func<T, TValue>> orderExpr, bool asc)

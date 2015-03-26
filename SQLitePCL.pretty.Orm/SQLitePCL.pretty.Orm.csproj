@@ -152,6 +152,9 @@
     <Compile Include="Reflection.cs" />
     <Compile Include="ForeignKeyConstraint.cs" />
     <Compile Include="SqlQuery.cs" />
+    <Compile Include="SqlQuery.Offset.cs">
+      <DependentUpon>SqlQuery.cs</DependentUpon>
+    </Compile>
     <Compile Include="SqlQuery.Limit.cs">
       <DependentUpon>SqlQuery.cs</DependentUpon>
     </Compile>

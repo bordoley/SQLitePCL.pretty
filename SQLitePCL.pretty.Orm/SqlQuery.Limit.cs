@@ -15,35 +15,22 @@ namespace SQLitePCL.pretty.Orm
         {
             private readonly OrderByClause<T> orderBy;
             private readonly int limit;
-            private readonly Nullable<int> offset;
 
-            internal LimitClause(OrderByClause<T> orderBy, int limit, Nullable<int> offset)
+            internal LimitClause(OrderByClause<T> orderBy, int limit)
             {
                 this.orderBy = orderBy;
                 this.limit = limit;
-                this.offset = offset;
             }
 
             /// <summary>
-            /// Returns a <see cref="LimitClause&lt;T&gt;"/> that limits the result set to a specified number of contiguous elements.
-            /// </summary>
-            /// <param name="n">The number of elements to return.</param>
-            /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-            public LimitClause<T> Take(int n)
-            {
-                Contract.Requires(n >= 0);
-                return new LimitClause<T>(orderBy, n, offset);
-            }
-
-            /// <summary>
-            /// Returns a <see cref="LimitClause&lt;T&gt;"/> that skips a specified number of elements in the result set and then returns the remaining elements.
+            /// Returns a <see cref="OffsetClause&lt;T&gt;"/> that skips a specified number of elements in the result set and then returns the remaining elements.
             /// </summary>
             /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
-            /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-            public LimitClause<T> Skip(int n)
+            /// <returns>A new <see cref="OffsetClause&lt;T&gt;"/>.</returns>
+            public OffsetClause<T> Skip(int n)
             {
                 Contract.Requires(n >= 0);
-                return new LimitClause<T>(orderBy, limit, n);
+                return new OffsetClause<T>(this, n);
             }
 
             /// <summary>
@@ -54,8 +41,7 @@ namespace SQLitePCL.pretty.Orm
             {
                 return 
                     orderBy.ToString() +
-                    "\r\nLIMIT " + limit +
-                    (offset.HasValue ? "\r\nOFFSET " + offset.Value : "");
+                    "\r\nLIMIT " + limit;
             }
         }
     }

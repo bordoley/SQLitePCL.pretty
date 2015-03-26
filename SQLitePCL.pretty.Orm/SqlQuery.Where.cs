@@ -78,7 +78,7 @@ namespace SQLitePCL.pretty.Orm
             /// </summary>
             /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
             /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-            public LimitClause<T> Skip(int n)
+            public OffsetClause<T> Skip(int n)
             {
                 return this.OrderByNone().Skip(n);
             }
@@ -87,9 +87,9 @@ namespace SQLitePCL.pretty.Orm
             /// Returns a <see cref="LimitClause&lt;T&gt;"/> that returns the element at a specified index in the result set.
             /// </summary>
             /// <returns>The <see cref="LimitClause&lt;T&gt;"/>.</returns>
-            /// <param name="index">Index.</param>
+            /// <param name="index">The index of the element to retrieve.</param>
             /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-            public LimitClause<T> ElementAt(int index)
+            public OffsetClause<T> ElementAt(int index)
             {
                 return this.OrderByNone().ElementAt(index);
             }
