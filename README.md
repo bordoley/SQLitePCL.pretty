@@ -105,6 +105,8 @@ using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream")
 }
 ```
 
+Note: Be conservative when using the Async API. SQLite has an inherently synchronous blocking API. A single thread pool thread is scheduled and used per asynchronous request, and a thread hop is required to return control to the UI thread when using Async/Await. Fine grain async requests can therefore result in a significant number of thread hops resulting in unnecessary additional latency. In general, it is best practice to schedule a logical sql block into a single call to IAsyncDatabase.Use() that either returns a value or an IEnumerable of values. If the IEnumerable of values is lazily evaluated, this can also result in better UI responsiveness, as the UI can process items as they are enumerated.
+
 # But I absolutely must have an ORM
 
 SQLitePCL.pretty has a very simple table mapping ORM, available in the SQLitePCL.pretty.Orm package on nuget. It supports inserting both new and existing objects, and finding and deleting objects by primary key, from SQLite database tables. Notably, the ORM is designed to make working with immutable data types much easier by supporting the builder pattern for deserializing database objects. Below is a simplish example:
