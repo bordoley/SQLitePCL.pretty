@@ -370,16 +370,24 @@ namespace SQLitePCL.pretty.tests
         [Test]
         public void MultiTableSelect()
         {
-            var query =SqlQuery.From<TestObject, TestObject2>()
-                    .Select()
-                    .Where((t1, t2) =>
-                        t1.Name == t2.Name)
-                    .OrderBy((t1, t2) => t1.Name)
-                    .ThenBy((t1, t2) => t2.Name)
-                    .Take(5)
-                    .Skip(1);
+            var query =
+                SqlQuery.From<TestObject, TestObject2>()
+                        .Select()
+                        .Where((t1, t2) =>
+                            t1.Name == t2.Name)
+                        .OrderBy((t1, t2) => t1.Name)
+                        .ThenBy((t1, t2) => t2.Name)
+                        .Take(5)
+                        .Skip(1);
             Console.WriteLine(query);
+            Console.WriteLine();
 
+
+            var query2 =
+                SqlQuery.From<TestObject>()
+                        .LeftJoin<TestObject2>((t1, t2) => t1.Name == t2.Name)
+                        .Select();
+            Console.WriteLine(query2);
         }
     }
 }

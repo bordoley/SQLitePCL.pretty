@@ -11,12 +11,14 @@ namespace SQLitePCL.pretty.Orm.Sql
 {
     internal static partial class SqlCompiler
     {
-        private static string CompileSelectClause(this IEnumerable<Expression> This)
+        private static string CompileSelectClause(this IEnumerable<Expression> This, bool distinct)
         {
-            return "SELECT " + string.Join(", ", This.Select(x => x.CompileExpr()));
+            return "SELECT " + 
+                (distinct ? "DISTINCT " : "") +
+                string.Join(", ", This.Select(x => x.CompileExpr()));
         }
 
-        internal static string SelectAllColumnsClause(params Type[] types)
+        internal static string SelectAllColumnsClause(bool distinct, params Type[] types)
         {
             return types.SelectMany(typ =>
                 {   
@@ -24,7 +26,7 @@ namespace SQLitePCL.pretty.Orm.Sql
                     var parameter = Expression.Parameter(typ);
                     return table.Columns.Values.Select(x => 
                         Expression.Property(parameter, x.Property));
-                }).CompileSelectClause();
+                }).CompileSelectClause(distinct);
         }
     }
 
@@ -33,12 +35,12 @@ namespace SQLitePCL.pretty.Orm.Sql
     /// </summary>
     public abstract class SelectClause : ISqlQuery
     {
-        private readonly FromClause from;
+        private readonly JoinClause join;
         private readonly string select;
 
-        internal SelectClause(FromClause from, string select)
+        internal SelectClause(JoinClause join, string select)
         {
-            this.from = from;
+            this.join = join;
             this.select = select;
         }
 
@@ -48,7 +50,7 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.SelectClause"/>.</returns>
         public override string ToString()
         {
-            return select + "\r\n" + from;
+            return select + "\r\n" + join;
         }
     }
 
@@ -57,7 +59,7 @@ namespace SQLitePCL.pretty.Orm.Sql
     /// </summary>
     public sealed class SelectClause<T> : SelectClause
     {
-        internal SelectClause(FromClause from, string select) : base(from, select)
+        internal SelectClause(JoinClause join, string select) : base(join, select)
         {
         }
 
@@ -222,7 +224,7 @@ namespace SQLitePCL.pretty.Orm.Sql
     /// </summary>
     public sealed class SelectClause<T1,T2> : SelectClause
     {
-        internal SelectClause(FromClause from, string select) : base(from, select)
+        internal SelectClause(JoinClause join, string select) : base(join, select)
         {
         }
 
@@ -387,7 +389,7 @@ namespace SQLitePCL.pretty.Orm.Sql
     /// </summary>
     public sealed class SelectClause<T1,T2,T3> : SelectClause
     {
-        internal SelectClause(FromClause from, string select) : base(from, select)
+        internal SelectClause(JoinClause join, string select) : base(join, select)
         {
         }
 
@@ -552,7 +554,7 @@ namespace SQLitePCL.pretty.Orm.Sql
     /// </summary>
     public sealed class SelectClause<T1,T2,T3,T4> : SelectClause
     {
-        internal SelectClause(FromClause from, string select) : base(from, select)
+        internal SelectClause(JoinClause join, string select) : base(join, select)
         {
         }
 

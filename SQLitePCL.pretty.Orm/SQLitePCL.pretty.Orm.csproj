@@ -187,6 +187,9 @@
     <Compile Include="SqlCompiler.cs">
       <DependentUpon>SqlQuery.cs</DependentUpon>
     </Compile>
+    <Compile Include="SqlQuery.Join.cs">
+      <DependentUpon>SqlQuery.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>

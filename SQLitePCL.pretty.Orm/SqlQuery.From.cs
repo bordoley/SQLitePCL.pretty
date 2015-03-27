@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Collections.Generic;
 
 namespace SQLitePCL.pretty.Orm.Sql
 {
@@ -43,14 +44,34 @@ namespace SQLitePCL.pretty.Orm.Sql
         {
         }
 
+        public JoinClause<T,T2> Join<T2>(Expression<Func<T,T2,bool>> predExpr)
+        {
+            var join = new List<string>();
+            join.Add(SqlCompiler.CompileJoinClause(false, typeof(T2),predExpr));
+            return new JoinClause<T,T2>(this, join);
+        }
+
+        public JoinClause<T,T2> LeftJoin<T2>(Expression<Func<T,T2,bool>> predExpr)
+        {
+            var join = new List<string>();
+            join.Add(SqlCompiler.CompileJoinClause(true, typeof(T2),predExpr));
+            return new JoinClause<T,T2>(this, join);
+        }
+
         /// <summary>
         /// Select all columns from the table.
         /// </summary>
         public SelectClause<T> Select()
         {
-            return new SelectClause<T>(
-                this, 
-                SqlCompiler.SelectAllColumnsClause(typeof(T)));
+            return new JoinClause<T>(this, new List<string>()).Select();
+        }
+
+        /// <summary>
+        /// Select all columns from the table returning only distinct rows.
+        /// </summary>
+        public SelectClause<T> SelectDistinct()
+        {
+            return new JoinClause<T>(this, new List<string>()).SelectDistinct();
         }
     }
 
@@ -63,14 +84,34 @@ namespace SQLitePCL.pretty.Orm.Sql
         {
         }
 
+        public JoinClause<T1,T2,T3> Join<T3>(Expression<Func<T1,T2,T3,bool>> predExpr)
+        {
+            var join = new List<string>();
+            join.Add(SqlCompiler.CompileJoinClause(false, typeof(T3),predExpr));
+            return new JoinClause<T1,T2,T3>(this, join);
+        }
+
+        public JoinClause<T1,T2,T3> LeftJoin<T3>(Expression<Func<T1,T2,T3,bool>> predExpr)
+        {
+            var join = new List<string>();
+            join.Add(SqlCompiler.CompileJoinClause(true, typeof(T3),predExpr));
+            return new JoinClause<T1,T2,T3>(this, join);
+        }
+
         /// <summary>
         /// Select all columns from the table.
         /// </summary>
         public SelectClause<T1,T2> Select()
         {
-            return new SelectClause<T1,T2>(
-                this, 
-                SqlCompiler.SelectAllColumnsClause(typeof(T1), typeof(T2)));
+            return new JoinClause<T1,T2>(this, new List<string>()).Select();
+        }
+
+        /// <summary>
+        /// Select all columns from the table returning only distinct rows.
+        /// </summary>
+        public SelectClause<T1,T2> SelectDistinct()
+        {
+            return new JoinClause<T1,T2>(this, new List<string>()).SelectDistinct();
         }
     }
 
@@ -83,14 +124,34 @@ namespace SQLitePCL.pretty.Orm.Sql
         {
         }
 
+        public JoinClause<T1,T2,T3,T4> Join<T4>(Expression<Func<T1,T2,T3,T4,bool>> predExpr)
+        {
+            var join = new List<string>();
+            join.Add(SqlCompiler.CompileJoinClause(false, typeof(T4),predExpr));
+            return new JoinClause<T1,T2,T3,T4>(this, join);
+        }
+
+        public JoinClause<T1,T2,T3,T4> LeftJoin<T4>(Expression<Func<T1,T2,T3,T4,bool>> predExpr)
+        {
+            var join = new List<string>();
+            join.Add(SqlCompiler.CompileJoinClause(true, typeof(T4),predExpr));
+            return new JoinClause<T1,T2,T3,T4>(this, join);
+        }
+
         /// <summary>
         /// Select all columns from the table.
         /// </summary>
         public SelectClause<T1,T2,T3> Select()
         {
-            return new SelectClause<T1,T2,T3>(
-                this, 
-                SqlCompiler.SelectAllColumnsClause(typeof(T1), typeof(T2), typeof(T3)));
+            return new JoinClause<T1,T2,T3>(this, new List<string>()).Select();
+        }
+
+        /// <summary>
+        /// Select all columns from the table returning only distinct rows.
+        /// </summary>
+        public SelectClause<T1,T2,T3> SelectDistinct()
+        {
+            return new JoinClause<T1,T2,T3>(this, new List<string>()).SelectDistinct();
         }
     }
 
@@ -108,9 +169,15 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// </summary>
         public SelectClause<T1,T2,T3,T4> Select()
         {
-            return new SelectClause<T1,T2,T3,T4>(
-                this, 
-                SqlCompiler.SelectAllColumnsClause(typeof(T1), typeof(T2), typeof(T3), typeof(T4)));
+            return new JoinClause<T1,T2,T3,T4>(this, new List<string>()).Select();
+        }
+
+        /// <summary>
+        /// Select all columns from the table returning only distinct rows.
+        /// </summary>
+        public SelectClause<T1,T2,T3,T4> SelectDistinct()
+        {
+            return new JoinClause<T1,T2,T3,T4>(this, new List<string>()).SelectDistinct();
         }
     }
 }
