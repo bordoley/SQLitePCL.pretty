@@ -41,7 +41,7 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(build != null);
 
             var columns = new Dictionary<string, PropertyInfo>();
-            var tableName = typeof(T).GetTableName();
+            var tableName = TableMapping.Get<T>().TableName;
 
             var typ = typeof(TBuilder);
 
