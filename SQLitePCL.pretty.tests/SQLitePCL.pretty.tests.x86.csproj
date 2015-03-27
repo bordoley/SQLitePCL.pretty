@@ -86,6 +86,7 @@
     <Compile Include="OrmTests\TableMappingTests.Sync.cs" />
     <Compile Include="OrmTests\TableMappingTest.Async.cs" />
     <Compile Include="OrmTests\QueryTests.cs" />
+    <Compile Include="OrmTests\QueryTests.Joins.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SQLitePCL.pretty.Async\SQLitePCL.pretty.Async.csproj">

@@ -10,7 +10,7 @@ using NUnit.Framework;
 namespace SQLitePCL.pretty.tests
 {
     [TestFixture]
-    public class QueryBuilder_SelectQuery_Tests
+    public partial class SqlQueryTests
     {
         public class TestObject
         {

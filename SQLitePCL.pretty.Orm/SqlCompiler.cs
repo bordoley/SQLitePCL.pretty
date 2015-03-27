@@ -116,10 +116,18 @@ namespace SQLitePCL.pretty.Orm.Sql
             else if (This.NodeType == ExpressionType.Convert)
             {
                 var u = (UnaryExpression)This;
+
+                // Let SQLite handle the casting for us
+                var operand = u.Operand;
+                return operand.CompileExpr();
+
+                // FIXME: Might still want to support a direct cast here if the
+                // operand is a constant value or a function that is evaluated
+                /*
                 var ty = u.Type;
                 var value = EvaluateExpression(u.Operand);
 
-                return value.ConvertTo(ty).ConvertToSQLiteValue().ToSqlString();
+                return value.ConvertTo(ty).ConvertToSQLiteValue().ToSqlString();*/
             }
             else if (This.NodeType == ExpressionType.Default)
             {
