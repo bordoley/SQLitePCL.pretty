@@ -27,13 +27,13 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(This != null);
             Contract.Requires(obj != null);
 
-            var columns = TableMapping.Get<T>().Columns;
-            foreach (var column in columns)
+            var bindVars = typeof(T).GetPublicInstanceProperties();
+            foreach (var bindVar in bindVars)
             {
-                var key = ":" + column.Key;
+                var key = ":" + bindVar.Name;
                 if (This.BindParameters.ContainsKey(key))
                 {
-                    var value = column.Value.Property.GetValue(obj);
+                    var value = bindVar.GetValue(obj);
                     This.BindParameters[key].Bind(value);
                 }
             }
