@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-using NUnit.Framework;
+using Xunit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,10 +26,9 @@ using System.Threading.Tasks;
 
 namespace SQLitePCL.pretty.tests
 {
-    [TestFixture]
     public class AsyncDatabaseConnectionTests
     {
-        [Test]
+        [Fact]
         public async Task TestProfileEvent()
         {
             using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
@@ -37,15 +36,15 @@ namespace SQLitePCL.pretty.tests
                 var statement = "CREATE TABLE foo (x int);";
                 db.Profile.Subscribe(e =>
                     {
-                        Assert.AreEqual(statement, e.Statement);
-                        Assert.Less(TimeSpan.MinValue, e.ExecutionTime);
+                        Assert.Equal(statement, e.Statement);
+                        Assert.True(TimeSpan.MinValue < e.ExecutionTime);
                     });
 
                 await db.ExecuteAsync(statement);
             }
         }
 
-        [Test]
+        [Fact]
         public async Task TestTraceEvent()
         {
             using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
@@ -53,7 +52,7 @@ namespace SQLitePCL.pretty.tests
                 var statement = "CREATE TABLE foo (x int);";
                 db.Trace.Subscribe(e =>
                     {
-                        Assert.AreEqual(statement, e.Statement);
+                        Assert.Equal(statement, e.Statement);
                     });
 
                 await db.ExecuteAsync(statement);
@@ -63,7 +62,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public async Task TestUpdateEvent()
         {
             using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
@@ -73,10 +72,10 @@ namespace SQLitePCL.pretty.tests
 
                 db.Update.Subscribe(e =>
                     {
-                        Assert.AreEqual(currentAction, e.Action);
-                        Assert.AreEqual("main", e.Database);
-                        Assert.AreEqual("foo", e.Table);
-                        Assert.AreEqual(rowid, e.RowId);
+                        Assert.Equal(currentAction, e.Action);
+                        Assert.Equal("main", e.Database);
+                        Assert.Equal("foo", e.Table);
+                        Assert.Equal(rowid, e.RowId);
                     });
 
                 currentAction = ActionCode.CreateTable;
@@ -97,7 +96,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public async Task TestUse()
         {
             using (var adb = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
@@ -106,7 +105,7 @@ namespace SQLitePCL.pretty.tests
                     .Scan(Tuple.Create(-1, -1), (x, y) => Tuple.Create(x.Item1 + 1, y))
                     .Do(result =>
                         {
-                            Assert.AreEqual(result.Item2, result.Item1);
+                            Assert.Equal(result.Item2, result.Item1);
                         });
 
                 int expected = 10;
@@ -114,7 +113,7 @@ namespace SQLitePCL.pretty.tests
                     {
                         return db.Query("Select ?", expected).SelectScalarInt().First();
                     });
-                Assert.AreEqual(t, expected);
+                Assert.Equal(t, expected);
 
                 var anotherUse = adb.Use(db => Enumerable.Range(0, 1000));
 
@@ -125,11 +124,11 @@ namespace SQLitePCL.pretty.tests
 
                 Assert.Throws<ObjectDisposedException>(() => adb.Use(db => Enumerable.Range(0, 1000)));
                 Assert.Throws<ObjectDisposedException>(() => anotherUse.Subscribe());
-                Assert.Throws<ObjectDisposedException>(() => adb.Use(db => { }));
+                Assert.ThrowsAsync<ObjectDisposedException>(async () => await adb.Use(db => { }));
             }
         }
 
-        [Test]
+        [Fact]
         public async Task TestIDatabaseConnectionStatements()
         {
             using (var adb = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
@@ -159,12 +158,12 @@ namespace SQLitePCL.pretty.tests
                         Assert.True(stmts.Contains(stmt));
                     }
 
-                    Assert.AreEqual(count, stmts.Count);
+                    Assert.Equal(count, stmts.Count);
                 });
             }
         }
 
-        [Test]
+        [Fact]
         public async Task TestIDatabaseConnectionEvents()
         {
             using (var adb = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
@@ -234,7 +233,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public async Task TestIDatabaseConnectionDispose()
         {
             using (var adb = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
@@ -243,19 +242,20 @@ namespace SQLitePCL.pretty.tests
 
                 await adb.Use(db =>
                 {
-                    Assert.DoesNotThrow(() => { var x = db.IsAutoCommit; });
-                    Assert.DoesNotThrow(() => { var x = db.IsReadOnly; });
-                    Assert.DoesNotThrow(() => { var x = db.Changes; });
-                    Assert.DoesNotThrow(() => { var x = db.TotalChanges; });
-                    Assert.DoesNotThrow(() => { var x = db.LastInsertedRowId; });
-                    Assert.DoesNotThrow(() => { var x = db.Statements; });
-                    Assert.DoesNotThrow(() => { var x = db.IsDatabaseReadOnly("main"); });
-                    Assert.DoesNotThrow(() => { using (var stmt = db.PrepareStatement("SELECT x FROM foo;")) { } });
+                    // Assert these don't throw
+                    { var x = db.IsAutoCommit; }
+                    { var x = db.IsReadOnly; }
+                    { var x = db.Changes; }
+                    { var x = db.TotalChanges; }
+                    { var x = db.LastInsertedRowId; };
+                    { var x = db.Statements; };
+                    { var x = db.IsDatabaseReadOnly("main"); };
+                    { using (var stmt = db.PrepareStatement("SELECT x FROM foo;")) { } };
 
                     int current;
                     int highwater;
-                    Assert.DoesNotThrow(() => { db.Status(DatabaseConnectionStatusCode.CacheMiss, out current, out highwater, false); });
-                    Assert.DoesNotThrow(() => { db.WalCheckPoint("main"); });
+                    { db.Status(DatabaseConnectionStatusCode.CacheMiss, out current, out highwater, false); };
+                    { db.WalCheckPoint("main"); };
 
                     db.Dispose();
 
@@ -276,7 +276,7 @@ namespace SQLitePCL.pretty.tests
                 await adb.Use(db =>
                     {
                         // Assert that the database is not disposed, despite the previous user disposing it's instance.
-                        Assert.DoesNotThrow(() => { var x = db.IsAutoCommit; });
+                        { var x = db.IsAutoCommit; };
                     });
 
                 // Test that subscribe doesn't throw after Dispose() is called.
@@ -285,27 +285,27 @@ namespace SQLitePCL.pretty.tests
                 await disposedObservable.Materialize()
                     .Do(x =>
                         {
-                            Assert.AreEqual(x.Kind, NotificationKind.OnError);
-                            Assert.IsInstanceOf<ObjectDisposedException>(x.Exception);
+                            Assert.Equal(x.Kind, NotificationKind.OnError);
+                            Assert.IsAssignableFrom<ObjectDisposedException>(x.Exception);
                         });
             }
         }
 
-        [Test]
+        [Fact]
         public void TestUseCancelled()
         {
             using (var adb = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
             {
                 var cts = new CancellationTokenSource();
                 cts.Cancel();
-                Assert.That(async () => await adb.Use((db, ct) => { }, cts.Token), Throws.TypeOf<TaskCanceledException>());
+                Assert.ThrowsAsync<TaskCanceledException>(async () => await adb.Use((db, ct) => { }, cts.Token));
 
                 cts = new CancellationTokenSource();
-                Assert.That(async () => await adb.Use((db, ct) => { cts.Cancel(); }, cts.Token), Throws.TypeOf<TaskCanceledException>());
+                Assert.ThrowsAsync<TaskCanceledException>(async () => await adb.Use((db, ct) => { cts.Cancel(); }, cts.Token));
             }
         }
 
-        [Test]
+        [Fact]
         public async Task TestPrepareAllAsync()
         {
             using (var adb = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
@@ -316,19 +316,19 @@ namespace SQLitePCL.pretty.tests
                         "SELECT * FROM foo;" +
                         "SELECT x FROM foo;" +
                         "SELECT rowid, x FROM foo;");
-                Assert.AreEqual(stmts.Count, 3);
+                Assert.Equal(stmts.Count, 3);
 
                 var stmt0 = await stmts[0].Use<string>(stmt => stmt.SQL);
                 var stmt1 = await stmts[1].Use<string>(stmt => stmt.SQL);
                 var stmt2 = await stmts[2].Use<string>(stmt => stmt.SQL);
 
-                Assert.AreEqual(stmt0, "SELECT * FROM foo;");
-                Assert.AreEqual(stmt1, "SELECT x FROM foo;");
-                Assert.AreEqual(stmt2, "SELECT rowid, x FROM foo;");
+                Assert.Equal(stmt0, "SELECT * FROM foo;");
+                Assert.Equal(stmt1, "SELECT x FROM foo;");
+                Assert.Equal(stmt2, "SELECT rowid, x FROM foo;");
             }
         }
 
-        [Test]
+        [Fact]
         public async Task TestQuery()
         {
             using (var adb = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
@@ -342,25 +342,25 @@ namespace SQLitePCL.pretty.tests
                         .Select(row => Tuple.Create(row[0].ToString(), row[1].ToInt(), row[2].ToInt()))
                         .FirstAsync();
 
-                Assert.AreEqual(result.Item1, _0);
-                Assert.AreEqual(result.Item2, _1);
-                Assert.AreEqual(result.Item3 != 0, _2);
+                Assert.Equal(result.Item1, _0);
+                Assert.Equal(result.Item2, _1);
+                Assert.Equal(result.Item3 != 0, _2);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestStatementCancellation()
         {
             using (var adb = SQLite3.OpenInMemory().AsAsyncDatabaseConnection(TaskPoolScheduler.Default, 1))
             {
                 var cts = new CancellationTokenSource();
-                Assert.That(async () =>
+                Assert.ThrowsAsync<TaskCanceledException>(async () =>
                     await adb.Use((db, ct) => 
                         {
                             cts.Cancel();
                             db.Execute("Select 1;");
-                            Assert.Fail();
-                        }, cts.Token), Throws.TypeOf<TaskCanceledException>());
+                            Assert.True(false, "Expected exception to be thrown.");
+                        }, cts.Token));
             }
         }
     }

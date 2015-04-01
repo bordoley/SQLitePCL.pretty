@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-using NUnit.Framework;
+using Xunit;
 using System;
 using System.IO;
 using System.Reactive.Linq;
@@ -23,10 +23,9 @@ using System.Threading.Tasks;
 
 namespace SQLitePCL.pretty.tests
 {
-    [TestFixture]
     public class AsyncBlobStreamTests
     {
-        [Test]
+        [Fact]
         public async Task TestDispose()
         {
             using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
@@ -51,7 +50,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public async Task TestRead()
         {
             using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
@@ -78,7 +77,7 @@ namespace SQLitePCL.pretty.tests
                     {
                         byte[] bite = new byte[1];
                         await stream.ReadAsync(bite, 0, 1);
-                        Assert.AreEqual(bytes[i], bite[0]);
+                        Assert.Equal(bytes[i], bite[0]);
                     }
 
                     // Since this is a read only stream, this is a good chance to test that writing fails
@@ -87,7 +86,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public async Task TestWrite()
         {
             using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
@@ -118,7 +117,7 @@ namespace SQLitePCL.pretty.tests
                     {
                         byte[] bite = new byte[1];
                         await stream.ReadAsync(bite, 0, 1);
-                        Assert.AreEqual(bytes[i], bite[0]);
+                        Assert.Equal(bytes[i], bite[0]);
                     }
 
                     // Test writing after the end of the stream
@@ -130,13 +129,13 @@ namespace SQLitePCL.pretty.tests
                     {
                         byte[] bite = new byte[1];
                         await stream.ReadAsync(bite, 0, 1);
-                        Assert.AreEqual(bytes[i], bite[0]);
+                        Assert.Equal(bytes[i], bite[0]);
                     }
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public async Task TestSeek()
         {
             using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
@@ -151,28 +150,30 @@ namespace SQLitePCL.pretty.tests
                 {
                     Assert.True(blob.CanSeek);
                     Assert.Throws<NotSupportedException>(() => blob.SetLength(10));
-                    Assert.DoesNotThrow(() => { blob.Position = 100; });
+
+                    // Assert does not throw
+                    blob.Position = 100;
 
                     // Test input validation
                     blob.Position = 5;
                     Assert.Throws<IOException>(() => blob.Seek(-10, SeekOrigin.Begin));
-                    Assert.AreEqual(blob.Position, 5);
+                    Assert.Equal(blob.Position, 5);
                     Assert.Throws<IOException>(() => blob.Seek(-10, SeekOrigin.Current));
-                    Assert.AreEqual(blob.Position, 5);
+                    Assert.Equal(blob.Position, 5);
                     Assert.Throws<IOException>(() => blob.Seek(-100, SeekOrigin.End));
-                    Assert.AreEqual(blob.Position, 5);
+                    Assert.Equal(blob.Position, 5);
                     Assert.Throws<ArgumentException>(() => blob.Seek(-100, (SeekOrigin)10));
-                    Assert.AreEqual(blob.Position, 5);
+                    Assert.Equal(blob.Position, 5);
 
                     blob.Seek(0, SeekOrigin.Begin);
-                    Assert.AreEqual(blob.Position, 0);
+                    Assert.Equal(blob.Position, 0);
 
                     blob.Seek(0, SeekOrigin.End);
-                    Assert.AreEqual(blob.Position, blob.Length);
+                    Assert.Equal(blob.Position, blob.Length);
 
                     blob.Position = 5;
                     blob.Seek(2, SeekOrigin.Current);
-                    Assert.AreEqual(blob.Position, 7);
+                    Assert.Equal(blob.Position, 7);
                 }
             }
         }

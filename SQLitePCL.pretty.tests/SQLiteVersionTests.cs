@@ -14,15 +14,14 @@
    limitations under the License.
 */
 
-using NUnit.Framework;
+using Xunit;
 using System;
 
 namespace SQLitePCL.pretty.tests
 {
-    [TestFixture]
     public class SQLiteVersionTests
     {
-        [Test]
+        [Fact]
         public void TestEquality()
         {
             Assert.True(SQLiteVersion.Of(3080911).Equals(SQLiteVersion.Of(3080911)));
@@ -53,7 +52,7 @@ namespace SQLitePCL.pretty.tests
             Assert.False(SQLiteVersion.Of(3080911).Equals(""));
         }
 
-        [Test]
+        [Fact]
         public void TestGetHashcode()
         {
             SQLiteVersion[] equalObjects =
@@ -67,19 +66,19 @@ namespace SQLitePCL.pretty.tests
             {
                 for (int j = i + 1; j < equalObjects.Length; j++)
                 {
-                    Assert.AreEqual(equalObjects[i].GetHashCode(), equalObjects[j].GetHashCode());
+                    Assert.Equal(equalObjects[i].GetHashCode(), equalObjects[j].GetHashCode());
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestComparison()
         {
-            Assert.AreEqual(0, SQLiteVersion.Of(3080911).CompareTo(SQLiteVersion.Of(3080911)));
+            Assert.Equal(0, SQLiteVersion.Of(3080911).CompareTo(SQLiteVersion.Of(3080911)));
 
-            Assert.Less(SQLiteVersion.Of(3080911), SQLiteVersion.Of(3080912));
-            Assert.Less(SQLiteVersion.Of(3080911), SQLiteVersion.Of(3081911));
-            Assert.Less(SQLiteVersion.Of(3080911), SQLiteVersion.Of(4080911));
+            Assert.True(SQLiteVersion.Of(3080911) < SQLiteVersion.Of(3080912));
+            Assert.True(SQLiteVersion.Of(3080911) < SQLiteVersion.Of(3081911));
+            Assert.True(SQLiteVersion.Of(3080911) < SQLiteVersion.Of(4080911));
 
             Assert.Throws<ArgumentException>(() => SQLiteVersion.Of(3080911).CompareTo(null));
             Assert.Throws<ArgumentException>(() => SQLiteVersion.Of(3080911).CompareTo(""));
@@ -93,13 +92,13 @@ namespace SQLitePCL.pretty.tests
             Assert.False(SQLiteVersion.Of(3080911) < SQLiteVersion.Of(3080910));
         }
 
-        [Test]
+        [Fact]
         public void TestToInt()
         {
-            Assert.AreEqual(SQLiteVersion.Of(3080911).ToInt(), 3080911);
+            Assert.Equal(SQLiteVersion.Of(3080911).ToInt(), 3080911);
         }
 
-        [Test]
+        [Fact]
         public void TestToString()
         {
             Tuple<int, string>[] tests =
@@ -112,7 +111,7 @@ namespace SQLitePCL.pretty.tests
 
             foreach (var test in tests)
             {
-                Assert.AreEqual(test.Item2, SQLiteVersion.Of(test.Item1).ToString());
+                Assert.Equal(test.Item2, SQLiteVersion.Of(test.Item1).ToString());
             }
         }
     }

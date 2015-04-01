@@ -3,7 +3,7 @@
 using SQLitePCL.pretty.Orm;
 using SQLitePCL.pretty.Orm.Attributes;
 
-using NUnit.Framework;
+using Xunit;
 using RS = SQLitePCL.pretty.Orm.ResultSet;
 using System.Linq;
 
@@ -59,7 +59,7 @@ namespace SQLitePCL.pretty.tests
             public uint ZipCode { get; set; }
         }
 
-        [Test]
+        [Fact]
         public void TestJoins()
         {
             var addressSelector = RS.RowToObject<Address>();
@@ -129,7 +129,7 @@ namespace SQLitePCL.pretty.tests
                           Tuple.Create(personSelector(x), businessSelector(x)))
                       .ToList();
 
-                Assert.AreEqual(peopleWhoWorkAt.Count, 3);
+                Assert.Equal(peopleWhoWorkAt.Count, 3);
             }
         }
     }

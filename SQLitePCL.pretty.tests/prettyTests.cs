@@ -17,16 +17,13 @@
 
 using System;
 
-using NUnit.Framework;
-using TestClass = NUnit.Framework.TestFixtureAttribute;
-using TestMethod = NUnit.Framework.TestAttribute;
+using Xunit;
 
 namespace SQLitePCL.pretty.tests
 {
-    [TestClass]
     public class test_cases
     {
-        [TestMethod]
+        [Fact]
         public void test_error()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -42,14 +39,16 @@ namespace SQLitePCL.pretty.tests
                 {
                     fail = true;
 
-                    Assert.AreEqual(e.ErrorCode, ErrorCode.Constraint);
-                    Assert.AreEqual(e.ExtendedErrorCode, ErrorCode.ConstraintUnique, "Extended error codes for SQLITE_CONSTRAINT were added in 3.7.16");
+                    Assert.Equal(e.ErrorCode, ErrorCode.Constraint);
+
+                    // "Extended error codes for SQLITE_CONSTRAINT were added in 3.7.16"
+                    Assert.Equal(e.ExtendedErrorCode, ErrorCode.ConstraintUnique);
                 }
-                Assert.IsTrue(fail);
+                Assert.True(fail);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void test_count()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -63,12 +62,12 @@ namespace SQLitePCL.pretty.tests
                 {
                     stmt.MoveNext();
                     int c = stmt.Current[0].ToInt();
-                    Assert.AreEqual(c, 3);
+                    Assert.Equal(c, 3);
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void test_exec_with_tail()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -76,7 +75,7 @@ namespace SQLitePCL.pretty.tests
                 try
                 {
                     db.Execute("CREATE TABLE foo (x int);INSERT INTO foo (x) VALUES (1);");
-                    Assert.Fail();
+                    Assert.True(false);
                 }
                 catch (ArgumentException)
                 {

@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-using NUnit.Framework;
+using Xunit;
 using System;
 using System.IO;
 using System.Linq;
@@ -25,10 +25,9 @@ using System.Threading.Tasks;
 
 namespace SQLitePCL.pretty.tests
 {
-    [TestFixture]
     public class Example
     {
-        [Test]
+        [Fact]
         public void DoExample()
         {
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream")))
@@ -71,7 +70,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public async Task DoExampleAsync()
         {
             using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
