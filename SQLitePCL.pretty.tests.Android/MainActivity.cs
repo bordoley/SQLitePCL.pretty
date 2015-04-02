@@ -18,13 +18,7 @@ namespace SQLitePCL.pretty.tests.Android
 
         protected override void OnCreate(Bundle bundle)
         {
-            // tests can be inside the main assembly
-            AddTestAssembly(Assembly.GetExecutingAssembly());
-
-            AddExecutionAssembly(typeof(ExtensibilityPointFactory).Assembly);
-            // or in any reference assemblies			
-
-            //AddTestAssembly(typeof(PortableTests).Assembly);
+            AddTestAssembly(typeof(SQLitePCL.pretty.tests.SQLiteDatabaseConnectionTests).Assembly);
             // or in any assembly that you load (since JIT is available)
 
 #if false

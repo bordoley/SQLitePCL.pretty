@@ -25,6 +25,14 @@ namespace SQLitePCL.pretty.tests
 {
     public class SQLiteDatabaseConnectionTests
     {
+        private static string GetTempFile()
+        {
+            using (var db = SQLite3.OpenInMemory())
+            {
+                return "tmp" + db.Query("SELECT lower(hex(randomblob(16)));").SelectScalarString().First();
+            }
+        }
+
         [Fact]
         public void TestFinalize()
         {
@@ -289,6 +297,8 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
+        // FIXME: This test creates a file which isn't PCL friendly. Need to update.
+
         [Fact]
         public void TestTryGetFileName()
         {
@@ -302,16 +312,16 @@ namespace SQLitePCL.pretty.tests
                 Assert.Throws<InvalidOperationException>(() => db.GetFileName("main"));
             }
 
-            var tempFile = Path.GetTempFileName();
+            var tempFile = GetTempFile();
             using (var db = SQLite3.Open(tempFile))
             {
                 db.Execute("CREATE TABLE foo (x int);");
                 string filename = null;
                 Assert.True(db.TryGetFileName("main", out filename));
-                Assert.Equal(tempFile, filename);
+                Assert.True(filename.EndsWith(tempFile));
                 Assert.Equal(db.GetFileName("main"), filename);
             }
-            File.Delete(tempFile);
+            raw.sqlite3__vfs__delete(null, tempFile, 1);
         }
 
         [Fact]
@@ -607,7 +617,7 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public void TestWalCheckpoint()
         {
-            var tmpFile = Path.GetTempFileName();
+            var tmpFile = GetTempFile();
             using (var db = SQLite3.Open(tmpFile))
             {
                 db.Execute("PRAGMA journal_mode=WAL;");

@@ -13,7 +13,7 @@
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
     <AndroidApplication>True</AndroidApplication>
     <AndroidUseLatestPlatformSdk>False</AndroidUseLatestPlatformSdk>
-    <AssemblyName>SQLitePCL.pretty.tests</AssemblyName>
+    <AssemblyName>SQLitePCL.pretty.tests.Android</AssemblyName>
     <TargetFrameworkVersion>v4.4</TargetFrameworkVersion>
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
   </PropertyGroup>
@@ -42,11 +42,35 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Mono.Android" />
+    <Reference Include="System.Reactive.Core">
+      <HintPath>..\packages\Rx-Core.2.2.5\lib\portable-net45+winrt45+wp8+wpa81\System.Reactive.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Interfaces">
+      <HintPath>..\packages\Rx-Interfaces.2.2.5\lib\portable-net45+winrt45+wp8+wpa81\System.Reactive.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Linq">
+      <HintPath>..\packages\Rx-Linq.2.2.5\lib\portable-net45+winrt45+wp8+wpa81\System.Reactive.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.PlatformServices">
+      <HintPath>..\packages\Rx-PlatformServices.2.2.5\lib\portable-net45+winrt45+wp8+wpa81\System.Reactive.PlatformServices.dll</HintPath>
+    </Reference>
+    <Reference Include="SQLitePCL.raw">
+      <HintPath>..\packages\SQLitePCL.raw.0.8.0-pre2\build\MonoAndroid\pinvoke_packaged_sqlite3\anycpu\SQLitePCL.raw.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit.abstractions">
+      <HintPath>..\packages\xunit.abstractions.2.0.0\lib\portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS\xunit.abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit.core">
+      <HintPath>..\packages\xunit.extensibility.core.2.0.0\lib\portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS\xunit.core.dll</HintPath>
+    </Reference>
     <Reference Include="xunit.execution.MonoAndroid">
       <HintPath>..\packages\xunit.extensibility.execution.2.0.0\lib\monoandroid\xunit.execution.MonoAndroid.dll</HintPath>
     </Reference>
     <Reference Include="xunit.runner.utility.MonoAndroid">
       <HintPath>..\packages\xunit.runner.utility.2.0.0\lib\monoandroid\xunit.runner.utility.MonoAndroid.dll</HintPath>
+    </Reference>
+    <Reference Include="xunit.assert">
+      <HintPath>..\packages\xunit.assert.2.0.0\lib\portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS\xunit.assert.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Android.Support.v4">
       <HintPath>..\packages\Xamarin.Android.Support.v4.21.0.3.0\lib\MonoAndroid10\Xamarin.Android.Support.v4.dll</HintPath>
@@ -66,54 +90,10 @@
     <Reference Include="xunit.runner.devices">
       <HintPath>..\packages\xunit.runner.devices.1.0.0\lib\MonoAndroid\xunit.runner.devices.dll</HintPath>
     </Reference>
-    <Reference Include="System.Reactive.Core">
-      <HintPath>..\packages\Rx-Core.2.2.5\lib\portable-net45+winrt45+wp8+wpa81\System.Reactive.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reactive.Interfaces">
-      <HintPath>..\packages\Rx-Interfaces.2.2.5\lib\portable-net45+winrt45+wp8+wpa81\System.Reactive.Interfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reactive.Linq">
-      <HintPath>..\packages\Rx-Linq.2.2.5\lib\portable-net45+winrt45+wp8+wpa81\System.Reactive.Linq.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Reactive.PlatformServices">
-      <HintPath>..\packages\Rx-PlatformServices.2.2.5\lib\portable-net45+winrt45+wp8+wpa81\System.Reactive.PlatformServices.dll</HintPath>
-    </Reference>
-    <Reference Include="xunit.abstractions">
-      <HintPath>..\packages\xunit.abstractions.2.0.0\lib\net35\xunit.abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="xunit.core">
-      <HintPath>..\packages\xunit.extensibility.core.2.0.0\lib\portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS\xunit.core.dll</HintPath>
-    </Reference>
-    <Reference Include="xunit.assert">
-      <HintPath>..\packages\xunit.assert.2.0.0\lib\portable-net45+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS\xunit.assert.dll</HintPath>
-    </Reference>
-    <Reference Include="SQLitePCL.raw">
-      <HintPath>..\packages\SQLitePCL.raw.0.8.0-pre2\build\MonoAndroid\pinvoke_packaged_sqlite3\anycpu\SQLitePCL.raw.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MainActivity.cs" />
-    <Compile Include="ColumnInfoTests.cs" />
-    <Compile Include="DatabaseConnectionTests.cs" />
-    <Compile Include="Example.cs" />
-    <Compile Include="ImplementationTests.cs" />
-    <Compile Include="prettyTests.cs" />
-    <Compile Include="ResultSet.cs" />
-    <Compile Include="SQLite3Tests.cs" />
-    <Compile Include="SQLiteValueTests.cs" />
-    <Compile Include="SQLiteVersionTests.cs" />
-    <Compile Include="TableColumnMetadataTests.cs" />
-    <Compile Include="AsyncTests\AsyncBlobStreamTests.cs" />
-    <Compile Include="AsyncTests\AsyncDatabaseConnectionTests.cs" />
-    <Compile Include="AsyncTests\AsyncStatementTests.cs" />
-    <Compile Include="AsyncTests\ResultSet.cs" />
-    <Compile Include="OrmTests\QueryTests.Joins.cs" />
-    <Compile Include="OrmTests\QueryTests.cs" />
-    <Compile Include="OrmTests\TableMappingTest.Async.cs" />
-    <Compile Include="OrmTests\TableMappingTests.Create.cs" />
-    <Compile Include="OrmTests\TableMappingTests.Sync.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\AndroidManifest.xml" />
@@ -123,10 +103,7 @@
   <Import Project="..\packages\Xamarin.Forms.1.4.0.6341\build\portable-win+net45+wp80+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Xamarin.Forms.targets" Condition="Exists('..\packages\Xamarin.Forms.1.4.0.6341\build\portable-win+net45+wp80+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Xamarin.Forms.targets')" />
   <Import Project="..\packages\xunit.runner.devices.1.0.0\build\MonoAndroid\xunit.runner.devices.targets" Condition="Exists('..\packages\xunit.runner.devices.1.0.0\build\MonoAndroid\xunit.runner.devices.targets')" />
   <Import Project="..\packages\SQLitePCL.raw.0.8.0-pre2\build\MonoAndroid\SQLitePCL.raw.targets" Condition="Exists('..\packages\SQLitePCL.raw.0.8.0-pre2\build\MonoAndroid\SQLitePCL.raw.targets')" />
-  <ItemGroup>
-    <Folder Include="AsyncTests\" />
-    <Folder Include="OrmTests\" />
-  </ItemGroup>
+  <Import Project="..\packages\xunit.core.2.0.0\build\monoandroid\xunit.core.props" Condition="Exists('..\packages\xunit.core.2.0.0\build\monoandroid\xunit.core.props')" />
   <ItemGroup>
     <ProjectReference Include="..\SQLitePCL.pretty\SQLitePCL.pretty.csproj">
       <Project>{C6743D26-E16E-41CA-A757-72BE2D7EAF28}</Project>
@@ -140,5 +117,12 @@
       <Project>{82EF24A8-7B24-42AA-BDB9-7A9F7527DF48}</Project>
       <Name>SQLitePCL.pretty.Orm</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SQLitePCL.pretty.Tests\SQLitePCL.pretty.Tests.csproj">
+      <Project>{3C8B2558-E287-4031-8597-14480A15ED0E}</Project>
+      <Name>SQLitePCL.pretty.Tests</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
 </Project>

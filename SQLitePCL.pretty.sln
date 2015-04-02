@@ -14,9 +14,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLitePCL.pretty.Async", "S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLitePCL.pretty.Orm", "SQLitePCL.pretty.Orm\SQLitePCL.pretty.Orm.csproj", "{82EF24A8-7B24-42AA-BDB9-7A9F7527DF48}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLitePCL.pretty.tests.Mac", "SQLitePCL.pretty.tests\SQLitePCL.pretty.tests.Mac.csproj", "{5704A5E4-ED39-4D42-915E-A25F84B076C1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLitePCL.pretty.tests.Android", "SQLitePCL.pretty.tests.Android\SQLitePCL.pretty.tests.Android.csproj", "{A3278FF6-0B65-482E-AE3E-7AEF33C4F25C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLitePCL.pretty.tests.Android", "SQLitePCL.pretty.tests\SQLitePCL.pretty.tests.Android.csproj", "{A3278FF6-0B65-482E-AE3E-7AEF33C4F25C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLitePCL.pretty.Tests", "SQLitePCL.pretty.Tests\SQLitePCL.pretty.Tests.csproj", "{3C8B2558-E287-4031-8597-14480A15ED0E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,6 +28,18 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3C8B2558-E287-4031-8597-14480A15ED0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C8B2558-E287-4031-8597-14480A15ED0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C8B2558-E287-4031-8597-14480A15ED0E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{3C8B2558-E287-4031-8597-14480A15ED0E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{3C8B2558-E287-4031-8597-14480A15ED0E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3C8B2558-E287-4031-8597-14480A15ED0E}.Debug|x86.Build.0 = Debug|Any CPU
+		{3C8B2558-E287-4031-8597-14480A15ED0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C8B2558-E287-4031-8597-14480A15ED0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C8B2558-E287-4031-8597-14480A15ED0E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{3C8B2558-E287-4031-8597-14480A15ED0E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{3C8B2558-E287-4031-8597-14480A15ED0E}.Release|x86.ActiveCfg = Release|Any CPU
+		{3C8B2558-E287-4031-8597-14480A15ED0E}.Release|x86.Build.0 = Release|Any CPU
 		{467AB566-4D9E-4D9E-BB28-8167E6F2A239}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{467AB566-4D9E-4D9E-BB28-8167E6F2A239}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{467AB566-4D9E-4D9E-BB28-8167E6F2A239}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
@@ -40,18 +52,6 @@ Global
 		{467AB566-4D9E-4D9E-BB28-8167E6F2A239}.Release|Mixed Platforms.Build.0 = Release|x86
 		{467AB566-4D9E-4D9E-BB28-8167E6F2A239}.Release|x86.ActiveCfg = Release|x86
 		{467AB566-4D9E-4D9E-BB28-8167E6F2A239}.Release|x86.Build.0 = Release|x86
-		{5704A5E4-ED39-4D42-915E-A25F84B076C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5704A5E4-ED39-4D42-915E-A25F84B076C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5704A5E4-ED39-4D42-915E-A25F84B076C1}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{5704A5E4-ED39-4D42-915E-A25F84B076C1}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{5704A5E4-ED39-4D42-915E-A25F84B076C1}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{5704A5E4-ED39-4D42-915E-A25F84B076C1}.Debug|x86.Build.0 = Debug|Any CPU
-		{5704A5E4-ED39-4D42-915E-A25F84B076C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5704A5E4-ED39-4D42-915E-A25F84B076C1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5704A5E4-ED39-4D42-915E-A25F84B076C1}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{5704A5E4-ED39-4D42-915E-A25F84B076C1}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{5704A5E4-ED39-4D42-915E-A25F84B076C1}.Release|x86.ActiveCfg = Release|Any CPU
-		{5704A5E4-ED39-4D42-915E-A25F84B076C1}.Release|x86.Build.0 = Release|Any CPU
 		{82EF24A8-7B24-42AA-BDB9-7A9F7527DF48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{82EF24A8-7B24-42AA-BDB9-7A9F7527DF48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82EF24A8-7B24-42AA-BDB9-7A9F7527DF48}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

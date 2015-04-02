@@ -75,7 +75,7 @@ namespace SQLitePCL.pretty.tests
 
                 var blob = Encoding.UTF8.GetBytes("ab");
                 var resultBlob = await db.Query("SELECT ?", blob).SelectScalarBlob().FirstAsync();
-                Assert.Equal(Encoding.UTF8.GetString(resultBlob), "ab");
+                Assert.Equal(Encoding.UTF8.GetString(resultBlob, 0, resultBlob.Length), "ab");
             }
         }
     }
