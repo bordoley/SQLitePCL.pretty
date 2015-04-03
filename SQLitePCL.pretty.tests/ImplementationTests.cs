@@ -15,7 +15,7 @@
    limitations under the License.
 */
 
-using NUnit.Framework;
+using Xunit;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -24,10 +24,9 @@ using System.Linq;
 
 namespace SQLitePCL.pretty.tests
 {
-    [TestFixture]
     public class DatabaseBackupTests
     {
-        [Test]
+        [Fact]
         public void TestDispose()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -60,7 +59,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestBackupWithPageStepping()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -75,28 +74,28 @@ namespace SQLitePCL.pretty.tests
                 {
                     using (var backup = db.BackupInit("main", db2, "main"))
                     {
-                        Assert.AreEqual(0, backup.RemainingPages);
-                        Assert.AreEqual(0, backup.PageCount);
+                        Assert.Equal(0, backup.RemainingPages);
+                        Assert.Equal(0, backup.PageCount);
 
                         backup.Step(1);
                         var remainingPages = backup.RemainingPages;
 
                         while (backup.Step(1))
                         {
-                            Assert.Less(backup.RemainingPages, remainingPages);
+                            Assert.True(backup.RemainingPages < remainingPages);
                             remainingPages = backup.RemainingPages;
                         }
 
-                        Assert.IsFalse(backup.Step(2));
-                        Assert.IsFalse(backup.Step(-1));
-                        Assert.AreEqual(backup.RemainingPages, 0);
-                        Assert.IsTrue(backup.PageCount > 0);
+                        Assert.False(backup.Step(2));
+                        Assert.False(backup.Step(-1));
+                        Assert.Equal(backup.RemainingPages, 0);
+                        Assert.True(backup.PageCount > 0);
                     }
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestBackup()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -111,13 +110,13 @@ namespace SQLitePCL.pretty.tests
                 {
                     using (var backup = db.BackupInit("main", db2, "main"))
                     {
-                        Assert.AreEqual(0, backup.RemainingPages);
-                        Assert.AreEqual(0, backup.PageCount);
+                        Assert.Equal(0, backup.RemainingPages);
+                        Assert.Equal(0, backup.PageCount);
 
-                        Assert.IsFalse(backup.Step(-1));
+                        Assert.False(backup.Step(-1));
 
-                        Assert.AreEqual(backup.RemainingPages, 0);
-                        Assert.IsTrue(backup.PageCount > 0);
+                        Assert.Equal(backup.RemainingPages, 0);
+                        Assert.True(backup.PageCount > 0);
                     }
                 }
 
@@ -131,32 +130,31 @@ namespace SQLitePCL.pretty.tests
 
                     foreach (var pair in backupResults)
                     {
-                        Assert.AreEqual(pair.Item1[0].ToInt(), pair.Item2[0].ToInt());
+                        Assert.Equal(pair.Item1[0].ToInt(), pair.Item2[0].ToInt());
                     }
                 }
             }
         }
     }
 
-    [TestFixture]
     public class StatementTests
     {
-        [Test]
+        [Fact]
         public void TestCurrent()
         {
             using (var db = SQLite3.OpenInMemory())
             using (var stmt = db.PrepareStatement("SELECT 1"))
             {
                 stmt.MoveNext();
-                Assert.AreEqual(stmt.Current[0].ToInt(), 1);
+                Assert.Equal(stmt.Current[0].ToInt(), 1);
 
                 var ienumCurrent = ((IEnumerator)stmt).Current;
                 var ienumResultSet = (IReadOnlyList<IResultSetValue>) ienumCurrent;
-                Assert.AreEqual(ienumResultSet[0].ToInt(), 1);
+                Assert.Equal(ienumResultSet[0].ToInt(), 1);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestDispose()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -180,7 +178,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestBusy()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -193,20 +191,20 @@ namespace SQLitePCL.pretty.tests
 
                 using (var stmt = db.PrepareStatement("SELECT x FROM foo;"))
                 {
-                    Assert.IsFalse(stmt.IsBusy);
+                    Assert.False(stmt.IsBusy);
                     stmt.MoveNext();
-                    Assert.IsTrue(stmt.IsBusy);
+                    Assert.True(stmt.IsBusy);
                     stmt.MoveNext();
-                    Assert.IsTrue(stmt.IsBusy);
+                    Assert.True(stmt.IsBusy);
                     stmt.MoveNext();
-                    Assert.IsTrue(stmt.IsBusy);
+                    Assert.True(stmt.IsBusy);
                     stmt.MoveNext();
-                    Assert.IsFalse(stmt.IsBusy);
+                    Assert.False(stmt.IsBusy);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestBindParameterCount()
         {
             Tuple<string, int>[] tests =
@@ -224,14 +222,14 @@ namespace SQLitePCL.pretty.tests
                 {
                     using (var stmt = db.PrepareStatement(test.Item1))
                     {
-                        Assert.AreEqual(test.Item2, stmt.BindParameters.Count);
+                        Assert.Equal(test.Item2, stmt.BindParameters.Count);
                         stmt.MoveNext();
                     }
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestReadOnly()
         {
             Tuple<string, bool>[] tests =
@@ -249,14 +247,14 @@ namespace SQLitePCL.pretty.tests
                 {
                     using (var stmt = db.PrepareStatement(test.Item1))
                     {
-                        Assert.AreEqual(test.Item2, stmt.IsReadOnly);
+                        Assert.Equal(test.Item2, stmt.IsReadOnly);
                         stmt.MoveNext();
                     }
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestGetSQL()
         {
             string[] sql =
@@ -276,13 +274,13 @@ namespace SQLitePCL.pretty.tests
                     {
                         stmt.MoveNext();
 
-                        Assert.AreEqual(sqlStmt, stmt.SQL);
+                        Assert.Equal(sqlStmt, stmt.SQL);
                     }
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestGetBindParameters()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -291,24 +289,24 @@ namespace SQLitePCL.pretty.tests
 
                 using (var stmt = db.PrepareStatement("INSERT INTO foo (x,v,t,d,b,q) VALUES (:x,:v,:t,:d,:b,:q)"))
                 {
-                    Assert.AreEqual(stmt.BindParameters[0].Name, ":x");
-                    Assert.AreEqual(stmt.BindParameters[1].Name, ":v");
-                    Assert.AreEqual(stmt.BindParameters[2].Name, ":t");
-                    Assert.AreEqual(stmt.BindParameters[3].Name, ":d");
-                    Assert.AreEqual(stmt.BindParameters[4].Name, ":b");
-                    Assert.AreEqual(stmt.BindParameters[5].Name, ":q");
+                    Assert.Equal(stmt.BindParameters[0].Name, ":x");
+                    Assert.Equal(stmt.BindParameters[1].Name, ":v");
+                    Assert.Equal(stmt.BindParameters[2].Name, ":t");
+                    Assert.Equal(stmt.BindParameters[3].Name, ":d");
+                    Assert.Equal(stmt.BindParameters[4].Name, ":b");
+                    Assert.Equal(stmt.BindParameters[5].Name, ":q");
 
-                    Assert.AreEqual(stmt.BindParameters[":x"].Name, ":x");
-                    Assert.AreEqual(stmt.BindParameters[":v"].Name, ":v");
-                    Assert.AreEqual(stmt.BindParameters[":t"].Name, ":t");
-                    Assert.AreEqual(stmt.BindParameters[":d"].Name, ":d");
-                    Assert.AreEqual(stmt.BindParameters[":b"].Name, ":b");
-                    Assert.AreEqual(stmt.BindParameters[":q"].Name, ":q");
+                    Assert.Equal(stmt.BindParameters[":x"].Name, ":x");
+                    Assert.Equal(stmt.BindParameters[":v"].Name, ":v");
+                    Assert.Equal(stmt.BindParameters[":t"].Name, ":t");
+                    Assert.Equal(stmt.BindParameters[":d"].Name, ":d");
+                    Assert.Equal(stmt.BindParameters[":b"].Name, ":b");
+                    Assert.Equal(stmt.BindParameters[":q"].Name, ":q");
 
                     Assert.True(stmt.BindParameters.ContainsKey(":x"));
                     Assert.False(stmt.BindParameters.ContainsKey(":nope"));
-                    Assert.AreEqual(stmt.BindParameters.Keys.Count(), 6);
-                    Assert.AreEqual(stmt.BindParameters.Values.Count(), 6);
+                    Assert.Equal(stmt.BindParameters.Keys.Count(), 6);
+                    Assert.Equal(stmt.BindParameters.Values.Count(), 6);
 
                     Assert.Throws<KeyNotFoundException>(() => { var x = stmt.BindParameters[":nope"]; });
                     Assert.Throws<ArgumentOutOfRangeException>(() => { var x = stmt.BindParameters[-1]; });
@@ -319,7 +317,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestExecute()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -335,12 +333,12 @@ namespace SQLitePCL.pretty.tests
 
                 foreach (var result in db.Query("SELECT v FROM foo ORDER BY 1").Select((v, index) => Tuple.Create(index, v[0].ToInt())))
                 {
-                    Assert.AreEqual(result.Item1, result.Item2);
+                    Assert.Equal(result.Item1, result.Item2);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestQuery()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -359,8 +357,8 @@ namespace SQLitePCL.pretty.tests
                     var result = stmt.Query(50).Count();
 
                     // Ensure that enumerating the Query Enumerable doesn't dispose the stmt
-                    Assert.DoesNotThrow(() => { var x = stmt.IsBusy; });
-                    Assert.AreEqual(result, 50);
+                    { var x = stmt.IsBusy; }
+                    Assert.Equal(result, 50);
                 }
 
                 using (var stmt = db.PrepareStatement("SELECT * from FOO WHERE v < 50"))
@@ -368,13 +366,13 @@ namespace SQLitePCL.pretty.tests
                     var result = stmt.Query().Count();
 
                     // Ensure that enumerating the Query Enumerable doesn't dispose the stmt
-                    Assert.DoesNotThrow(() => { var x = stmt.IsBusy; });
-                    Assert.AreEqual(result, 50);
+                    { var x = stmt.IsBusy; }
+                    Assert.Equal(result, 50);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestClearBindings()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -397,12 +395,12 @@ namespace SQLitePCL.pretty.tests
                         .Select(row => Tuple.Create(row[0].ToInt(), row[1].ToInt()))
                         .Last();
 
-                Assert.AreEqual(last.Item1, 0);
-                Assert.AreEqual(last.Item2, 0);
+                Assert.Equal(last.Item1, 0);
+                Assert.Equal(last.Item2, 0);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestGetColumns()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -412,17 +410,17 @@ namespace SQLitePCL.pretty.tests
                 foreach (var column in stmt.Columns)
                 {
                     count++;
-                    Assert.AreEqual(column.Name, "a");
+                    Assert.Equal(column.Name, "a");
                 }
 
                 Assert.Throws<ArgumentOutOfRangeException>(() => { var x = stmt.Columns[-1]; });
                 Assert.Throws<ArgumentOutOfRangeException>(() => { var x = stmt.Columns[3]; });
 
-                Assert.AreEqual(count, stmt.Columns.Count);
+                Assert.Equal(count, stmt.Columns.Count);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestStatus()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -434,22 +432,21 @@ namespace SQLitePCL.pretty.tests
                     stmt.MoveNext();
 
                     int vmStep = stmt.Status(StatementStatusCode.VirtualMachineStep, false);
-                    Assert.IsTrue(vmStep > 0);
+                    Assert.True(vmStep > 0);
 
                     int vmStep2 = stmt.Status(StatementStatusCode.VirtualMachineStep, true);
-                    Assert.AreEqual(vmStep, vmStep2);
+                    Assert.Equal(vmStep, vmStep2);
 
                     int vmStep3 = stmt.Status(StatementStatusCode.VirtualMachineStep, false);
-                    Assert.AreEqual(0, vmStep3);
+                    Assert.Equal(0, vmStep3);
                 }
             }
         }
     }
 
-    [TestFixture]
     public class BindParameters
     {
-        [Test]
+        [Fact]
         public void TestBindOnDisposedStatement()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -467,7 +464,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestBindObject()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -487,24 +484,24 @@ namespace SQLitePCL.pretty.tests
                     stmt.ClearBindings();
                     stmt.BindParameters[0].Bind((object) DateTime.MaxValue);
                     stmt.MoveNext();
-                    Assert.AreEqual(stmt.Current[0].ToDateTime(), DateTime.MaxValue);
+                    Assert.Equal(stmt.Current[0].ToDateTime(), DateTime.MaxValue);
 
                     stmt.Reset();
                     stmt.ClearBindings();
                     stmt.BindParameters[0].Bind((object) DateTimeOffset.MaxValue);
                     stmt.MoveNext();
-                    Assert.AreEqual(stmt.Current[0].ToDateTimeOffset(), DateTimeOffset.MaxValue);
+                    Assert.Equal(stmt.Current[0].ToDateTimeOffset(), DateTimeOffset.MaxValue);
 
                     stmt.Reset();
                     stmt.ClearBindings();
                     stmt.BindParameters[0].Bind((object) TimeSpan.Zero);
                     stmt.MoveNext();
-                    Assert.AreEqual(stmt.Current[0].ToTimeSpan(), TimeSpan.Zero);
+                    Assert.Equal(stmt.Current[0].ToTimeSpan(), TimeSpan.Zero);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestBindExtensions()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -515,36 +512,36 @@ namespace SQLitePCL.pretty.tests
                     stmt.ClearBindings();
                     stmt.BindParameters[0].Bind(true);
                     stmt.MoveNext();
-                    Assert.AreEqual(stmt.Current[0].ToBool(), true);
+                    Assert.Equal(stmt.Current[0].ToBool(), true);
 
                     stmt.Reset();
                     stmt.ClearBindings();
                     stmt.BindParameters[0].Bind(TimeSpan.Zero);
                     stmt.MoveNext();
-                    Assert.AreEqual(stmt.Current[0].ToTimeSpan(), TimeSpan.Zero);
+                    Assert.Equal(stmt.Current[0].ToTimeSpan(), TimeSpan.Zero);
 
                     stmt.Reset();
                     stmt.ClearBindings();
                     stmt.BindParameters[0].Bind(1.1m);
                     stmt.MoveNext();
-                    Assert.AreEqual(stmt.Current[0].ToDecimal(), 1.1);
+                    Assert.Equal(stmt.Current[0].ToDecimal(), new Decimal(1.1));
 
                     stmt.Reset();
                     stmt.ClearBindings();
                     stmt.BindParameters[0].Bind(DateTime.MaxValue);
                     stmt.MoveNext();
-                    Assert.AreEqual(stmt.Current[0].ToDateTime(), DateTime.MaxValue);
+                    Assert.Equal(stmt.Current[0].ToDateTime(), DateTime.MaxValue);
 
                     stmt.Reset();
                     stmt.ClearBindings();
                     stmt.BindParameters[0].Bind(DateTimeOffset.MaxValue);
                     stmt.MoveNext();
-                    Assert.AreEqual(stmt.Current[0].ToDateTimeOffset(), DateTimeOffset.MaxValue);
+                    Assert.Equal(stmt.Current[0].ToDateTimeOffset(), DateTimeOffset.MaxValue);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestBindSQLiteValue()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -556,44 +553,43 @@ namespace SQLitePCL.pretty.tests
                     param.Bind(SQLiteValue.Null);
                     stmt.MoveNext();
                     var result = stmt.Current.First();
-                    Assert.AreEqual(result.SQLiteType, SQLiteType.Null);
+                    Assert.Equal(result.SQLiteType, SQLiteType.Null);
 
                     stmt.Reset();
                     param.Bind(new byte[0].ToSQLiteValue());
                     stmt.MoveNext();
                     result = stmt.Current.First();
-                    Assert.AreEqual(result.SQLiteType, SQLiteType.Blob);
-                    CollectionAssert.AreEqual(result.ToBlob(), new Byte[0]);
+                    Assert.Equal(result.SQLiteType, SQLiteType.Blob);
+                    Assert.Equal(result.ToBlob(), new Byte[0]);
 
                     stmt.Reset();
                     param.Bind("test".ToSQLiteValue());
                     stmt.MoveNext();
                     result = stmt.Current.First();
-                    Assert.AreEqual(result.SQLiteType, SQLiteType.Text);
-                    Assert.AreEqual(result.ToString(), "test");
+                    Assert.Equal(result.SQLiteType, SQLiteType.Text);
+                    Assert.Equal(result.ToString(), "test");
 
                     stmt.Reset();
                     param.Bind((1).ToSQLiteValue());
                     stmt.MoveNext();
                     result = stmt.Current.First();
-                    Assert.AreEqual(result.SQLiteType, SQLiteType.Integer);
-                    Assert.AreEqual(result.ToInt64(), 1);
+                    Assert.Equal(result.SQLiteType, SQLiteType.Integer);
+                    Assert.Equal(result.ToInt64(), 1);
 
                     stmt.Reset();
                     param.Bind((0.0).ToSQLiteValue());
                     stmt.MoveNext();
                     result = stmt.Current.First();
-                    Assert.AreEqual(result.SQLiteType, SQLiteType.Float);
-                    Assert.AreEqual(result.ToInt(), 0);
+                    Assert.Equal(result.SQLiteType, SQLiteType.Float);
+                    Assert.Equal(result.ToInt(), 0);
                 }
             }
         }
     }
 
-    [TestFixture]
     public class ResultSetTests
     {
-        [Test]
+        [Fact]
         public void TestCount()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -605,17 +601,17 @@ namespace SQLitePCL.pretty.tests
 
                 foreach (var row in db.Query("select * from foo"))
                 {
-                    Assert.AreEqual(row.Count, 2);
+                    Assert.Equal(row.Count, 2);
                 }
 
                 foreach (var row in db.Query("select x from foo"))
                 {
-                    Assert.AreEqual(row.Count, 1);
+                    Assert.Equal(row.Count, 1);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestBracketOp()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -630,13 +626,13 @@ namespace SQLitePCL.pretty.tests
                     Assert.Throws<ArgumentOutOfRangeException>(() => { var x = row[-1]; });
                     Assert.Throws<ArgumentOutOfRangeException>(() => { var x = row[row.Count]; });
 
-                    Assert.AreEqual(row[0].SQLiteType, SQLiteType.Integer);
-                    Assert.AreEqual(row[1].SQLiteType, SQLiteType.Integer);
+                    Assert.Equal(row[0].SQLiteType, SQLiteType.Integer);
+                    Assert.Equal(row[1].SQLiteType, SQLiteType.Integer);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestColumns()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -644,22 +640,21 @@ namespace SQLitePCL.pretty.tests
                 foreach (var row in db.Query("SELECT 1 as a, 2 as b"))
                 {
                     var columns = row.Columns();
-                    Assert.AreEqual(columns[0].Name, "a");
-                    Assert.AreEqual(columns[1].Name, "b");
-                    Assert.AreEqual(columns.Count, 2);
+                    Assert.Equal(columns[0].Name, "a");
+                    Assert.Equal(columns[1].Name, "b");
+                    Assert.Equal(columns.Count, 2);
 
                     var count = row.Columns().Count();
 
-                    Assert.AreEqual(count, 2);
+                    Assert.Equal(count, 2);
                 }
             }
         }
     }
 
-    [TestFixture]
     public class BlobStreamTests
     {
-        [Test]
+        [Fact]
         public void TestRead()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -685,7 +680,7 @@ namespace SQLitePCL.pretty.tests
                     for (int i = 0; i < stream.Length; i++)
                     {
                         int b = stream.ReadByte();
-                        Assert.AreEqual(bytes[i], b);
+                        Assert.Equal(bytes[i], b);
                     }
 
                     // Since this is a read only stream, this is a good chance to test that writing fails
@@ -694,7 +689,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestDispose()
         {
             Stream notDisposedStream;
@@ -729,7 +724,7 @@ namespace SQLitePCL.pretty.tests
             Assert.Throws<ObjectDisposedException>(() => { var x = notDisposedStream.Length; });
         }
 
-        [Test]
+        [Fact]
         public void TestSeek()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -744,33 +739,33 @@ namespace SQLitePCL.pretty.tests
                 {
                     Assert.True(blob.CanSeek);
                     Assert.Throws<NotSupportedException>(() => blob.SetLength(10));
-                    Assert.DoesNotThrow(() => { blob.Position = 100; });
+                    { blob.Position = 100; }
 
                     // Test input validation
                     blob.Position = 5;
                     Assert.Throws<IOException>(() => blob.Seek(-10, SeekOrigin.Begin));
-                    Assert.AreEqual(blob.Position, 5);
+                    Assert.Equal(blob.Position, 5);
                     Assert.Throws<IOException>(() => blob.Seek(-10, SeekOrigin.Current));
-                    Assert.AreEqual(blob.Position, 5);
+                    Assert.Equal(blob.Position, 5);
                     Assert.Throws<IOException>(() => blob.Seek(-100, SeekOrigin.End));
-                    Assert.AreEqual(blob.Position, 5);
+                    Assert.Equal(blob.Position, 5);
                     Assert.Throws<ArgumentException>(() => blob.Seek(-100, (SeekOrigin)10));
-                    Assert.AreEqual(blob.Position, 5);
+                    Assert.Equal(blob.Position, 5);
 
                     blob.Seek(0, SeekOrigin.Begin);
-                    Assert.AreEqual(blob.Position, 0);
+                    Assert.Equal(blob.Position, 0);
 
                     blob.Seek(0, SeekOrigin.End);
-                    Assert.AreEqual(blob.Position, blob.Length);
+                    Assert.Equal(blob.Position, blob.Length);
 
                     blob.Position = 5;
                     blob.Seek(2, SeekOrigin.Current);
-                    Assert.AreEqual(blob.Position, 7);
+                    Assert.Equal(blob.Position, 7);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWrite()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -800,7 +795,7 @@ namespace SQLitePCL.pretty.tests
                     for (int i = 0; i < stream.Length; i++)
                     {
                         int b = stream.ReadByte();
-                        Assert.AreEqual(bytes[i], b);
+                        Assert.Equal(bytes[i], b);
                     }
 
                     // Test writing after the end of the stream
@@ -811,7 +806,7 @@ namespace SQLitePCL.pretty.tests
                     for (int i = 0; i < stream.Length; i++)
                     {
                         int b = stream.ReadByte();
-                        Assert.AreEqual(bytes[i], b);
+                        Assert.Equal(bytes[i], b);
                     }
                 }
             }

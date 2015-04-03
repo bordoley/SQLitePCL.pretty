@@ -14,86 +14,85 @@
    limitations under the License.
 */
 
-using NUnit.Framework;
+using Xunit;
 using System;
 using System.Linq;
 using System.Text;
 
 namespace SQLitePCL.pretty.tests
 {
-    [TestFixture]
     public class SQLiteValueTests
     {
         private void compare(ISQLiteValue expected, ISQLiteValue test)
         {
-            Assert.AreEqual(expected.Length, test.Length);
-            Assert.AreEqual(expected.SQLiteType, test.SQLiteType);
+            Assert.Equal(expected.Length, test.Length);
+            Assert.Equal(expected.SQLiteType, test.SQLiteType);
 
             // FIXME: Testing double equality is imprecise
-            //Assert.AreEqual(expected.ToDouble(), test.ToDouble());
-            Assert.AreEqual(expected.ToInt64(), test.ToInt64());
-            Assert.AreEqual(expected.ToInt(), test.ToInt());
-            Assert.AreEqual(expected.ToString(), test.ToString());
-            CollectionAssert.AreEqual(expected.ToBlob(), test.ToBlob());
+            //Assert.Equal(expected.ToDouble(), test.ToDouble());
+            Assert.Equal(expected.ToInt64(), test.ToInt64());
+            Assert.Equal(expected.ToInt(), test.ToInt());
+            Assert.Equal(expected.ToString(), test.ToString());
+            Assert.Equal(expected.ToBlob(), test.ToBlob());
         }
 
-        [Test]
+        [Fact]
         public void TestToSQLiteValueExtensions()
         {
             short testShort = 2;
-            Assert.AreEqual(testShort, testShort.ToSQLiteValue().ToShort());
+            Assert.Equal(testShort, testShort.ToSQLiteValue().ToShort());
 
             byte testByte = 2;
-            Assert.AreEqual(testByte, testByte.ToSQLiteValue().ToByte());
+            Assert.Equal(testByte, testByte.ToSQLiteValue().ToByte());
 
             float testFloat = 2.0f;
-            Assert.AreEqual(testFloat, testFloat.ToSQLiteValue().ToFloat());
+            Assert.Equal(testFloat, testFloat.ToSQLiteValue().ToFloat());
 
             TimeSpan testTimeSpan = new TimeSpan(100);
-            Assert.AreEqual(testTimeSpan, testTimeSpan.ToSQLiteValue().ToTimeSpan());
+            Assert.Equal(testTimeSpan, testTimeSpan.ToSQLiteValue().ToTimeSpan());
 
             DateTime testDateTime = DateTime.Now;
-            Assert.AreEqual(testDateTime, testDateTime.ToSQLiteValue().ToDateTime());
+            Assert.Equal(testDateTime, testDateTime.ToSQLiteValue().ToDateTime());
 
             DateTimeOffset testDateTimeOffset = new DateTimeOffset(100, TimeSpan.Zero);
-            Assert.AreEqual(testDateTimeOffset, testDateTimeOffset.ToSQLiteValue().ToDateTimeOffset());
+            Assert.Equal(testDateTimeOffset, testDateTimeOffset.ToSQLiteValue().ToDateTimeOffset());
 
             decimal testDecimal = 2.2m;
-            Assert.AreEqual(testDecimal, testDecimal.ToSQLiteValue().ToDecimal());
+            Assert.Equal(testDecimal, testDecimal.ToSQLiteValue().ToDecimal());
 
             Guid testGuid = Guid.NewGuid();
-            Assert.AreEqual(testGuid, testGuid.ToSQLiteValue().ToGuid());
+            Assert.Equal(testGuid, testGuid.ToSQLiteValue().ToGuid());
 
             ushort testUShort = 1;
-            Assert.AreEqual(testUShort, testUShort.ToSQLiteValue().ToUInt16());
+            Assert.Equal(testUShort, testUShort.ToSQLiteValue().ToUInt16());
 
             sbyte testSByte = 1;
-            Assert.AreEqual(testSByte, testSByte.ToSQLiteValue().ToSByte());
+            Assert.Equal(testSByte, testSByte.ToSQLiteValue().ToSByte());
 
             Uri uri = new Uri("http://www.example.com/path/to/resource?querystring#fragment");
-            Assert.AreEqual(uri, uri.ToSQLiteValue().ToUri());
+            Assert.Equal(uri, uri.ToSQLiteValue().ToUri());
         }
 
-        [Test]
+        [Fact]
         public void TestToSQLiteValue()
         {
-            Assert.AreEqual(false.ToSQLiteValue().ToInt(), 0);
-            Assert.AreNotEqual(true.ToSQLiteValue().ToInt(), 0);
+            Assert.Equal(false.ToSQLiteValue().ToInt(), 0);
+            Assert.NotEqual(true.ToSQLiteValue().ToInt(), 0);
 
             byte b = 8;
-            Assert.AreEqual(b.ToSQLiteValue().ToInt(), b);
+            Assert.Equal(b.ToSQLiteValue().ToInt(), b);
 
             char c = 'c';
-            Assert.AreEqual(c.ToSQLiteValue().ToInt(), (long) c);
+            Assert.Equal(c.ToSQLiteValue().ToInt(), (long) c);
 
             sbyte sb = 8;
-            Assert.AreEqual(sb.ToSQLiteValue().ToInt(), sb);
+            Assert.Equal(sb.ToSQLiteValue().ToInt(), sb);
 
             uint u = 8;
-            Assert.AreEqual(u.ToSQLiteValue().ToInt(), u);
+            Assert.Equal(u.ToSQLiteValue().ToUInt32(), u);
         }
 
-        [Test]
+        [Fact]
         public void TestNullValue()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -107,7 +106,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestFloatValue()
         {
             double[] tests =
@@ -138,9 +137,9 @@ namespace SQLitePCL.pretty.tests
                         Assert.Throws<NotSupportedException>(() => { result.ToString(); });
                         Assert.Throws<NotSupportedException>(() => { result.ToBlob(); });
 
-                        Assert.AreEqual(expected.SQLiteType, result.SQLiteType);
-                        Assert.AreEqual(expected.ToInt64(), result.ToInt64());
-                        Assert.AreEqual(expected.ToInt(), result.ToInt());
+                        Assert.Equal(expected.SQLiteType, result.SQLiteType);
+                        Assert.Equal(expected.ToInt64(), result.ToInt64());
+                        Assert.Equal(expected.ToInt(), result.ToInt());
                     }
 
                     db.Execute("DROP TABLE foo;");
@@ -148,7 +147,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestIntValue()
         {
             long[] tests =
@@ -178,7 +177,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestBlobValue()
         {
             string[] tests =
@@ -216,7 +215,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestZeroBlob()
         {
             int[] tests = { 0, 1, 2, 10 };
@@ -237,7 +236,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestStringValue()
         {
             string[] tests =
@@ -274,7 +273,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestResultSetValue()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -289,39 +288,39 @@ namespace SQLitePCL.pretty.tests
                     stmt.MoveNext();
                     var row = stmt.Current;
 
-                    Assert.AreEqual(row[0].ColumnInfo.DatabaseName, "main");
-                    Assert.AreEqual(row[0].ColumnInfo.TableName, "foo");
-                    Assert.AreEqual(row[0].ColumnInfo.OriginName, "w");
-                    Assert.AreEqual(row[0].ColumnInfo.Name, "w");
-                    Assert.AreEqual(row[0].SQLiteType, SQLiteType.Integer);
-                    Assert.AreEqual(row[0].ToInt(), 32);
+                    Assert.Equal(row[0].ColumnInfo.DatabaseName, "main");
+                    Assert.Equal(row[0].ColumnInfo.TableName, "foo");
+                    Assert.Equal(row[0].ColumnInfo.OriginName, "w");
+                    Assert.Equal(row[0].ColumnInfo.Name, "w");
+                    Assert.Equal(row[0].SQLiteType, SQLiteType.Integer);
+                    Assert.Equal(row[0].ToInt(), 32);
 
-                    Assert.AreEqual(row[1].ColumnInfo.DatabaseName, "main");
-                    Assert.AreEqual(row[1].ColumnInfo.TableName, "foo");
-                    Assert.AreEqual(row[1].ColumnInfo.OriginName, "x");
-                    Assert.AreEqual(row[1].ColumnInfo.Name, "x");
-                    Assert.AreEqual(row[1].SQLiteType, SQLiteType.Text);
-                    Assert.AreEqual(row[1].ToString(), "hello");
+                    Assert.Equal(row[1].ColumnInfo.DatabaseName, "main");
+                    Assert.Equal(row[1].ColumnInfo.TableName, "foo");
+                    Assert.Equal(row[1].ColumnInfo.OriginName, "x");
+                    Assert.Equal(row[1].ColumnInfo.Name, "x");
+                    Assert.Equal(row[1].SQLiteType, SQLiteType.Text);
+                    Assert.Equal(row[1].ToString(), "hello");
 
-                    Assert.AreEqual(row[2].ColumnInfo.DatabaseName, "main");
-                    Assert.AreEqual(row[2].ColumnInfo.TableName, "foo");
-                    Assert.AreEqual(row[2].ColumnInfo.OriginName, "y");
-                    Assert.AreEqual(row[2].ColumnInfo.Name, "y");
-                    Assert.AreEqual(row[2].SQLiteType, SQLiteType.Float);
-                    Assert.AreEqual(row[2].ToDouble(), 3.14);
+                    Assert.Equal(row[2].ColumnInfo.DatabaseName, "main");
+                    Assert.Equal(row[2].ColumnInfo.TableName, "foo");
+                    Assert.Equal(row[2].ColumnInfo.OriginName, "y");
+                    Assert.Equal(row[2].ColumnInfo.Name, "y");
+                    Assert.Equal(row[2].SQLiteType, SQLiteType.Float);
+                    Assert.Equal(row[2].ToDouble(), 3.14);
 
-                    Assert.AreEqual(row[3].ColumnInfo.DatabaseName, "main");
-                    Assert.AreEqual(row[3].ColumnInfo.TableName, "foo");
-                    Assert.AreEqual(row[3].ColumnInfo.OriginName, "z");
-                    Assert.AreEqual(row[3].ColumnInfo.Name, "z");
-                    Assert.AreEqual(row[3].SQLiteType, SQLiteType.Blob);
-                    CollectionAssert.AreEqual(row[3].ToBlob(), blob);
+                    Assert.Equal(row[3].ColumnInfo.DatabaseName, "main");
+                    Assert.Equal(row[3].ColumnInfo.TableName, "foo");
+                    Assert.Equal(row[3].ColumnInfo.OriginName, "z");
+                    Assert.Equal(row[3].ColumnInfo.Name, "z");
+                    Assert.Equal(row[3].SQLiteType, SQLiteType.Blob);
+                    Assert.Equal(row[3].ToBlob(), blob);
 
-                    Assert.AreEqual(row[4].ColumnInfo.DatabaseName, "main");
-                    Assert.AreEqual(row[4].ColumnInfo.TableName, "foo");
-                    Assert.AreEqual(row[4].ColumnInfo.OriginName, "n");
-                    Assert.AreEqual(row[4].ColumnInfo.Name, "n");
-                    Assert.AreEqual(row[4].SQLiteType, SQLiteType.Null);
+                    Assert.Equal(row[4].ColumnInfo.DatabaseName, "main");
+                    Assert.Equal(row[4].ColumnInfo.TableName, "foo");
+                    Assert.Equal(row[4].ColumnInfo.OriginName, "n");
+                    Assert.Equal(row[4].ColumnInfo.Name, "n");
+                    Assert.Equal(row[4].SQLiteType, SQLiteType.Null);
                 }
 
                 using (var stmt = db.PrepareStatement("SELECT w AS mario FROM foo;"))
@@ -329,8 +328,8 @@ namespace SQLitePCL.pretty.tests
                     stmt.MoveNext();
                     var row = stmt.Current;
 
-                    Assert.AreEqual(row[0].ColumnInfo.OriginName, "w");
-                    Assert.AreEqual(row[0].ColumnInfo.Name, "mario");
+                    Assert.Equal(row[0].ColumnInfo.OriginName, "w");
+                    Assert.Equal(row[0].ColumnInfo.Name, "mario");
                 }
             }
         }

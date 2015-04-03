@@ -1,12 +1,11 @@
-﻿using NUnit.Framework;
+﻿using Xunit;
 using System;
 
 namespace SQLitePCL.pretty.tests
 {
-    [TestFixture]
     public class TableColumnMetadataTests
     {
-        [Test]
+        [Fact]
         public void TestEquality()
         {
             Tuple<string, string, bool, bool, bool>[] tests =
@@ -33,13 +32,13 @@ namespace SQLitePCL.pretty.tests
                     {
                         Assert.True(fst.Equals(fst));
                         Assert.True(snd.Equals(snd));
-                        Assert.AreEqual(fst, snd);
+                        Assert.Equal(fst, snd);
                         Assert.True(fst == snd);
                         Assert.False(fst != snd);
                     }
                     else
                     {
-                        Assert.AreNotEqual(fst, snd);
+                        Assert.NotEqual(fst, snd);
                         Assert.False(fst == snd);
                         Assert.True(fst != snd);
                     }
@@ -47,7 +46,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestGetHashcode()
         {
             Tuple<string, string, bool, bool, bool>[] tests =
@@ -65,11 +64,11 @@ namespace SQLitePCL.pretty.tests
                 var fst = new TableColumnMetadata(test.Item1, test.Item2, test.Item3, test.Item4, test.Item5);
                 var snd = new TableColumnMetadata(test.Item1, test.Item2, test.Item3, test.Item4, test.Item5);
 
-                Assert.AreEqual(fst.GetHashCode(), snd.GetHashCode());
+                Assert.Equal(fst.GetHashCode(), snd.GetHashCode());
             }
         }
 
-        [Test]
+        [Fact]
         public void TestComparison()
         {
             TableColumnMetadata[] tests =
@@ -88,8 +87,8 @@ namespace SQLitePCL.pretty.tests
                 {
                     if (i < j)
                     {
-                        Assert.Less(tests[i].CompareTo(tests[j]), 0);
-                        Assert.Less(((IComparable)tests[i]).CompareTo(tests[j]), 0);
+                        Assert.True(tests[i].CompareTo(tests[j]) < 0);
+                        Assert.True(((IComparable)tests[i]).CompareTo(tests[j]) < 0);
 
                         Assert.True(tests[i] < tests[j]);
                         Assert.True(tests[i] <= tests[j]);
@@ -98,8 +97,8 @@ namespace SQLitePCL.pretty.tests
                     }
                     else if (i == j)
                     {
-                        Assert.AreEqual(tests[i].CompareTo(tests[j]), 0);
-                        Assert.AreEqual(((IComparable)tests[i]).CompareTo(tests[j]), 0);
+                        Assert.Equal(tests[i].CompareTo(tests[j]), 0);
+                        Assert.Equal(((IComparable)tests[i]).CompareTo(tests[j]), 0);
 
                         Assert.True(tests[i] >= tests[j]);
                         Assert.True(tests[i] <= tests[j]);
@@ -108,8 +107,8 @@ namespace SQLitePCL.pretty.tests
                     }
                     else
                     {
-                        Assert.Greater(tests[i].CompareTo(tests[j]), 0);
-                        Assert.Greater(((IComparable)tests[i]).CompareTo(tests[j]), 0);
+                        Assert.True(tests[i].CompareTo(tests[j]) > 0);
+                        Assert.True(((IComparable)tests[i]).CompareTo(tests[j]) > 0);
 
                         Assert.True(tests[i] > tests[j]);
                         Assert.True(tests[i] >= tests[j]);
@@ -120,10 +119,10 @@ namespace SQLitePCL.pretty.tests
             }
 
             TableColumnMetadata nullColumnInfo = null;
-            Assert.AreEqual(new TableColumnMetadata("", "", false, false, false).CompareTo(nullColumnInfo), 1);
+            Assert.Equal(new TableColumnMetadata("", "", false, false, false).CompareTo(nullColumnInfo), 1);
 
             object nullObj = null;
-            Assert.AreEqual(((IComparable)new TableColumnMetadata("", "", false, false, false)).CompareTo(nullObj), 1);
+            Assert.Equal(((IComparable)new TableColumnMetadata("", "", false, false, false)).CompareTo(nullObj), 1);
         }
     }
 }

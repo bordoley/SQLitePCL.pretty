@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+﻿using Xunit;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,10 +12,9 @@ using Ignore = SQLitePCL.pretty.Orm.Attributes.IgnoreAttribute;
 
 namespace SQLitePCL.pretty.tests
 {
-    [TestFixture]
     public partial class TableMappingTests
     {
-        [Test]
+        [Fact]
         public async Task TestDeleteAllAsync()
         {
             var orm = Orm.ResultSet.RowToObject(
@@ -36,10 +35,10 @@ namespace SQLitePCL.pretty.tests
                 var notDeleted = await db.Use(x => x.InsertOrReplace(new TestObject.Builder() { Value = "NotDeleted" }.Build(), orm));
                 var inserted = await db.InsertOrReplaceAllAsync(objects, orm);
                 var deleted = await db.DeleteAllAsync(inserted.Values.Select(x => x.Id.Value), orm);
-                CollectionAssert.AreEquivalent(inserted.Values, deleted.Values);
+                Assert.Equal(inserted.Values, deleted.Values);
 
                 var found = await db.FindAllAsync(inserted.Values.Select(x => x.Id.Value), orm);
-                Assert.IsEmpty(found);
+                Assert.Empty(found);
 
                 await db.Use(x =>
                     {
@@ -47,7 +46,7 @@ namespace SQLitePCL.pretty.tests
                         
                         if (x.TryFind(notDeleted.Id.Value, orm, out found2))
                         {
-                            Assert.AreEqual(found2, notDeleted);
+                            Assert.Equal(found2, notDeleted);
                         }
                     });
 
@@ -56,12 +55,12 @@ namespace SQLitePCL.pretty.tests
                 await db.Use(x =>
                     {
                         TestObject notFound;
-                        Assert.IsFalse(x.TryFind(notDeleted.Id.Value, orm, out notFound));
+                        Assert.False(x.TryFind(notDeleted.Id.Value, orm, out notFound));
                     });
             }
         }
 
-        [Test]
+        [Fact]
         public async Task TestDropTableAsync()
         {
             using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
@@ -76,12 +75,12 @@ namespace SQLitePCL.pretty.tests
 
                 await db.InitTableAsync<TestObject>();
                 var count = await db.Query(tableLookup).Count();
-                Assert.Greater(count, 0);
+                Assert.True(count > 0);
 
                 await db.DropTableIfExistsAsync<TestObject>();
 
                 count = await db.Query(tableLookup).Count();
-                Assert.AreEqual(count, 0);
+                Assert.Equal(count, 0);
             }
         }
     }

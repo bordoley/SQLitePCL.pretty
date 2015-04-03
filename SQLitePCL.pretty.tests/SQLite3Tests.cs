@@ -15,39 +15,38 @@
    limitations under the License.
 */
 
-using NUnit.Framework;
+using Xunit;
 
 namespace SQLitePCL.pretty.tests
 {
-    [TestFixture]
     public class SQLite3Tests
     {
-        [Test]
+        [Fact]
         public void TestCompileOptions()
         {
             foreach (var opt in SQLite3.CompilerOptions)
             {
                 bool used = SQLite3.CompileOptionUsed(opt);
-                Assert.IsTrue(used);
+                Assert.True(used);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestMemory()
         {
             using (var db = SQLite3.OpenInMemory())
             {
                 db.Execute("CREATE TABLE foo (x int);");
 
-                Assert.IsTrue(SQLite3.MemoryUsed > 0);
-                Assert.IsTrue(SQLite3.MemoryHighWater >= SQLite3.MemoryUsed);
+                Assert.True(SQLite3.MemoryUsed > 0);
+                Assert.True(SQLite3.MemoryHighWater >= SQLite3.MemoryUsed);
 
                 SQLite3.ResetMemoryHighWater();
-                Assert.AreEqual(SQLite3.MemoryUsed, SQLite3.MemoryHighWater);
+                Assert.Equal(SQLite3.MemoryUsed, SQLite3.MemoryHighWater);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestOpen()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -61,38 +60,38 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestIsCompleteStatement()
         {
             using (var db = SQLite3.OpenInMemory())
             {
-                Assert.IsFalse(SQLite3.IsCompleteStatement("SELECT x FROM"));
-                Assert.IsFalse(SQLite3.IsCompleteStatement("SELECT"));
-                Assert.IsFalse(SQLite3.IsCompleteStatement("INSERT INTO"));
-                Assert.IsFalse(SQLite3.IsCompleteStatement("SELECT x FROM foo"));
+                Assert.False(SQLite3.IsCompleteStatement("SELECT x FROM"));
+                Assert.False(SQLite3.IsCompleteStatement("SELECT"));
+                Assert.False(SQLite3.IsCompleteStatement("INSERT INTO"));
+                Assert.False(SQLite3.IsCompleteStatement("SELECT x FROM foo"));
 
-                Assert.IsTrue(SQLite3.IsCompleteStatement("SELECT x FROM foo;"));
-                Assert.IsTrue(SQLite3.IsCompleteStatement("SELECT COUNT(*) FROM foo;"));
-                Assert.IsTrue(SQLite3.IsCompleteStatement("SELECT 5;"));
+                Assert.True(SQLite3.IsCompleteStatement("SELECT x FROM foo;"));
+                Assert.True(SQLite3.IsCompleteStatement("SELECT COUNT(*) FROM foo;"));
+                Assert.True(SQLite3.IsCompleteStatement("SELECT 5;"));
             }
         }
 
-        [Test]
+        [Fact]
         public void TestSourceId()
         {
             string sourceid = SQLite3.SourceId;
-            Assert.IsTrue(sourceid != null);
-            Assert.IsTrue(sourceid.Length > 0);
+            Assert.True(sourceid != null);
+            Assert.True(sourceid.Length > 0);
         }
 
-        [Test]
+        [Fact]
         public void TestVersion()
         {
             var version = SQLite3.Version;
-            Assert.AreEqual(version.Major, 3);
+            Assert.Equal(version.Major, 3);
         }
 
-        [Test]
+        [Fact]
         public void TestStatus()
         {
             using (var db = SQLite3.OpenInMemory())
@@ -101,12 +100,12 @@ namespace SQLitePCL.pretty.tests
                 int highwater;
                 SQLite3.Status(SQLiteStatusCode.MemoryUsed, out current, out highwater, false);
 
-                Assert.IsTrue(current > 0);
-                Assert.IsTrue(highwater > 0);
+                Assert.True(current > 0);
+                Assert.True(highwater > 0);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestEnableSharedCache()
         { 
             SQLite3.EnableSharedCache = true;

@@ -5,11 +5,10 @@ using SQLitePCL.pretty;
 using SQLitePCL.pretty.Orm;
 using SQLitePCL.pretty.Orm.Attributes;
 
-using NUnit.Framework;
+using Xunit;
 
 namespace SQLitePCL.pretty.tests
 {
-    [TestFixture]
     public partial class SqlQueryTests
     {
         public class TestObject
@@ -21,7 +20,7 @@ namespace SQLitePCL.pretty.tests
             public String Name { get; set; }
         }
 
-        [Test]
+        [Fact]
         public void TestWhereGreaterThanPropertyValue()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();
@@ -35,11 +34,11 @@ namespace SQLitePCL.pretty.tests
                 var aTuple = Tuple.Create("key", 1);
                 var query = SqlQuery.From<TestObject>().Select().Where(x => x.Cost <= aTuple.Item2);
 
-                Assert.AreEqual(db.Query(query).Select(orm).Count(), 1);
+                Assert.Equal(db.Query(query).Select(orm).Count(), 1);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWhereLessThanConstant()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();
@@ -52,11 +51,11 @@ namespace SQLitePCL.pretty.tests
 
                 var query = SqlQuery.From<TestObject>().Select().Where(x => x.Cost < 5);
 
-                Assert.AreEqual(db.Query(query).Select(orm).Count(), 1);
+                Assert.Equal(db.Query(query).Select(orm).Count(), 1);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWhereLessThanOrEqualToBindParam()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();
@@ -70,13 +69,13 @@ namespace SQLitePCL.pretty.tests
 
                 var query = SqlQuery.From<TestObject>().Select().Where<int>((x, cost) => x.Cost <= cost);
 
-                Assert.AreEqual(db.Query(query, 6).Select(orm).Count(), 2);
-                Assert.AreEqual(db.Query(query, 5).Select(orm).Count(), 1);
-                Assert.AreEqual(db.Query(query, 7).Select(orm).Count(), 3);
+                Assert.Equal(db.Query(query, 6).Select(orm).Count(), 2);
+                Assert.Equal(db.Query(query, 5).Select(orm).Count(), 1);
+                Assert.Equal(db.Query(query, 7).Select(orm).Count(), 3);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWhereGreaterThanOrEqual()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();
@@ -90,13 +89,13 @@ namespace SQLitePCL.pretty.tests
 
                 var query = SqlQuery.From<TestObject>().Select().Where<int>((x, cost) => x.Cost >= cost);
 
-                Assert.AreEqual(db.Query(query, 6).Select(orm).Count(), 2);
-                Assert.AreEqual(db.Query(query, 5).Select(orm).Count(), 2);
-                Assert.AreEqual(db.Query(query, 7).Select(orm).Count(), 1);
+                Assert.Equal(db.Query(query, 6).Select(orm).Count(), 2);
+                Assert.Equal(db.Query(query, 5).Select(orm).Count(), 2);
+                Assert.Equal(db.Query(query, 7).Select(orm).Count(), 1);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWhereOr()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();
@@ -110,11 +109,11 @@ namespace SQLitePCL.pretty.tests
 
                 var query = SqlQuery.From<TestObject>().Select().Where(x => x.Cost == 0 || x.Flag == false);
 
-                Assert.AreEqual(db.Query(query).Select(orm).Count(), 3);
+                Assert.Equal(db.Query(query).Select(orm).Count(), 3);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestMultipleBindParams()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();
@@ -131,13 +130,13 @@ namespace SQLitePCL.pretty.tests
                          .Where<int, bool, string>((x, cost, flag, name) => 
                             x.Cost > cost && x.Flag == flag && x.Name.IsNot(name));
 
-                Assert.AreEqual(db.Query(query, 0, false, null).Select(orm).Count(), 0);
-                Assert.AreEqual(db.Query(query, 0, true, null).Select(orm).Count(), 1);
-                Assert.AreEqual(db.Query(query, -1, true, null).Select(orm).Count(), 2);
+                Assert.Equal(db.Query(query, 0, false, null).Select(orm).Count(), 0);
+                Assert.Equal(db.Query(query, 0, true, null).Select(orm).Count(), 1);
+                Assert.Equal(db.Query(query, -1, true, null).Select(orm).Count(), 2);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestMultipleBindParamsBoundByName()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();
@@ -160,12 +159,12 @@ namespace SQLitePCL.pretty.tests
                     stmt.BindParameters[":flag"].Bind(true);
                     stmt.BindParameters[":name"].BindNull();
 
-                    Assert.AreEqual(stmt.Query().Count(), 1);
+                    Assert.Equal(stmt.Query().Count(), 1);
                 }
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWhereContains()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();
@@ -179,11 +178,11 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(new TestObject() { Name = "Boo" }, orm);
 
                 var query = SqlQuery.From<TestObject>().Select().Where(x => x.Name.Contains("bob"));
-                Assert.AreEqual(db.Query(query).Count(), 3);
+                Assert.Equal(db.Query(query).Count(), 3);
             }
         } 
 
-        [Test]
+        [Fact]
         public void TestWhereStartsWith()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();
@@ -197,11 +196,11 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(new TestObject() { Name = "Boo" }, orm);
 
                 var query = SqlQuery.From<TestObject>().Select().Where(x => x.Name.StartsWith("bo"));
-                Assert.AreEqual(db.Query(query).Count(), 3);
+                Assert.Equal(db.Query(query).Count(), 3);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWhereEndsWith()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();
@@ -215,11 +214,11 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(new TestObject() { Name = "Boo" }, orm);
 
                 var query = SqlQuery.From<TestObject>().Select().Where(x => x.Name.EndsWith("ob"));
-                Assert.AreEqual(db.Query(query).Count(), 2);
+                Assert.Equal(db.Query(query).Count(), 2);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWhereEndsIsNull()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();
@@ -231,11 +230,11 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(new TestObject() { Cost = 100, Name = "Bob" }, orm);
 
                 var query = SqlQuery.From<TestObject>().Select().Where(x => x.Name.Is(null));
-                Assert.AreEqual(db.Query(query).Count(), 1);
+                Assert.Equal(db.Query(query).Count(), 1);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWhereEndsIsNotNull()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();
@@ -247,11 +246,11 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(new TestObject() { Cost = 100, Name = "Bob" }, orm);
 
                 var query = SqlQuery.From<TestObject>().Select().Where(x => x.Name.IsNot(null));
-                Assert.AreEqual(db.Query(query).Count(), 1);
+                Assert.Equal(db.Query(query).Count(), 1);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWhereEqual()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();
@@ -263,11 +262,11 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(new TestObject() { Cost = 100, Name = "Bob" }, orm);
 
                 var query = SqlQuery.From<TestObject>().Select().Where(x => x.Name.Equals("Bob"));
-                Assert.AreEqual(db.Query(query).Count(), 1);
+                Assert.Equal(db.Query(query).Count(), 1);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWhereNot()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();
@@ -279,11 +278,11 @@ namespace SQLitePCL.pretty.tests
                 db.InsertOrReplace(new TestObject() { Flag = false}, orm);
 
                 var query = SqlQuery.From<TestObject>().Select().Where<bool>((x, y) => x.Flag == !y);
-                Assert.AreEqual(db.Query(query, true).Count(), 1);
+                Assert.Equal(db.Query(query, true).Count(), 1);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestOrderBy()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();
@@ -305,13 +304,13 @@ namespace SQLitePCL.pretty.tests
                         {
                             if (obj.Cost > acc.Cost)
                             {
-                                Assert.IsTrue(obj.Flag);
-                                Assert.IsFalse(acc.Flag);
+                                Assert.True(obj.Flag);
+                                Assert.False(acc.Flag);
                             }
                             else
                             {
-                                Assert.IsFalse(obj.Flag);
-                                Assert.IsTrue(acc.Flag);
+                                Assert.False(obj.Flag);
+                                Assert.True(acc.Flag);
                             }
                             return obj;
                         });
@@ -319,7 +318,7 @@ namespace SQLitePCL.pretty.tests
             }
         }
 
-        [Test]
+        [Fact]
         public void TestElementAt()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();
@@ -336,12 +335,12 @@ namespace SQLitePCL.pretty.tests
 
                 var query = SqlQuery.From<TestObject>().Select().OrderBy(x => x.Cost).ThenBy(x => x.Flag).ElementAt(3);
                 var result = db.Query(query).Select(orm).First();
-                Assert.AreEqual(result.Cost, 1);
-                Assert.AreEqual(result.Flag, true);
+                Assert.Equal(result.Cost, 1);
+                Assert.Equal(result.Flag, true);
             }
         }
 
-        [Test]
+        [Fact]
         public void TestWhereWithCast()
         {
             var orm = Orm.ResultSet.RowToObject<TestObject>();
@@ -354,40 +353,8 @@ namespace SQLitePCL.pretty.tests
 
                 object falsey = false;
                 var query = SqlQuery.From<TestObject>().Select().Where(x => x.Flag == (bool) falsey);
-                Assert.AreEqual(db.Query(query).Count(), 2);
+                Assert.Equal(db.Query(query).Count(), 2);
             }
-        }
-
-        public class TestObject2
-        {
-            [PrimaryKey]
-            public long? Id { get; set; }
-            public bool Flag { get; set; }
-            public int Cost { get; set;}
-            public String Name { get; set; }
-        }
-
-        [Test]
-        public void MultiTableSelect()
-        {
-            var query =
-                SqlQuery.From<TestObject, TestObject2>()
-                        .Select()
-                        .Where((t1, t2) =>
-                            t1.Name == t2.Name)
-                        .OrderBy((t1, t2) => t1.Name)
-                        .ThenBy((t1, t2) => t2.Name)
-                        .Take(5)
-                        .Skip(1);
-            Console.WriteLine(query);
-            Console.WriteLine();
-
-
-            var query2 =
-                SqlQuery.From<TestObject>()
-                        .LeftJoin<TestObject2>((t1, t2) => t1.Name == t2.Name)
-                        .Select();
-            Console.WriteLine(query2);
         }
     }
 }
