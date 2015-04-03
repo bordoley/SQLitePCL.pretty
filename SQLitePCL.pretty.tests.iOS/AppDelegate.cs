@@ -27,16 +27,10 @@ namespace SQLitePCL.pretty.tests.iOS
         //
         public override bool FinishedLaunching(UIApplication app, NSDictionary options)
         {
-            AddTestAssembly(typeof(SQLitePCL.pretty.tests.SQLiteDatabaseConnectionTests).Assembly);
+            // We need this to ensure the execution assembly is part of the app bundle
+            AddExecutionAssembly(typeof(ExtensibilityPointFactory).Assembly);
 
-#if false
-			// you can use the default or set your own custom writer (e.g. save to web site and tweet it ;-)
-			Writer = new TcpTextWriter ("10.0.1.2", 16384);
-			// start running the test suites as soon as the application is loaded
-			AutoStart = true;
-			// crash the application (to ensure it's ended) and return to springboard
-			TerminateAfterExecution = true;
-#endif
+            AddTestAssembly(typeof(SQLitePCL.pretty.tests.SQLiteDatabaseConnectionTests).Assembly);
             return base.FinishedLaunching(app, options);
 		}
     }
