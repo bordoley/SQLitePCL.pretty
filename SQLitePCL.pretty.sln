@@ -16,7 +16,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLitePCL.pretty.Orm", "SQL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLitePCL.pretty.tests.Android", "SQLitePCL.pretty.tests.Android\SQLitePCL.pretty.tests.Android.csproj", "{A3278FF6-0B65-482E-AE3E-7AEF33C4F25C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLitePCL.pretty.Tests", "SQLitePCL.pretty.Tests\SQLitePCL.pretty.Tests.csproj", "{3C8B2558-E287-4031-8597-14480A15ED0E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLitePCL.pretty.tests", "SQLitePCL.pretty.tests\SQLitePCL.pretty.tests.csproj", "{3C8B2558-E287-4031-8597-14480A15ED0E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLitePCL.pretty.tests.iOS", "SQLitePCL.pretty.tests.iOS\SQLitePCL.pretty.tests.iOS.csproj", "{641DDEDB-D0E6-47B9-A96E-5567B8D79244}"
 EndProject

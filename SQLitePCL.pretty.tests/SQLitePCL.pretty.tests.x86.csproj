@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\xunit.runner.visualstudio.2.0.0\build\net20\xunit.runner.visualstudio.props" Condition="Exists('..\packages\xunit.runner.visualstudio.2.0.0\build\net20\xunit.runner.visualstudio.props')" />
   <Import Project="..\packages\xunit.core.2.1.0-beta1-build2945\build\portable-net45+aspnetcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS\xunit.core.props" Condition="Exists('..\packages\xunit.core.2.1.0-beta1-build2945\build\portable-net45+aspnetcore50+win+wpa81+wp80+monotouch+monoandroid+Xamarin.iOS\xunit.core.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -8,7 +9,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>SQLitePCL.pretty.tests.x86</RootNamespace>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <NuGetPackageImportStamp>63f1c1ac</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>4e4e7804</NuGetPackageImportStamp>
     <AssemblyName>SQLitePCL.pretty.tests</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -48,24 +49,25 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="columninfotests.cs" />
-    <Compile Include="databaseconnectiontests.cs" />
-    <Compile Include="implementationtests.cs" />
-    <Compile Include="prettytests.cs" />
-    <Compile Include="resultset.cs" />
-    <Compile Include="sqlite3tests.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ColumnInfoTests.cs" />
+    <Compile Include="DatabaseConnectionTests.cs" />
+    <Compile Include="ImplementationTests.cs" />
+    <Compile Include="prettyTests.cs" />
+    <Compile Include="ResultSet.cs" />
+    <Compile Include="SQLite3Tests.cs" />
     <Compile Include="SQLiteValueTests.cs" />
-    <Compile Include="sqliteversiontests.cs" />
-    <Compile Include="tablecolumnmetadatatests.cs" />
-    <Compile Include="OrmTests\querytests.cs" />
-    <Compile Include="OrmTests\querytests.joins.cs" />
+    <Compile Include="SQLiteVersionTests.cs" />
+    <Compile Include="TableColumnMetadataTests.cs" />
+    <Compile Include="OrmTests\QueryTests.cs" />
+    <Compile Include="OrmTests\QueryTests.Joins.cs" />
     <Compile Include="OrmTests\TableMappingTest.Async.cs" />
     <Compile Include="OrmTests\TableMappingTests.Create.cs" />
-    <Compile Include="OrmTests\tablemappingtests.sync.cs" />
-    <Compile Include="AsyncTests\asyncblobstreamtests.cs" />
+    <Compile Include="OrmTests\TableMappingTests.sync.cs" />
+    <Compile Include="AsyncTests\AsyncBlobStreamTests.cs" />
     <Compile Include="AsyncTests\AsyncDatabaseConnectionTests.cs" />
-    <Compile Include="AsyncTests\asyncstatementtests.cs" />
-    <Compile Include="AsyncTests\resultset.cs" />
+    <Compile Include="AsyncTests\AsyncStatementTests.cs" />
+    <Compile Include="AsyncTests\ResultSet.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -117,4 +119,10 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\xunit.runner.visualstudio.2.0.0\build\net20\xunit.runner.visualstudio.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\xunit.runner.visualstudio.2.0.0\build\net20\xunit.runner.visualstudio.props'))" />
+  </Target>
 </Project>

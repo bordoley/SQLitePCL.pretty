@@ -6,7 +6,7 @@
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <ProjectGuid>{3C8B2558-E287-4031-8597-14480A15ED0E}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>SQLitePCL.pretty.Tests</RootNamespace>
+    <RootNamespace>SQLitePCL.pretty.tests</RootNamespace>
     <AssemblyName>SQLitePCL.pretty.tests</AssemblyName>
     <TargetFrameworkProfile>Profile259</TargetFrameworkProfile>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
@@ -31,24 +31,24 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="columninfotests.cs" />
-    <Compile Include="databaseconnectiontests.cs" />
-    <Compile Include="implementationtests.cs" />
-    <Compile Include="prettytests.cs" />
-    <Compile Include="resultset.cs" />
-    <Compile Include="sqlite3tests.cs" />
+    <Compile Include="ColumnInfoTests.cs" />
+    <Compile Include="DatabaseConnectionTests.cs" />
+    <Compile Include="ImplementationTests.cs" />
+    <Compile Include="prettyTests.cs" />
+    <Compile Include="ResultSet.cs" />
+    <Compile Include="SQLite3Tests.cs" />
     <Compile Include="SQLiteValueTests.cs" />
-    <Compile Include="sqliteversiontests.cs" />
-    <Compile Include="tablecolumnmetadatatests.cs" />
-    <Compile Include="OrmTests\querytests.cs" />
-    <Compile Include="OrmTests\querytests.joins.cs" />
+    <Compile Include="SQLiteVersionTests.cs" />
+    <Compile Include="TableColumnMetadataTests.cs" />
+    <Compile Include="OrmTests\QueryTests.cs" />
+    <Compile Include="OrmTests\QueryTests.Joins.cs" />
     <Compile Include="OrmTests\TableMappingTest.Async.cs" />
     <Compile Include="OrmTests\TableMappingTests.Create.cs" />
-    <Compile Include="OrmTests\tablemappingtests.sync.cs" />
-    <Compile Include="AsyncTests\asyncblobstreamtests.cs" />
+    <Compile Include="OrmTests\TableMappingTests.sync.cs" />
+    <Compile Include="AsyncTests\AsyncBlobStreamTests.cs" />
     <Compile Include="AsyncTests\AsyncDatabaseConnectionTests.cs" />
-    <Compile Include="AsyncTests\asyncstatementtests.cs" />
-    <Compile Include="AsyncTests\resultset.cs" />
+    <Compile Include="AsyncTests\AsyncStatementTests.cs" />
+    <Compile Include="AsyncTests\ResultSet.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Reactive.Core">
