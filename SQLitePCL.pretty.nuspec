@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>SQLitePCL.pretty</id>
-    <version>0.0.12-pre6</version>
+    <version>0.0.12</version>
     <title>SQLitePCL.pretty</title>
     <authors>David Bordoley</authors>
     <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
@@ -19,7 +19,7 @@ A simple table mapped ORM is also available. See https://www.nuget.org/packages/
       <reference file="SQLitePCL.pretty.dll" />
     </references>
     <dependencies>
-      <dependency id="SQLitePCL.raw" version="0.8.0-pre1" />
+      <dependency id="SQLitePCL.raw" version="0.8.0" />
     </dependencies>
   </metadata>
   <files>
