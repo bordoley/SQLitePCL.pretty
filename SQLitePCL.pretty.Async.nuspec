@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>SQLitePCL.pretty.Async</id>
-    <version>0.0.12/version>
+    <version>0.0.12</version>
     <title>SQLitePCL.pretty.Async</title>
     <authors>David Bordoley</authors>
     <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
