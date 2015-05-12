@@ -156,10 +156,8 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <returns>A <see cref="SQLiteDatabaseConnection"/> instance.</returns>
         /// <seealso href="https://sqlite.org/c3ref/open.html"/>
-        public static SQLiteDatabaseConnection OpenInMemory()
-        {
-            return SQLite3.Open(":memory:");
-        }
+        public static SQLiteDatabaseConnection OpenInMemory() =>
+            SQLite3.Open(":memory:");
 
         /// <summary>
         /// Opens a SQLite database.
@@ -188,10 +186,8 @@ namespace SQLitePCL.pretty
         /// Reset the memory high-water mark to the current value of <see cref="MemoryUsed"/>.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/memory_highwater.html"/>
-        public static void ResetMemoryHighWater()
-        {
+        public static void ResetMemoryHighWater() =>
             raw.sqlite3_memory_highwater(1);
-        }
 
         /// <summary>
         /// Determines if the text provided forms a complete SQL statement.

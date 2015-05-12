@@ -1,4 +1,4 @@
-﻿﻿using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 
 // A trivial cons list implementation
@@ -6,10 +6,8 @@ namespace SQLitePCL.pretty
 {
     internal static class Stack
     {
-        public static bool IsEmpty<T>(this Stack<T> stack)
-        {
-            return (stack.Head == null) && (stack.Tail == null);
-        }
+        public static bool IsEmpty<T>(this Stack<T> stack) =>
+            (stack.Head == null) && (stack.Tail == null);
     }
 
     internal sealed class Stack<T>
@@ -43,9 +41,7 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public Stack<T> Push(T element)
-        {
-            return new Stack<T>(element, this);
-        }
+        public Stack<T> Push(T element) => 
+            new Stack<T>(element, this);
     }
 }

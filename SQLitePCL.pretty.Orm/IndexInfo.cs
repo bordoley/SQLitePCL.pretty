@@ -31,29 +31,24 @@ namespace SQLitePCL.pretty.Orm
         /// <param name="x">A IndexInfo instance.</param>
         /// <param name="y">A IndexInfo instance.</param>
         /// <returns><see langword="true"/> if the two instances are not equal to each other; otherwise,  <see langword="false"/>.</returns>
-        public static bool operator !=(IndexInfo x, IndexInfo y)
-        {
-            return !(x == y);
-        }
-
-        private readonly bool unique;
-        private readonly IReadOnlyList<string> columns;
+        public static bool operator !=(IndexInfo x, IndexInfo y) =>
+            !(x == y);
 
         internal IndexInfo(bool unique, IReadOnlyList<string> columns)
         {
-            this.unique = unique;
-            this.columns = columns;
+            this.Unique = unique;
+            this.Columns = columns;
         }
 
         /// <summary>
         /// Whether the index is unique or not.
         /// </summary>
-        public bool Unique { get { return unique; } }
+        public bool Unique { get; }
 
         /// <summary>
         /// The columns that compose the index in order.
         /// </summary>
-        public IEnumerable<string> Columns { get { return columns; } }
+        public IEnumerable<string> Columns { get; }
 
         /// <summary>
         /// Determines whether the specified <see cref="SQLitePCL.pretty.Orm.IndexInfo"/> is equal to the current <see cref="SQLitePCL.pretty.Orm.IndexInfo"/>.
@@ -61,12 +56,10 @@ namespace SQLitePCL.pretty.Orm
         /// <param name="other">The <see cref="SQLitePCL.pretty.Orm.IndexInfo"/> to compare with the current <see cref="SQLitePCL.pretty.Orm.IndexInfo"/>.</param>
         /// <returns><c>true</c> if the specified <see cref="SQLitePCL.pretty.Orm.IndexInfo"/> is equal to the current
         /// <see cref="SQLitePCL.pretty.Orm.IndexInfo"/>; otherwise, <c>false</c>.</returns>
-        public bool Equals(IndexInfo other)
-        {
-            return (this.Unique == other.Unique) &&
+        public bool Equals(IndexInfo other) =>
+            (this.Unique == other.Unique) &&
                 // FIXME: Ideally we use immutable lists that implement correct equality semantics
                 (this.Columns.SequenceEqual(other.Columns));
-        }
 
         /// <summary>
         /// Determines whether the specified <see cref="System.Object"/> is equal to the current <see cref="SQLitePCL.pretty.Orm.IndexInfo"/>.
@@ -74,10 +67,8 @@ namespace SQLitePCL.pretty.Orm
         /// <param name="other">The <see cref="System.Object"/> to compare with the current <see cref="SQLitePCL.pretty.Orm.IndexInfo"/>.</param>
         /// <returns><c>true</c> if the specified <see cref="System.Object"/> is equal to the current
         /// <see cref="SQLitePCL.pretty.Orm.IndexInfo"/>; otherwise, <c>false</c>.</returns>
-        public override bool Equals(object other)
-        {
-            return other is IndexInfo && this == (IndexInfo)other;
-        }
+        public override bool Equals(object other) =>
+            other is IndexInfo && this == (IndexInfo)other;
 
         /// <summary>
         /// Serves as a hash function for a <see cref="SQLitePCL.pretty.Orm.IndexInfo"/> object.
@@ -101,10 +92,8 @@ namespace SQLitePCL.pretty.Orm
         /// Returns a <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.IndexInfo"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.IndexInfo"/>.</returns>
-        public override string ToString()
-        {
-            return string.Format("[IndexInfo: Unique={0}, Columns={1}", this.Unique, string.Join(", ", this.Columns));
-        }
+        public override string ToString() =>
+            string.Format("[IndexInfo: Unique={0}, Columns={1}", this.Unique, string.Join(", ", this.Columns));
     }
 }
 

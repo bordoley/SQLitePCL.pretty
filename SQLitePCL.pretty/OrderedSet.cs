@@ -33,15 +33,11 @@ namespace SQLitePCL.pretty
             list.Clear();
         }
 
-        public bool Contains(T item)
-        {
-            return set.ContainsKey(item);
-        }
+        public bool Contains(T item) =>
+            set.ContainsKey(item);
 
-        public void CopyTo(T[] array, int arrayIndex)
-        {
+        public void CopyTo(T[] array, int arrayIndex) =>
             list.CopyTo(array, arrayIndex);
-        }
 
         public int Count
         {
@@ -64,19 +60,13 @@ namespace SQLitePCL.pretty
             return false;
         }
 
-        public IEnumerable<T> Reverse()
-        {
-            return new DelegatingEnumerable<T>(() => Reverse(this.list));
-        }
+        public IEnumerable<T> Reverse() =>
+            new DelegatingEnumerable<T>(() => Reverse(this.list));
 
-        public IEnumerator<T> GetEnumerator()
-        {
-            return this.list.GetEnumerator();
-        }
+        public IEnumerator<T> GetEnumerator() =>
+            this.list.GetEnumerator();
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() =>
+            this.GetEnumerator();
     }
 }

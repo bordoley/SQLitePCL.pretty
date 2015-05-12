@@ -11,23 +11,19 @@ namespace SQLitePCL.pretty.Orm.Sql
 {
     internal static partial class SqlCompiler
     {
-        private static string CompileSelectClause(this IEnumerable<Expression> This, bool distinct)
-        {
-            return "SELECT " + 
+        private static string CompileSelectClause(this IEnumerable<Expression> This, bool distinct) =>
+            "SELECT " + 
                 (distinct ? "DISTINCT " : "") +
                 string.Join(", ", This.Select(x => x.CompileExpr()));
-        }
 
-        internal static string SelectAllColumnsClause(bool distinct, params Type[] types)
-        {
-            return types.SelectMany(typ =>
+        internal static string SelectAllColumnsClause(bool distinct, params Type[] types) =>
+            types.SelectMany(typ =>
                 {   
                     var table = TableMapping.Get(typ);
                     var parameter = Expression.Parameter(typ);
                     return table.Columns.Values.Select(x => 
                         Expression.Property(parameter, x.Property));
                 }).CompileSelectClause(distinct);
-        }
     }
 
     /// <summary>
@@ -48,10 +44,8 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// Returns a <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.SelectClause"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.SelectClause"/>.</returns>
-        public override string ToString()
-        {
-            return select + "\r\n" + join;
-        }
+        public override string ToString() => 
+            select + "\r\n" + join;
     }
 
     /// <summary>
@@ -160,10 +154,8 @@ namespace SQLitePCL.pretty.Orm.Sql
             return new WhereClause<T>(this, where);
         }
 
-        private WhereClause<T> Where()
-        {
-            return this.Where(Expression.Empty());
-        }
+        private WhereClause<T> Where() =>
+            this.Where(Expression.Empty());
 
         /// <summary>
         /// Performs a subsequent ordering of the elements in a sequence in ascending order according to a key.
@@ -171,10 +163,8 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>An <seealso cref="OrderByClause&lt;T&gt;"/>.</returns>
         /// <param name="orderExpr">A function to extract a key from each element.</param>
         /// <typeparam name="TValue">The type of the key</typeparam>
-        public OrderByClause<T> OrderBy<TValue>(Expression<Func<T, TValue>> orderExpr)
-        {
-            return this.Where().OrderBy(orderExpr);
-        }
+        public OrderByClause<T> OrderBy<TValue>(Expression<Func<T, TValue>> orderExpr) =>
+            this.Where().OrderBy(orderExpr);
 
         /// <summary>
         /// Performs a subsequent ordering of the elements in a sequence in descending order according to a key.
@@ -182,30 +172,24 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>An <seealso cref="OrderByClause&lt;T&gt;"/>.</returns>
         /// <param name="orderExpr">A function to extract a key from each element.</param>
         /// <typeparam name="TValue">The type of the key</typeparam>
-        public OrderByClause<T> OrderByDescending<TValue>(Expression<Func<T, TValue>> orderExpr)
-        {
-            return this.Where().OrderByDescending(orderExpr);
-        }
+        public OrderByClause<T> OrderByDescending<TValue>(Expression<Func<T, TValue>> orderExpr) =>
+            this.Where().OrderByDescending(orderExpr);
 
         /// <summary>
         /// Returns a <see cref="LimitClause&lt;T&gt;"/> that limits the result set to a specified number of contiguous elements.
         /// </summary>
         /// <param name="n">The number of elements to return.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public LimitClause<T> Take(int n)
-        {
-            return this.Where().Take(n);
-        }
+        public LimitClause<T> Take(int n) =>
+            this.Where().Take(n);
 
         /// <summary>
         /// Returns a <see cref="OffsetClause&lt;T&gt;"/> that skips a specified number of elements in the result set and then returns the remaining elements.
         /// </summary>
         /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public OffsetClause<T> Skip(int n)
-        {
-            return this.Where().Skip(n);
-        }
+        public OffsetClause<T> Skip(int n) =>
+            this.Where().Skip(n);
 
         /// <summary>
         /// Returns a <see cref="OffsetClause&lt;T&gt;"/> that returns the element at a specified index in the result set.
@@ -213,10 +197,8 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>The <see cref="OffsetClause&lt;T&gt;"/>.</returns>
         /// <param name="index">The index of the element to retrieve.</param>
         /// <returns>A new <see cref="OffsetClause&lt;T&gt;"/>.</returns>
-        public OffsetClause<T> ElementAt(int index)
-        {
-            return this.Where().ElementAt(index);
-        }
+        public OffsetClause<T> ElementAt(int index) =>
+            this.Where().ElementAt(index);
     }
 
     /// <summary>
@@ -325,10 +307,8 @@ namespace SQLitePCL.pretty.Orm.Sql
             return new WhereClause<T1,T2>(this, where);
         }
 
-        private WhereClause<T1,T2> Where()
-        {
-            return this.Where(Expression.Empty());
-        }
+        private WhereClause<T1,T2> Where() =>
+            this.Where(Expression.Empty());
 
         /// <summary>
         /// Performs a subsequent ordering of the elements in a sequence in ascending order according to a key.
@@ -336,10 +316,8 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>An <seealso cref="OrderByClause&lt;T&gt;"/>.</returns>
         /// <param name="orderExpr">A function to extract a key from each element.</param>
         /// <typeparam name="TValue">The type of the key</typeparam>
-        public OrderByClause<T1,T2> OrderBy<TValue>(Expression<Func<T1,T2,TValue>> orderExpr)
-        {
-            return this.Where().OrderBy(orderExpr);
-        }
+        public OrderByClause<T1,T2> OrderBy<TValue>(Expression<Func<T1,T2,TValue>> orderExpr) =>
+            this.Where().OrderBy(orderExpr);
 
         /// <summary>
         /// Performs a subsequent ordering of the elements in a sequence in descending order according to a key.
@@ -347,30 +325,24 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>An <seealso cref="OrderByClause&lt;T&gt;"/>.</returns>
         /// <param name="orderExpr">A function to extract a key from each element.</param>
         /// <typeparam name="TValue">The type of the key</typeparam>
-        public OrderByClause<T1,T2> OrderByDescending<TValue>(Expression<Func<T1,T2,TValue>> orderExpr)
-        {
-            return this.Where().OrderByDescending(orderExpr);
-        }
+        public OrderByClause<T1,T2> OrderByDescending<TValue>(Expression<Func<T1,T2,TValue>> orderExpr) =>
+            this.Where().OrderByDescending(orderExpr);
 
         /// <summary>
         /// Returns a <see cref="LimitClause&lt;T&gt;"/> that limits the result set to a specified number of contiguous elements.
         /// </summary>
         /// <param name="n">The number of elements to return.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public LimitClause<T1,T2> Take(int n)
-        {
-            return this.Where().Take(n);
-        }
+        public LimitClause<T1,T2> Take(int n) =>
+            this.Where().Take(n);
 
         /// <summary>
         /// Returns a <see cref="OffsetClause&lt;T&gt;"/> that skips a specified number of elements in the result set and then returns the remaining elements.
         /// </summary>
         /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public OffsetClause<T1,T2> Skip(int n)
-        {
-            return this.Where().Skip(n);
-        }
+        public OffsetClause<T1,T2> Skip(int n) =>
+            this.Where().Skip(n);
 
         /// <summary>
         /// Returns a <see cref="OffsetClause&lt;T&gt;"/> that returns the element at a specified index in the result set.
@@ -378,10 +350,8 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>The <see cref="OffsetClause&lt;T&gt;"/>.</returns>
         /// <param name="index">The index of the element to retrieve.</param>
         /// <returns>A new <see cref="OffsetClause&lt;T&gt;"/>.</returns>
-        public OffsetClause<T1,T2> ElementAt(int index)
-        {
-            return this.Where().ElementAt(index);
-        }
+        public OffsetClause<T1,T2> ElementAt(int index) =>
+             this.Where().ElementAt(index);
     }
 
     /// <summary>
@@ -490,10 +460,8 @@ namespace SQLitePCL.pretty.Orm.Sql
             return new WhereClause<T1,T2,T3>(this, where);
         }
 
-        private WhereClause<T1,T2,T3> Where()
-        {
-            return this.Where(Expression.Empty());
-        }
+        private WhereClause<T1,T2,T3> Where() =>
+            this.Where(Expression.Empty());
 
         /// <summary>
         /// Performs a subsequent ordering of the elements in a sequence in ascending order according to a key.
@@ -501,10 +469,8 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>An <seealso cref="OrderByClause&lt;T&gt;"/>.</returns>
         /// <param name="orderExpr">A function to extract a key from each element.</param>
         /// <typeparam name="TValue">The type of the key</typeparam>
-        public OrderByClause<T1,T2,T3> OrderBy<TValue>(Expression<Func<T1,T2,T3,TValue>> orderExpr)
-        {
-            return this.Where().OrderBy(orderExpr);
-        }
+        public OrderByClause<T1,T2,T3> OrderBy<TValue>(Expression<Func<T1,T2,T3,TValue>> orderExpr) =>
+            this.Where().OrderBy(orderExpr);
 
         /// <summary>
         /// Performs a subsequent ordering of the elements in a sequence in descending order according to a key.
@@ -512,30 +478,24 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>An <seealso cref="OrderByClause&lt;T&gt;"/>.</returns>
         /// <param name="orderExpr">A function to extract a key from each element.</param>
         /// <typeparam name="TValue">The type of the key</typeparam>
-        public OrderByClause<T1,T2,T3> OrderByDescending<TValue>(Expression<Func<T1,T2,T3,TValue>> orderExpr)
-        {
-            return this.Where().OrderByDescending(orderExpr);
-        }
+        public OrderByClause<T1,T2,T3> OrderByDescending<TValue>(Expression<Func<T1,T2,T3,TValue>> orderExpr) =>
+            this.Where().OrderByDescending(orderExpr);
 
         /// <summary>
         /// Returns a <see cref="LimitClause&lt;T&gt;"/> that limits the result set to a specified number of contiguous elements.
         /// </summary>
         /// <param name="n">The number of elements to return.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public LimitClause<T1,T2,T3> Take(int n)
-        {
-            return this.Where().Take(n);
-        }
+        public LimitClause<T1,T2,T3> Take(int n) =>
+             this.Where().Take(n);
 
         /// <summary>
         /// Returns a <see cref="OffsetClause&lt;T&gt;"/> that skips a specified number of elements in the result set and then returns the remaining elements.
         /// </summary>
         /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public OffsetClause<T1,T2,T3> Skip(int n)
-        {
-            return this.Where().Skip(n);
-        }
+        public OffsetClause<T1,T2,T3> Skip(int n) =>
+            this.Where().Skip(n);
 
         /// <summary>
         /// Returns a <see cref="OffsetClause&lt;T&gt;"/> that returns the element at a specified index in the result set.
@@ -543,10 +503,8 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>The <see cref="OffsetClause&lt;T&gt;"/>.</returns>
         /// <param name="index">The index of the element to retrieve.</param>
         /// <returns>A new <see cref="OffsetClause&lt;T&gt;"/>.</returns>
-        public OffsetClause<T1,T2,T3> ElementAt(int index)
-        {
-            return this.Where().ElementAt(index);
-        }
+        public OffsetClause<T1,T2,T3> ElementAt(int index) =>
+            this.Where().ElementAt(index);
     }
 
     /// <summary>
@@ -655,10 +613,8 @@ namespace SQLitePCL.pretty.Orm.Sql
             return new WhereClause<T1,T2,T3,T4>(this, where);
         }
 
-        private WhereClause<T1,T2,T3,T4> Where()
-        {
-            return this.Where(Expression.Empty());
-        }
+        private WhereClause<T1,T2,T3,T4> Where() =>
+            this.Where(Expression.Empty());
 
         /// <summary>
         /// Performs a subsequent ordering of the elements in a sequence in ascending order according to a key.
@@ -666,10 +622,8 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>An <seealso cref="OrderByClause&lt;T&gt;"/>.</returns>
         /// <param name="orderExpr">A function to extract a key from each element.</param>
         /// <typeparam name="TValue">The type of the key</typeparam>
-        public OrderByClause<T1,T2,T3,T4> OrderBy<TValue>(Expression<Func<T1,T2,T3,T4,TValue>> orderExpr)
-        {
-            return this.Where().OrderBy(orderExpr);
-        }
+        public OrderByClause<T1,T2,T3,T4> OrderBy<TValue>(Expression<Func<T1,T2,T3,T4,TValue>> orderExpr) =>
+            this.Where().OrderBy(orderExpr);
 
         /// <summary>
         /// Performs a subsequent ordering of the elements in a sequence in descending order according to a key.
@@ -677,30 +631,24 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>An <seealso cref="OrderByClause&lt;T&gt;"/>.</returns>
         /// <param name="orderExpr">A function to extract a key from each element.</param>
         /// <typeparam name="TValue">The type of the key</typeparam>
-        public OrderByClause<T1,T2,T3,T4> OrderByDescending<TValue>(Expression<Func<T1,T2,T3,T4,TValue>> orderExpr)
-        {
-            return this.Where().OrderByDescending(orderExpr);
-        }
+        public OrderByClause<T1,T2,T3,T4> OrderByDescending<TValue>(Expression<Func<T1,T2,T3,T4,TValue>> orderExpr) =>
+            this.Where().OrderByDescending(orderExpr);
 
         /// <summary>
         /// Returns a <see cref="LimitClause&lt;T&gt;"/> that limits the result set to a specified number of contiguous elements.
         /// </summary>
         /// <param name="n">The number of elements to return.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public LimitClause<T1,T2,T3,T4> Take(int n)
-        {
-            return this.Where().Take(n);
-        }
+        public LimitClause<T1,T2,T3,T4> Take(int n) =>
+            this.Where().Take(n);
 
         /// <summary>
         /// Returns a <see cref="OffsetClause&lt;T&gt;"/> that skips a specified number of elements in the result set and then returns the remaining elements.
         /// </summary>
         /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public OffsetClause<T1,T2,T3,T4> Skip(int n)
-        {
-            return this.Where().Skip(n);
-        }
+        public OffsetClause<T1,T2,T3,T4> Skip(int n) =>
+            this.Where().Skip(n);
 
         /// <summary>
         /// Returns a <see cref="OffsetClause&lt;T&gt;"/> that returns the element at a specified index in the result set.
@@ -708,10 +656,8 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>The <see cref="OffsetClause&lt;T&gt;"/>.</returns>
         /// <param name="index">The index of the element to retrieve.</param>
         /// <returns>A new <see cref="OffsetClause&lt;T&gt;"/>.</returns>
-        public OffsetClause<T1,T2,T3,T4> ElementAt(int index)
-        {
-            return this.Where().ElementAt(index);
-        }
+        public OffsetClause<T1,T2,T3,T4> ElementAt(int index) =>
+            this.Where().ElementAt(index);
     }
 }
 

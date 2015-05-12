@@ -49,15 +49,11 @@ namespace SQLitePCL.pretty
             }
         }
 
-        internal static void CheckOk(sqlite3_stmt stmt, int rc)
-        {
+        internal static void CheckOk(sqlite3_stmt stmt, int rc) =>
             CheckOk(raw.sqlite3_db_handle(stmt), rc);
-        }
 
-        internal static Exception Create(int rc, int extended, string msg)
-        {
-            return Create((ErrorCode)rc, (ErrorCode)extended, msg);
-        }
+        internal static Exception Create(int rc, int extended, string msg) =>
+            Create((ErrorCode)rc, (ErrorCode)extended, msg);
 
         internal static Exception Create(ErrorCode rc, ErrorCode extended, string msg)
         {
@@ -104,9 +100,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <inheritdoc/>
-        public override string ToString()
-        {
-            return string.Format("{0}: {1}\r\n{2}", errorCode, errmsg, base.ToString());
-        }
+        public override string ToString() =>
+            $"{errorCode}: {errmsg}\r\n{base.ToString()}";
     }
 }

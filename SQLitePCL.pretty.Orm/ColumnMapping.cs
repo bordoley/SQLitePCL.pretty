@@ -30,51 +30,43 @@ namespace SQLitePCL.pretty.Orm
         /// <param name="x">A ColumnMapping instance.</param>
         /// <param name="y">A ColumnMapping instance.</param>
         /// <returns><see langword="true"/> if the two instances are not equal to each other; otherwise,  <see langword="false"/>.</returns>
-        public static bool operator !=(ColumnMapping x, ColumnMapping y)
-        {
-            return !(x == y);
-        }
-
-        private readonly Type clrType;
-        private readonly object defaultValue;
-        private readonly PropertyInfo property;
-        private readonly TableColumnMetadata metadata;
-        private readonly ForeignKeyConstraint foreignKeyConstraint;
+        public static bool operator !=(ColumnMapping x, ColumnMapping y) =>
+            !(x == y);
 
         internal ColumnMapping(Type clrType, object defaultValue, PropertyInfo property, TableColumnMetadata metadata, ForeignKeyConstraint foreignKeyConstraint)
         {
-            this.clrType = clrType;
-            this.defaultValue = defaultValue;
-            this.property = property;
-            this.metadata = metadata;
-            this.foreignKeyConstraint = foreignKeyConstraint;
+            this.ClrType = clrType;
+            this.DefaultValue = defaultValue;
+            this.Property = property;
+            this.Metadata = metadata;
+            this.ForeignKeyConstraint = foreignKeyConstraint;
         }
 
         /// <summary>
         /// The CLR <see cref="Type"/> of the column.
         /// </summary>
-        public Type ClrType { get { return clrType; } }
+        public Type ClrType { get; }
 
 
         /// <summary>
         /// The default value of the ClrType as specified by the user.
         /// </summary>
-        public object DefaultValue { get { return defaultValue; } }
+        public object DefaultValue { get; }
 
         /// <summary>
         /// The <see cref="PropertyInfo"/> of the column.
         /// </summary>
-        public PropertyInfo Property { get { return property; } }
+        public PropertyInfo Property { get; }
 
         /// <summary>
         /// The <see cref="TableColumnMetadata"/> of the column. 
         /// </summary>
-        public TableColumnMetadata Metadata { get { return metadata; } }
+        public TableColumnMetadata Metadata { get; }
 
         /// <summary>
         /// Gets the foreign key constraint on the column or null.
         /// </summary>
-        public ForeignKeyConstraint ForeignKeyConstraint { get { return foreignKeyConstraint; } }
+        public ForeignKeyConstraint ForeignKeyConstraint { get; }
 
         /// <inheritdoc/>
         public bool Equals(ColumnMapping other)
@@ -90,7 +82,7 @@ namespace SQLitePCL.pretty.Orm
             }
 
             return this.ClrType == other.ClrType &&
-                (this.DefaultValue == null ? (other.DefaultValue == null) : this.DefaultValue.Equals(other.defaultValue)) &&
+                (this.DefaultValue == null ? (other.DefaultValue == null) : this.DefaultValue.Equals(other.DefaultValue)) &&
                 this.Property == other.Property &&
                 this.Metadata == other.Metadata &&
                 (this.ForeignKeyConstraint == null) ? (other.ForeignKeyConstraint == null) : this.ForeignKeyConstraint.Equals(other.ForeignKeyConstraint);
@@ -118,11 +110,8 @@ namespace SQLitePCL.pretty.Orm
         /// Returns a <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.ColumnMapping"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.ColumnMapping"/>.</returns>
-        public override string ToString()
-        {
-            return string.Format("[ColumnMapping: ClrType={0}, Property={1}, Metadata={2}]", ClrType, Property, Metadata);
-        }
+        public override string ToString() =>
+            string.Format("[ColumnMapping: ClrType={0}, Property={1}, Metadata={2}]", ClrType, Property, Metadata);
     }
-
 }
 

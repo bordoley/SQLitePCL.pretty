@@ -50,22 +50,16 @@ namespace SQLitePCL.pretty.Orm
         /// Query data from a single table.
         /// </summary>
         /// <typeparam name="T">The type of the table.</typeparam>
-        public static FromClause<T> From<T>()
-        {
-            return new FromClause<T>(
-                SqlCompiler.CompileFromClause(typeof(T)));
-        }
+        public static FromClause<T> From<T>() =>
+            new FromClause<T>(SqlCompiler.CompileFromClause(typeof(T)));
 
         /// <summary>
         /// Query data from two tables.
         /// </summary>
         /// <typeparam name="T1">The type of the first table.</typeparam>
         /// <typeparam name="T2">The type of the second table.</typeparam>
-        public static FromClause<T1,T2> From<T1,T2>()
-        {
-            return new FromClause<T1,T2>(
-                SqlCompiler.CompileFromClause(typeof(T1), typeof(T2)));
-        }
+        public static FromClause<T1,T2> From<T1,T2>() =>
+            new FromClause<T1,T2>(SqlCompiler.CompileFromClause(typeof(T1), typeof(T2)));
 
         /// <summary>
         /// Query data from two tables.
@@ -73,11 +67,8 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T1">The type of the first table.</typeparam>
         /// <typeparam name="T2">The type of the second table.</typeparam>
         /// <typeparam name="T3">The type of the third table.</typeparam>
-        public static FromClause<T1,T2,T3> From<T1,T2,T3>()
-        {
-            return new FromClause<T1,T2,T3>(
-                SqlCompiler.CompileFromClause(typeof(T1), typeof(T2), typeof(T3)));
-        }
+        public static FromClause<T1,T2,T3> From<T1,T2,T3>() =>
+            new FromClause<T1,T2,T3>(SqlCompiler.CompileFromClause(typeof(T1), typeof(T2), typeof(T3)));
 
         /// <summary>
         /// Query data from two tables.
@@ -86,10 +77,7 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T2">The type of the second table.</typeparam>
         /// <typeparam name="T3">The type of the third table.</typeparam>
         /// <typeparam name="T4">The type of the fourth table.</typeparam>
-        public static FromClause<T1,T2,T3,T4> From<T1,T2,T3,T4>()
-        {
-            return new FromClause<T1,T2,T3,T4>(
-                SqlCompiler.CompileFromClause(typeof(T1), typeof(T2), typeof(T3), typeof(T4)));
-        }
+        public static FromClause<T1,T2,T3,T4> From<T1,T2,T3,T4>() =>
+            new FromClause<T1,T2,T3,T4>(SqlCompiler.CompileFromClause(typeof(T1), typeof(T2), typeof(T3), typeof(T4)));
     }
 }

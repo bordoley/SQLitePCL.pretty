@@ -31,10 +31,8 @@ namespace SQLitePCL.pretty
         /// <param name="x">A SQLiteVersion instance.</param>
         /// <param name="y">A SQLiteVersion instance.</param>
         /// <returns><see langword="true"/> if the two instances are equal to each other; otherwise,  <see langword="false"/>.</returns>
-        public static bool operator ==(SQLiteVersion x, SQLiteVersion y)
-        {
-            return x.Equals(y);
-        }
+        public static bool operator ==(SQLiteVersion x, SQLiteVersion y) =>
+            x.Equals(y);
 
         /// <summary>
         /// Indicates whether the two SQLiteVersion instances are not equal each other.
@@ -42,10 +40,8 @@ namespace SQLitePCL.pretty
         /// <param name="x">A SQLiteVersion instance.</param>
         /// <param name="y">A SQLiteVersion instance.</param>
         /// <returns><see langword="true"/> if the two instances are not equal to each other; otherwise,  <see langword="false"/>.</returns>
-        public static bool operator !=(SQLiteVersion x, SQLiteVersion y)
-        {
-            return !(x == y);
-        }
+        public static bool operator !=(SQLiteVersion x, SQLiteVersion y) =>
+            !(x == y);
 
         /// <summary>
         /// Indicates if the the first SQLiteVersion is greater than or equal to the second.
@@ -53,10 +49,8 @@ namespace SQLitePCL.pretty
         /// <param name="x">A SQLiteVersion instance.</param>
         /// <param name="y">A SQLiteVersion instance.</param>
         /// <returns><see langword="true"/>if the the first SQLiteVersion is greater than or equal to the second; otherwise, <see langword="false"/>.</returns>
-        public static bool operator >=(SQLiteVersion x, SQLiteVersion y)
-        {
-            return x.version >= y.version;
-        }
+        public static bool operator >=(SQLiteVersion x, SQLiteVersion y) =>
+            x.version >= y.version;
 
         /// <summary>
         /// Indicates if the the first SQLiteVersion is greater than the second.
@@ -64,10 +58,8 @@ namespace SQLitePCL.pretty
         /// <param name="x">A SQLiteVersion instance.</param>
         /// <param name="y">A SQLiteVersion instance.</param>
         /// <returns><see langword="true"/>if the the first SQLiteVersion is greater than the second; otherwise, <see langword="false"/>.</returns>
-        public static bool operator >(SQLiteVersion x, SQLiteVersion y)
-        {
-            return x.version > y.version;
-        }
+        public static bool operator >(SQLiteVersion x, SQLiteVersion y) =>
+            x.version > y.version;
 
         /// <summary>
         /// Indicates if the the first SQLiteVersion is less than or equal to the second.
@@ -75,10 +67,8 @@ namespace SQLitePCL.pretty
         /// <param name="x">A SQLiteVersion instance.</param>
         /// <param name="y">A SQLiteVersion instance.</param>
         /// <returns><see langword="true"/>if the the first SQLiteVersion is less than or equal to the second; otherwise, <see langword="false"/>.</returns>
-        public static bool operator <=(SQLiteVersion x, SQLiteVersion y)
-        {
-            return x.version <= y.version;
-        }
+        public static bool operator <=(SQLiteVersion x, SQLiteVersion y) =>
+            x.version <= y.version;
 
         /// <summary>
         /// Indicates if the the first SQLiteVersion is less than the second.
@@ -86,10 +76,8 @@ namespace SQLitePCL.pretty
         /// <param name="x">A SQLiteVersion instance.</param>
         /// <param name="y">A SQLiteVersion instance.</param>
         /// <returns><see langword="true"/>if the the first SQLiteVersion is less than the second; otherwise, <see langword="false"/>.</returns>
-        public static bool operator <(SQLiteVersion x, SQLiteVersion y)
-        {
-            return x.version < y.version;
-        }
+        public static bool operator <(SQLiteVersion x, SQLiteVersion y) =>
+            x.version < y.version;
 
         internal static SQLiteVersion Of(int version)
         {
@@ -141,40 +129,26 @@ namespace SQLitePCL.pretty
         /// Converts the version number as an integer with the value (Major*1000000 + Minor*1000 + Release).
         /// </summary>
         /// <returns>The version number as an integer</returns>
-        public int ToInt()
-        {
-            return version;
-        }
+        public int ToInt() =>  version;
 
         /// <inheritdoc/>
-        public override string ToString()
-        {
-            return string.Format("{0}.{1}.{2}", this.Major, this.Minor, this.Release);
-        }
+        public override string ToString() =>
+            $"{this.Major}.{this.Minor}.{this.Release}";
 
         /// <inheritdoc/>
-        public override int GetHashCode()
-        {
-            return version;
-        }
+        public override int GetHashCode() => version;
 
         /// <inheritdoc/>
-        public bool Equals(SQLiteVersion other)
-        {
-            return this.version == other.version;
-        }
+        public bool Equals(SQLiteVersion other) =>
+            this.version == other.version;
 
         /// <inheritdoc/>
-        public override bool Equals(object other)
-        {
-            return other is SQLiteVersion && this == (SQLiteVersion)other;
-        }
+        public override bool Equals(object other) =>
+            other is SQLiteVersion && this == (SQLiteVersion)other;
 
         /// <inheritdoc/>
-        public int CompareTo(SQLiteVersion other)
-        {
-            return this.version.CompareTo(other.version);
-        }
+        public int CompareTo(SQLiteVersion other) =>
+            this.version.CompareTo(other.version);
 
         /// <inheritdoc/>
         public int CompareTo(object obj)

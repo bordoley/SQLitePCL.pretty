@@ -34,36 +34,21 @@ namespace SQLitePCL.pretty
             return new DatabaseProfileEventArgs(statement, executionTime);
         }
 
-        private readonly string statement;
-        private readonly TimeSpan executionTime;
-
         private DatabaseProfileEventArgs(string statement, TimeSpan executionTime)
         {
-            this.statement = statement;
-            this.executionTime = executionTime;
+            this.Statement = statement;
+            this.ExecutionTime = executionTime;
         }
 
         /// <summary>
         /// The SQL statement being profiled.
         /// </summary>
-        public string Statement
-        {
-            get
-            {
-                return statement;
-            }
-        }
+        public string Statement { get; }
 
         /// <summary>
         /// The execution time of the statement.
         /// </summary>
-        public TimeSpan ExecutionTime
-        {
-            get
-            {
-                return executionTime;
-            }
-        }
+        public TimeSpan ExecutionTime { get; }
     }
 
     /// <summary>
@@ -77,23 +62,15 @@ namespace SQLitePCL.pretty
             return new DatabaseTraceEventArgs(statement);
         }
 
-        private readonly string statement;
-
         private DatabaseTraceEventArgs(string statement)
         {
-            this.statement = statement;
+            this.Statement = statement;
         }
 
         /// <summary>
         /// The SQL statement text as the statement first begins executing which caused the trace event.
         /// </summary>
-        public string Statement
-        {
-            get
-            {
-                return statement;
-            }
-        }
+        public string Statement { get; }
     }
 
     /// <summary>
@@ -109,62 +86,33 @@ namespace SQLitePCL.pretty
             return new DatabaseUpdateEventArgs(action, database, table, rowId);
         }
 
-        private readonly ActionCode action;
-        private readonly string database;
-        private readonly string table;
-        private readonly long rowId;
-
         private DatabaseUpdateEventArgs(ActionCode action, String database, string table, long rowId)
         {
-            this.action = action;
-            this.database = database;
-            this.table = table;
-            this.rowId = rowId;
+            this.Action = action;
+            this.Database = database;
+            this.Table = table;
+            this.RowId = rowId;
         }
 
         /// <summary>
         /// The SQL operation that caused the update event.
         /// </summary>
-        public ActionCode Action
-        {
-            get
-            {
-                return action;
-            }
-        }
+        public ActionCode Action { get; }
 
         /// <summary>
         /// The database containing the affected row.
         /// </summary>
-        public string Database
-        {
-            get
-            {
-                return database;
-            }
-        }
+        public string Database { get; }
 
         /// <summary>
         /// The table name containing the affected row.
         /// </summary>
-        public string Table
-        {
-            get
-            {
-                return table;
-            }
-        }
+        public string Table { get; }
 
         /// <summary>
         /// The rowid of the row updated.
         /// </summary>
-        public long RowId
-        {
-            get
-            {
-                return rowId;
-            }
-        }
+        public long RowId { get; }
     }
 
     internal static class DatabaseConnectionExpando
@@ -1083,10 +1031,8 @@ namespace SQLitePCL.pretty
         ///  Causes any pending database operation to abort and return at its earliest opportunity.
         /// </summary>
         /// <seealso href="https://www.sqlite.org/c3ref/interrupt.html"/>
-        public void Interrupt()
-        {
+        public void Interrupt() =>
             raw.sqlite3_interrupt(db);
-        }
 
         /// <summary>
         /// Add or modify a collation function to the connection.

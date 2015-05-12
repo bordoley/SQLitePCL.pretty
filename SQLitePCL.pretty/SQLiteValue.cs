@@ -28,18 +28,13 @@ namespace SQLitePCL.pretty
     /// </summary>
     public static class SQLiteValue
     {
-        private static readonly ISQLiteValue _null = new NullValue();
+        //private static readonly ISQLiteValue _null = new NullValue();
 
         /// <summary>
         /// The SQLite null value.
         /// </summary>
-        public static ISQLiteValue Null
-        {
-            get
-            {
-                return _null;
-            }
-        }
+        public static ISQLiteValue Null { get; } = new NullValue();
+
 
         /// <summary>
         /// Create a SQLite zeroblob of the specified length.
@@ -59,110 +54,88 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this int This)
-        {
-            return Convert.ToInt64(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this int This) => 
+            Convert.ToInt64(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts an <see cref="short"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this short This)
-        {
-            return Convert.ToInt64(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this short This) =>
+            Convert.ToInt64(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts a <see cref="bool"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this bool This)
-        {
-            return Convert.ToInt64(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this bool This) =>
+            Convert.ToInt64(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts a <see cref="byte"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this byte This)
-        {
-            return Convert.ToInt64(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this byte This) =>
+            Convert.ToInt64(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts a <see cref="char"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this char This)
-        {
-            return Convert.ToInt64(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this char This) =>
+            Convert.ToInt64(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts a <see cref="sbyte"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this sbyte This)
-        {
-            return Convert.ToInt64(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this sbyte This) =>
+            Convert.ToInt64(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts a <see cref="UInt32"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this UInt32 This)
-        {
-            return Convert.ToInt64(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this UInt32 This) =>
+            Convert.ToInt64(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts an <see cref="UInt16"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this UInt16 This)
-        {
-            return Convert.ToInt64(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this UInt16 This) =>
+            Convert.ToInt64(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts a <see cref="long"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this long This)
-        {
-            return new IntValue(This);
-        }
+        public static ISQLiteValue ToSQLiteValue(this long This) =>
+            new IntValue(This);
 
         /// <summary>
         /// Converts a <see cref="double"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this double This)
-        {
-            return new FloatValue(This);
-        }
+        public static ISQLiteValue ToSQLiteValue(this double This) =>
+            new FloatValue(This);
 
         /// <summary>
         /// Converts an <see cref="float"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this float This)
-        {
-            return Convert.ToDouble(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this float This) =>
+            Convert.ToDouble(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts a <see cref="string"/> to an <see cref="ISQLiteValue"/>.
@@ -191,50 +164,40 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this TimeSpan This)
-        {
-            return This.Ticks.ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this TimeSpan This) =>
+            This.Ticks.ToSQLiteValue();
 
         /// <summary>
         /// Converts an <see cref="DateTime"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this DateTime This)
-        {
-            return This.Ticks.ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this DateTime This) =>
+            This.Ticks.ToSQLiteValue();
 
         /// <summary>
         /// Converts an <see cref="DateTimeOffset"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this DateTimeOffset This)
-        {
-            return This.ToOffset(TimeSpan.Zero).Ticks.ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this DateTimeOffset This) =>
+            This.ToOffset(TimeSpan.Zero).Ticks.ToSQLiteValue();
 
         /// <summary>
         /// Converts an <see cref="decimal"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this decimal This)
-        {
-            return Convert.ToDouble(This).ToSQLiteValue();
-        }            
+        public static ISQLiteValue ToSQLiteValue(this decimal This) =>
+            Convert.ToDouble(This).ToSQLiteValue();         
 
         /// <summary>
         /// Converts an <see cref="Guid"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this Guid This)
-        {
-            return This.ToString().ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this Guid This) =>
+            This.ToString().ToSQLiteValue();
 
         /// <summary>
         /// Converts an <see cref="Uri"/> to an <see cref="ISQLiteValue"/>.
@@ -247,15 +210,11 @@ namespace SQLitePCL.pretty
             return This.ToString().ToSQLiteValue();
         }
 
-        internal static ISQLiteValue ToSQLiteValue(this sqlite3_value This)
-        {
-            return new NativeValue(This);
-        }
+        internal static ISQLiteValue ToSQLiteValue(this sqlite3_value This) =>
+            new NativeValue(This);
 
-        internal static IResultSetValue ResultSetValueAt(this StatementImpl This, int index)
-        {
-            return new ResultSetValueImpl(This, index);
-        }
+        internal static IResultSetValue ResultSetValueAt(this StatementImpl This, int index) =>
+            new ResultSetValueImpl(This, index);
 
         internal static void SetResult(this sqlite3_context ctx, ISQLiteValue value)
         {
@@ -437,30 +396,20 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public byte[] ToBlob()
-        {
-            return raw.sqlite3_value_blob(value) ?? new byte[0];
-        }
+        public byte[] ToBlob() => 
+            raw.sqlite3_value_blob(value) ?? new byte[0];
 
-        public double ToDouble()
-        {
-            return raw.sqlite3_value_double(value);
-        }
+        public double ToDouble() =>
+            raw.sqlite3_value_double(value);
 
-        public int ToInt()
-        {
-            return raw.sqlite3_value_int(value);
-        }
+        public int ToInt() =>
+            raw.sqlite3_value_int(value);
 
-        public long ToInt64()
-        {
-            return raw.sqlite3_value_int64(value);
-        }
+        public long ToInt64() =>
+            raw.sqlite3_value_int64(value);
 
-        public override string ToString()
-        {
-            return raw.sqlite3_value_text(value) ?? "";
-        }
+        public override string ToString() =>
+            raw.sqlite3_value_text(value) ?? "";
     }
 
     // Type coercion rules
@@ -483,30 +432,15 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public byte[] ToBlob()
-        {
-            return new byte[0];
-        }
+        public byte[] ToBlob() => new byte[0];
 
-        public double ToDouble()
-        {
-            return 0.0;
-        }
+        public double ToDouble() => 0.0;
 
-        public int ToInt()
-        {
-            return 0;
-        }
+        public int ToInt() => 0;
 
-        public long ToInt64()
-        {
-            return 0;
-        }
+        public long ToInt64() => 0;
 
-        public override string ToString()
-        {
-            return "";
-        }
+        public override string ToString() => "";
     }
 
     internal struct IntValue : ISQLiteValue
@@ -534,30 +468,17 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public byte[] ToBlob()
-        {
-            return this.ToString().ToSQLiteValue().ToBlob();
-        }
+        public byte[] ToBlob() =>
+            this.ToString().ToSQLiteValue().ToBlob();
 
-        public double ToDouble()
-        {
-            return value;
-        }
+        public double ToDouble() => value;
 
-        public int ToInt()
-        {
-            return (int)value;
-        }
+        public int ToInt() => (int)value;
 
-        public long ToInt64()
-        {
-            return value;
-        }
+        public long ToInt64() => value;
 
-        public override string ToString()
-        {
-            return value.ToString();
-        }
+        public override string ToString() =>
+            value.ToString();
     }
 
     internal struct FloatValue : ISQLiteValue
@@ -593,15 +514,9 @@ namespace SQLitePCL.pretty
             throw new NotSupportedException();
         }
 
-        public double ToDouble()
-        {
-            return value;
-        }
+        public double ToDouble() => value;
 
-        public int ToInt()
-        {
-            return (int)this.ToInt64();
-        }
+        public int ToInt() => (int)this.ToInt64();
 
         public long ToInt64()
         {
@@ -654,10 +569,8 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public byte[] ToBlob()
-        {
-            return Encoding.UTF8.GetBytes(value);
-        }
+        public byte[] ToBlob() => 
+            Encoding.UTF8.GetBytes(value);
 
         // When casting a TEXT value to REAL, the longest possible prefix
         // of the value that can be interpreted as a real number is extracted
@@ -680,10 +593,8 @@ namespace SQLitePCL.pretty
             return 0.0;
         }
 
-        public int ToInt()
-        {
-            return (int)this.ToInt64();
-        }
+        public int ToInt() =>
+            (int)this.ToInt64();
 
         // When casting a TEXT value to INTEGER, the longest possible prefix of
         // the value that can be interpreted as an integer number is extracted from
@@ -716,10 +627,7 @@ namespace SQLitePCL.pretty
             return 0;
         }
 
-        public override string ToString()
-        {
-            return value;
-        }
+        public override string ToString() => value;
     }
 
     internal class BlobValue : ISQLiteValue
@@ -747,32 +655,21 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public byte[] ToBlob()
-        {
-            return value;
-        }
+        public byte[] ToBlob() => value;
 
         // When casting a BLOB value to a REAL, the value is first converted to TEXT.
-        public double ToDouble()
-        {
-            return this.ToString().ToSQLiteValue().ToDouble();
-        }
+        public double ToDouble() =>
+            this.ToString().ToSQLiteValue().ToDouble();
 
-        public int ToInt()
-        {
-            return (int)this.ToInt64();
-        }
+        public int ToInt() =>
+            (int)this.ToInt64();
 
         // When casting a BLOB value to INTEGER, the value is first converted to TEXT.
-        public long ToInt64()
-        {
-            return this.ToString().ToSQLiteValue().ToInt64();
-        }
+        public long ToInt64() =>
+            this.ToString().ToSQLiteValue().ToInt64();
 
-        public override string ToString()
-        {
-            return Encoding.UTF8.GetString(value, 0, value.Length);
-        }
+        public override string ToString() =>
+            Encoding.UTF8.GetString(value, 0, value.Length);
     }
 
     internal sealed class ResultSetValueImpl : IResultSetValue
@@ -810,30 +707,20 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public byte[] ToBlob()
-        {
-            return raw.sqlite3_column_blob(stmt.sqlite3_stmt, index) ?? new byte[0];
-        }
+        public byte[] ToBlob() =>
+            raw.sqlite3_column_blob(stmt.sqlite3_stmt, index) ?? new byte[0];
 
-        public double ToDouble()
-        {
-            return raw.sqlite3_column_double(stmt.sqlite3_stmt, index);
-        }
+        public double ToDouble() =>
+            raw.sqlite3_column_double(stmt.sqlite3_stmt, index);
 
-        public int ToInt()
-        {
-            return raw.sqlite3_column_int(stmt.sqlite3_stmt, index);
-        }
+        public int ToInt() =>
+            raw.sqlite3_column_int(stmt.sqlite3_stmt, index);
 
-        public long ToInt64()
-        {
-            return raw.sqlite3_column_int64(stmt.sqlite3_stmt, index);
-        }
+        public long ToInt64() =>
+            raw.sqlite3_column_int64(stmt.sqlite3_stmt, index);
 
-        public override string ToString()
-        {
-            return raw.sqlite3_column_text(stmt.sqlite3_stmt, index) ?? "";
-        }
+        public override string ToString() =>
+            raw.sqlite3_column_text(stmt.sqlite3_stmt, index) ?? "";
     }
 
     internal class ZeroBlob : ISQLiteValue
@@ -855,29 +742,15 @@ namespace SQLitePCL.pretty
             get { return length; }
         }
 
-        public byte[] ToBlob()
-        {
-            return new byte[length];
-        }
+        public byte[] ToBlob() =>
+            new byte[length];
 
-        public double ToDouble()
-        {
-            return 0;
-        }
+        public double ToDouble() => 0;
 
-        public int ToInt()
-        {
-            return 0;
-        }
+        public int ToInt() => 0;
 
-        public long ToInt64()
-        {
-            return 0;
-        }
+        public long ToInt64() => 0;
 
-        public override string ToString()
-        {
-            return "";
-        }
+        public override string ToString() => "";
     }
 }

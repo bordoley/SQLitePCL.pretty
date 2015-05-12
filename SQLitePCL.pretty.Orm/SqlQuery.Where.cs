@@ -35,10 +35,8 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// Returns a <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.WhereClause"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.WhereClause"/>.</returns>
-        public override string ToString()
-        {
-            return this.select + "\r\n" + where;
-        }
+        public override string ToString() =>
+            this.select + "\r\n" + where;
     }
 
     /// <summary>
@@ -91,20 +89,16 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// </summary>
         /// <param name="n">The number of elements to return.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public LimitClause<T> Take(int n)
-        {
-            return this.OrderByNone().Take(n);
-        }
+        public LimitClause<T> Take(int n) =>
+            this.OrderByNone().Take(n);
 
         /// <summary>
         /// Returns a <see cref="LimitClause&lt;T&gt;"/> that skips a specified number of elements in the result set and then returns the remaining elements.
         /// </summary>
         /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public OffsetClause<T> Skip(int n)
-        {
-            return this.OrderByNone().Skip(n);
-        }
+        public OffsetClause<T> Skip(int n) =>
+            this.OrderByNone().Skip(n);
 
         /// <summary>
         /// Returns a <see cref="LimitClause&lt;T&gt;"/> that returns the element at a specified index in the result set.
@@ -112,10 +106,8 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>The <see cref="LimitClause&lt;T&gt;"/>.</returns>
         /// <param name="index">The index of the element to retrieve.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public OffsetClause<T> ElementAt(int index)
-        {
-            return this.OrderByNone().ElementAt(index);
-        }
+        public OffsetClause<T> ElementAt(int index) =>
+            this.OrderByNone().ElementAt(index);
     }
 
     /// <summary>
@@ -168,20 +160,16 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// </summary>
         /// <param name="n">The number of elements to return.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public LimitClause<T1,T2> Take(int n)
-        {
-            return this.OrderByNone().Take(n);
-        }
+        public LimitClause<T1,T2> Take(int n) =>
+            this.OrderByNone().Take(n);
 
         /// <summary>
         /// Returns a <see cref="LimitClause&lt;T&gt;"/> that skips a specified number of elements in the result set and then returns the remaining elements.
         /// </summary>
         /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public OffsetClause<T1,T2> Skip(int n)
-        {
-            return this.OrderByNone().Skip(n);
-        }
+        public OffsetClause<T1,T2> Skip(int n) =>
+            this.OrderByNone().Skip(n);
 
         /// <summary>
         /// Returns a <see cref="LimitClause&lt;T&gt;"/> that returns the element at a specified index in the result set.
@@ -189,10 +177,8 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>The <see cref="LimitClause&lt;T&gt;"/>.</returns>
         /// <param name="index">The index of the element to retrieve.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public OffsetClause<T1,T2> ElementAt(int index)
-        {
-            return this.OrderByNone().ElementAt(index);
-        }
+        public OffsetClause<T1,T2> ElementAt(int index) =>
+            this.OrderByNone().ElementAt(index);
     }
 
     /// <summary>
@@ -245,20 +231,16 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// </summary>
         /// <param name="n">The number of elements to return.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public LimitClause<T1,T2,T3> Take(int n)
-        {
-            return this.OrderByNone().Take(n);
-        }
+        public LimitClause<T1,T2,T3> Take(int n) =>
+            this.OrderByNone().Take(n);
 
         /// <summary>
         /// Returns a <see cref="LimitClause&lt;T&gt;"/> that skips a specified number of elements in the result set and then returns the remaining elements.
         /// </summary>
         /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public OffsetClause<T1,T2,T3> Skip(int n)
-        {
-            return this.OrderByNone().Skip(n);
-        }
+        public OffsetClause<T1,T2,T3> Skip(int n) =>
+            this.OrderByNone().Skip(n);
 
         /// <summary>
         /// Returns a <see cref="LimitClause&lt;T&gt;"/> that returns the element at a specified index in the result set.
@@ -266,10 +248,8 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>The <see cref="LimitClause&lt;T&gt;"/>.</returns>
         /// <param name="index">The index of the element to retrieve.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public OffsetClause<T1,T2,T3> ElementAt(int index)
-        {
-            return this.OrderByNone().ElementAt(index);
-        }
+        public OffsetClause<T1,T2,T3> ElementAt(int index) =>
+            this.OrderByNone().ElementAt(index);
     }
 
     /// <summary>
@@ -322,20 +302,16 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// </summary>
         /// <param name="n">The number of elements to return.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public LimitClause<T1,T2,T3,T4> Take(int n)
-        {
-            return this.OrderByNone().Take(n);
-        }
+        public LimitClause<T1,T2,T3,T4> Take(int n) =>
+            this.OrderByNone().Take(n);
 
         /// <summary>
         /// Returns a <see cref="LimitClause&lt;T&gt;"/> that skips a specified number of elements in the result set and then returns the remaining elements.
         /// </summary>
         /// <param name="n">The number of elements to skip before returning the remaining elements.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public OffsetClause<T1,T2,T3,T4> Skip(int n)
-        {
-            return this.OrderByNone().Skip(n);
-        }
+        public OffsetClause<T1,T2,T3,T4> Skip(int n) =>
+            this.OrderByNone().Skip(n);
 
         /// <summary>
         /// Returns a <see cref="LimitClause&lt;T&gt;"/> that returns the element at a specified index in the result set.
@@ -343,9 +319,7 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>The <see cref="LimitClause&lt;T&gt;"/>.</returns>
         /// <param name="index">The index of the element to retrieve.</param>
         /// <returns>A new <see cref="LimitClause&lt;T&gt;"/>.</returns>
-        public OffsetClause<T1,T2,T3,T4> ElementAt(int index)
-        {
-            return this.OrderByNone().ElementAt(index);
-        }
+        public OffsetClause<T1,T2,T3,T4> ElementAt(int index) =>
+            this.OrderByNone().ElementAt(index);
     }
 }

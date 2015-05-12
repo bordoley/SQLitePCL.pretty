@@ -102,10 +102,8 @@ namespace SQLitePCL.pretty
             base.Dispose(disposing);
         }
 
-        public override void Flush()
-        {
+        public override void Flush() =>
             blobStream.Flush();
-        }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
@@ -133,10 +131,8 @@ namespace SQLitePCL.pretty
             throw new NotSupportedException();
         }
 
-        public override void Write(byte[] buffer, int offset, int count)
-        {
+        public override void Write(byte[] buffer, int offset, int count) =>
             this.WriteAsync(buffer, offset, count).Wait();
-        }
 
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {

@@ -7,10 +7,8 @@ namespace SQLitePCL.pretty.Orm.Sql
 {
     internal static partial class SqlCompiler
     {   
-        internal static string CompileFromClause(params Type[] types)
-        {
-            return "FROM " + string.Join(", ", types.Select(x => "\"" + TableMapping.Get(x).TableName + "\""));
-        }
+        internal static string CompileFromClause(params Type[] types) =>
+            "FROM " + string.Join(", ", types.Select(x => "\"" + TableMapping.Get(x).TableName + "\""));
     }
 
     /// <summary>
@@ -29,10 +27,7 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// Returns a <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.FromClause"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.FromClause"/>.</returns>
-        public override string ToString()
-        {
-            return from;
-        }
+        public override string ToString() => from;
     }
 
     /// <summary>
@@ -61,18 +56,14 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <summary>
         /// Select all columns from the table.
         /// </summary>
-        public SelectClause<T> Select()
-        {
-            return new JoinClause<T>(this, new List<string>()).Select();
-        }
+        public SelectClause<T> Select() =>
+            new JoinClause<T>(this, new List<string>()).Select();
 
         /// <summary>
         /// Select all columns from the table returning only distinct rows.
         /// </summary>
-        public SelectClause<T> SelectDistinct()
-        {
-            return new JoinClause<T>(this, new List<string>()).SelectDistinct();
-        }
+        public SelectClause<T> SelectDistinct() =>
+            new JoinClause<T>(this, new List<string>()).SelectDistinct();
     }
 
     /// <summary>
@@ -101,18 +92,14 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <summary>
         /// Select all columns from the table.
         /// </summary>
-        public SelectClause<T1,T2> Select()
-        {
-            return new JoinClause<T1,T2>(this, new List<string>()).Select();
-        }
+        public SelectClause<T1,T2> Select() =>
+            new JoinClause<T1,T2>(this, new List<string>()).Select();
 
         /// <summary>
         /// Select all columns from the table returning only distinct rows.
         /// </summary>
-        public SelectClause<T1,T2> SelectDistinct()
-        {
-            return new JoinClause<T1,T2>(this, new List<string>()).SelectDistinct();
-        }
+        public SelectClause<T1,T2> SelectDistinct() =>
+            new JoinClause<T1,T2>(this, new List<string>()).SelectDistinct();
     }
 
     /// <summary>
@@ -141,18 +128,14 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <summary>
         /// Select all columns from the table.
         /// </summary>
-        public SelectClause<T1,T2,T3> Select()
-        {
-            return new JoinClause<T1,T2,T3>(this, new List<string>()).Select();
-        }
+        public SelectClause<T1,T2,T3> Select() =>
+            new JoinClause<T1,T2,T3>(this, new List<string>()).Select();
 
         /// <summary>
         /// Select all columns from the table returning only distinct rows.
         /// </summary>
-        public SelectClause<T1,T2,T3> SelectDistinct()
-        {
-            return new JoinClause<T1,T2,T3>(this, new List<string>()).SelectDistinct();
-        }
+        public SelectClause<T1,T2,T3> SelectDistinct() =>
+            new JoinClause<T1,T2,T3>(this, new List<string>()).SelectDistinct();
     }
 
     /// <summary>
@@ -167,18 +150,14 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <summary>
         /// Select all columns from the table.
         /// </summary>
-        public SelectClause<T1,T2,T3,T4> Select()
-        {
-            return new JoinClause<T1,T2,T3,T4>(this, new List<string>()).Select();
-        }
+        public SelectClause<T1,T2,T3,T4> Select() =>
+            new JoinClause<T1,T2,T3,T4>(this, new List<string>()).Select();
 
         /// <summary>
         /// Select all columns from the table returning only distinct rows.
         /// </summary>
-        public SelectClause<T1,T2,T3,T4> SelectDistinct()
-        {
-            return new JoinClause<T1,T2,T3,T4>(this, new List<string>()).SelectDistinct();
-        }
+        public SelectClause<T1,T2,T3,T4> SelectDistinct() =>
+            new JoinClause<T1,T2,T3,T4>(this, new List<string>()).SelectDistinct();
     }
 }
 

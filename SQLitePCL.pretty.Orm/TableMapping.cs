@@ -63,10 +63,8 @@ namespace SQLitePCL.pretty.Orm
         /// <param name="x">A TableMapping instance.</param>
         /// <param name="y">A TableMapping instance.</param>
         /// <returns><see langword="true"/> if the two instances are not equal to each other; otherwise,  <see langword="false"/>.</returns>
-        public static bool operator !=(TableMapping x, TableMapping y)
-        {
-            return !(x == y);
-        }
+        public static bool operator !=(TableMapping x, TableMapping y) =>
+            !(x == y);
 
         private static readonly ConditionalWeakTable<Type, TableMapping> tableMappings = 
             new ConditionalWeakTable<Type, TableMapping>();
@@ -75,15 +73,11 @@ namespace SQLitePCL.pretty.Orm
         /// Creates a table mapping instance that will use the given builder to build new instances.
         /// </summary>
         /// <typeparam name="T">The mapped type.</typeparam>
-        internal static TableMapping Get<T>()
-        {
-            return Get(typeof(T));
-        }
+        internal static TableMapping Get<T>() =>
+            Get(typeof(T));
 
-        internal static TableMapping Get(Type typ)
-        {
-            return tableMappings.GetValue(typ, t => CreateInternal(t));
-        }
+        internal static TableMapping Get(Type typ) =>
+            tableMappings.GetValue(typ, t => CreateInternal(t));
 
         private static TableMapping CreateInternal(Type mappedType)
         {
@@ -149,45 +143,40 @@ namespace SQLitePCL.pretty.Orm
             return new TableMapping(mappedType, tableName, columns, indexes);
         }
 
-        private readonly Type type;
-        private readonly string tableName;
-        private readonly IReadOnlyDictionary<string, ColumnMapping> columns;
-        private readonly IReadOnlyDictionary<string, IndexInfo> indexes;
-
         internal TableMapping(
             Type type,
             string tableName,
             IReadOnlyDictionary<string, ColumnMapping> columns,
             IReadOnlyDictionary<string, IndexInfo> indexes)
         {
-            this.type = type;
-            this.tableName = tableName;
-            this.columns = columns;
-            this.indexes = indexes;
+            this.Type = type;
+            this.TableName = tableName;
+            this.Columns = columns;
+            this.Indexes = indexes;
         }
 
         /// <summary>
         /// The clr type that is mapped by the TableMapping.
         /// </summary>
-        public Type Type { get { return type; } }
+        public Type Type { get; }
 
         /// <summary>
         /// Gets the name of the table.
         /// </summary>
         /// <value>The name of the table.</value>
-        public String TableName { get { return tableName; } }
+        public String TableName { get; }
 
         /// <summary>
         /// Gets the table indexes.
         /// </summary>
         /// <value>The indexes.</value>
-        public IReadOnlyDictionary<string, IndexInfo> Indexes { get { return indexes; } }
+        public IReadOnlyDictionary<string, IndexInfo> Indexes { get; }
 
         /// <summary>
         /// Gets the table columns.
         /// </summary>
         /// <value>The columns.</value>
-        public IReadOnlyDictionary<string,ColumnMapping> Columns { get { return columns; } }
+        public IReadOnlyDictionary<string,ColumnMapping> Columns { get; }
 
         /// <inheritdoc/>
         public bool Equals(TableMapping other)
@@ -209,10 +198,8 @@ namespace SQLitePCL.pretty.Orm
         }
 
         /// <inheritdoc/>
-        public override bool Equals(object other)
-        {
-            return other is TableMapping && this == (TableMapping)other;
-        }
+        public override bool Equals(object other) =>
+            other is TableMapping && this == (TableMapping)other;
 
         /// <inheritdoc/>
         public override int GetHashCode()
@@ -231,13 +218,11 @@ namespace SQLitePCL.pretty.Orm
         private static readonly ConditionalWeakTable<TableMapping, string> primaryKeyColumn = 
             new ConditionalWeakTable<TableMapping, string>();
 
-        internal static string PrimaryKeyColumn(this TableMapping This)
-        {
-            return primaryKeyColumn.GetValue(This, mapping => 
+        internal static string PrimaryKeyColumn(this TableMapping This) =>
+            primaryKeyColumn.GetValue(This, mapping => 
                 // Intentionally throw if the column doesn't have a primary key
                 mapping.Columns.Where(x => 
                     x.Value.Metadata.IsPrimaryKeyPart).Select(x => x.Key).First());
-        } 
 
         internal static KeyValuePair<string,ColumnMapping> GetColumnMapping(this PropertyInfo This)
         {
@@ -347,11 +332,9 @@ namespace SQLitePCL.pretty.Orm
 
     internal static class EnumerableExt
     {
-        internal static bool Equivalent<Key,Value>(this IReadOnlyDictionary<Key,Value> This, IReadOnlyDictionary<Key,Value> other)
-        {
-            return (This.Keys.Count() == other.Keys.Count()) &&
+        internal static bool Equivalent<Key,Value>(this IReadOnlyDictionary<Key,Value> This, IReadOnlyDictionary<Key,Value> other) =>
+            (This.Keys.Count() == other.Keys.Count()) &&
                 This.Keys.All(k => 
                     other.ContainsKey(k) && object.Equals(other[k], This[k]));
-        }
     }
 }
