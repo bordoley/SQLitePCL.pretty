@@ -692,15 +692,12 @@ namespace SQLitePCL.pretty
         private sealed class DatabaseConnectionWrapper : IDatabaseConnection, IDisposable
         {
             private readonly SQLiteDatabaseConnection db;
-            private readonly int initialTotalChanges;
 
             private bool disposed = false;
 
             internal DatabaseConnectionWrapper(SQLiteDatabaseConnection db)
             {
                 this.db = db;
-
-                this.initialTotalChanges = db.TotalChanges;
             }
 
             public bool IsAutoCommit
@@ -735,7 +732,7 @@ namespace SQLitePCL.pretty
                 get
                 {
                     if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-                    return db.TotalChanges - initialTotalChanges;
+                    return db.TotalChanges;
                 }
             }
 
