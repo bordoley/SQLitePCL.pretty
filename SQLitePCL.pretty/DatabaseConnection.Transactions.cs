@@ -37,35 +37,12 @@ namespace SQLitePCL.pretty
     {
         private readonly IDatabaseConnection db;
 
-        private readonly EventHandler rollback;
-        private readonly EventHandler<DatabaseTraceEventArgs> trace;
-        private readonly EventHandler<DatabaseProfileEventArgs> profile;
-        private readonly EventHandler<DatabaseUpdateEventArgs> update;
-
         private bool disposed = false;
 
         internal TransactionDatabaseConnection(IDatabaseConnection db)
         {
             this.db = db;
-
-            this.rollback = (o, e) => this.Rollback(this, e);
-            this.trace = (o, e) => this.Trace(this, e);
-            this.profile = (o, e) => this.Profile(this, e);
-            this.update = (o, e) => this.Update(this, e);
-
-            db.Rollback += rollback;
-            db.Trace += trace;
-            db.Profile += profile;
-            db.Update += update;
         }
-
-        public event EventHandler Rollback = (o, e) => { };
-
-        public event EventHandler<DatabaseTraceEventArgs> Trace = (o, e) => { };
-
-        public event EventHandler<DatabaseProfileEventArgs> Profile = (o, e) => { };
-
-        public event EventHandler<DatabaseUpdateEventArgs> Update = (o, e) => { };
 
         public bool IsAutoCommit
         {
@@ -160,11 +137,6 @@ namespace SQLitePCL.pretty
 
         public void Dispose()
         {
-            db.Rollback -= rollback;
-            db.Trace -= trace;
-            db.Profile -= profile;
-            db.Update -= update;
-
             // Guard against someone taking a reference to this and trying to use it outside of
             // the Use function delegate
             disposed = true;

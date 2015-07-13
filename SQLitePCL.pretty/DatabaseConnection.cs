@@ -840,16 +840,28 @@ namespace SQLitePCL.pretty
         // FIXME: One could argue that we really shouldn't initialized the callbacks
         // with sqlite3 until we actually have listeners. not sure how much it matters though
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Occurs whenever a transaction is rolled back on the database connection.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/commit_hook.html"/>
         public event EventHandler Rollback = (o, e) => { };
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Profiling event that occurs when a <see cref="IStatement"/> finishes.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/profile.html"/>
         public event EventHandler<DatabaseProfileEventArgs> Profile = (o, e) => { };
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Tracing event that occurs at various times when <see cref="IStatement"/>is running.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/profile.html"/>
         public event EventHandler<DatabaseTraceEventArgs> Trace = (o, e) => { };
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Occurs whenever a row is updated, inserted or deleted in a rowid table.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/update_hook.html"/>
         public event EventHandler<DatabaseUpdateEventArgs> Update = (o, e) => { };
 
         internal event EventHandler Disposing = (o, e) => { };

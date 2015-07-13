@@ -26,14 +26,6 @@ namespace SQLitePCL.pretty
     [ContractClassFor(typeof(IDatabaseConnection))]
     internal abstract class IDatabaseConnectionContract : IDatabaseConnection
     {
-        public abstract event EventHandler Rollback;
-
-        public abstract event EventHandler<DatabaseTraceEventArgs> Trace;
-
-        public abstract event EventHandler<DatabaseProfileEventArgs> Profile;
-
-        public abstract event EventHandler<DatabaseUpdateEventArgs> Update;
-
         public abstract bool IsAutoCommit { get; }
 
         public abstract bool IsReadOnly { get; }

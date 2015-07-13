@@ -162,77 +162,7 @@ namespace SQLitePCL.pretty.tests
                 });
             }
         }
-
-        [Fact]
-        public async Task TestIDatabaseConnectionEvents()
-        {
-            using (var adb = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
-            {
-                bool expectEvent = true;
-
-                await adb.Use(db =>
-                {
-                    bool profile = false;
-                    bool trace = false;
-                    bool rollback = false;
-                    bool update = false;
-
-                    db.Profile += (o, e) =>
-                        {
-                            profile = true;
-                            Assert.True(expectEvent);
-                        };
-
-                    db.Trace += (o, e) =>
-                        {
-                            trace = true;
-                            Assert.True(expectEvent);
-                        };
-
-                    db.Rollback += (o, e) =>
-                        {
-                            rollback = true;
-                            Assert.True(expectEvent);
-                        };
-
-                    db.Update += (o, e) =>
-                        {
-                            update = true;
-                            Assert.True(expectEvent);
-                        };
-
-                    db.ExecuteAll(
-                      @"CREATE TABLE foo (x int);
-                        INSERT INTO foo (x) VALUES (1);
-                        BEGIN TRANSACTION;
-                        INSERT INTO foo (x) VALUES (2);
-                        ROLLBACK TRANSACTION;
-                        BEGIN TRANSACTION;
-                        INSERT INTO foo (x) VALUES (2);
-                        COMMIT;");
-
-                    Assert.True(profile);
-                    Assert.True(trace);
-                    Assert.True(rollback);
-                    Assert.True(update);
-                });
-
-                // Test to ensure the event handlers are not called.
-                expectEvent = false;
-                await adb.Use(db =>
-                {
-                    db.ExecuteAll(
-                      @"INSERT INTO foo (x) VALUES (1);
-                        BEGIN TRANSACTION;
-                        INSERT INTO foo (x) VALUES (2);
-                        ROLLBACK TRANSACTION;
-                        BEGIN TRANSACTION;
-                        INSERT INTO foo (x) VALUES (2);
-                        COMMIT;");
-                });
-            }
-        }
-
+            
         [Fact]
         public async Task TestIDatabaseConnectionDispose()
         {

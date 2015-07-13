@@ -30,30 +30,6 @@ namespace SQLitePCL.pretty
     public interface IDatabaseConnection
     {
         /// <summary>
-        /// Occurs whenever a transaction is rolled back on the database connection.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/commit_hook.html"/>
-        event EventHandler Rollback;
-
-        /// <summary>
-        /// Tracing event that occurs at various times when <see cref="IStatement"/>is running.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/profile.html"/>
-        event EventHandler<DatabaseTraceEventArgs> Trace;
-
-        /// <summary>
-        /// Profiling event that occurs when a <see cref="IStatement"/> finishes.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/profile.html"/>
-        event EventHandler<DatabaseProfileEventArgs> Profile;
-
-        /// <summary>
-        /// Occurs whenever a row is updated, inserted or deleted in a rowid table.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/update_hook.html"/>
-        event EventHandler<DatabaseUpdateEventArgs> Update;
-
-        /// <summary>
         /// Returns true if the given database connection is in autocommit mode,
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/get_autocommit.html"/>
