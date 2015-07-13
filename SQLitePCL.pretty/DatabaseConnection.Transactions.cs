@@ -33,7 +33,7 @@ using System.IO;
 
 namespace SQLitePCL.pretty
 {
-    internal sealed class TransactionDatabaseConnection : IDatabaseConnection
+    internal sealed class TransactionDatabaseConnection : IDatabaseConnection, IDisposable
     {
         private readonly IDatabaseConnection db;
 

@@ -805,7 +805,7 @@ namespace SQLitePCL.pretty
     /// <summary>
     /// An implementation of IDatabaseConnection that wraps a raw SQLite database connection.
     /// </summary>
-    public sealed class SQLiteDatabaseConnection : IDatabaseConnection
+    public sealed class SQLiteDatabaseConnection : IDatabaseConnection, IDisposable
     {
         private readonly sqlite3 db;
         private readonly OrderedSet<StatementImpl> statements = new OrderedSet<StatementImpl>();

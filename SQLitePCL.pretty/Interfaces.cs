@@ -27,7 +27,7 @@ namespace SQLitePCL.pretty
     /// </summary>
     /// <seealso href="https://sqlite.org/c3ref/sqlite3.html"/>
     [ContractClass(typeof(IDatabaseConnectionContract))]
-    public interface IDatabaseConnection : IDisposable
+    public interface IDatabaseConnection
     {
         /// <summary>
         /// Occurs whenever a transaction is rolled back on the database connection.

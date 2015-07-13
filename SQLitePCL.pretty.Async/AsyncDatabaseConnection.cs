@@ -689,7 +689,7 @@ namespace SQLitePCL.pretty
         // FIXME: Move this into SQLitePCL.pretty as an internal class so that the ORM
         // can use introspect the type and get the underlying db connection for adding 
         // dynamice properties to the connections.
-        private sealed class DatabaseConnectionWrapper : IDatabaseConnection
+        private sealed class DatabaseConnectionWrapper : IDatabaseConnection, IDisposable
         {
             private readonly SQLiteDatabaseConnection db;
             private readonly OrderedSet<StatementWrapper> statements = new OrderedSet<StatementWrapper>();

@@ -240,6 +240,8 @@ namespace SQLitePCL.pretty.tests
             {
                 await adb.ExecuteAsync("CREATE TABLE foo (x int);");
 
+                IDatabaseConnection disposedDb = null;
+
                 await adb.Use(db =>
                 {
                     // Assert these don't throw
@@ -257,21 +259,24 @@ namespace SQLitePCL.pretty.tests
                     { db.Status(DatabaseConnectionStatusCode.CacheMiss, out current, out highwater, false); };
                     { db.WalCheckPoint("main"); };
 
-                    db.Dispose();
-
-                    Assert.Throws<ObjectDisposedException>(() => { var x = db.IsAutoCommit; });
-                    Assert.Throws<ObjectDisposedException>(() => { var x = db.IsReadOnly; });
-                    Assert.Throws<ObjectDisposedException>(() => { var x = db.Changes; });
-                    Assert.Throws<ObjectDisposedException>(() => { var x = db.TotalChanges; });
-                    Assert.Throws<ObjectDisposedException>(() => { var x = db.LastInsertedRowId; });
-                    Assert.Throws<ObjectDisposedException>(() => { var x = db.Statements; });
-                    Assert.Throws<ObjectDisposedException>(() => { var x = db.IsDatabaseReadOnly("main"); });
-                    Assert.Throws<ObjectDisposedException>(() => { var x = db.OpenBlob("", "", "", 0, true); });
-                    Assert.Throws<ObjectDisposedException>(() => { var x = db.GetTableColumnMetadata("", "", ""); });
-                    Assert.Throws<ObjectDisposedException>(() => db.PrepareStatement("SELECT x FROM foo;"));
-                    Assert.Throws<ObjectDisposedException>(() => { db.Status(DatabaseConnectionStatusCode.CacheMiss, out current, out highwater, false); });
-                    Assert.Throws<ObjectDisposedException>(() => { db.WalCheckPoint("main"); });
+                    disposedDb = db;
                 });
+
+                Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.IsAutoCommit; });
+                Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.IsReadOnly; });
+                Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.Changes; });
+                Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.TotalChanges; });
+                Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.LastInsertedRowId; });
+                Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.Statements; });
+                Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.IsDatabaseReadOnly("main"); });
+                Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.OpenBlob("", "", "", 0, true); });
+                Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.GetTableColumnMetadata("", "", ""); });
+                Assert.Throws<ObjectDisposedException>(() => disposedDb.PrepareStatement("SELECT x FROM foo;"));
+
+                int current2;
+                int highwater2;
+                Assert.Throws<ObjectDisposedException>(() => { disposedDb.Status(DatabaseConnectionStatusCode.CacheMiss, out current2, out highwater2, false); });
+                Assert.Throws<ObjectDisposedException>(() => { disposedDb.WalCheckPoint("main"); });
 
                 await adb.Use(db =>
                     {
