@@ -25,12 +25,6 @@ namespace SQLitePCL.pretty
     [ContractClassFor(typeof(IAsyncDatabaseConnection))]
     internal abstract class IAsyncDatabaseConnectionContract : IAsyncDatabaseConnection
     {
-        public abstract IObservable<DatabaseTraceEventArgs> Trace { get; }
-
-        public abstract IObservable<DatabaseProfileEventArgs> Profile { get; }
-
-        public abstract IObservable<DatabaseUpdateEventArgs> Update { get; }
-
         public abstract void Dispose();
 
         public abstract Task DisposeAsync();

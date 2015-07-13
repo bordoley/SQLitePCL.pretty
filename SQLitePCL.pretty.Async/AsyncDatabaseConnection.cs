@@ -548,9 +548,6 @@ namespace SQLitePCL.pretty
         private readonly int interruptInstructionCount;
 
         private readonly SQLiteDatabaseConnection conn;
-        private readonly IObservable<DatabaseTraceEventArgs> trace;
-        private readonly IObservable<DatabaseProfileEventArgs> profile;
-        private readonly IObservable<DatabaseUpdateEventArgs> update;
 
         private bool disposed = false;
 
@@ -559,34 +556,6 @@ namespace SQLitePCL.pretty
             this.conn = conn;
             this.scheduler = scheduler;
             this.interruptInstructionCount = interruptInstructionCount;
-
-            this.trace = Observable.FromEventPattern<DatabaseTraceEventArgs>(conn, "Trace").Select(e => e.EventArgs);
-            this.profile = Observable.FromEventPattern<DatabaseProfileEventArgs>(conn, "Profile").Select(e => e.EventArgs);
-            this.update = Observable.FromEventPattern<DatabaseUpdateEventArgs>(conn, "Update").Select(e => e.EventArgs);
-        }
-
-        public IObservable<DatabaseTraceEventArgs> Trace
-        {
-            get
-            {
-                return trace;
-            }
-        }
-
-        public IObservable<DatabaseProfileEventArgs> Profile
-        {
-            get
-            {
-                return profile;
-            }
-        }
-
-        public IObservable<DatabaseUpdateEventArgs> Update
-        {
-            get
-            {
-                return update;
-            }
         }
 
         public async Task DisposeAsync()
