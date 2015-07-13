@@ -29,9 +29,149 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.IO;
 
 namespace SQLitePCL.pretty
 {
+	internal sealed class TransactionDatabaseConnection : IDatabaseConnection
+	{
+		private readonly IDatabaseConnection db;
+
+		private readonly EventHandler rollback;
+		private readonly EventHandler<DatabaseTraceEventArgs> trace;
+		private readonly EventHandler<DatabaseProfileEventArgs> profile;
+		private readonly EventHandler<DatabaseUpdateEventArgs> update;
+
+		private bool disposed = false;
+
+		internal TransactionDatabaseConnection(IDatabaseConnection db)
+		{
+			this.db = db;
+
+			this.rollback = (o, e) => this.Rollback(this, e);
+			this.trace = (o, e) => this.Trace(this, e);
+			this.profile = (o, e) => this.Profile(this, e);
+			this.update = (o, e) => this.Update(this, e);
+
+			db.Rollback += rollback;
+			db.Trace += trace;
+			db.Profile += profile;
+			db.Update += update;
+		}
+
+		public event EventHandler Rollback = (o, e) => { };
+
+		public event EventHandler<DatabaseTraceEventArgs> Trace = (o, e) => { };
+
+		public event EventHandler<DatabaseProfileEventArgs> Profile = (o, e) => { };
+
+		public event EventHandler<DatabaseUpdateEventArgs> Update = (o, e) => { };
+
+		public bool IsAutoCommit
+		{
+			get
+			{
+				if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+				return db.IsAutoCommit;
+			}
+		}
+
+		public bool IsReadOnly
+		{
+			get
+			{
+				if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+				return db.IsReadOnly;
+			}
+		}
+
+		public int Changes
+		{
+			get
+			{
+				if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+				return db.Changes;
+			}
+		}
+
+		public int TotalChanges
+		{
+			get
+			{
+				if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+				return db.TotalChanges;
+			}
+		}
+
+		public long LastInsertedRowId
+		{
+			get
+			{
+				if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+				return db.LastInsertedRowId;
+			}
+		}
+
+		public IEnumerable<IStatement> Statements
+		{
+			get
+			{
+				if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+				return db.Statements;
+			}
+		}
+
+		public void WalCheckPoint(string dbName, WalCheckPointMode mode, out int nLog, out int nCkpt)
+		{
+			if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+			db.WalCheckPoint(dbName, mode, out nLog, out nCkpt);
+		}
+
+		public bool IsDatabaseReadOnly(string dbName)
+		{
+			if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+			return db.IsDatabaseReadOnly(dbName);
+		}
+
+		public TableColumnMetadata GetTableColumnMetadata(string dbName, string tableName, string columnName)
+		{
+			if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+			return db.GetTableColumnMetadata(dbName, tableName, columnName);
+		}
+
+		public Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite)
+		{
+			if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+			return db.OpenBlob(database, tableName, columnName, rowId, canWrite);
+		}
+
+		public IStatement PrepareStatement(string sql, out string tail)
+		{
+			if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+			return db.PrepareStatement(sql, out tail);
+		}
+
+		public void Status(DatabaseConnectionStatusCode statusCode, out int current, out int highwater, bool reset)
+		{
+			if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+			this.db.Status(statusCode, out current, out highwater, reset);
+		}
+
+		public void Dispose()
+		{
+			db.Rollback -= rollback;
+			db.Trace -= trace;
+			db.Profile -= profile;
+			db.Update -= update;
+
+			// Guard against someone taking a reference to this and trying to use it outside of
+			// the Use function delegate
+			disposed = true;
+			// We don't actually own the database connection so its not disposed
+		}
+	}
+
     /// <summary>
     /// Database transaction modes.
     /// </summary>
@@ -59,132 +199,38 @@ namespace SQLitePCL.pretty
 
     public static partial class DatabaseConnection
     {
-        private const string TransactionStackKey = "TransactionStack";
-
         private static readonly ThreadLocal<Random> _rand = new ThreadLocal<Random>(() => new Random());
 
-        private static Stack<string> GetTransactionStack(this IDatabaseConnection This)
+		private static void BeginTransaction(this IDatabaseConnection This, TransactionMode mode)
         {
-            return DatabaseConnectionExpando.Instance.GetOrAddValue(This, TransactionStackKey, _ => Stack<string>.Empty);
-        }
-
-        private static void SetTransactionStack(this IDatabaseConnection This, Stack<string> stack)
-        {
-            DatabaseConnectionExpando.Instance.SetValue(This, TransactionStackKey, stack);
-        }
-
-        private static void ResetTransactionStack(this IDatabaseConnection This)
-        {
-            This.SetTransactionStack(Stack<string>.Empty);
-        }
-
-        private static void PushSavePoint(this IDatabaseConnection This, string savepoint)
-        {
-            
-            This.SetTransactionStack(This.GetTransactionStack().Push(savepoint));
-        }
-
-        private static void PopTransactionStackToSavePoint(this IDatabaseConnection This, string savepoint)
-        {
-            var transactionStack = This.GetTransactionStack();
-            var result = transactionStack;
-            while (result.Head != savepoint)
-            {
-                if (result.IsEmpty())
-                { 
-                    // This can't actually happen, since we don't expose the underlaying SaveTransactionPoint and ReleaseTransaction APIs
-                    throw new ArgumentException("savePoint is not valid, and should be the result of a call to SaveTransactionPoint.", "savePoint");
-                }
-                result = result.Tail;
-            }
-
-            This.SetTransactionStack(result);
-        }
-
-        /// <summary>
-        /// Begins a SQLite transaction using the specified transaction mode.
-        /// </summary>
-        /// <param name="This">The database connection.</param>
-        /// <param name="mode">The transaction mode.</param>
-        private static void BeginTransaction(this IDatabaseConnection This, TransactionMode mode)
-        {
-            Contract.Requires(This != null);
-
-            var transactionStack = This.GetTransactionStack();
-
-            // Can't actually happen
-            if (!transactionStack.IsEmpty()) { throw new InvalidOperationException(); }
-
             var beginTransactionString = SQLBuilder.BeginTransactionWithMode(mode);
             This.Execute(beginTransactionString);
-            This.PushSavePoint(beginTransactionString);
         }
-
-        /// <summary>
-        /// Executes the SQLite SAVEPOINT command, starting a new transaction with a name.
-        /// </summary>
-        /// <returns>The savepoint name.</returns>
-        /// <param name="This">The database connection.</param>
+			
         private static string SaveTransactionPoint(this IDatabaseConnection This)
         {
-            Contract.Requires(This != null);
-
             var savePoint = "S" + _rand.Value.Next (short.MaxValue);
             This.Execute(SQLBuilder.SavePoint(savePoint));
-            This.PushSavePoint(savePoint);
             return savePoint;
         }
-
-        /// <summary>
-        /// Executes the SQLite RELEASE command with the given savepoint (similar to COMMIT).
-        /// </summary>
-        /// <param name="This">The database connection.</param>
-        /// <param name="savepoint">The savepoint</param>
-        /// <seealso href="https://www.sqlite.org/lang_savepoint.html"/>
+			
         private static void ReleaseTransaction(this IDatabaseConnection This, string savepoint)
         {
-            Contract.Requires(This != null);
-            Contract.Requires(savepoint != null);
-
-            This.PopTransactionStackToSavePoint(savepoint);
             This.Execute(SQLBuilder.Release(savepoint));
         }
-
-        /// <summary>
-        /// Commits the current transaction.
-        /// </summary>
-        /// <param name="This">The database connection.</param>
+			
         private static void CommitTransaction(this IDatabaseConnection This)
         {
-            Contract.Requires(This != null);
-
-            This.ResetTransactionStack();
             This.Execute(SQLBuilder.CommitTransaction);
         }
-
-        /// <summary>
-        /// Rollbacks the current transaction to a specific savepoint.
-        /// </summary>
-        /// <param name="This">This.</param>
-        /// <param name="savepoint">The savepoint.</param>
-        /// <seealso href="https://www.sqlite.org/lang_transaction.html"/>
+			
         private static void RollbackTransactionTo(this IDatabaseConnection This, string savepoint)
         {
-            Contract.Requires(This != null);
-
-            This.PopTransactionStackToSavePoint(savepoint);
             This.Execute(SQLBuilder.RollbackTransactionTo(savepoint));
         }
-
-        /// <summary>
-        /// Rollback the current transaction.
-        /// </summary>
-        /// <param name="This">The database connection.</param>
-        /// <seealso href="https://www.sqlite.org/lang_transaction.html"/>
+			
         private static void RollbackTransaction(this IDatabaseConnection This)
         {
-            Contract.Requires(This != null);
-            This.ResetTransactionStack();
             This.Execute(SQLBuilder.RollbackTransaction);
         }
 
@@ -249,39 +295,44 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(f != null);
 
-            bool beganTransaction = false;
-            if (This.GetTransactionStack().IsEmpty())
-            {
-                beganTransaction = true;
-                This.BeginTransaction(mode);
-            }
+			using(var db = new TransactionDatabaseConnection(This))
+			{
+				string savePoint = null;
 
-            var savePoint = This.SaveTransactionPoint();
+				if (This is TransactionDatabaseConnection) 
+				{
+					savePoint = db.SaveTransactionPoint();
+				}
 
-            try
-            {
-                var retval = f(This);
-                This.ReleaseTransaction(savePoint);
+				try
+				{
+					var retval = f(db);
 
-                if (beganTransaction) 
-                { 
-                    This.CommitTransaction(); 
-                } 
+					if (savePoint != null)
+					{
+						db.ReleaseTransaction(savePoint);
+					}
+					else
+					{
+						db.CommitTransaction(); 
+					} 
 
-                return retval;
-            }
-            catch (Exception)
-            {
-                if (beganTransaction)
-                {
-                    This.RollbackTransaction();
-                }
-                else
-                {
-                    This.RollbackTransactionTo(savePoint);
-                }
-                throw;
-            }
+					return retval;
+				}
+				catch (Exception)
+				{
+					if (savePoint != null) 
+					{
+						db.RollbackTransactionTo(savePoint);
+					}
+					else
+					{
+						db.RollbackTransaction();
+					}
+
+					throw;
+				}
+			}
         }
 
         /// <summary>
