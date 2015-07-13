@@ -89,15 +89,6 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public IEnumerable<IStatement> Statements
-        {
-            get
-            {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-                return db.Statements;
-            }
-        }
-
         public void WalCheckPoint(string dbName, WalCheckPointMode mode, out int nLog, out int nCkpt)
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }

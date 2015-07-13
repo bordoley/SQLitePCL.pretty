@@ -936,7 +936,9 @@ namespace SQLitePCL.pretty
             }
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// An enumeration of the connection's currently opened statements in the order they were prepared.
+        /// </summary>
         public IEnumerable<IStatement> Statements
         {
             get

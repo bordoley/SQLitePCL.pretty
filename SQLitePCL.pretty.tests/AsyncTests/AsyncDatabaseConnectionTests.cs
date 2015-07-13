@@ -127,41 +127,6 @@ namespace SQLitePCL.pretty.tests
                 Assert.ThrowsAsync<ObjectDisposedException>(async () => await adb.Use(db => { }));
             }
         }
-
-        [Fact]
-        public async Task TestIDatabaseConnectionStatements()
-        {
-            using (var adb = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
-            {
-                await adb.ExecuteAsync("CREATE TABLE foo (x int);");
-                var someStatements = await adb.PrepareAllAsync(
-                    @"INSERT INTO foo (x) VALUES (1);
-                      BEGIN TRANSACTION;
-                      INSERT INTO foo (x) VALUES (2);
-                      ROLLBACK TRANSACTION;
-                      BEGIN TRANSACTION;
-                      INSERT INTO foo (x) VALUES (2);
-                      COMMIT;");
-
-                await adb.Use(db =>
-                {
-                    var stmt1 = db.PrepareStatement("INSERT INTO foo (x) VALUES (?);");
-                    var stmt2 = db.PrepareStatement("SELECT * FROM foo");
-                    var stmt3 = db.PrepareStatement("SELECT rowid, x FROM foo");
-
-                    var stmts = new HashSet<IStatement>() { stmt1, stmt2, stmt3 };
-
-                    int count = 0;
-                    foreach (var stmt in db.Statements)
-                    {
-                        count++;
-                        Assert.True(stmts.Contains(stmt));
-                    }
-
-                    Assert.Equal(count, stmts.Count);
-                });
-            }
-        }
             
         [Fact]
         public async Task TestIDatabaseConnectionDispose()
@@ -180,7 +145,6 @@ namespace SQLitePCL.pretty.tests
                     { var x = db.Changes; }
                     { var x = db.TotalChanges; }
                     { var x = db.LastInsertedRowId; };
-                    { var x = db.Statements; };
                     { var x = db.IsDatabaseReadOnly("main"); };
                     { using (var stmt = db.PrepareStatement("SELECT x FROM foo;")) { } };
 
@@ -197,7 +161,6 @@ namespace SQLitePCL.pretty.tests
                 Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.Changes; });
                 Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.TotalChanges; });
                 Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.LastInsertedRowId; });
-                Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.Statements; });
                 Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.IsDatabaseReadOnly("main"); });
                 Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.OpenBlob("", "", "", 0, true); });
                 Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.GetTableColumnMetadata("", "", ""); });

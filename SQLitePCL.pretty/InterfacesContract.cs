@@ -36,8 +36,6 @@ namespace SQLitePCL.pretty
 
         public abstract long LastInsertedRowId { get; }
 
-        public abstract IEnumerable<IStatement> Statements { get; }
-
         public void WalCheckPoint(string dbName, WalCheckPointMode mode, out int nLog, out int nCkpt)
         {
             Contract.Requires(dbName != null);
@@ -50,8 +48,6 @@ namespace SQLitePCL.pretty
             Contract.Requires(dbName != null);
             return default(bool);
         }
-
-        public abstract void Dispose();
 
         public TableColumnMetadata GetTableColumnMetadata(string dbName, string tableName, string columnName)
         {

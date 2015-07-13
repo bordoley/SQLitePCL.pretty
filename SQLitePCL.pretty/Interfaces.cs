@@ -61,11 +61,6 @@ namespace SQLitePCL.pretty
         long LastInsertedRowId { get; }
 
         /// <summary>
-        /// An enumeration of the connection's currently opened statements in the order they were prepared.
-        /// </summary>
-        IEnumerable<IStatement> Statements { get; }
-
-        /// <summary>
         /// Returns metadata about a specific column of a specific database table,
         /// </summary>
         /// <param name="dbName">

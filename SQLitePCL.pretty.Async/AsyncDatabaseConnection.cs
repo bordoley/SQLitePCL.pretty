@@ -692,7 +692,6 @@ namespace SQLitePCL.pretty
         private sealed class DatabaseConnectionWrapper : IDatabaseConnection, IDisposable
         {
             private readonly SQLiteDatabaseConnection db;
-            private readonly OrderedSet<StatementWrapper> statements = new OrderedSet<StatementWrapper>();
             private readonly int initialTotalChanges;
 
             private bool disposed = false;
@@ -749,19 +748,6 @@ namespace SQLitePCL.pretty
                 }
             }
 
-            public IEnumerable<IStatement> Statements
-            {
-                get
-                {
-                    if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-
-                    // Reverse the order of the statements to match the order returned by SQLite.
-                    // Side benefit of preventing callers from being able to cast the statement 
-                    // list and do evil things see: http://stackoverflow.com/a/491591
-                    return this.statements.Reverse();
-                }
-            }
-
             public void WalCheckPoint(string dbName, WalCheckPointMode mode, out int nLog, out int nCkpt)
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
@@ -772,11 +758,6 @@ namespace SQLitePCL.pretty
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
                 return db.IsDatabaseReadOnly(dbName);
-            }
-
-            internal void RemoveStatement(StatementWrapper stmt)
-            {
-                statements.Remove(stmt);
             }
 
             public TableColumnMetadata GetTableColumnMetadata(string dbName, string tableName, string columnName)
@@ -795,10 +776,7 @@ namespace SQLitePCL.pretty
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-                var stmt = db.PrepareStatement(sql, out tail);
-                var retval = new StatementWrapper(stmt, this);
-                this.statements.Add(retval);
-                return retval;
+                return db.PrepareStatement(sql, out tail);
             }
 
             public void Status(DatabaseConnectionStatusCode statusCode, out int current, out int highwater, bool reset)
@@ -813,88 +791,6 @@ namespace SQLitePCL.pretty
                 // the Use function delegate
                 disposed = true;
                 // We don't actually own the database connection so its not disposed
-            }
-        }
-
-        private class StatementWrapper : IStatement
-        {
-            internal readonly IStatement stmt;
-            private readonly WeakReference<DatabaseConnectionWrapper> db;
-
-            internal StatementWrapper(IStatement stmt, DatabaseConnectionWrapper db)
-            {
-                this.stmt = stmt;
-
-                // The statement may outlive the connection wrapper.
-                // This is ok as long as the statement is disposed prior to disposing
-                // The actual underlying database connection.
-                this.db = new WeakReference<DatabaseConnectionWrapper>(db);
-            }
-
-            public IReadOnlyOrderedDictionary<string, IBindParameter> BindParameters
-            {
-                get { return stmt.BindParameters; }
-            }
-
-            public IReadOnlyList<ColumnInfo> Columns
-            {
-                get { return stmt.Columns; }
-            }
-
-            public string SQL
-            {
-                get { return stmt.SQL; }
-            }
-
-            public bool IsReadOnly
-            {
-                get { return stmt.IsReadOnly; }
-            }
-
-            public bool IsBusy
-            {
-                get { return stmt.IsBusy; }
-            }
-
-            public void ClearBindings()
-            {
-                stmt.ClearBindings();
-            }
-
-            public IReadOnlyList<IResultSetValue> Current
-            {
-                get { return stmt.Current; }
-            }
-
-            object System.Collections.IEnumerator.Current
-            {
-                get { return stmt.Current; }
-            }
-
-            public bool MoveNext()
-            {
-                return stmt.MoveNext();
-            }
-
-            public void Reset()
-            {
-                stmt.Reset();
-            }
-
-            public void Dispose()
-            {
-                DatabaseConnectionWrapper conn;
-                if (db.TryGetTarget(out conn))
-                {
-                    conn.RemoveStatement(this);
-                }
-
-                stmt.Dispose();
-            }
-
-            public int Status(StatementStatusCode statusCode, bool reset)
-            {
-                return stmt.Status(statusCode, reset);
             }
         }
     }
