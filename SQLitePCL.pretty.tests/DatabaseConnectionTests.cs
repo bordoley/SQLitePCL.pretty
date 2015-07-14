@@ -744,7 +744,7 @@ namespace SQLitePCL.pretty.tests
             using (var db = SQLite3.OpenInMemory())
             {
                 // VACUUM can't be called during a transaction so its a good negative confirmation test.
-                Assert.Throws<SQLiteException>(() => db.RunInTransaction(_ => db.Vacuum()));
+                Assert.Throws<SQLiteException>(() => db.RunInTransaction(tdb => tdb.Vacuum()));
                 db.Vacuum();
             }
         }
@@ -754,33 +754,33 @@ namespace SQLitePCL.pretty.tests
         {
             using (var db = SQLite3.OpenInMemory())
             {
-                var result = db.RunInTransaction(_ =>
+                var result = db.RunInTransaction(tdb =>
                     {
-                        db.RunInTransaction(__ => db.Execute("CREATE TABLE foo (x int);"));
-                        db.TryRunInTransaction(__ =>
+                        tdb.RunInTransaction(_tdb => _tdb.Execute("CREATE TABLE foo (x int);"));
+                        tdb.TryRunInTransaction(_tdb =>
                             {
-                                db.Execute("INSERT INTO foo (x) VALUES (1);");
-                                db.Execute("INSERT INTO foo (x) VALUES (2);");
-                                db.Execute("INSERT INTO foo (x) VALUES (3);");
+                                _tdb.Execute("INSERT INTO foo (x) VALUES (1);");
+                                _tdb.Execute("INSERT INTO foo (x) VALUES (2);");
+                                _tdb.Execute("INSERT INTO foo (x) VALUES (3);");
                             });
-                        Assert.Equal(db.Query("SELECT * FROM foo").SelectScalarInt().ToList(), new int[]{ 1, 2, 3 });
+                        Assert.Equal(tdb.Query("SELECT * FROM foo").SelectScalarInt().ToList(), new int[]{ 1, 2, 3 });
 
-                        var failedResult = db.TryRunInTransaction(__ =>
+                        var failedResult = tdb.TryRunInTransaction(_tdb =>
                             {
-                                db.Execute("INSERT INTO foo (x) VALUES (1);");
-                                db.Execute("INSERT INTO foo (x) VALUES (2);");
-                                db.Execute("INSERT INTO foo (x) VALUES (3);");
+                                _tdb.Execute("INSERT INTO foo (x) VALUES (1);");
+                                _tdb.Execute("INSERT INTO foo (x) VALUES (2);");
+                                _tdb.Execute("INSERT INTO foo (x) VALUES (3);");
                                 throw new Exception();
                             });
                         Assert.False(failedResult);
-                        Assert.Equal(db.Query("SELECT * FROM foo").SelectScalarInt().ToList(), new int[]{ 1, 2, 3 });
+                        Assert.Equal(tdb.Query("SELECT * FROM foo").SelectScalarInt().ToList(), new int[]{ 1, 2, 3 });
 
                         string successResult;
-                        if(db.TryRunInTransaction(__ =>
+                        if(tdb.TryRunInTransaction(_tdb =>
                             {
-                                db.Execute("INSERT INTO foo (x) VALUES (1);");
-                                db.Execute("INSERT INTO foo (x) VALUES (2);");
-                                db.Execute("INSERT INTO foo (x) VALUES (3);");
+                                _tdb.Execute("INSERT INTO foo (x) VALUES (1);");
+                                _tdb.Execute("INSERT INTO foo (x) VALUES (2);");
+                                _tdb.Execute("INSERT INTO foo (x) VALUES (3);");
                                 return "SUCCESS";
                             }, out successResult))
                         {

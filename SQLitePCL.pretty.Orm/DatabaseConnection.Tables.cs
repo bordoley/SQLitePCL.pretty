@@ -36,19 +36,19 @@ namespace SQLitePCL.pretty.Orm
         {
             Contract.Requires(This != null);
 
-            This.RunInTransaction(_ =>
+            This.RunInTransaction(db =>
                 {
                     var tableMapping = TableMapping.Get<T>();
-                    This.CreateTableIfNotExists(tableMapping.TableName, CreateFlags.None, tableMapping.Columns);
+                    db.CreateTableIfNotExists(tableMapping.TableName, CreateFlags.None, tableMapping.Columns);
 
-                    if (This.Changes != 0)
+                    if (db.Changes != 0)
                     {
-                        This.MigrateTable(tableMapping);
+                        db.MigrateTable(tableMapping);
                     }
 
                     foreach (var index in tableMapping.Indexes) 
                     {
-                        This.CreateIndex(index.Key, tableMapping.TableName, index.Value.Columns, index.Value.Unique);
+                        db.CreateIndex(index.Key, tableMapping.TableName, index.Value.Columns, index.Value.Unique);
                     }
                 });
         }

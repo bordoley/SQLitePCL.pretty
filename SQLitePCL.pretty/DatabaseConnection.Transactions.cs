@@ -262,9 +262,13 @@ namespace SQLitePCL.pretty
             {
                 string savePoint = null;
 
-                if (This is TransactionDatabaseConnection) 
+                if (This is TransactionDatabaseConnection)
                 {
                     savePoint = db.SaveTransactionPoint();
+                }
+                else
+                {
+                    db.BeginTransaction(mode);
                 }
 
                 try
@@ -335,9 +339,9 @@ namespace SQLitePCL.pretty
             Contract.Requires(action != null);
 
             object result;
-            return This.TryRunInTransaction<object>(_ => 
+            return This.TryRunInTransaction<object>(db => 
                 { 
-                    action(This); 
+                    action(db); 
                     return null; 
                 }, mode, out result);
         }

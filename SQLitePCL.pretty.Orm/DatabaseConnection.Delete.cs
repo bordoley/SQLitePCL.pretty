@@ -103,8 +103,8 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(primaryKeys != null);
             Contract.Requires(resultSelector != null);
 
-            return This.RunInTransaction(_ => 
-                        This.YieldDeleteAll(primaryKeys, resultSelector)
+            return This.RunInTransaction(db => 
+                       db.YieldDeleteAll(primaryKeys, resultSelector)
                             .Where(kvp => kvp.Value != null)
                             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
         }

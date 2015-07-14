@@ -85,8 +85,8 @@ namespace SQLitePCL.pretty.Orm
             Contract.Requires(objects != null);
             Contract.Requires(resultSelector != null);
 
-            return This.RunInTransaction(_ => 
-                This.YieldInsertOrReplaceAll(objects, resultSelector)
+            return This.RunInTransaction(db => 
+                db.YieldInsertOrReplaceAll(objects, resultSelector)
                     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
         }
      }
