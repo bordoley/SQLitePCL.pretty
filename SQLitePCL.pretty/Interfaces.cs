@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.IO;
 
 namespace SQLitePCL.pretty
@@ -26,7 +25,6 @@ namespace SQLitePCL.pretty
     /// A connection to a SQLite database.
     /// </summary>
     /// <seealso href="https://sqlite.org/c3ref/sqlite3.html"/>
-    [ContractClass(typeof(IDatabaseConnectionContract))]
     public interface IDatabaseConnection
     {
         /// <summary>
@@ -131,7 +129,6 @@ namespace SQLitePCL.pretty
     /// Represents a single SQL statement.
     /// </summary>
     /// <seealso href="https://sqlite.org/c3ref/stmt.html"/>
-    [ContractClass(typeof(IStatementContract))]
     public interface IStatement : IEnumerator<IReadOnlyList<IResultSetValue>>
     {
         /// <summary>
@@ -203,7 +200,6 @@ namespace SQLitePCL.pretty
     /// <summary>
     /// An indexed bind parameter in a <see cref="IStatement"/>.
     /// </summary>
-    [ContractClass(typeof(IBindParameterContract))]
     public interface IBindParameter
     {
         /// <summary>

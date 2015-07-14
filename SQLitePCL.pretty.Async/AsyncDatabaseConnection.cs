@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Reactive;
@@ -615,6 +614,8 @@ namespace SQLitePCL.pretty
 
         public IObservable<T> Use<T>(Func<IDatabaseConnection, CancellationToken, IEnumerable<T>> f)
         {
+            Contract.Requires(f != null);
+
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             return Observable.Create((IObserver<T> observer, CancellationToken cancellationToken) =>

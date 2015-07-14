@@ -392,6 +392,8 @@ namespace SQLitePCL.pretty
 
         public void Bind(byte[] blob)
         {
+            Contract.Requires(blob != null);
+
             int rc = raw.sqlite3_bind_blob(stmt, index + 1, blob);
             SQLiteException.CheckOk(stmt, rc);
         }
@@ -416,6 +418,8 @@ namespace SQLitePCL.pretty
 
         public void Bind(string text)
         {
+            Contract.Requires(text != null);
+
             int rc = raw.sqlite3_bind_text(stmt, index + 1, text);
             SQLiteException.CheckOk(stmt, rc);
         }
@@ -428,6 +432,8 @@ namespace SQLitePCL.pretty
 
         public void BindZeroBlob(int size)
         {
+            Contract.Requires(size >= 0);
+
             int rc = raw.sqlite3_bind_zeroblob(stmt, index + 1, size);
             SQLiteException.CheckOk(stmt, rc);
         }

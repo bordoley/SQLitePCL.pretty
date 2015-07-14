@@ -131,7 +131,6 @@
   <ItemGroup>
     <Compile Include="BindParameter.cs" />
     <Compile Include="ColumnInfo.cs" />
-    <Compile Include="InterfacesContract.cs" />
     <Compile Include="OrderedSet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SQLiteException.cs" />
@@ -148,6 +147,7 @@
     <Compile Include="SQLBuilder.cs" />
     <Compile Include="DatabaseConnection.Transactions.cs" />
     <Compile Include="Expando.cs" />
+    <Compile Include="Contract.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>

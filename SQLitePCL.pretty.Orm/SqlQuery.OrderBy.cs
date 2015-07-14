@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Reflection;
 
 using SQLitePCL.pretty.Orm.Attributes;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace SQLitePCL.pretty.Orm.Sql

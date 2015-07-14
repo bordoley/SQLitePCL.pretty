@@ -17,14 +17,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 
 namespace SQLitePCL.pretty
 {
     /// <summary>
-    /// Provides data for <see cref="IDatabaseConnection"/> <see cref="IDatabaseConnection.Profile"/> events.
+    /// Provides data for <see cref="SQLiteDatabaseConnection"/> <see cref="SQLiteDatabaseConnection.Profile"/> events.
     /// </summary>
     public sealed class DatabaseProfileEventArgs : EventArgs
     {
@@ -67,7 +66,7 @@ namespace SQLitePCL.pretty
     }
 
     /// <summary>
-    /// Provides data for <see cref="IDatabaseConnection"/> <see cref="IDatabaseConnection.Trace"/> events.
+    /// Provides data for <see cref="SQLiteDatabaseConnection"/> <see cref="SQLiteDatabaseConnection.Trace"/> events.
     /// </summary>
     public sealed class DatabaseTraceEventArgs : EventArgs
     {
@@ -97,7 +96,7 @@ namespace SQLitePCL.pretty
     }
 
     /// <summary>
-    /// Provides data for <see cref="IDatabaseConnection"/> <see cref="IDatabaseConnection.Update"/> events.
+    /// Provides data for <see cref="SQLiteDatabaseConnection"/> <see cref="SQLiteDatabaseConnection.Update"/> events.
     /// </summary>
     public sealed class DatabaseUpdateEventArgs : EventArgs
     {
@@ -955,6 +954,7 @@ namespace SQLitePCL.pretty
         /// <inheritdoc/>
         public bool IsDatabaseReadOnly(string dbName)
         {
+            Contract.Requires(dbName != null);
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
             int rc = raw.sqlite3_db_readonly(db, dbName);
             switch (rc)
@@ -971,6 +971,7 @@ namespace SQLitePCL.pretty
         /// <inheritdoc/>
         public void WalCheckPoint(string dbName, WalCheckPointMode mode, out int nLog, out int nCkpt)
         {
+            Contract.Requires(dbName != null);
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
             int rc = raw.sqlite3_wal_checkpoint_v2(db, dbName, (int) mode, out nLog, out nCkpt);
             SQLiteException.CheckOk(db, rc);
@@ -1024,6 +1025,10 @@ namespace SQLitePCL.pretty
         /// <inheritdoc/>
         public Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite)
         {
+            Contract.Requires(database != null);
+            Contract.Requires(tableName != null);
+            Contract.Requires(columnName != null);
+
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             sqlite3_blob blob;
@@ -1038,6 +1043,8 @@ namespace SQLitePCL.pretty
         /// <inheritdoc/>
         public IStatement PrepareStatement(string sql, out string tail)
         {
+            Contract.Requires(sql != null);
+
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             sqlite3_stmt stmt;
@@ -1082,6 +1089,9 @@ namespace SQLitePCL.pretty
         /// <inheritdoc/>
         public TableColumnMetadata GetTableColumnMetadata(string dbName, string tableName, string columnName)
         {
+            Contract.Requires(tableName != null);
+            Contract.Requires(columnName != null);
+
             string dataType;
             string collSeq;
             int notNull;

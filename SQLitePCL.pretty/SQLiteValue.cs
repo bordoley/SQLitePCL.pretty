@@ -16,7 +16,6 @@
 */
 
 using System;
-using System.Diagnostics.Contracts;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
