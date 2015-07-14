@@ -987,4 +987,26 @@ namespace SQLitePCL.pretty
         /// </summary>
         VirtualMachineStep = raw.SQLITE_STMTSTATUS_VM_STEP
     }
+
+    /// <summary>
+    /// Authorizer return codes.
+    /// </summary>
+    /// <seealso href="https://www.sqlite.org/c3ref/c_deny.html"/>
+    public enum AuthorizerReturnCode
+    {
+        /// <summary>
+        /// Authorize the action.
+        /// </summary>
+        Ok = raw.SQLITE_OK,
+
+        /// <summary>
+        /// Abort the SQL statement with an error.
+        /// </summary>
+        Deny = raw.SQLITE_DENY,
+
+        /// <summary>
+        /// Don't allow access, but don't generate an error.
+        /// </summary>
+        Ignore = raw.SQLITE_IGNORE
+    }
 }

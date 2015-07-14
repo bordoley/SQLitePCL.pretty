@@ -1339,5 +1339,32 @@ namespace SQLitePCL.pretty
             int rc = raw.sqlite3_db_status(db, (int)statusCode, out current, out highwater, reset ? 1 : 0);
             SQLiteException.CheckOk(rc);
         }
+
+        /// <summary>
+        /// Registers an authorizer callback.
+        /// </summary>
+        /// <param name="f">The authorizer function.</param>
+        /// <seealso href="https://www.sqlite.org/c3ref/set_authorizer.html"/>
+        public void RegisterAuthorizer(Func<ActionCode, string, string, string, string, AuthorizerReturnCode> f) 
+        {
+            Contract.Requires(f != null);
+
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+
+            int rc = raw.sqlite3_set_authorizer(db, (o, actionCode, p0, p1, dbName, triggerOrView) =>
+                (int) f((ActionCode) actionCode, p0, p1, dbName, triggerOrView), null);
+            SQLiteException.CheckOk(rc);  
+        }
+
+        /// <summary>
+        /// Removes the registered authorizer callback.
+        /// </summary>
+        public void RemoveAuthorizer()
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            int rc = raw.sqlite3_set_authorizer(db, null, null);
+            SQLiteException.CheckOk(rc);  
+        }
     }
 }

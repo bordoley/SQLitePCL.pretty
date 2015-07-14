@@ -725,6 +725,81 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Fact]
+        public void TestAuthorizer()
+        {
+            using (var db = SQLite3.OpenInMemory())
+            {
+                db.RegisterAuthorizer((actionCode, p0, p1, dbName, triggerOrView) =>
+                    {
+                        switch (actionCode)
+                        {
+                            // When creating a table an insert is first done.
+                            case ActionCode.Insert:
+                                Assert.Equal(p0, "sqlite_master");
+                                Assert.Null(p1);
+                                Assert.Equal(dbName, "main");
+                                Assert.Null(triggerOrView);
+                                break;
+                            case ActionCode.CreateTable:
+                                Assert.Equal(p0, "foo");
+                                Assert.Null(p1);
+                                Assert.Equal(dbName, "main");
+                                Assert.Null(triggerOrView);
+                                break;  
+                            case ActionCode.Read:
+                                Assert.NotNull(p0);
+                                Assert.NotNull(p1);
+                                Assert.Equal(dbName, "main");
+                                Assert.Null(triggerOrView);
+                                break;  
+                        }
+
+                        return AuthorizerReturnCode.Ok;
+                    });
+
+                db.ExecuteAll(
+                    @"CREATE TABLE foo (x int);
+                      SELECT * FROM foo;
+                      CREATE VIEW TEST_VIEW AS SELECT * FROM foo;");
+
+
+                // View authorizer
+                db.RegisterAuthorizer((actionCode, p0, p1, dbName, triggerOrView) =>
+                    {
+                        switch (actionCode)
+                        {
+                            case ActionCode.Read:
+                                Assert.NotNull(p0);
+                                Assert.NotNull(p1);
+                                Assert.Equal(dbName, "main");
+
+                                // A Hack. Goal is to prove that inner_most_trigger_or_view is not null when it is returned in the callback
+                                if (p0 == "foo") { Assert.NotNull(triggerOrView); }
+                                break;  
+                        }
+
+                        return AuthorizerReturnCode.Ok;
+                    });
+                db.Execute("SELECT * FROM TEST_VIEW;");
+
+                // Denied authorizer
+                db.RegisterAuthorizer((actionCode, p0, p1, dbName, triggerOrView) => AuthorizerReturnCode.Deny);
+                try
+                {
+                    db.Execute("SELECT * FROM TEST_VIEW;");
+                    Assert.True(false);
+                }
+                catch (SQLiteException e)
+                {
+                    Assert.Equal(e.ErrorCode, ErrorCode.NotAuthorized);
+                }
+
+                db.RemoveAuthorizer();
+                db.Execute("SELECT * FROM TEST_VIEW;");
+            }
+        }
+
+        [Fact]
         public void TestStatus()
         {
             using (var db = SQLite3.OpenInMemory())
