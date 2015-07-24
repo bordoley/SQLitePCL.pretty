@@ -29,15 +29,8 @@ namespace SQLitePCL.pretty
         /// <param name="x">A TableColumnMetadata instance.</param>
         /// <param name="y">A TableColumnMetadata instance.</param>
         /// <returns><see langword="true"/> if the two instances are equal to each other; otherwise,  <see langword="false"/>.</returns>
-        public static bool operator ==(TableColumnMetadata x, TableColumnMetadata y)
-        {
-            if (object.ReferenceEquals(x, null))
-            {
-                 return object.ReferenceEquals(y, null);
-            }
-
-            return x.Equals(y);
-        }
+        public static bool operator ==(TableColumnMetadata x, TableColumnMetadata y) =>
+            object.ReferenceEquals(x, null) ? object.ReferenceEquals(y, null) : x.Equals(y);
 
         /// <summary>
         /// Indicates whether the two TableColumnMetadata instances are not equal each other.
@@ -45,10 +38,8 @@ namespace SQLitePCL.pretty
         /// <param name="x">A TableColumnMetadata instance.</param>
         /// <param name="y">A TableColumnMetadata instance.</param>
         /// <returns><see langword="true"/> if the two instances are equal to each other; otherwise,  <see langword="false"/>.</returns>
-        public static bool operator !=(TableColumnMetadata x, TableColumnMetadata y)
-        {
-            return !(x == y);
-        }
+        public static bool operator !=(TableColumnMetadata x, TableColumnMetadata y) =>
+            !(x == y);
 
         /// <summary>
         /// Indicates if the the first TableColumnMetadata is greater than or equal to the second.
@@ -56,10 +47,8 @@ namespace SQLitePCL.pretty
         /// <param name="x">A TableColumnMetadata instance.</param>
         /// <param name="y">A TableColumnMetadata instance.</param>
         /// <returns><see langword="true"/> if the the first TableColumnMetadata is greater than or equal to the second; otherwise, <see langword="false"/>.</returns>
-        public static bool operator >=(TableColumnMetadata x, TableColumnMetadata y)
-        {
-            return x.CompareTo(y) >= 0;
-        }
+        public static bool operator >=(TableColumnMetadata x, TableColumnMetadata y) =>
+            x.CompareTo(y) >= 0;
 
         /// <summary>
         /// Indicates if the the first TableColumnMetadata is greater than the second.
@@ -67,10 +56,8 @@ namespace SQLitePCL.pretty
         /// <param name="x">A TableColumnMetadata instance.</param>
         /// <param name="y">A TableColumnMetadata instance.</param>
         /// <returns><see langword="true"/> if the the first TableColumnMetadata is greater than the second; otherwise, <see langword="false"/>.</returns>
-        public static bool operator >(TableColumnMetadata x, TableColumnMetadata y)
-        {
-            return x.CompareTo(y) > 0;
-        }
+        public static bool operator >(TableColumnMetadata x, TableColumnMetadata y) =>
+            x.CompareTo(y) > 0;
 
         /// <summary>
         /// Indicates if the the first TableColumnMetadata is less than or equal to the second.
@@ -78,10 +65,8 @@ namespace SQLitePCL.pretty
         /// <param name="x">A TableColumnMetadata instance.</param>
         /// <param name="y">A TableColumnMetadata instance.</param>
         /// <returns><see langword="true"/> if the the first TableColumnMetadata is less than or equal to the second; otherwise, <see langword="false"/>.</returns>
-        public static bool operator <=(TableColumnMetadata x, TableColumnMetadata y)
-        {
-            return x.CompareTo(y) <= 0;
-        }
+        public static bool operator <=(TableColumnMetadata x, TableColumnMetadata y) =>
+            x.CompareTo(y) <= 0;
 
         /// <summary>
         /// Indicates if the the first TableColumnMetadata is less than the second.
@@ -89,64 +74,43 @@ namespace SQLitePCL.pretty
         /// <param name="x">A TableColumnMetadata instance.</param>
         /// <param name="y">A TableColumnMetadata instance.</param>
         /// <returns><see langword="true"/> if the the first TableColumnMetadata is less than the second; otherwise, <see langword="false"/>.</returns>
-        public static bool operator <(TableColumnMetadata x, TableColumnMetadata y)
-        {
-            return x.CompareTo(y) < 0;
-        }
-
-        private readonly string declaredType;
-        private readonly string collationSequence;
-        private readonly bool hasNotNullConstraint;
-        private readonly bool isPrimaryKeyPart;
-        private readonly bool isAutoIncrement;
-
-        internal TableColumnMetadata(string declaredType, string collationSequence, bool hasNotNullConstraint, bool isPrimaryKeyPart, bool isAutoIncrement)
-        {
-            this.declaredType = declaredType;
-            this.collationSequence = collationSequence;
-            this.hasNotNullConstraint = hasNotNullConstraint;
-            this.isPrimaryKeyPart = isPrimaryKeyPart;
-            this.isAutoIncrement = isAutoIncrement;
-        }
+        public static bool operator <(TableColumnMetadata x, TableColumnMetadata y) =>
+            x.CompareTo(y) < 0;
 
         /// <summary>
         /// Returns the declared type of a column or null if no type is declared.
         /// </summary>
-        public string DeclaredType
-        {
-            get { return this.declaredType; }
-        }
+        public string DeclaredType { get; }
 
         /// <summary>
         /// Name of the default collation sequence.
         /// </summary>
-        public string CollationSequence
-        {
-            get { return this.collationSequence; }
-        }
+        public string CollationSequence { get; }
+
 
         /// <summary>
         /// True if column has a NOT NULL constraint.
         /// </summary>
-        public bool HasNotNullConstraint
-        {
-            get { return this.hasNotNullConstraint; }
-        }
+        public bool HasNotNullConstraint { get; }
 
         /// <summary>
         /// True if column is part of the PRIMARY KEY.
         /// </summary>
-        public bool IsPrimaryKeyPart
-        {
-            get { return this.isPrimaryKeyPart; }
-        }
+        public bool IsPrimaryKeyPart { get; }
+
 
         /// <summary>
         /// True if column is AUTOINCREMENT.
         /// </summary>
-        public bool IsAutoIncrement
+        public bool IsAutoIncrement { get; }
+
+        internal TableColumnMetadata(string declaredType, string collationSequence, bool hasNotNullConstraint, bool isPrimaryKeyPart, bool isAutoIncrement)
         {
-            get { return this.isAutoIncrement; }
+            this.DeclaredType = declaredType;
+            this.CollationSequence = collationSequence;
+            this.HasNotNullConstraint = hasNotNullConstraint;
+            this.IsPrimaryKeyPart = isPrimaryKeyPart;
+            this.IsAutoIncrement = isAutoIncrement;
         }
 
         /// <inheritdoc/>
@@ -170,10 +134,8 @@ namespace SQLitePCL.pretty
         }
 
         /// <inheritdoc/>
-        public override bool Equals(object other)
-        {
-            return other is TableColumnMetadata && this == (TableColumnMetadata)other;
-        }
+        public override bool Equals(object other) =>
+            other is TableColumnMetadata && this == (TableColumnMetadata)other;
 
         /// <inheritdoc/>
         public override int GetHashCode()
@@ -213,23 +175,14 @@ namespace SQLitePCL.pretty
         }
 
         /// <inheritdoc/>
-        public int CompareTo(object obj)
-        {
-            if (System.Object.ReferenceEquals(obj, null))
-            {
-                return 1;
-            }
-
-            return this.CompareTo((TableColumnMetadata)obj);
-        }
+        public int CompareTo(object obj) =>
+            System.Object.ReferenceEquals(obj, null) ? 1 : this.CompareTo((TableColumnMetadata)obj);
 
         /// <summary>
         /// Returns a <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.TableColumnMetadata"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.TableColumnMetadata"/>.</returns>
-        public override string ToString()
-        {
-            return string.Format("[TableColumnMetadata: DeclaredType={0}, CollationSequence={1}, HasNotNullConstraint={2}, IsPrimaryKeyPart={3}, IsAutoIncrement={4}]", DeclaredType, CollationSequence, HasNotNullConstraint, IsPrimaryKeyPart, IsAutoIncrement);
-        }
+        public override string ToString() =>
+            string.Format("[TableColumnMetadata: DeclaredType={0}, CollationSequence={1}, HasNotNullConstraint={2}, IsPrimaryKeyPart={3}, IsAutoIncrement={4}]", DeclaredType, CollationSequence, HasNotNullConstraint, IsPrimaryKeyPart, IsAutoIncrement);
     }
 }

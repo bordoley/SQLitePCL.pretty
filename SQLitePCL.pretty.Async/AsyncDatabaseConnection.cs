@@ -92,10 +92,8 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="scheduler">A scheduler used to schedule asynchronous database use on.</param>
         /// <returns>An <see cref="IAsyncDatabaseConnection"/> instance.</returns>
-        public static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this SQLiteDatabaseConnection This, IScheduler scheduler)
-        {
-            return AsAsyncDatabaseConnection(This, scheduler, defaultInterruptInstructionCount);
-        }
+        public static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this SQLiteDatabaseConnection This, IScheduler scheduler) =>
+            AsAsyncDatabaseConnection(This, scheduler, defaultInterruptInstructionCount);
 
         /// <summary>
         /// Returns an <see cref="IAsyncDatabaseConnection"/> instance that delegates database requests
@@ -106,10 +104,8 @@ namespace SQLitePCL.pretty
         /// safely used directly.</remarks>
         /// <param name="This">The database connection.</param>
         /// <returns>An <see cref="IAsyncDatabaseConnection"/> instance.</returns>
-        public static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this SQLiteDatabaseConnection This)
-        {
-            return AsAsyncDatabaseConnection(This, defaultScheduler);
-        }
+        public static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this SQLiteDatabaseConnection This) =>
+            AsAsyncDatabaseConnection(This, defaultScheduler);
     }
 
     /// <summary>
@@ -318,13 +314,11 @@ namespace SQLitePCL.pretty
         /// </param>
         /// <returns>A <see cref="Task"/> that completes with a <see cref="System.IO.Stream"/> that can be used to asynchronously write and read to and from blob.</returns>
         public static Task<Stream> OpenBlobAsync(
-            this IAsyncDatabaseConnection This,
-            ColumnInfo columnInfo,
-            long rowId,
-            bool canWrite = false)
-        {
-            return This.OpenBlobAsync(columnInfo, rowId, canWrite, CancellationToken.None);
-        }
+                this IAsyncDatabaseConnection This,
+                ColumnInfo columnInfo,
+                long rowId,
+                bool canWrite = false) => 
+            This.OpenBlobAsync(columnInfo, rowId, canWrite, CancellationToken.None);
 
         /// <summary>
         /// Compiles one or more SQL statements.

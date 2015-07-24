@@ -29,15 +29,8 @@ namespace SQLitePCL.pretty
         /// <param name="x">A ColumnInfo instance.</param>
         /// <param name="y">A ColumnInfo instance.</param>
         /// <returns><see langword="true"/> if the two instances are equal to each other; otherwise,  <see langword="false"/>.</returns>
-        public static bool operator ==(ColumnInfo x, ColumnInfo y)
-        {
-            if (object.ReferenceEquals(x, null))
-            {
-                 return object.ReferenceEquals(y, null);
-            }
-
-            return x.Equals(y);
-        }
+        public static bool operator ==(ColumnInfo x, ColumnInfo y) =>
+            object.ReferenceEquals(x, null) ? object.ReferenceEquals(y, null) : x.Equals(y);
 
         /// <summary>
         /// Indicates whether the two ColumnInfo instances are not equal each other.
@@ -45,10 +38,8 @@ namespace SQLitePCL.pretty
         /// <param name="x">A ColumnInfo instance.</param>
         /// <param name="y">A ColumnInfo instance.</param>
         /// <returns><see langword="true"/> if the two instances are not equal to each other; otherwise,  <see langword="false"/>.</returns>
-        public static bool operator !=(ColumnInfo x, ColumnInfo y)
-        {
-            return !(x == y);
-        }
+        public static bool operator !=(ColumnInfo x, ColumnInfo y) => 
+            !(x == y);
 
         /// <summary>
         /// Indicates if the the first ColumnInfo is greater than or equal to the second.
@@ -56,10 +47,8 @@ namespace SQLitePCL.pretty
         /// <param name="x">A ColumnInfo instance.</param>
         /// <param name="y">A ColumnInfo instance.</param>
         /// <returns><see langword="true"/> if the the first ColumnInfo is greater than or equal to the second; otherwise, <see langword="false"/>.</returns>
-        public static bool operator >=(ColumnInfo x, ColumnInfo y)
-        {
-            return x.CompareTo(y) >= 0;
-        }
+        public static bool operator >=(ColumnInfo x, ColumnInfo y) =>
+            x.CompareTo(y) >= 0;
 
         /// <summary>
         /// Indicates if the the first ColumnInfo is greater than the second.
@@ -67,10 +56,8 @@ namespace SQLitePCL.pretty
         /// <param name="x">A ColumnInfo instance.</param>
         /// <param name="y">A ColumnInfo instance.</param>
         /// <returns><see langword="true"/> if the the first ColumnInfo is greater than the second; otherwise, <see langword="false"/>.</returns>
-        public static bool operator >(ColumnInfo x, ColumnInfo y)
-        {
-            return x.CompareTo(y) > 0;
-        }
+        public static bool operator >(ColumnInfo x, ColumnInfo y) =>
+            x.CompareTo(y) > 0;
 
         /// <summary>
         /// Indicates if the the first ColumnInfo is less than or equal to the second.
@@ -78,10 +65,8 @@ namespace SQLitePCL.pretty
         /// <param name="x">A ColumnInfo instance.</param>
         /// <param name="y">A ColumnInfo instance.</param>
         /// <returns><see langword="true"/> if the the first ColumnInfo is less than or equal to the second; otherwise, <see langword="false"/>.</returns>
-        public static bool operator <=(ColumnInfo x, ColumnInfo y)
-        {
-            return x.CompareTo(y) <= 0;
-        }
+        public static bool operator <=(ColumnInfo x, ColumnInfo y) =>
+            x.CompareTo(y) <= 0;
 
         /// <summary>
         /// Indicates if the the first ColumnInfo is less than the second.
@@ -89,65 +74,55 @@ namespace SQLitePCL.pretty
         /// <param name="x">A ColumnInfo instance.</param>
         /// <param name="y">A ColumnInfo instance.</param>
         /// <returns><see langword="true"/> if the the first ColumnInfo is less than the second; otherwise, <see langword="false"/>.</returns>
-        public static bool operator <(ColumnInfo x, ColumnInfo y)
-        {
-            return x.CompareTo(y) < 0;
-        }
+        public static bool operator <(ColumnInfo x, ColumnInfo y) =>
+            x.CompareTo(y) < 0;
 
-        internal static ColumnInfo Create(StatementImpl stmt, int index)
-        {
-            return new ColumnInfo(
+        internal static ColumnInfo Create(StatementImpl stmt, int index) =>
+            new ColumnInfo(
                 raw.sqlite3_column_name(stmt.sqlite3_stmt, index),
                 raw.sqlite3_column_database_name(stmt.sqlite3_stmt, index),
                 raw.sqlite3_column_origin_name(stmt.sqlite3_stmt, index),
                 raw.sqlite3_column_table_name(stmt.sqlite3_stmt, index),
                 raw.sqlite3_column_decltype(stmt.sqlite3_stmt, index));
-        }
-
-        private readonly string name;
-        private readonly string databaseName;
-        private readonly string tableName;
-        private readonly string originName;
-        private readonly string declaredType;
-
-        internal ColumnInfo(string name, string databaseName, string originName, string tableName, string declaredType)
-        {
-            this.name = name;
-            this.databaseName = databaseName;
-            this.originName = originName;
-            this.tableName = tableName;
-            this.declaredType = declaredType;
-        }
 
         /// <summary>
         /// The column name.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/column_name.html"/>
-        public string Name { get { return name; } }
+        public  string Name { get; }
 
         /// <summary>
         /// The database that is the origin of this particular result column.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/column_database_name.html"/>
-        public string DatabaseName { get { return databaseName; } }
-
-        /// <summary>
-        /// The column that is the origin of this particular result column.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/column_database_name.html"/>
-        public string OriginName { get { return originName; } }
+        public string DatabaseName { get; }
 
         /// <summary>
         ///  The table that is the origin of this particular result column.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/column_database_name.html"/>
-        public string TableName { get { return tableName; } }
+        public string TableName { get; }
 
+        /// <summary>
+        /// The column that is the origin of this particular result column.
+        /// </summary>
+        /// <seealso href="https://sqlite.org/c3ref/column_database_name.html"/>
+        public string OriginName { get; }
+       
         /// <summary>
         /// Returns the declared type of a column in a result set or null if no type is declared.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/column_decltype.html"/>
-        public string DeclaredType { get { return declaredType; } }
+        public string DeclaredType { get; }
+
+        internal ColumnInfo(string name, string databaseName, string originName, string tableName, string declaredType)
+        {
+            this.Name = name;
+            this.DatabaseName = databaseName;
+            this.OriginName = originName;
+            this.TableName = tableName;
+            this.DeclaredType = declaredType;
+        }
 
         /// <inheritdoc/>
         public bool Equals(ColumnInfo other)
@@ -170,10 +145,8 @@ namespace SQLitePCL.pretty
         }
 
         /// <inheritdoc/>
-        public override bool Equals(object other)
-        {
-            return other is ColumnInfo && this == (ColumnInfo)other;
-        }
+        public override bool Equals(object other) =>
+            other is ColumnInfo && this == (ColumnInfo)other;
 
         /// <inheritdoc/>
         public override int GetHashCode()
@@ -212,15 +185,8 @@ namespace SQLitePCL.pretty
             }
         }
 
-        /// <inheritdoc/>
-        int IComparable.CompareTo(object obj)
-        {
-            if (System.Object.ReferenceEquals(obj, null))
-            {
-                return 1;
-            }
-
-            return this.CompareTo((ColumnInfo)obj);
-        }
+        /// <inheritdoc/>>
+        int IComparable.CompareTo(object obj) =>
+            System.Object.ReferenceEquals(obj, null) ? 1 : this.CompareTo((ColumnInfo)obj);
     }
 }

@@ -60,20 +60,14 @@ namespace SQLitePCL.pretty
             }
         }
 
-        internal static string SavePoint(string savePoint)
-        {
-            return "SAVEPOINT " + savePoint;
-        }
+        internal static string SavePoint(string savePoint) =>
+            "SAVEPOINT " + savePoint;
 
-        internal static string Release(string savePoint)
-        {
-            return "RELEASE " + savePoint;
-        }
+        internal static string Release(string savePoint) =>
+            "RELEASE " + savePoint;
        
-        internal static string RollbackTransactionTo(string savepoint)
-        {
-            return "ROLLBACK TRANSACTION TO " + savepoint;
-        }
+        internal static string RollbackTransactionTo(string savepoint) =>
+            "ROLLBACK TRANSACTION TO " + savepoint;
     } 
 }
 

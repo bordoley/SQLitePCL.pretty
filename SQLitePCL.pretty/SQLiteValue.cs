@@ -58,10 +58,8 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this int This)
-        {
-            return Convert.ToInt64(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this int This) =>
+            Convert.ToInt64(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts an <see cref="short"/> to an <see cref="ISQLiteValue"/>.

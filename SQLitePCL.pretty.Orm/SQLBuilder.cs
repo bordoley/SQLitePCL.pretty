@@ -6,41 +6,29 @@ namespace SQLitePCL.pretty.Orm
 {
     internal static class SQLBuilder
     {
-        internal static string GetTableInfo (string tableName)
-        {
-            return "PRAGMA TABLE_INFO(\"" + tableName + "\")";         
-        }
+        internal static string GetTableInfo (string tableName) =>
+            "PRAGMA TABLE_INFO(\"" + tableName + "\")";         
 
-        internal static string SelectWhereColumnEquals(string tableName, string columnName)
-        {
-            return string.Format("SELECT * FROM \"{0}\" WHERE \"{1}\" = ?", tableName, columnName);
-        }
+        internal static string SelectWhereColumnEquals(string tableName, string columnName) =>
+            string.Format("SELECT * FROM \"{0}\" WHERE \"{1}\" = ?", tableName, columnName);
 
-        internal static string FindByRowID(string tableName)
-        {
-            return string.Format("SELECT * FROM \"{0}\" WHERE ROWID = ?", tableName);
-        }
+        internal static string FindByRowID(string tableName) =>
+            string.Format("SELECT * FROM \"{0}\" WHERE ROWID = ?", tableName);
 
-        internal static string AlterTableAddColumn(string tableName, string columnName, ColumnMapping columnMapping)
-        {
-            return string.Format("ALTER TABLE \"{0}\" ADD COLUMN {1}", tableName, SqlDecl(columnName, columnMapping));
-        }
+        internal static string AlterTableAddColumn(string tableName, string columnName, ColumnMapping columnMapping) =>
+            string.Format("ALTER TABLE \"{0}\" ADD COLUMN {1}", tableName, SqlDecl(columnName, columnMapping));
 
-        internal static string DeleteUsingPrimaryKey(string tableName, string pkColumn)
-        {
-            return string.Format("DELETE FROM \"{0}\" WHERE \"{1}\" = ?", tableName, pkColumn);
-        }
+        internal static string DeleteUsingPrimaryKey(string tableName, string pkColumn) =>
+            string.Format("DELETE FROM \"{0}\" WHERE \"{1}\" = ?", tableName, pkColumn);
 
-        internal static string InsertOrReplace(string tableName, IEnumerable<string> columns)
-        {
-            return string.Format(
+        internal static string InsertOrReplace(string tableName, IEnumerable<string> columns) =>
+            string.Format(
                 "INSERT OR REPLACE INTO \"{0}\" ({1}) VALUES ({2})",
                 tableName,
                 string.Join(",", columns.Select(x => "\"" + x + "\"")),
 
                 // FIXME: Might need to quote this for some cases. Test!!!
                 string.Join(",", columns.Select(x => ":" + x)));
-        }
 
         internal static string CreateIndex(string indexName, string tableName, IEnumerable<string> columnNames, bool unique)
         {
@@ -48,25 +36,17 @@ namespace SQLitePCL.pretty.Orm
             return String.Format(sqlFormat, tableName, string.Join ("\", \"", columnNames), unique ? "UNIQUE" : "", indexName);
         }
 
-        internal static string NameIndex(string tableName, IEnumerable<string> columnNames)
-        {
-            return tableName + "_" + string.Join ("_", columnNames);
-        }
+        internal static string NameIndex(string tableName, IEnumerable<string> columnNames) =>
+            tableName + "_" + string.Join ("_", columnNames);
 
-        internal static string NameIndex(string tableName, string columnName)
-        {
-            return NameIndex(tableName, new String[] { columnName});
-        }
+        internal static string NameIndex(string tableName, string columnName) =>
+            NameIndex(tableName, new String[] { columnName});
 
-        internal static string ListIndexes(string tableName)
-        {
-            return string.Format("PRAGMA INDEX_LIST (\"{0}\")", tableName);
-        }
+        internal static string ListIndexes(string tableName) =>
+            string.Format("PRAGMA INDEX_LIST (\"{0}\")", tableName);
 
-        internal static string IndexInfo(string indexName)
-        {
-            return string.Format("PRAGMA INDEX_INFO (\"{0}\")", indexName);
-        }
+        internal static string IndexInfo(string indexName) =>
+            string.Format("PRAGMA INDEX_INFO (\"{0}\")", indexName);
 
         internal static string CreateTableIfNotExists(string tableName, CreateFlags createFlags, IReadOnlyDictionary<string, ColumnMapping> columns)
         {
@@ -121,15 +101,11 @@ namespace SQLitePCL.pretty.Orm
             return decl;
         }
 
-        internal static string DropTableIfExists(string tableName)
-        {
-            return string.Format("DROP TABLE IF EXISTS \"{0}\"", tableName);
-        }
+        internal static string DropTableIfExists(string tableName) =>
+            string.Format("DROP TABLE IF EXISTS \"{0}\"", tableName);
 
-        internal static string DeleteAll(string tableName)
-        {
-            return string.Format("DELETE FROM \"{0}\"", tableName);
-        }
+        internal static string DeleteAll(string tableName) =>
+            string.Format("DELETE FROM \"{0}\"", tableName);
     }
 }
 

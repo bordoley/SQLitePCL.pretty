@@ -10,10 +10,8 @@ namespace SQLitePCL.pretty.Orm.Sql
 {
     internal static partial class SqlCompiler
     {
-        internal static string CompileOrderByOrdering(Expression expr, bool asc)
-        {
-            return expr.CompileExpr() + (asc ? "" : " DESC");
-        }
+        internal static string CompileOrderByOrdering(Expression expr, bool asc) =>
+            expr.CompileExpr() + (asc ? "" : " DESC");
     }
 
     /// <summary>
@@ -37,11 +35,9 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// Returns a <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.OrderByClause"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.OrderByClause"/>.</returns>
-        public override string ToString()
-        {
-            return this.whereClause +
+        public override string ToString() =>
+            this.whereClause +
                 (this.orderings.Count > 0 ? "\r\nORDER BY " +  string.Join(", ", this.orderings) : "");
-        }
     }
 
     /// <summary>

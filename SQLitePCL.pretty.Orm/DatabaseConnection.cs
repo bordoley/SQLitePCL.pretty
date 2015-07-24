@@ -53,10 +53,8 @@ namespace SQLitePCL.pretty.Orm
         /// <returns>The SQLite prepared statement.</returns>
         /// <param name="This">The database connection.</param>
         /// <param name="tableName">The table name.</param>
-        internal static IStatement PrepareFindByRowId(this IDatabaseConnection This, string tableName)
-        {
-            return This.PrepareStatement(SQLBuilder.FindByRowID(tableName));
-        }
+        internal static IStatement PrepareFindByRowId(this IDatabaseConnection This, string tableName) =>
+            This.PrepareStatement(SQLBuilder.FindByRowID(tableName));
 
         /// <summary>
         /// Gets the table column info.

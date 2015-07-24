@@ -13,15 +13,8 @@ namespace SQLitePCL.pretty.Orm
         /// <param name="x">A ForeignKeyConstraint instance.</param>
         /// <param name="y">A ForeignKeyConstraint instance.</param>
         /// <returns><see langword="true"/> if the two instances are equal to each other; otherwise,  <see langword="false"/>.</returns>
-        public static bool operator ==(ForeignKeyConstraint x, ForeignKeyConstraint y)
-        {
-            if (object.ReferenceEquals(x, null))
-            {
-                 return object.ReferenceEquals(y, null);
-            }
-
-            return x.Equals(y);
-        }
+        public static bool operator ==(ForeignKeyConstraint x, ForeignKeyConstraint y) =>
+            object.ReferenceEquals(x, null) ? object.ReferenceEquals(y, null) : x.Equals(y);
 
         /// <summary>
         /// Indicates whether the two ForeignKeyConstraint instances are not equal each other.
@@ -29,29 +22,24 @@ namespace SQLitePCL.pretty.Orm
         /// <param name="x">A ForeignKeyConstraint instance.</param>
         /// <param name="y">A ForeignKeyConstraint instance.</param>
         /// <returns><see langword="true"/> if the two instances are not equal to each other; otherwise,  <see langword="false"/>.</returns>
-        public static bool operator !=(ForeignKeyConstraint x, ForeignKeyConstraint y)
-        {
-            return !(x == y);
-        }
-
-        private readonly string tableName;
-        private readonly string columnName;
-
-        internal ForeignKeyConstraint(string tableName, string columnName)
-        {
-            this.tableName = tableName;
-            this.columnName = columnName;
-        }
+        public static bool operator !=(ForeignKeyConstraint x, ForeignKeyConstraint y) =>
+            !(x == y);
 
         /// <summary>
         /// Gets the foreign key constraing table name.
         /// </summary>
-        public string TableName { get { return tableName; } }
+        public string TableName { get; }
 
         /// <summary>
         /// Gets the foreign key constraing column name.
         /// </summary>
-        public string ColumnName { get { return columnName; } }
+        public string ColumnName { get; }
+
+        internal ForeignKeyConstraint(string tableName, string columnName)
+        {
+            this.TableName = tableName;
+            this.ColumnName = columnName;
+        }
 
         /// <inheritdoc/>
         public bool Equals(ForeignKeyConstraint other)
@@ -71,10 +59,8 @@ namespace SQLitePCL.pretty.Orm
         }
 
         /// <inheritdoc/>
-        public override bool Equals(object other)
-        {
-            return other is ForeignKeyConstraint && this == (ForeignKeyConstraint)other;
-        }
+        public override bool Equals(object other) =>
+            other is ForeignKeyConstraint && this == (ForeignKeyConstraint)other;
 
         /// <inheritdoc/>
         public override int GetHashCode()

@@ -6,10 +6,8 @@ namespace SQLitePCL.pretty.Orm.Sql
 {
     internal static partial class SqlCompiler
     {
-        internal static String CompileOffsetClause(this Expression This)
-        {
-            return "OFFSET " + This.CompileExpr();
-        }
+        internal static String CompileOffsetClause(this Expression This) =>
+            "OFFSET " + This.CompileExpr();
     }
 
     /// <summary>
@@ -30,10 +28,8 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// Returns a <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.OffsetClause"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.OffsetClause"/>.</returns>
-        public override string ToString()
-        {
-            return limit + "\r\n" + offset;
-        }
+        public override string ToString() =>
+            limit + "\r\n" + offset;
     }
 
     /// <summary>

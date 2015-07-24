@@ -34,10 +34,8 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// Returns a <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.JoinClause"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.JoinClause"/>.</returns>
-        public override string ToString()
-        {
-            return from + (join.Count == 0 ? "" : "\r\n" +  string.Join("\r\n", join));
-        }
+        public override string ToString() =>
+            from + (join.Count == 0 ? "" : "\r\n" +  string.Join("\r\n", join));
     }
 
     internal sealed class JoinClause<T> : JoinClause
@@ -49,22 +47,18 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <summary>
         /// Select all columns from the table.
         /// </summary>
-        public SelectClause<T> Select()
-        {
-            return new SelectClause<T>(
+        public SelectClause<T> Select() =>
+            new SelectClause<T>(
                 this, 
                 SqlCompiler.SelectAllColumnsClause(false, typeof(T)));
-        }
 
         /// <summary>
         /// Select all columns from the table returning only distinct rows.
         /// </summary>
-        public SelectClause<T> SelectDistinct()
-        {
-            return new SelectClause<T>(
+        public SelectClause<T> SelectDistinct() =>
+            new SelectClause<T>(
                 this, 
                 SqlCompiler.SelectAllColumnsClause(true, typeof(T)));
-        }
     }
 
     /// <summary>
@@ -93,22 +87,18 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <summary>
         /// Select all columns from the table.
         /// </summary>
-        public SelectClause<T1,T2> Select()
-        {
-            return new SelectClause<T1,T2>(
+        public SelectClause<T1,T2> Select() =>
+            new SelectClause<T1,T2>(
                 this, 
                 SqlCompiler.SelectAllColumnsClause(false, typeof(T1), typeof(T2)));
-        }
 
         /// <summary>
         /// Select all columns from the table returning only distinct rows.
         /// </summary>
-        public SelectClause<T1,T2> SelectDistinct()
-        {
-            return new SelectClause<T1,T2>(
+        public SelectClause<T1,T2> SelectDistinct() =>
+            new SelectClause<T1,T2>(
                 this, 
                 SqlCompiler.SelectAllColumnsClause(true, typeof(T1), typeof(T2)));
-        }
     }
 
     /// <summary>
@@ -137,22 +127,18 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <summary>
         /// Select all columns from the table.
         /// </summary>
-        public SelectClause<T1,T2,T3> Select()
-        {
-            return new SelectClause<T1,T2,T3>(
+        public SelectClause<T1,T2,T3> Select() =>
+            new SelectClause<T1,T2,T3>(
                 this, 
                 SqlCompiler.SelectAllColumnsClause(false, typeof(T1), typeof(T2), typeof(T3)));
-        }
 
         /// <summary>
         /// Select all columns from the table returning only distinct rows.
         /// </summary>
-        public SelectClause<T1,T2,T3> SelectDistinct()
-        {
-            return new SelectClause<T1,T2,T3>(
+        public SelectClause<T1,T2,T3> SelectDistinct() =>
+            new SelectClause<T1,T2,T3>(
                 this, 
                 SqlCompiler.SelectAllColumnsClause(true, typeof(T1), typeof(T2), typeof(T3)));
-        }
     }
 
     /// <summary>
@@ -167,22 +153,18 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <summary>
         /// Select all columns from the table.
         /// </summary>
-        public SelectClause<T1,T2,T3,T4> Select()
-        {
-            return new SelectClause<T1,T2,T3,T4>(
+        public SelectClause<T1,T2,T3,T4> Select() =>
+            new SelectClause<T1,T2,T3,T4>(
                 this, 
                 SqlCompiler.SelectAllColumnsClause(false, typeof(T1), typeof(T2), typeof(T3), typeof(T4)));
-        }
 
         /// <summary>
         /// Select all columns from the table returning only distinct rows.
         /// </summary>
-        public SelectClause<T1,T2,T3,T4> SelectDistinct()
-        {
-            return new SelectClause<T1,T2,T3,T4>(
+        public SelectClause<T1,T2,T3,T4> SelectDistinct() =>
+            new SelectClause<T1,T2,T3,T4>(
                 this, 
                 SqlCompiler.SelectAllColumnsClause(true, typeof(T1), typeof(T2), typeof(T3), typeof(T4)));
-        }
     }
 }
 

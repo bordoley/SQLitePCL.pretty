@@ -49,15 +49,11 @@ namespace SQLitePCL.pretty
             }
         }
 
-        internal static void CheckOk(sqlite3_stmt stmt, int rc)
-        {
+        internal static void CheckOk(sqlite3_stmt stmt, int rc) =>
             CheckOk(raw.sqlite3_db_handle(stmt), rc);
-        }
 
-        internal static Exception Create(int rc, int extended, string msg)
-        {
-            return Create((ErrorCode)rc, (ErrorCode)extended, msg);
-        }
+        internal static Exception Create(int rc, int extended, string msg) =>
+            Create((ErrorCode)rc, (ErrorCode)extended, msg);
 
         internal static Exception Create(ErrorCode rc, ErrorCode extended, string msg)
         {
@@ -70,43 +66,27 @@ namespace SQLitePCL.pretty
             return exp;
         }
 
-        private readonly ErrorCode errorCode;
-        private readonly ErrorCode extendedErrorCode;
-        private readonly string errmsg;
-
-        private SQLiteException(ErrorCode errorCode, ErrorCode extendedErrorCode, string msg)
-        {
-            this.errorCode = errorCode;
-            this.extendedErrorCode = extendedErrorCode;
-            errmsg = msg;
-        }
-
         /// <summary>
         /// Gets the SQLite error code associated with the exception.
         /// </summary>
-        public ErrorCode ErrorCode
-        {
-            get
-            {
-                return errorCode;
-            }
-        }
+        public ErrorCode ErrorCode { get; }
 
         /// <summary>
         /// Gets the SQLite extend error code associated with the exception.
         /// </summary>
-        public ErrorCode ExtendedErrorCode
+        public ErrorCode ExtendedErrorCode;
+
+        private readonly string errmsg;
+
+        private SQLiteException(ErrorCode errorCode, ErrorCode extendedErrorCode, string msg)
         {
-            get
-            {
-                return extendedErrorCode;
-            }
+            this.ErrorCode = errorCode;
+            this.ExtendedErrorCode = extendedErrorCode;
+            errmsg = msg;
         }
 
         /// <inheritdoc/>
-        public override string ToString()
-        {
-            return string.Format("{0}: {1}\r\n{2}", errorCode, errmsg, base.ToString());
-        }
+        public override string ToString() =>
+            string.Format("{0}: {1}\r\n{2}", ErrorCode, errmsg, base.ToString());
     }
 }

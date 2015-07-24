@@ -273,15 +273,11 @@ namespace SQLitePCL.pretty
                 }
             }
 
-            public IEnumerator<ColumnInfo> GetEnumerator()
-            {
-                return rs.Select(val => val.ColumnInfo).GetEnumerator();
-            }
+            public IEnumerator<ColumnInfo> GetEnumerator() =>
+                rs.Select(val => val.ColumnInfo).GetEnumerator();
 
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return this.GetEnumerator();
-            }
+            IEnumerator IEnumerable.GetEnumerator() =>
+                this.GetEnumerator();
         }
     }
 }

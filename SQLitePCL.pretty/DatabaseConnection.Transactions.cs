@@ -176,25 +176,17 @@ namespace SQLitePCL.pretty
             return savePoint;
         }
             
-        private static void ReleaseTransaction(this IDatabaseConnection This, string savepoint)
-        {
+        private static void ReleaseTransaction(this IDatabaseConnection This, string savepoint) =>
             This.Execute(SQLBuilder.Release(savepoint));
-        }
             
-        private static void CommitTransaction(this IDatabaseConnection This)
-        {
+        private static void CommitTransaction(this IDatabaseConnection This) =>
             This.Execute(SQLBuilder.CommitTransaction);
-        }
             
-        private static void RollbackTransactionTo(this IDatabaseConnection This, string savepoint)
-        {
+        private static void RollbackTransactionTo(this IDatabaseConnection This, string savepoint) =>
             This.Execute(SQLBuilder.RollbackTransactionTo(savepoint));
-        }
             
-        private static void RollbackTransaction(this IDatabaseConnection This)
-        {
+        private static void RollbackTransaction(this IDatabaseConnection This) =>
             This.Execute(SQLBuilder.RollbackTransaction);
-        }
 
         /// <summary>
         /// Runs the Action <paramref name="action"/> in a transaction and returns the function result.
@@ -230,10 +222,8 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="action">The Action to run in a transaction.</param>
         /// <exception cref="Exception">The exception that caused the transaction to be aborted and rolled back.</exception>
-        public static void RunInTransaction(this IDatabaseConnection This, Action<IDatabaseConnection> action)
-        {
+        public static void RunInTransaction(this IDatabaseConnection This, Action<IDatabaseConnection> action) =>
             This.RunInTransaction(action, TransactionMode.Deferred);
-        }
 
         /// <summary>
         /// Runs the function <paramref name="f"/> in a transaction and returns the function result.
@@ -314,10 +304,8 @@ namespace SQLitePCL.pretty
         /// </param>
         /// <typeparam name="T">The result type.</typeparam>
         /// <exception cref="Exception">The exception that caused the transaction to be aborted and rolled back.</exception>
-        public static T RunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, T> f)
-        {
-            return This.RunInTransaction(f, TransactionMode.Deferred);
-        }
+        public static T RunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, T> f) =>
+            This.RunInTransaction(f, TransactionMode.Deferred);
 
         /// <summary>
         /// Runs the Action <paramref name="action"/> in a transaction and returns the function result.
@@ -354,10 +342,8 @@ namespace SQLitePCL.pretty
         /// <returns><c>true</c>, if the transaction was committed or released <c>false</c> if it was rolledback.</returns>
         /// <param name="This">The database connection.</param>
         /// <param name="action">The Action to run in a transaction.</param>
-        public static bool TryRunInTransaction(this IDatabaseConnection This, Action<IDatabaseConnection> action)
-        {
-            return This.TryRunInTransaction(action, TransactionMode.Deferred);
-        }
+        public static bool TryRunInTransaction(this IDatabaseConnection This, Action<IDatabaseConnection> action) =>
+            This.TryRunInTransaction(action, TransactionMode.Deferred);
 
         /// <summary>
         /// Runs the function <paramref name="f"/> in a transaction and returns the function result.
@@ -402,9 +388,7 @@ namespace SQLitePCL.pretty
         /// <param name="f">F.</param>
         /// <param name="result">The function result.</param>
         /// <typeparam name="T">The result type.</typeparam>
-        public static bool TryRunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, T> f, out T result)
-        {
-            return This.TryRunInTransaction(f, TransactionMode.Deferred, out result);
-        }
+        public static bool TryRunInTransaction<T>(this IDatabaseConnection This, Func<IDatabaseConnection, T> f, out T result) =>
+            This.TryRunInTransaction(f, TransactionMode.Deferred, out result);
     }
 }

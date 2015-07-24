@@ -59,10 +59,8 @@ namespace SQLitePCL.pretty
         /// <param name="This">The async statement.</param>
         /// <param name="f">The action.</param>
         /// <returns>A task that completes when <paramref name="f"/> returns.</returns>
-        public static Task Use(this IAsyncStatement This, Action<IStatement> f)
-        {
-            return This.Use((stmt, ct) => f(stmt), CancellationToken.None);
-        }
+        public static Task Use(this IAsyncStatement This, Action<IStatement> f) =>
+            This.Use((stmt, ct) => f(stmt), CancellationToken.None);
 
         /// <summary>
         /// Schedules the <see cref="Func&lt;T,TResult&gt;"/> <paramref name="f"/> on the statement's operations queue.
@@ -90,10 +88,8 @@ namespace SQLitePCL.pretty
         /// <param name="This">The async statement.</param>
         /// <param name="f">A function from <see cref="IAsyncStatement"/> to <typeparamref name="T"/>.</param>
         /// <returns>A task that completes with the result of <paramref name="f"/>.</returns>
-        public static Task<T> Use<T>(this IAsyncStatement This, Func<IStatement, T> f)
-        {
-            return This.Use((stmt, ct) => f(stmt), CancellationToken.None);
-        }
+        public static Task<T> Use<T>(this IAsyncStatement This, Func<IStatement, T> f) =>
+            This.Use((stmt, ct) => f(stmt), CancellationToken.None);
 
         /// <summary>
         /// Returns a cold IObservable which schedules the function f on the statement's database operation queue each
@@ -108,10 +104,8 @@ namespace SQLitePCL.pretty
         /// enumerating the prepared statement for instance.
         /// </param>
         /// <returns>A cold observable of the values produced by the function f.</returns>
-        public static IObservable<T> Use<T>(this IAsyncStatement This, Func<IStatement, IEnumerable<T>> f)
-        {
-            return This.Use((stmt, ct) => f(stmt));
-        }
+        public static IObservable<T> Use<T>(this IAsyncStatement This, Func<IStatement, IEnumerable<T>> f) =>
+            This.Use((stmt, ct) => f(stmt));
 
         /// <summary>
         /// Executes the <see cref="IStatement"/> with provided bind parameter values.
@@ -121,12 +115,10 @@ namespace SQLitePCL.pretty
         /// <param name="values">The position indexed values to bind.</param>
         /// <returns>A <see cref="Task"/> that completes when the statement is executed.</returns>
         public static Task ExecuteAsync(
-            this IAsyncStatement This,
-            CancellationToken cancellationToken,
-            params object[] values)
-        {
-            return This.Use((stmt, ct) => { stmt.Execute(values); }, cancellationToken);
-        }
+                this IAsyncStatement This,
+                CancellationToken cancellationToken,
+                params object[] values) =>
+            This.Use((stmt, ct) => { stmt.Execute(values); }, cancellationToken);
 
         /// <summary>
         /// Executes the <see cref="IStatement"/> with provided bind parameter values.
@@ -134,12 +126,8 @@ namespace SQLitePCL.pretty
         /// <param name="This">The async statement.</param>
         /// <param name="values">The position indexed values to bind.</param>
         /// <returns>A <see cref="Task"/> that completes when the statement is executed.</returns>
-        public static Task ExecuteAsync(
-            this IAsyncStatement This,
-            params object[] values)
-        {
-            return This.ExecuteAsync(CancellationToken.None, values);
-        }
+        public static Task ExecuteAsync(this IAsyncStatement This, params object[] values) =>
+            This.ExecuteAsync(CancellationToken.None, values);
 
         /// <summary>
         /// Queries the database asynchronously using the provided IStatement and provided bind variables.
@@ -147,22 +135,16 @@ namespace SQLitePCL.pretty
         /// <param name="This">The async statement.</param>
         /// <param name="values">The position indexed values to bind.</param>
         /// <returns>A cold IObservable of the rows in the result set.</returns>
-        public static IObservable<IReadOnlyList<IResultSetValue>> Query(
-            this IAsyncStatement This, 
-            params object[] values)
-        {
-            return This.Use<IReadOnlyList<IResultSetValue>>(stmt => stmt.Query(values));
-        }
+        public static IObservable<IReadOnlyList<IResultSetValue>> Query(this IAsyncStatement This, params object[] values) =>
+            This.Use<IReadOnlyList<IResultSetValue>>(stmt => stmt.Query(values));
 
         /// <summary>
         /// Queries the database asynchronously using the provided IStatement
         /// </summary>
         /// <param name="This">The async statement.</param>
         /// <returns>A cold IObservable of the rows in the result set.</returns>
-        public static IObservable<IReadOnlyList<IResultSetValue>> Query(this IAsyncStatement This)
-        {
-            return This.Use<IReadOnlyList<IResultSetValue>>(stmt => stmt.Query());
-        }
+        public static IObservable<IReadOnlyList<IResultSetValue>> Query(this IAsyncStatement This) =>
+            This.Use<IReadOnlyList<IResultSetValue>>(stmt => stmt.Query());
     }
 
     internal class AsyncStatementImpl : IAsyncStatement

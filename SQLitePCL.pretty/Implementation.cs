@@ -352,10 +352,8 @@ namespace SQLitePCL.pretty
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() =>
+            this.GetEnumerator();
 
         public bool TryGetValue(string key, out IBindParameter value)
         {
@@ -477,10 +475,8 @@ namespace SQLitePCL.pretty
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() =>
+            this.GetEnumerator();
     }
 
     internal sealed class ResultSetImpl : IReadOnlyList<IResultSetValue>
@@ -508,10 +504,8 @@ namespace SQLitePCL.pretty
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() =>
+            this.GetEnumerator();
 
         public IResultSetValue this[int index]
         {
@@ -709,14 +703,10 @@ namespace SQLitePCL.pretty
             this.deleg = deleg;
         }
 
-        public IEnumerator<T> GetEnumerator()
-        {
-            return deleg();
-        }
+        public IEnumerator<T> GetEnumerator() =>
+            deleg();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() =>
+            this.GetEnumerator();
     }
 }

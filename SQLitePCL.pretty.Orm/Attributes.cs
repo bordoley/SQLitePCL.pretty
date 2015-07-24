@@ -34,7 +34,11 @@ namespace SQLitePCL.pretty.Orm.Attributes
     [AttributeUsage (AttributeTargets.Class)]
     public sealed class TableAttribute : Attribute
     {
-        private readonly string _name;
+        /// <summary>
+        /// The table name.
+        /// </summary>
+        /// <value>The name.</value>
+        public string Name { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SQLitePCL.pretty.Orm.Attributes.TableAttribute"/> class.
@@ -44,14 +48,8 @@ namespace SQLitePCL.pretty.Orm.Attributes
         {
             Contract.Requires(name != null);
             Contract.Requires(name.Length != 0);
-            _name = name;
+            this.Name = name;
         }
-
-        /// <summary>
-        /// The table name.
-        /// </summary>
-        /// <value>The name.</value>
-        public string Name { get { return _name; } }
     }
 
     /// <summary>
@@ -60,7 +58,11 @@ namespace SQLitePCL.pretty.Orm.Attributes
     [AttributeUsage (AttributeTargets.Property)]
     public sealed class ColumnAttribute : Attribute
     {
-        private readonly string _name;
+        /// <summary>
+        /// The column name.
+        /// </summary>
+        /// <value>The name.</value>
+        public string Name { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SQLitePCL.pretty.Orm.Attributes.ColumnAttribute"/> class.
@@ -70,14 +72,8 @@ namespace SQLitePCL.pretty.Orm.Attributes
         {
             Contract.Requires(name != null);
             Contract.Requires(name.Length != 0);
-            _name = name;
+            this.Name = name;
         }
-
-        /// <summary>
-        /// The column name.
-        /// </summary>
-        /// <value>The name.</value>
-        public string Name { get { return _name; } }
     }
 
     /// <summary>
@@ -95,8 +91,16 @@ namespace SQLitePCL.pretty.Orm.Attributes
     public sealed class CompositeIndexAttribute : Attribute
     {
         private readonly List<string> columns;
-        private readonly bool unique;
-        private readonly string name;
+
+        /// <summary>
+        /// Whether the index is unique or not.
+        /// </summary>
+        public bool Unique { get; }
+
+        /// <summary>
+        /// The index name or null.
+        /// </summary>
+        public string Name { get; }
 
         /// <summary>
         /// Creates a non-unique index across one or more columns
@@ -116,8 +120,8 @@ namespace SQLitePCL.pretty.Orm.Attributes
             Contract.Requires(columns != null);
             Contract.Requires(columns.Length != 0);
 
-            this.name = null;
-            this.unique = unique;
+            this.Name = null;
+            this.Unique = unique;
             this.columns = new List<string>(columns);
         }
 
@@ -133,25 +137,15 @@ namespace SQLitePCL.pretty.Orm.Attributes
             Contract.Requires(columns != null);
             Contract.Requires(columns.Length != 0);
 
-            this.name = name;
-            this.unique = unique;
+            this.Name = name;
+            this.Unique = unique;
             this.columns = new List<string>(columns);
         }
-
-        /// <summary>
-        /// Whether the index is unique or not.
-        /// </summary>
-        public bool Unique { get { return unique; } }
 
         /// <summary>
         /// The table columns in order which compose the index.
         /// </summary>
         public IEnumerable<string> Columns { get { return columns.AsEnumerable(); } }
-
-        /// <summary>
-        /// The index name or null.
-        /// </summary>
-        public string Name { get { return name; } }
     }
 
     /// <summary>
@@ -160,7 +154,10 @@ namespace SQLitePCL.pretty.Orm.Attributes
     [AttributeUsage (AttributeTargets.Property)]
     public sealed class IndexedAttribute : Attribute
     {
-        private readonly bool _unique;
+        /// <summary>
+        /// Whether the index should be unique or not.
+        /// </summary>
+        public bool Unique { get; }
 
         /// <summary>
         /// Creates a non-unique index on the given column.
@@ -175,13 +172,8 @@ namespace SQLitePCL.pretty.Orm.Attributes
         /// <param name="unique">Whether the index should be unique or not.</param>
         public IndexedAttribute(bool unique)
         {
-            _unique = unique;
+            this.Unique = unique;
         }
-
-        /// <summary>
-        /// Whether the index should be unique or not.
-        /// </summary>
-        public bool Unique { get { return _unique; } }
     }
 
     /// <summary>
@@ -199,7 +191,11 @@ namespace SQLitePCL.pretty.Orm.Attributes
     [AttributeUsage (AttributeTargets.Property)]
     public sealed class CollationAttribute: Attribute
     {
-        private readonly string _name;
+        /// <summary>
+        /// Gets the value.
+        /// </summary>
+        /// <value>The value.</value>
+        public string Name { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SQLitePCL.pretty.Orm.Attributes.CollationAttribute"/> class.
@@ -209,14 +205,8 @@ namespace SQLitePCL.pretty.Orm.Attributes
         {
             Contract.Requires(name != null);
 
-            _name = name;
+            this.Name = name;
         }
-
-        /// <summary>
-        /// Gets the value.
-        /// </summary>
-        /// <value>The value.</value>
-        public string Name { get { return _name; } }
     }
 
     /// <summary>
@@ -225,7 +215,10 @@ namespace SQLitePCL.pretty.Orm.Attributes
     [AttributeUsage (AttributeTargets.Property)]
     public sealed class NotNullAttribute : Attribute
     {
-        private object defaultValue;
+        /// <summary>
+        /// The default value to use if the table is migrated.
+        /// </summary>
+        public object DefaultValue { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SQLitePCL.pretty.Orm.Attributes.NotNullAttribute"/> class.
@@ -234,13 +227,8 @@ namespace SQLitePCL.pretty.Orm.Attributes
         public NotNullAttribute(object defaultValue)
         {
             Contract.Requires(defaultValue != null);
-            this.defaultValue = defaultValue;
+            this.DefaultValue = defaultValue;
         }
-
-        /// <summary>
-        /// The default value to use if the table is migrated.
-        /// </summary>
-        public object DefaultValue { get { return defaultValue; } }
     }
 
     /// <summary>
@@ -249,8 +237,15 @@ namespace SQLitePCL.pretty.Orm.Attributes
     [AttributeUsage (AttributeTargets.Property)]
     public sealed class ForeignKeyAttribute : Attribute
     {
-        private readonly string tableName;
-        private readonly string columnName;
+        /// <summary>
+        /// The table that constrains the annotated column.
+        /// </summary>
+        public string TableName { get; }
+
+        /// <summary>
+        /// The column in the table that constrains the annotated column.
+        /// </summary>
+        public string ColumnName { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SQLitePCL.pretty.Orm.Attributes.ForeignKeyAttribute"/> class.
@@ -262,8 +257,8 @@ namespace SQLitePCL.pretty.Orm.Attributes
 
             var table = TableMapping.Get(typ);
 
-            this.tableName = table.TableName;
-            this.columnName = table.PrimaryKeyColumn();
+            this.TableName = table.TableName;
+            this.ColumnName = table.PrimaryKeyColumn();
         }
 
         /// <summary>
@@ -276,19 +271,9 @@ namespace SQLitePCL.pretty.Orm.Attributes
             Contract.Requires(tableName != null);
             Contract.Requires(columnName != null);
 
-            this.tableName = tableName;
-            this.columnName = columnName;
+            this.TableName = tableName;
+            this.ColumnName = columnName;
         }
-
-        /// <summary>
-        /// The table that constrains the annotated column.
-        /// </summary>
-        public string TableName { get { return tableName; } }
-
-        /// <summary>
-        /// The column in the table that constrains the annotated column.
-        /// </summary>
-        public string ColumnName { get { return columnName; } }
     }
 
     internal static class OrmAttributes
@@ -305,20 +290,14 @@ namespace SQLitePCL.pretty.Orm.Attributes
             return attrs.Count() > 0;
         }
 
-        internal static string GetCollationSequence(this PropertyInfo This)
-        {
-            return This.GetCustomAttributes<CollationAttribute>(true).Select(x => x.Name).FirstOrDefault();
-        }
+        internal static string GetCollationSequence(this PropertyInfo This) =>
+            This.GetCustomAttributes<CollationAttribute>(true).Select(x => x.Name).FirstOrDefault();
 
-        private static bool Ignore(this PropertyInfo This)
-        {
-            return This.GetCustomAttributes<IgnoreAttribute>(true).Count() > 0;
-        }
+        private static bool Ignore(this PropertyInfo This) =>
+            This.GetCustomAttributes<IgnoreAttribute>(true).Count() > 0;
 
-        internal static IndexedAttribute GetColumnIndex(this PropertyInfo This)
-        {
-            return This.GetCustomAttributes<IndexedAttribute>(true).FirstOrDefault();
-        }
+        internal static IndexedAttribute GetColumnIndex(this PropertyInfo This) =>
+            This.GetCustomAttributes<IndexedAttribute>(true).FirstOrDefault();
 
         internal static string GetColumnName(this PropertyInfo This)
         {
@@ -332,10 +311,8 @@ namespace SQLitePCL.pretty.Orm.Attributes
             return tableAttr != null ? tableAttr.Name : This.Name;
         }
 
-        internal static IEnumerable<CompositeIndexAttribute> GetCompositeIndexes(this Type This)
-        {
-            return This.GetTypeInfo().GetCustomAttributes<CompositeIndexAttribute>(true);
-        }
+        internal static IEnumerable<CompositeIndexAttribute> GetCompositeIndexes(this Type This) =>
+            This.GetTypeInfo().GetCustomAttributes<CompositeIndexAttribute>(true);
 
         internal static object GetDefaultValue(this PropertyInfo This)
         {
@@ -346,22 +323,15 @@ namespace SQLitePCL.pretty.Orm.Attributes
             else                                                  { return null; }
         }
 
-        internal static ForeignKeyConstraint GetForeignKeyConstraint(this PropertyInfo This)
-        {
-            return 
-                This.GetCustomAttributes<ForeignKeyAttribute>(true)
-                    .Select(x => new ForeignKeyConstraint(x.TableName, x.ColumnName))
-                    .FirstOrDefault();
-        }
+        internal static ForeignKeyConstraint GetForeignKeyConstraint(this PropertyInfo This) =>
+            This.GetCustomAttributes<ForeignKeyAttribute>(true)
+                .Select(x => new ForeignKeyConstraint(x.TableName, x.ColumnName))
+                .FirstOrDefault();
 
-        internal static IEnumerable<PropertyInfo> GetNotIgnoredGettableProperties(this Type This)
-        {
-            return This.GetPublicInstanceProperties().Where(x => !x.Ignore());
-        }
+        internal static IEnumerable<PropertyInfo> GetNotIgnoredGettableProperties(this Type This) =>
+            This.GetPublicInstanceProperties().Where(x => !x.Ignore());
 
-        internal static IEnumerable<PropertyInfo> GetNotIgnoredSettableProperties(this Type This)
-        {
-            return This.GetPublicInstanceSettableProperties().Where(x => !x.Ignore());
-        }
+        internal static IEnumerable<PropertyInfo> GetNotIgnoredSettableProperties(this Type This) =>
+            This.GetPublicInstanceSettableProperties().Where(x => !x.Ignore());
     }
 }

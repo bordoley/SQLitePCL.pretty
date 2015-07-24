@@ -7,10 +7,8 @@ namespace SQLitePCL.pretty
     internal sealed class Expando<T>
         where T: class
     {
-        public static Expando<T> Create()
-        {
-            return new Expando<T>();
-        }
+        public static Expando<T> Create() =>
+            new Expando<T>();
 
         private readonly ConditionalWeakTable<T, IDictionary<string, object>> table = 
             new ConditionalWeakTable<T, IDictionary<string, object>>();
@@ -19,20 +17,14 @@ namespace SQLitePCL.pretty
         {
         }
 
-        private IDictionary<string, object> GetDictionary(T obj)
-        {
-            return table.GetValue(obj, _ => new Dictionary<string,object>());
-        }
+        private IDictionary<string, object> GetDictionary(T obj) =>
+            table.GetValue(obj, _ => new Dictionary<string,object>());
 
-        public void SetValue(T obj, string key, object value)
-        {
+        public void SetValue(T obj, string key, object value) =>
             GetDictionary(obj)[key] = value;
-        }
 
-        public TValue GetValue<TValue>(T obj, string key)
-        {
-            return (TValue) GetDictionary(obj)[key];
-        }
+        public TValue GetValue<TValue>(T obj, string key) =>
+            (TValue) GetDictionary(obj)[key];
 
         public bool TryGetValue<TValue>(T obj, string key, out TValue value)
         {
@@ -59,10 +51,8 @@ namespace SQLitePCL.pretty
             return (TValue) value;
         }
 
-        public TValue GetOrAddValue<TValue>(T obj, string key, TValue value)
-        {
-            return GetOrAddValue(obj, key, _ => value);
-        }
+        public TValue GetOrAddValue<TValue>(T obj, string key, TValue value) =>
+            GetOrAddValue(obj, key, _ => value);
     }
 }
 

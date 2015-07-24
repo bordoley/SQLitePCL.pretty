@@ -51,9 +51,8 @@ namespace SQLitePCL.pretty.Orm
             This.Execute(SQLBuilder.ReIndexWithName(name));
         }*/
 
-        internal static IReadOnlyDictionary<string, IndexInfo> GetIndexInfo(this IDatabaseConnection This, string tableName)
-        {
-            return This.RunInTransaction(db =>
+        internal static IReadOnlyDictionary<string, IndexInfo> GetIndexInfo(this IDatabaseConnection This, string tableName) =>
+            This.RunInTransaction(db =>
                 {
                     var retval = new Dictionary<string,IndexInfo>();
 
@@ -77,8 +76,6 @@ namespace SQLitePCL.pretty.Orm
 
                     return retval;
                 });
-            
-        }
     }
 }
 

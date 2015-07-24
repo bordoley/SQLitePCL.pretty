@@ -42,10 +42,8 @@ namespace SQLitePCL.pretty
 
         private sealed class Operation<T> : Operation
         {
-            public static Operation<T> Create(Func<CancellationToken, Task<T>> f, CancellationToken cancellationToken)
-            {
-                return new Operation<T>(f, cancellationToken);
-            }
+            public static Operation<T> Create(Func<CancellationToken, Task<T>> f, CancellationToken cancellationToken) =>
+                new Operation<T>(f, cancellationToken);
 
             private readonly Func<CancellationToken, Task<T>> f;
             private readonly CancellationToken cancellationToken;
@@ -118,12 +116,10 @@ namespace SQLitePCL.pretty
 
     internal static class OperationsQueueExtensions
     {
-        public static Task EnqueueOperation(this OperationsQueue This, Action<CancellationToken> calculationFunc, IScheduler scheduler, CancellationToken cancellationToken)
-        {
-            return This.EnqueueOperation(ct =>
+        public static Task EnqueueOperation(this OperationsQueue This, Action<CancellationToken> calculationFunc, IScheduler scheduler, CancellationToken cancellationToken) =>
+            This.EnqueueOperation(ct =>
                 Observable.Start(() => calculationFunc(ct), scheduler).ToTask(), 
                 cancellationToken);
-        }
     }
 }
  

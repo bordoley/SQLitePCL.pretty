@@ -6,10 +6,8 @@ namespace SQLitePCL.pretty.Orm.Sql
 {
     internal static partial class SqlCompiler
     {
-        internal static String CompileLimitClause(this Expression This)
-        {
-            return "LIMIT " + This.CompileExpr();
-        }
+        internal static String CompileLimitClause(this Expression This) =>
+            "LIMIT " + This.CompileExpr();
     }
 
     /// <summary>
@@ -30,10 +28,8 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// Returns a <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.LimitClause"/>.
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.LimitClause"/>.</returns>
-        public override string ToString()
-        {
-            return orderBy + "\r\n" + limit;
-        }
+        public override string ToString() =>
+            orderBy + "\r\n" + limit;
     }
 
     /// <summary>

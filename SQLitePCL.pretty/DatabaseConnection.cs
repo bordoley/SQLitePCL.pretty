@@ -33,35 +33,20 @@ namespace SQLitePCL.pretty
             return new DatabaseProfileEventArgs(statement, executionTime);
         }
 
-        private readonly string statement;
-        private readonly TimeSpan executionTime;
-
-        private DatabaseProfileEventArgs(string statement, TimeSpan executionTime)
-        {
-            this.statement = statement;
-            this.executionTime = executionTime;
-        }
-
         /// <summary>
         /// The SQL statement being profiled.
         /// </summary>
-        public string Statement
-        {
-            get
-            {
-                return statement;
-            }
-        }
+        public string Statement { get; }
 
         /// <summary>
         /// The execution time of the statement.
         /// </summary>
-        public TimeSpan ExecutionTime
+        public TimeSpan ExecutionTime { get; }
+
+        private DatabaseProfileEventArgs(string statement, TimeSpan executionTime)
         {
-            get
-            {
-                return executionTime;
-            }
+            this.Statement = statement;
+            this.ExecutionTime = executionTime;
         }
     }
 
@@ -76,22 +61,14 @@ namespace SQLitePCL.pretty
             return new DatabaseTraceEventArgs(statement);
         }
 
-        private readonly string statement;
-
-        private DatabaseTraceEventArgs(string statement)
-        {
-            this.statement = statement;
-        }
-
         /// <summary>
         /// The SQL statement text as the statement first begins executing which caused the trace event.
         /// </summary>
-        public string Statement
+        public string Statement { get; }
+
+        private DatabaseTraceEventArgs(string statement)
         {
-            get
-            {
-                return statement;
-            }
+            this.Statement = statement;
         }
     }
 
@@ -108,61 +85,32 @@ namespace SQLitePCL.pretty
             return new DatabaseUpdateEventArgs(action, database, table, rowId);
         }
 
-        private readonly ActionCode action;
-        private readonly string database;
-        private readonly string table;
-        private readonly long rowId;
-
-        private DatabaseUpdateEventArgs(ActionCode action, String database, string table, long rowId)
-        {
-            this.action = action;
-            this.database = database;
-            this.table = table;
-            this.rowId = rowId;
-        }
-
         /// <summary>
         /// The SQL operation that caused the update event.
         /// </summary>
-        public ActionCode Action
-        {
-            get
-            {
-                return action;
-            }
-        }
+        public ActionCode Action { get; }
 
         /// <summary>
         /// The database containing the affected row.
         /// </summary>
-        public string Database
-        {
-            get
-            {
-                return database;
-            }
-        }
+        public string Database { get; }
 
         /// <summary>
         /// The table name containing the affected row.
         /// </summary>
-        public string Table
-        {
-            get
-            {
-                return table;
-            }
-        }
+        public string Table { get; }
 
         /// <summary>
         /// The rowid of the row updated.
         /// </summary>
-        public long RowId
+        public long RowId { get; }
+
+        private DatabaseUpdateEventArgs(ActionCode action, String database, string table, long rowId)
         {
-            get
-            {
-                return rowId;
-            }
+            this.Action = action;
+            this.Database = database;
+            this.Table = table;
+            this.RowId = rowId;
         }
     }
 
