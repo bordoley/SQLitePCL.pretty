@@ -1315,4 +1315,106 @@ namespace SQLitePCL.pretty
             SQLiteException.CheckOk(rc);  
         }
     }
+
+    internal class DelegatingDatabaseConnection : IDatabaseConnection, IDisposable
+    {
+        private readonly IDatabaseConnection db;
+
+        private bool disposed = false;
+
+        internal DelegatingDatabaseConnection(IDatabaseConnection db)
+        {
+            this.db = db;
+        }
+
+        public bool IsAutoCommit
+        {
+            get
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                return db.IsAutoCommit;
+            }
+        }
+
+        public bool IsReadOnly
+        {
+            get
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                return db.IsReadOnly;
+            }
+        }
+
+        public int Changes
+        {
+            get
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                return db.Changes;
+            }
+        }
+
+        public int TotalChanges
+        {
+            get
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                return db.TotalChanges;
+            }
+        }
+
+        public long LastInsertedRowId
+        {
+            get
+            {
+                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                return db.LastInsertedRowId;
+            }
+        }
+
+        public void WalCheckPoint(string dbName, WalCheckPointMode mode, out int nLog, out int nCkpt)
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            db.WalCheckPoint(dbName, mode, out nLog, out nCkpt);
+        }
+
+        public bool IsDatabaseReadOnly(string dbName)
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            return db.IsDatabaseReadOnly(dbName);
+        }
+
+        public TableColumnMetadata GetTableColumnMetadata(string dbName, string tableName, string columnName)
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            return db.GetTableColumnMetadata(dbName, tableName, columnName);
+        }
+
+        public Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite)
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            return db.OpenBlob(database, tableName, columnName, rowId, canWrite);
+        }
+
+        public IStatement PrepareStatement(string sql, out string tail)
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+
+            return db.PrepareStatement(sql, out tail);
+        }
+
+        public void Status(DatabaseConnectionStatusCode statusCode, out int current, out int highwater, bool reset)
+        {
+            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            this.db.Status(statusCode, out current, out highwater, reset);
+        }
+
+        public void Dispose()
+        {
+            // Guard against someone taking a reference to this and trying to use it outside of
+            // the Use function delegate
+            disposed = true;
+            // We don't actually own the database connection so its not disposed
+        }
+    }
 }
