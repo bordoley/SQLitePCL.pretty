@@ -339,6 +339,7 @@ namespace SQLitePCL.pretty
 
         public bool ContainsKey(string key)
         {
+            Contract.Requires(key != null);
             int i;
             return this.TryGetBindParameterIndex(key, out i);
         }

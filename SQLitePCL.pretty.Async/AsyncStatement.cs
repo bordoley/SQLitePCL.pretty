@@ -43,7 +43,6 @@ namespace SQLitePCL.pretty
             Action<IStatement, CancellationToken> f,
             CancellationToken cancellationToken)
         {
-            Contract.Requires(This != null);
             Contract.Requires(f != null);
 
             return This.Use((stmt, ct) =>

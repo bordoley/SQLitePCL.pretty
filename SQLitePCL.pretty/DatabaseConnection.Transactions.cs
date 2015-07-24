@@ -108,7 +108,6 @@ namespace SQLitePCL.pretty
         /// <exception cref="Exception">The exception that caused the transaction to be aborted and rolled back.</exception>
         public static void RunInTransaction(this IDatabaseConnection This, Action<IDatabaseConnection> action, TransactionMode mode)
         {
-            Contract.Requires(This != null);
             Contract.Requires(action != null);
 
             This.RunInTransaction<object>(db => 
@@ -227,7 +226,6 @@ namespace SQLitePCL.pretty
         /// </param>
         public static bool TryRunInTransaction(this IDatabaseConnection This, Action<IDatabaseConnection> action, TransactionMode mode)
         {
-            Contract.Requires(This != null);
             Contract.Requires(action != null);
 
             object result;

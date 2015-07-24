@@ -27,18 +27,10 @@ namespace SQLitePCL.pretty
     /// </summary>
     public static class SQLiteValue
     {
-        private static readonly ISQLiteValue _null = new NullValue();
-
         /// <summary>
         /// The SQLite null value.
         /// </summary>
-        public static ISQLiteValue Null
-        {
-            get
-            {
-                return _null;
-            }
-        }
+        public static ISQLiteValue Null { get; } = new NullValue();
 
         /// <summary>
         /// Create a SQLite zeroblob of the specified length.
@@ -66,100 +58,80 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this short This)
-        {
-            return Convert.ToInt64(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this short This) =>
+            Convert.ToInt64(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts a <see cref="bool"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this bool This)
-        {
-            return Convert.ToInt64(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this bool This) =>
+            Convert.ToInt64(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts a <see cref="byte"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this byte This)
-        {
-            return Convert.ToInt64(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this byte This) =>
+            Convert.ToInt64(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts a <see cref="char"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this char This)
-        {
-            return Convert.ToInt64(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this char This) =>
+            Convert.ToInt64(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts a <see cref="sbyte"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this sbyte This)
-        {
-            return Convert.ToInt64(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this sbyte This) =>
+            Convert.ToInt64(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts a <see cref="UInt32"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this UInt32 This)
-        {
-            return Convert.ToInt64(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this UInt32 This) =>
+            Convert.ToInt64(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts an <see cref="UInt16"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this UInt16 This)
-        {
-            return Convert.ToInt64(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this UInt16 This) =>
+            Convert.ToInt64(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts a <see cref="long"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this long This)
-        {
-            return new IntValue(This);
-        }
+        public static ISQLiteValue ToSQLiteValue(this long This) =>
+            new IntValue(This);
 
         /// <summary>
         /// Converts a <see cref="double"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this double This)
-        {
-            return new FloatValue(This);
-        }
+        public static ISQLiteValue ToSQLiteValue(this double This) =>
+            new FloatValue(This);
 
         /// <summary>
         /// Converts an <see cref="float"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this float This)
-        {
-            return Convert.ToDouble(This).ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this float This) =>
+            Convert.ToDouble(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts a <see cref="string"/> to an <see cref="ISQLiteValue"/>.
@@ -188,50 +160,40 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this TimeSpan This)
-        {
-            return This.Ticks.ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this TimeSpan This) =>
+            This.Ticks.ToSQLiteValue();
 
         /// <summary>
         /// Converts an <see cref="DateTime"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this DateTime This)
-        {
-            return This.Ticks.ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this DateTime This) =>
+            This.Ticks.ToSQLiteValue();
 
         /// <summary>
         /// Converts an <see cref="DateTimeOffset"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this DateTimeOffset This)
-        {
-            return This.ToOffset(TimeSpan.Zero).Ticks.ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this DateTimeOffset This) =>
+            This.ToOffset(TimeSpan.Zero).Ticks.ToSQLiteValue();
 
         /// <summary>
         /// Converts an <see cref="decimal"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this decimal This)
-        {
-            return Convert.ToDouble(This).ToSQLiteValue();
-        }            
+        public static ISQLiteValue ToSQLiteValue(this decimal This) =>
+            Convert.ToDouble(This).ToSQLiteValue();         
 
         /// <summary>
         /// Converts an <see cref="Guid"/> to an <see cref="ISQLiteValue"/>.
         /// </summary>
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
-        public static ISQLiteValue ToSQLiteValue(this Guid This)
-        {
-            return This.ToString().ToSQLiteValue();
-        }
+        public static ISQLiteValue ToSQLiteValue(this Guid This) =>
+            This.ToString().ToSQLiteValue();
 
         /// <summary>
         /// Converts an <see cref="Uri"/> to an <see cref="ISQLiteValue"/>.
@@ -244,15 +206,11 @@ namespace SQLitePCL.pretty
             return This.ToString().ToSQLiteValue();
         }
 
-        internal static ISQLiteValue ToSQLiteValue(this sqlite3_value This)
-        {
-            return new NativeValue(This);
-        }
+        internal static ISQLiteValue ToSQLiteValue(this sqlite3_value This) =>
+            new NativeValue(This);
 
-        internal static IResultSetValue ResultSetValueAt(this StatementImpl This, int index)
-        {
-            return new ResultSetValueImpl(This, index);
-        }
+        internal static IResultSetValue ResultSetValueAt(this StatementImpl This, int index) =>
+            new ResultSetValueImpl(This, index);
 
         internal static void SetResult(this sqlite3_context ctx, ISQLiteValue value)
         {

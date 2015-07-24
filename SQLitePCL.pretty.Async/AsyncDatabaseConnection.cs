@@ -125,7 +125,6 @@ namespace SQLitePCL.pretty
             string sql,
             CancellationToken cancellationToken)
         {
-            Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
             return This.Use((conn, ct) => conn.ExecuteAll(sql), cancellationToken);
@@ -137,12 +136,8 @@ namespace SQLitePCL.pretty
         /// <param name="This">The asynchronous database connection.</param>
         /// <param name="sql">One or more semicolon delimited SQL statements.</param>
         /// <returns>A task that completes when all statements have been executed.</returns>
-        public static Task ExecuteAllAsync(this IAsyncDatabaseConnection This, string sql)
-        {
-            Contract.Requires(This != null);
-            Contract.Requires(sql != null);
-            return This.ExecuteAllAsync(sql, CancellationToken.None);
-        }
+        public static Task ExecuteAllAsync(this IAsyncDatabaseConnection This, string sql) =>
+            This.ExecuteAllAsync(sql, CancellationToken.None);
 
         /// <summary>
         /// Compiles and executes a SQL statement with the provided bind parameter values.
@@ -158,7 +153,6 @@ namespace SQLitePCL.pretty
             CancellationToken cancellationToken,
             params object[] values)
         {
-            Contract.Requires(This != null);
             Contract.Requires(sql != null);
             Contract.Requires(values != null);
 
@@ -172,14 +166,8 @@ namespace SQLitePCL.pretty
         /// <param name="sql">The SQL statement to compile and execute.</param>
         /// <param name="values">The bind parameter values.</param>
         /// <returns>A task that completes when the statement has been executed.</returns>
-        public static Task ExecuteAsync(this IAsyncDatabaseConnection This, string sql, params object[] values)
-        {
-            Contract.Requires(This != null);
-            Contract.Requires(sql != null);
-            Contract.Requires(values != null);
-
-            return ExecuteAsync(This, sql, CancellationToken.None, values);
-        }
+        public static Task ExecuteAsync(this IAsyncDatabaseConnection This, string sql, params object[] values) =>
+            This.ExecuteAsync(sql, CancellationToken.None, values);
 
         /// <summary>
         /// Compiles and executes a SQL statement.
@@ -193,7 +181,6 @@ namespace SQLitePCL.pretty
             string sql,
             CancellationToken cancellationToken)
         {
-            Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
             return This.Use((conn, ct) => conn.Execute(sql), cancellationToken);
@@ -205,13 +192,8 @@ namespace SQLitePCL.pretty
         /// <param name="This">The asynchronous database connection.</param>
         /// <param name="sql">The SQL statement to compile and execute.</param>
         /// <returns>A task that completes when the statement has been executed.</returns>
-        public static Task ExecuteAsync(this IAsyncDatabaseConnection This, string sql)
-        {
-            Contract.Requires(This != null);
-            Contract.Requires(sql != null);
-
-            return ExecuteAsync(This, sql, CancellationToken.None);
-        }
+        public static Task ExecuteAsync(this IAsyncDatabaseConnection This, string sql) =>
+            This.ExecuteAsync(sql, CancellationToken.None);
 
         /// <summary>
         /// Opens the blob located by the a database, table, column, and rowid for incremental asynchronous I/O as a <see cref="System.IO.Stream"/>.
@@ -227,20 +209,13 @@ namespace SQLitePCL.pretty
         /// </param>
         /// <returns>A <see cref="Task"/> that completes with a <see cref="System.IO.Stream"/> that can be used to asynchronously write and read to and from blob.</returns>
         public static Task<Stream> OpenBlobAsync(
-            this IAsyncDatabaseConnection This,
-            string database,
-            string tableName,
-            string columnName,
-            long rowId,
-            bool canWrite = false)
-        {
-            Contract.Requires(This != null);
-            Contract.Requires(database != null);
-            Contract.Requires(tableName != null);
-            Contract.Requires(columnName != null);
-
-            return OpenBlobAsync(This, database, tableName, columnName, rowId, canWrite, CancellationToken.None);
-        }
+                this IAsyncDatabaseConnection This,
+                string database,
+                string tableName,
+                string columnName,
+                long rowId,
+                bool canWrite = false) =>
+            This.OpenBlobAsync(database, tableName, columnName, rowId, canWrite, CancellationToken.None);
 
         /// <summary>
         /// Opens the blob located by the a database, table, column, and rowid for incremental asynchronous I/O as a <see cref="System.IO.Stream"/>.
@@ -265,7 +240,6 @@ namespace SQLitePCL.pretty
             bool canWrite,
             CancellationToken cancellationToken)
         {
-            Contract.Requires(This != null);
             Contract.Requires(database != null);
             Contract.Requires(tableName != null);
             Contract.Requires(columnName != null);
@@ -296,9 +270,7 @@ namespace SQLitePCL.pretty
             bool canWrite,
             CancellationToken cancellationToken)
         {
-            Contract.Requires(This != null);
             Contract.Requires(columnInfo != null);
-
             return This.OpenBlobAsync(columnInfo.DatabaseName, columnInfo.TableName, columnInfo.OriginName, rowId, canWrite, cancellationToken);
         }
 
@@ -333,7 +305,6 @@ namespace SQLitePCL.pretty
            string sql,
            CancellationToken cancellationToken)
         {
-            Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
             return This.Use<IReadOnlyList<IAsyncStatement>>((conn, ct) =>
@@ -358,15 +329,8 @@ namespace SQLitePCL.pretty
         /// <param name="sql">One or more semicolon delimited SQL statements.</param>
         /// <returns>A <see cref="Task"/> that completes with a <see cref="IReadOnlyList&lt;T&gt;"/>
         /// of the compiled <see cref="IAsyncStatement"/>instances.</returns>
-        public static Task<IReadOnlyList<IAsyncStatement>> PrepareAllAsync(
-           this IAsyncDatabaseConnection This,
-           string sql)
-        {
-            Contract.Requires(This != null);
-            Contract.Requires(sql != null);
-
-            return PrepareAllAsync(This, sql, CancellationToken.None);
-        }
+        public static Task<IReadOnlyList<IAsyncStatement>> PrepareAllAsync(this IAsyncDatabaseConnection This, string sql) =>
+            This.PrepareAllAsync(sql, CancellationToken.None);
 
         /// <summary>
         /// Compiles a SQL statement.
@@ -381,7 +345,6 @@ namespace SQLitePCL.pretty
            string sql,
            CancellationToken cancellationToken)
         {
-            Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
             return This.Use<IAsyncStatement>((conn, ct) =>
@@ -398,13 +361,8 @@ namespace SQLitePCL.pretty
         /// <param name="sql">The SQL statement to compile.</param>
         /// <returns>Task that completes with a <see cref="IAsyncStatement"/> that
         /// can be used to query the result set asynchronously.</returns>
-        public static Task<IAsyncStatement> PrepareStatementAsync(this IAsyncDatabaseConnection This, string sql)
-        {
-            Contract.Requires(This != null);
-            Contract.Requires(sql != null);
-
-            return PrepareStatementAsync(This, sql, CancellationToken.None);
-        }
+        public static Task<IAsyncStatement> PrepareStatementAsync(this IAsyncDatabaseConnection This, string sql) =>
+            This.PrepareStatementAsync(sql, CancellationToken.None);
 
         /// <summary>
         /// Returns a cold observable that compiles a SQL statement with
@@ -438,7 +396,6 @@ namespace SQLitePCL.pretty
             this IAsyncDatabaseConnection This,
             string sql)
         {
-            Contract.Requires(This != null);
             Contract.Requires(sql != null);
 
             return This.Use(conn => conn.Query(sql));
@@ -456,7 +413,6 @@ namespace SQLitePCL.pretty
             Action<IDatabaseConnection, CancellationToken> f,
             CancellationToken cancellationToken)
         {
-            Contract.Requires(This != null);
             Contract.Requires(f != null);
 
             return This.Use((conn, ct) =>
@@ -474,7 +430,6 @@ namespace SQLitePCL.pretty
         /// <returns>A task that completes when <paramref name="f"/> returns.</returns>
         public static Task Use(this IAsyncDatabaseConnection This, Action<IDatabaseConnection> f)
         {
-            Contract.Requires(This != null);
             Contract.Requires(f != null);
 
             return This.Use((db, ct) => f(db), CancellationToken.None);
@@ -508,9 +463,7 @@ namespace SQLitePCL.pretty
         /// <returns>A task that completes with the result of <paramref name="f"/>.</returns>
         public static Task<T> Use<T>(this IAsyncDatabaseConnection This, Func<IDatabaseConnection,T> f)
         {
-            Contract.Requires(This != null);
             Contract.Requires(f != null);
-
             return This.Use((db, ct) => f(db), CancellationToken.None);
         }
 
