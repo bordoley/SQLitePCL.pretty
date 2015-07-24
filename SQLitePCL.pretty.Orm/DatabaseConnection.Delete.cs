@@ -21,8 +21,6 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static IStatement PrepareDeleteStatement<T>(this IDatabaseConnection This)
         {
-            Contract.Requires(This != null);
-
             var tableMapping = TableMapping.Get<T>();
             var sql = deleteQueries.GetValue(tableMapping, mapping => 
                 {
@@ -39,6 +37,9 @@ namespace SQLitePCL.pretty.Orm
             IEnumerable<long> primaryKeys, 
             Func<IReadOnlyList<IResultSetValue>,T> resultSelector)
         {
+            Contract.Requires(This != null);
+            Contract.Requires(resultSelector != null);
+
             using (var deleteStmt = This.PrepareDeleteStatement<T>())
             using (var findStmt = This.PrepareFindStatement<T>())
             {
@@ -68,10 +69,7 @@ namespace SQLitePCL.pretty.Orm
             long primaryKey, 
             Func<IReadOnlyList<IResultSetValue>,T> resultSelector, 
             out T deleted)
-        {
-            Contract.Requires(This != null);
-            Contract.Requires(resultSelector != null);
-           
+        {           
             var result = This.YieldDeleteAll(new long[] { primaryKey }, resultSelector).FirstOrDefault();
             if (result.Value != null)
             {
@@ -98,7 +96,6 @@ namespace SQLitePCL.pretty.Orm
             IEnumerable<long> primaryKeys,
             Func<IReadOnlyList<IResultSetValue>,T> resultSelector)
         {
-            Contract.Requires(This != null);
             Contract.Requires(primaryKeys != null);
             Contract.Requires(resultSelector != null);
 
@@ -116,8 +113,6 @@ namespace SQLitePCL.pretty.Orm
         /// <seealso href="https://www.sqlite.org/lang_droptable.html"/>
         public static void DropTableIfExists<T>(this IDatabaseConnection This)
         {
-            Contract.Requires(This != null);
-
             var tableMapping = TableMapping.Get<T>();
             This.Execute(SQLBuilder.DropTableIfExists(tableMapping.TableName));
         }
@@ -130,8 +125,6 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>
         public static void DeleteAllRows<T>(this IDatabaseConnection This)
         {
-            Contract.Requires(This != null);
-
             var tableMapping = TableMapping.Get<T>();
             This.Execute(SQLBuilder.DeleteAll(tableMapping.TableName));
         }
@@ -154,7 +147,6 @@ namespace SQLitePCL.pretty.Orm
             Func<IReadOnlyList<IResultSetValue>,T> resultSelector,
             CancellationToken ct)
         {
-            Contract.Requires(This != null);
             Contract.Requires(primaryKeys != null);
             Contract.Requires(resultSelector != null);
 
@@ -170,17 +162,10 @@ namespace SQLitePCL.pretty.Orm
         /// <param name="resultSelector">A transform function to apply to each row.</param> 
         /// <typeparam name="T">The mapped type.</typeparam>
         public static Task<IReadOnlyDictionary<long,T>> DeleteAllAsync<T>(
-            this IAsyncDatabaseConnection This, 
-            IEnumerable<long> primaryKeys,
-            Func<IReadOnlyList<IResultSetValue>,T> resultSelector)
-        {
-            Contract.Requires(This != null);
-            Contract.Requires(primaryKeys != null);
-            Contract.Requires(resultSelector != null);
-
-            return This.DeleteAllAsync(primaryKeys, resultSelector, CancellationToken.None);
-        }
-
+                this IAsyncDatabaseConnection This, 
+                IEnumerable<long> primaryKeys,
+                Func<IReadOnlyList<IResultSetValue>,T> resultSelector) =>
+            This.DeleteAllAsync(primaryKeys, resultSelector, CancellationToken.None);
 
         /// <summary>
         /// Drops the table if exists async.
@@ -188,12 +173,8 @@ namespace SQLitePCL.pretty.Orm
         /// <returns>The table if exists async.</returns>
         /// <param name="This">The database connection.</param>
         /// <param name="ct">The cancellation token.</param>
-        public static Task DropTableIfExistsAsync<T>(this IAsyncDatabaseConnection This,  CancellationToken ct)
-        {
-            Contract.Requires(This != null);
-
-            return This.Use((db, _) => db.DropTableIfExists<T>(), ct);
-        }
+        public static Task DropTableIfExistsAsync<T>(this IAsyncDatabaseConnection This,  CancellationToken ct) =>
+            This.Use((db, _) => db.DropTableIfExists<T>(), ct);
 
         /// <summary>
         /// Drops the table if exists async.
@@ -201,11 +182,8 @@ namespace SQLitePCL.pretty.Orm
         /// <returns>The table if exists async.</returns>
         /// <param name="This">The database connection.</param>
         /// <typeparam name="T">The mapped type.</typeparam>
-        public static Task DropTableIfExistsAsync<T>(this IAsyncDatabaseConnection This)
-        {
-            Contract.Requires(This != null);
-            return This.DropTableIfExistsAsync<T>(CancellationToken.None);
-        }
+        public static Task DropTableIfExistsAsync<T>(this IAsyncDatabaseConnection This) =>
+            This.DropTableIfExistsAsync<T>(CancellationToken.None);
 
         /// <summary>
         /// Deletes all rows in a given table, asynchronously.
@@ -214,11 +192,8 @@ namespace SQLitePCL.pretty.Orm
         /// <param name="This">The database connection.</param>
         /// <param name="ct">A cancellation token that can be used to cancel the operation.</param>
         /// <typeparam name="T">The mapped type.</typeparam>
-        public static Task DeleteAllRowsAsync<T>(this IAsyncDatabaseConnection This, CancellationToken ct)
-        {
-            Contract.Requires(This != null);
-            return This.Use((db, _) => db.DeleteAllRows<T>(), ct);
-        }
+        public static Task DeleteAllRowsAsync<T>(this IAsyncDatabaseConnection This, CancellationToken ct) =>
+            This.Use((db, _) => db.DeleteAllRows<T>(), ct);
 
         /// <summary>
         /// Deletes all rows in a given table, asynchronously.
@@ -226,11 +201,8 @@ namespace SQLitePCL.pretty.Orm
         /// <returns>A task that completes when all rows are deleted succesfully.</returns>
         /// <param name="This">The database connection.</param>
         /// <typeparam name="T">The mapped type.</typeparam>
-        public static Task DeleteAllRowsAsync<T>(this IAsyncDatabaseConnection This)
-        {
-            Contract.Requires(This != null);
-            return This.DeleteAllRowsAsync<T>(CancellationToken.None);
-        }
+        public static Task DeleteAllRowsAsync<T>(this IAsyncDatabaseConnection This) =>
+            This.DeleteAllRowsAsync<T>(CancellationToken.None);
     }
 }
 

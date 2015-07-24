@@ -20,12 +20,8 @@ namespace SQLitePCL.pretty.Orm
         /// <typeparam name="T">The mapped type.</typeparam>  
         public static IStatement PrepareInsertOrReplaceStatement<T>(this IDatabaseConnection This)
         {
-            Contract.Requires(This != null);
-
             var sql = insertOrReplaceQueries.GetValue(TableMapping.Get<T>(), mapping => 
-                {
-                    return SQLBuilder.InsertOrReplace(mapping.TableName, mapping.Columns.Select(x => x.Key));     
-                });
+                SQLBuilder.InsertOrReplace(mapping.TableName, mapping.Columns.Select(x => x.Key)));
 
             return This.PrepareStatement(sql);   
         }
@@ -35,6 +31,9 @@ namespace SQLitePCL.pretty.Orm
             IEnumerable<T> objects,
             Func<IReadOnlyList<IResultSetValue>,T> resultSelector)
         {
+            Contract.Requires(objects != null);
+            Contract.Requires(resultSelector != null);
+
             using (var insertOrReplaceStmt = This.PrepareInsertOrReplaceStatement<T>())
             using (var findStmt = This.PrepareFindByRowId(TableMapping.Get<T>().TableName))
             {
@@ -60,10 +59,7 @@ namespace SQLitePCL.pretty.Orm
             T obj,
             Func<IReadOnlyList<IResultSetValue>,T> resultSelector)
         {
-            Contract.Requires(This != null);
             Contract.Requires(obj != null);
-            Contract.Requires(resultSelector != null);
-
             return This.YieldInsertOrReplaceAll(new T[] {obj}, resultSelector).First().Value;
         }
 
@@ -80,7 +76,6 @@ namespace SQLitePCL.pretty.Orm
             IEnumerable<T> objects,
             Func<IReadOnlyList<IResultSetValue>,T> resultSelector)
         {
-            Contract.Requires(This != null);
             Contract.Requires(objects != null);
             Contract.Requires(resultSelector != null);
 
@@ -107,7 +102,6 @@ namespace SQLitePCL.pretty.Orm
             Func<IReadOnlyList<IResultSetValue>,T> resultSelector,
             CancellationToken ct)
         {
-            Contract.Requires(This != null);
             Contract.Requires(objects != null);
             Contract.Requires(resultSelector != null);
 
@@ -123,16 +117,10 @@ namespace SQLitePCL.pretty.Orm
         /// <param name="resultSelector">A transform function to apply to each row.</param>    
         /// <typeparam name="T">The mapped type.</typeparam> 
         public static Task<IReadOnlyDictionary<T,T>> InsertOrReplaceAllAsync<T>(
-            this IAsyncDatabaseConnection This, 
-            IEnumerable<T> objects,
-            Func<IReadOnlyList<IResultSetValue>,T> resultSelector)
-        {
-            Contract.Requires(This != null);
-            Contract.Requires(objects != null);
-            Contract.Requires(resultSelector != null);
-
-            return This.InsertOrReplaceAllAsync(objects, resultSelector, CancellationToken.None);
-        }
+                this IAsyncDatabaseConnection This, 
+                IEnumerable<T> objects,
+                Func<IReadOnlyList<IResultSetValue>,T> resultSelector) =>
+            This.InsertOrReplaceAllAsync(objects, resultSelector, CancellationToken.None);
     }
 }
 
