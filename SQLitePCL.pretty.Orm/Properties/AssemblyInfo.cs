@@ -8,6 +8,6 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyDescription("An ORM for SQLitePCL.pretty")]
 [assembly: AssemblyProduct("SQLitePCL.pretty")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
-[assembly: AssemblyVersion("0.0.12")]
-[assembly: AssemblyFileVersion("0.0.12")]
+[assembly: AssemblyVersion("1.0.0")]
+[assembly: AssemblyFileVersion("1.0.0")]
 [assembly: InternalsVisibleTo("SQLitePCL.pretty.tests")]

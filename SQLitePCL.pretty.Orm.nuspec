@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>SQLitePCL.pretty.Orm</id>
-    <version>0.0.12</version>
+    <version>1.0.0</version>
     <title>SQLitePCL.pretty.Orm</title>
     <authors>David Bordoley</authors>
     <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
@@ -15,8 +15,8 @@
       <reference file="SQLitePCL.pretty.Orm.dll" />
     </references>
     <dependencies>
-      <dependency id="SQLitePCL.pretty" version="0.0.12" />
-      <dependency id="SQLitePCL.pretty.Async" version="0.0.12" />
+      <dependency id="SQLitePCL.pretty" version="1.0.0" />
+      <dependency id="SQLitePCL.pretty.Async" version="1.0.0" />
     </dependencies>
   </metadata>
   <files>
