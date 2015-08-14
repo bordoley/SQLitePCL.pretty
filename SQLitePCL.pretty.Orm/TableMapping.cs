@@ -317,7 +317,7 @@ namespace SQLitePCL.pretty.Orm
             else if (clrType == typeof(byte[]) || clrType.IsSameOrSubclass(typeof(Stream)))                { return SQLiteType.Blob; } 
             else 
             {
-                throw new NotSupportedException ("Don't know about " + clrType);
+                throw new NotSupportedException ($"Don't know about {clrType}");
             }
         }
     }

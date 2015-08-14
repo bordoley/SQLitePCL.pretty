@@ -7,46 +7,41 @@ namespace SQLitePCL.pretty.Orm
     internal static class SQLBuilder
     {
         internal static string GetTableInfo (string tableName) =>
-            "PRAGMA TABLE_INFO(\"" + tableName + "\")";         
+            $"PRAGMA TABLE_INFO(\"{tableName}\")";         
 
         internal static string SelectWhereColumnEquals(string tableName, string columnName) =>
-            string.Format("SELECT * FROM \"{0}\" WHERE \"{1}\" = ?", tableName, columnName);
+            $"SELECT * FROM \"{tableName}\" WHERE \"{columnName}\" = ?";
 
         internal static string FindByRowID(string tableName) =>
-            string.Format("SELECT * FROM \"{0}\" WHERE ROWID = ?", tableName);
+            $"SELECT * FROM \"{tableName}\" WHERE ROWID = ?";
 
         internal static string AlterTableAddColumn(string tableName, string columnName, ColumnMapping columnMapping) =>
-            string.Format("ALTER TABLE \"{0}\" ADD COLUMN {1}", tableName, SqlDecl(columnName, columnMapping));
+            $"ALTER TABLE \"{tableName}\" ADD COLUMN { SqlDecl(columnName, columnMapping)}";
 
         internal static string DeleteUsingPrimaryKey(string tableName, string pkColumn) =>
-            string.Format("DELETE FROM \"{0}\" WHERE \"{1}\" = ?", tableName, pkColumn);
+            $"DELETE FROM \"{tableName}\" WHERE \"{pkColumn}\" = ?";
 
-        internal static string InsertOrReplace(string tableName, IEnumerable<string> columns) =>
-            string.Format(
-                "INSERT OR REPLACE INTO \"{0}\" ({1}) VALUES ({2})",
-                tableName,
-                string.Join(",", columns.Select(x => "\"" + x + "\"")),
-
-                // FIXME: Might need to quote this for some cases. Test!!!
-                string.Join(",", columns.Select(x => ":" + x)));
-
-        internal static string CreateIndex(string indexName, string tableName, IEnumerable<string> columnNames, bool unique)
+        internal static string InsertOrReplace(string tableName, IEnumerable<string> columns)
         {
-            const string sqlFormat = "CREATE {2} INDEX IF NOT EXISTS \"{3}\" ON \"{0}\"(\"{1}\")";
-            return String.Format(sqlFormat, tableName, string.Join ("\", \"", columnNames), unique ? "UNIQUE" : "", indexName);
+            var columnList = string.Join(",", columns.Select(x => $"\"{x}\""));
+            var bindParamList = string.Join(",", columns.Select(x => $":{x}"));
+            return $"INSERT OR REPLACE INTO \"{tableName}\" ({columnList}) VALUES ({bindParamList})";
         }
 
+        internal static string CreateIndex(string indexName, string tableName, IEnumerable<string> columnNames, bool unique) =>
+            $"CREATE {(unique ? "UNIQUE" : "")} INDEX IF NOT EXISTS \"{indexName}\" ON \"{tableName}\"(\"{string.Join ("\", \"", columnNames)}\")"; 
+
         internal static string NameIndex(string tableName, IEnumerable<string> columnNames) =>
-            tableName + "_" + string.Join ("_", columnNames);
+            $"{tableName}_{string.Join("_", columnNames)}";
 
         internal static string NameIndex(string tableName, string columnName) =>
             NameIndex(tableName, new String[] { columnName});
 
         internal static string ListIndexes(string tableName) =>
-            string.Format("PRAGMA INDEX_LIST (\"{0}\")", tableName);
+            $"PRAGMA INDEX_LIST (\"{tableName}\")";
 
         internal static string IndexInfo(string indexName) =>
-            string.Format("PRAGMA INDEX_INFO (\"{0}\")", indexName);
+            $"PRAGMA INDEX_INFO (\"{indexName}\")";
 
         internal static string CreateTableIfNotExists(string tableName, CreateFlags createFlags, IReadOnlyDictionary<string, ColumnMapping> columns)
         {
@@ -54,11 +49,11 @@ namespace SQLitePCL.pretty.Orm
             bool fts4 = (createFlags & CreateFlags.FullTextSearch4) != 0;
             bool fts = fts3 || fts4;
 
-            var @virtual = fts ? "VIRTUAL " : string.Empty;
-            var @using = fts3 ? "USING FTS3 " : fts4 ? "USING FTS4 " : string.Empty;
+            var @virtual = fts ? "VIRTUAL " : "";
+            var @using = fts3 ? "USING FTS3 " : fts4 ? "USING FTS4 " : "";
 
             // Build query.
-            var query = "CREATE " + @virtual + "TABLE IF NOT EXISTS \"" + tableName + "\" " + @using + "(\n";
+            var query = $"CREATE {@virtual}TABLE IF NOT EXISTS \"{tableName}\" {@using}(\n";
             var decls = columns.Select(c => SQLBuilder.SqlDecl(c.Key, c.Value));
             var decl = string.Join(",\n", decls.ToArray());
             query += decl;
@@ -66,10 +61,7 @@ namespace SQLitePCL.pretty.Orm
                 string.Join(
                     ",\n", 
                     columns.Where(x => x.Value.ForeignKeyConstraint != null).Select(x =>
-                        string.Format("FOREIGN KEY(\"{0}\") REFERENCES \"{1}\"(\"{2}\")",
-                             x.Key, 
-                             x.Value.ForeignKeyConstraint.TableName,
-                             x.Value.ForeignKeyConstraint.ColumnName)));
+                        $"FOREIGN KEY(\"{x.Key}\") REFERENCES \"{x.Value.ForeignKeyConstraint.TableName}\"(\"{x.Value.ForeignKeyConstraint.ColumnName}\")"));
             query += (fkconstraints.Length != 0) ? "," + fkconstraints : "";
             query += ")";
 
@@ -78,7 +70,7 @@ namespace SQLitePCL.pretty.Orm
 
         internal static string SqlDecl(string columnName, ColumnMapping columnMapping)
         {
-            string decl = "\"" + columnName + "\" " + columnMapping.Metadata.DeclaredType + " ";
+            string decl = $"\"{columnName}\" {columnMapping.Metadata.DeclaredType} ";
 
             if (columnMapping.Metadata.IsPrimaryKeyPart && columnMapping.Metadata.IsAutoIncrement)
             {
@@ -90,22 +82,22 @@ namespace SQLitePCL.pretty.Orm
             }
             else if (columnMapping.Metadata.HasNotNullConstraint) 
             {
-                decl += "NOT NULL DEFAULT \"" + columnMapping.DefaultValue.ToString() + "\" ";
+                decl += $"NOT NULL DEFAULT \"{columnMapping.DefaultValue.ToString()}\" ";
             }
 
             if (!string.IsNullOrEmpty (columnMapping.Metadata.CollationSequence)) 
             {
-                decl += "COLLATE " + columnMapping.Metadata.CollationSequence + " ";
+                decl += $"COLLATE {columnMapping.Metadata.CollationSequence} ";
             }
             
             return decl;
         }
 
         internal static string DropTableIfExists(string tableName) =>
-            string.Format("DROP TABLE IF EXISTS \"{0}\"", tableName);
+            $"DROP TABLE IF EXISTS \"{tableName}\"";
 
         internal static string DeleteAll(string tableName) =>
-            string.Format("DELETE FROM \"{0}\"", tableName);
+            $"DELETE FROM \"{tableName}\"";
     }
 }
 

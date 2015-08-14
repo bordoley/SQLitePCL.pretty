@@ -34,29 +34,11 @@ namespace SQLitePCL.pretty
             this.queue = queue;
         }
 
-        public override bool CanRead
-        {
-            get
-            {
-                return !disposed;
-            }
-        }
+        public override bool CanRead => !disposed;
 
-        public override bool CanSeek
-        {
-            get
-            {
-                return !disposed;
-            }
-        }
+        public override bool CanSeek => !disposed;
 
-        public override bool CanWrite
-        {
-            get
-            {
-                return !disposed && blobStream.CanWrite;
-            }
-        }
+        public override bool CanWrite => !disposed && blobStream.CanWrite;
 
         public override long Length
         {

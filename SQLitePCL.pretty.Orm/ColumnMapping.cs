@@ -101,7 +101,7 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.ColumnMapping"/>.</returns>
         public override string ToString() =>
-            string.Format("[ColumnMapping: ClrType={0}, Property={1}, Metadata={2}]", ClrType, Property, Metadata);
+            $"[ColumnMapping: ClrType={ClrType}, Property={Property}, Metadata={Metadata}]";
     }
 }
 

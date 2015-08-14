@@ -76,7 +76,7 @@ namespace SQLitePCL.pretty
             
         private static string SaveTransactionPoint(this IDatabaseConnection This)
         {
-            var savePoint = "S" + _rand.Value.Next (short.MaxValue);
+            var savePoint = $"S{_rand.Value.Next(short.MaxValue)}";
             This.Execute(SQLBuilder.SavePoint(savePoint));
             return savePoint;
         }

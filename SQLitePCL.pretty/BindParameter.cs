@@ -172,7 +172,7 @@ namespace SQLitePCL.pretty
             else if (obj is Uri)                                                              { This.Bind((Uri) obj); }
             else
             {
-                throw new ArgumentException("Invalid type conversion" + t);
+                throw new ArgumentException($"Invalid type conversion {t}");
             }
         }
 

@@ -49,13 +49,7 @@ namespace SQLitePCL.pretty
         /// The SQLite compiler options that were defined at compile time.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/compileoption_get.html"/>
-        public static IEnumerable<string> CompilerOptions
-        {
-            get
-            {
-                return compilerOptions;
-            }
-        }
+        public static IEnumerable<string> CompilerOptions => compilerOptions;
 
         private static readonly SQLiteVersion version = SQLiteVersion.Of(raw.sqlite3_libversion_number());
 
@@ -77,49 +71,25 @@ namespace SQLitePCL.pretty
         /// The SQLite version.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/libversion.html"/>
-        public static SQLiteVersion Version
-        {
-            get
-            {
-                return version;
-            }
-        }
+        public static SQLiteVersion Version => version;
 
         /// <summary>
         /// The SQLite source id.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/libversion.html"/>
-        public static string SourceId
-        {
-            get
-            {
-                return raw.sqlite3_sourceid();
-            }
-        }
+        public static string SourceId => raw.sqlite3_sourceid();
 
         /// <summary>
         /// Returns the number of bytes of memory currently outstanding (malloced but not freed) by SQLite.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/memory_highwater.html"/>
-        public static long MemoryUsed
-        {
-            get
-            {
-                return raw.sqlite3_memory_used();
-            }
-        }
+        public static long MemoryUsed => raw.sqlite3_memory_used();
 
         /// <summary>
         /// Returns the maximum value of <see cref="MemoryUsed"/> since the high-water mark was last reset.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/memory_highwater.html"/>
-        public static long MemoryHighWater
-        {
-            get
-            {
-                return raw.sqlite3_memory_highwater(0);
-            }
-        }
+        public static long MemoryHighWater => raw.sqlite3_memory_highwater(0);
 
         /// <summary>
         /// Indicates whether the specified option was defined at compile time.

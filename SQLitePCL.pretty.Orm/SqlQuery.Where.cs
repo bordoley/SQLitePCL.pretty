@@ -12,7 +12,7 @@ namespace SQLitePCL.pretty.Orm.Sql
         internal static String CompileWhereClause(this Expression This)
         {
             var compiled = This.CompileExpr();
-            return compiled.Length > 0 ? "WHERE " + This.CompileExpr() : "";
+            return compiled.Length > 0 ? $"WHERE {This.CompileExpr()}" : "";
         }
     }
 
@@ -35,7 +35,7 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.WhereClause"/>.</returns>
         public override string ToString() =>
-            this.select + "\r\n" + where;
+            $"{select}\r\n{where}";
     }
 
     /// <summary>

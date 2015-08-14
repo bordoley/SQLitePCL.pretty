@@ -1095,19 +1095,11 @@ namespace SQLitePCL.pretty
 
         private sealed class CtxState<T>
         {
-            private readonly T value;
+            internal T Value { get; }
 
             internal CtxState(T value)
             {
-                this.value = value;
-            }
-
-            internal T Value
-            {
-                get
-                {
-                    return value;
-                }
+                this.Value = value;
             }
         }
 

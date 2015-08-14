@@ -163,13 +163,7 @@ namespace SQLitePCL.pretty
             }
         }
 
-        Object IEnumerator.Current
-        {
-            get
-            {
-                return this.Current;
-            }
-        }
+        Object IEnumerator.Current => this.Current;
 
         public string SQL
         {
@@ -313,29 +307,14 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public int Count
-        {
-            get
-            {
-                return raw.sqlite3_bind_parameter_count(stmt.sqlite3_stmt);
-            }
-        }
+        public int Count =>
+            raw.sqlite3_bind_parameter_count(stmt.sqlite3_stmt);
 
-        public IEnumerable<string> Keys
-        {
-            get
-            {
-                return this.Select(pair => pair.Key);
-            }
-        }
+        public IEnumerable<string> Keys =>
+            this.Select(pair => pair.Key);
 
-        public IEnumerable<IBindParameter> Values
-        {
-            get
-            {
-                return this.Select(pair => pair.Value);
-            }
-        }
+        public IEnumerable<IBindParameter> Values =>
+            this.Select(pair => pair.Value);
 
         public bool ContainsKey(string key)
         {
@@ -381,13 +360,8 @@ namespace SQLitePCL.pretty
             this.index = index;
         }
 
-        public string Name
-        {
-            get
-            {
-                return raw.sqlite3_bind_parameter_name(stmt, index + 1);
-            }
-        }
+        public string Name =>
+            raw.sqlite3_bind_parameter_name(stmt, index + 1);
 
         public void Bind(byte[] blob)
         {
@@ -460,13 +434,8 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public int Count
-        {
-            get
-            {
-                return raw.sqlite3_column_count(stmt.sqlite3_stmt);
-            }
-        }
+        public int Count =>
+            raw.sqlite3_column_count(stmt.sqlite3_stmt);
 
         public IEnumerator<ColumnInfo> GetEnumerator()
         {
@@ -489,13 +458,8 @@ namespace SQLitePCL.pretty
             this.stmt = stmt;
         }
 
-        public int Count
-        {
-            get
-            {
-                return raw.sqlite3_data_count(stmt.sqlite3_stmt);
-            }
-        }
+        public int Count =>
+            raw.sqlite3_data_count(stmt.sqlite3_stmt);
 
         public IEnumerator<IResultSetValue> GetEnumerator()
         {
@@ -556,29 +520,11 @@ namespace SQLitePCL.pretty
             this.db.Disposing += dbDisposing;
         }
 
-        public override bool CanRead
-        {
-            get
-            {
-                return !disposed;
-            }
-        }
+        public override bool CanRead => !disposed;
 
-        public override bool CanSeek
-        {
-            get
-            {
-                return !disposed;
-            }
-        }
+        public override bool CanSeek => !disposed;
 
-        public override bool CanWrite
-        {
-            get
-            {
-                return !disposed && canWrite;
-            }
-        }
+        public override bool CanWrite => !disposed && canWrite;
 
         public override long Length
         {

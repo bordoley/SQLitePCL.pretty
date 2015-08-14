@@ -29,7 +29,7 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.LimitClause"/>.</returns>
         public override string ToString() =>
-            orderBy + "\r\n" + limit;
+            $"{orderBy}\r\n{limit}";
     }
 
     /// <summary>

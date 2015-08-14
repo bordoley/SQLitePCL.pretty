@@ -37,7 +37,7 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.OrderByClause"/>.</returns>
         public override string ToString() =>
             this.whereClause +
-                (this.orderings.Count > 0 ? "\r\nORDER BY " +  string.Join(", ", this.orderings) : "");
+                (this.orderings.Count > 0 ? $"\r\nORDER BY {string.Join(", ", this.orderings)}" : "");
     }
 
     /// <summary>

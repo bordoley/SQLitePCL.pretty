@@ -39,15 +39,9 @@ namespace SQLitePCL.pretty
         public void CopyTo(T[] array, int arrayIndex) =>
             list.CopyTo(array, arrayIndex);
 
-        public int Count
-        {
-            get { return set.Count; }
-        }
+        public int Count => set.Count;
 
-        public bool IsReadOnly
-        {
-            get { return false; }
-        }
+        public bool IsReadOnly => false;
 
         public bool Remove(T item)
         {

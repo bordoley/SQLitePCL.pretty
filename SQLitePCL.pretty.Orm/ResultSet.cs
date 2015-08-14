@@ -98,7 +98,7 @@ namespace SQLitePCL.pretty.Orm
             else if (clrType == typeof(Uri))            { return value.ToUri(); } 
             else 
             {
-                throw new NotSupportedException ("Don't know how to read " + clrType);
+                throw new NotSupportedException ($"Don't know how to read {clrType}");
             }
         }
     }

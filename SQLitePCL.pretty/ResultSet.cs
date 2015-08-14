@@ -199,21 +199,11 @@ namespace SQLitePCL.pretty
                 this.rs = rs;
             }
 
-            public ColumnInfo this[int index]
-            {
-                get
-                {
-                    return rs[index].ColumnInfo;
-                }
-            }
+            public ColumnInfo this[int index] =>
+                rs[index].ColumnInfo;
 
-            public int Count
-            {
-                get
-                {
-                    return rs.Count;
-                }
-            }
+            public int Count =>
+                rs.Count;
 
             public IEnumerator<ColumnInfo> GetEnumerator() =>
                 rs.Select(val => val.ColumnInfo).GetEnumerator();

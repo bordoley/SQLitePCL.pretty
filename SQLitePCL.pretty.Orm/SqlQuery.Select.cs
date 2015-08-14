@@ -44,7 +44,7 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.SelectClause"/>.</returns>
         public override string ToString() =>
-            select + "\r\n" + join;
+            $"{select}\r\n{join}";
     }
 
     /// <summary>

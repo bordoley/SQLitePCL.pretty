@@ -29,7 +29,7 @@ namespace SQLitePCL.pretty.Orm
             var bindVars = typeof(T).GetPublicInstanceProperties();
             foreach (var bindVar in bindVars)
             {
-                var key = ":" + bindVar.Name;
+                var key = $":{bindVar.Name}";
                 if (This.BindParameters.ContainsKey(key))
                 {
                     var value = bindVar.GetValue(obj);

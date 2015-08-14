@@ -29,7 +29,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 
-// FIXME: Seperate namespace so that we don't overrun the main namespace with non-core types.
 namespace SQLitePCL.pretty
 {
     internal static class SQLBuilder
@@ -61,13 +60,13 @@ namespace SQLitePCL.pretty
         }
 
         internal static string SavePoint(string savePoint) =>
-            "SAVEPOINT " + savePoint;
+            $"SAVEPOINT {savePoint}";
 
         internal static string Release(string savePoint) =>
-            "RELEASE " + savePoint;
+            $"RELEASE {savePoint}";
        
-        internal static string RollbackTransactionTo(string savepoint) =>
-            "ROLLBACK TRANSACTION TO " + savepoint;
+        internal static string RollbackTransactionTo(string savePoint) =>
+            $"ROLLBACK TRANSACTION TO {savePoint}";
     } 
 }
 

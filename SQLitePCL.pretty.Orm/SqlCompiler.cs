@@ -21,20 +21,20 @@ namespace SQLitePCL.pretty.Orm.Sql
                 {
                     if (bin.NodeType == ExpressionType.Equal)
                     {
-                        return "(" + leftExpr + "IS NULL)";
+                        return $"({leftExpr} IS NULL)";
                     }
                     else if (rightExpr == "NULL" && bin.NodeType == ExpressionType.NotEqual)
                     {
-                        return "(" + leftExpr + "IS NOT NULL)";
+                        return $"({leftExpr} IS NOT NULL)";
                     }
                 }
 
-                return "(" + leftExpr + " " + GetSqlName(bin) + " " + rightExpr + ")";
+                return $"({leftExpr} {GetSqlName(bin)} {rightExpr})";
             }
             else if (This is ParameterExpression)
             {
                 var param = (ParameterExpression)This;
-                return ":" + param.Name;
+                return $":{param.Name}";
             }
             else if (This is MemberExpression)
             {
@@ -45,7 +45,7 @@ namespace SQLitePCL.pretty.Orm.Sql
                     // This is a column in the table, output the column name
                     var tableName = TableMapping.Get(member.Expression.Type).TableName;
                     var columnName = ((PropertyInfo) member.Member).GetColumnName();
-                    return "\"" + tableName + "\".\"" + columnName + "\"";
+                    return $"\"{tableName}\".\"{columnName}\"";
                 }
                 else
                 {
@@ -55,7 +55,7 @@ namespace SQLitePCL.pretty.Orm.Sql
             else if (This.NodeType == ExpressionType.Not)
             {
                 var operandExpr = ((UnaryExpression)This).Operand;
-                return "NOT(" + operandExpr.CompileExpr() + ")";
+                return $"NOT({operandExpr.CompileExpr()})";
             }
             else if (This is ConstantExpression)
             {
@@ -75,42 +75,42 @@ namespace SQLitePCL.pretty.Orm.Sql
                 
                 if (call.Method.Name == "Like" && args.Length == 2)
                 {
-                    return "(" + args[0] + " LIKE " + args[1] + ")";
+                    return $"({args[0]} LIKE {args[1]})";
                 }
                 else if (call.Method.Name == "Contains" && args.Length == 2)
                 {
-                    return "(" + args[1] + " IN " + args[0] + ")";
+                    return $"({args[1]} IN {args[0]})";
                 }
                 else if (call.Method.Name == "Contains" && args.Length == 1)
                 {
                     if (call.Object != null && call.Object.Type == typeof(string))
                     {
-                        return "(" + obj + " LIKE ('%' || " + args[0] + " || '%'))";
+                        return $"({obj} LIKE ('%' || {args[0]} || '%'))";
                     }
                     else
                     {
-                        return "(" + args[0] + " IN " + obj + ")";
+                        return $"({args[0]} IN {obj})";
                     }
                 }
                 else if (call.Method.Name == "StartsWith" && args.Length == 1)
                 {
-                    return "(" + obj + " LIKE (" + args[0] + " || '%'))";
+                    return $"({obj} LIKE ({args[0]} || '%'))";
                 }
                 else if (call.Method.Name == "EndsWith" && args.Length == 1)
                 {
-                    return "(" + obj + " LIKE ('%' || " + args[0] + "))";
+                    return $"({obj} LIKE ('%' || {args[0]}))";
                 }
                 else if (call.Method.Name == "Equals" && args.Length == 1)
                 {
-                    return "(" + obj + " = (" + args[0] + "))";
+                    return $"({obj} = ({args[0]}))";
                 }
                 else if (call.Method.Name == "Is" && args.Length == 2)
                 {
-                    return "(" + args[0] + " IS " + args[1] + ")";
+                    return $"({args[0]} IS {args[1]})";
                 }
                 else if (call.Method.Name == "IsNot" && args.Length == 2)
                 {
-                    return "(" + args[0] + " IS NOT " + args[1] + ")";
+                    return $"({args[0]} IS NOT {args[1]})";
                 }
             }
             else if (This.NodeType == ExpressionType.Convert)
@@ -144,7 +144,7 @@ namespace SQLitePCL.pretty.Orm.Sql
                 return CompileExpr(expr.Body);
             }
 
-            throw new NotSupportedException("Cannot compile: " + This.NodeType.ToString());
+            throw new NotSupportedException($"Cannot compile: {This.NodeType.ToString()}");
         }
 
         private static object EvaluateExpression(this Expression expr)
@@ -172,7 +172,7 @@ namespace SQLitePCL.pretty.Orm.Sql
                 }
             }
 
-            throw new NotSupportedException("Cannot compile: " + expr.NodeType.ToString());
+            throw new NotSupportedException($"Cannot compile: {expr.NodeType.ToString()}");
         }
 
         private static string ToSqlString(this ISQLiteValue value)
@@ -183,7 +183,7 @@ namespace SQLitePCL.pretty.Orm.Sql
                     return "NULL";
                 case SQLiteType.Text:
                 case SQLiteType.Blob:  
-                    return "\"" + value.ToString() + "\"";
+                    return $"\"{value.ToString()}\"";
                 default:
                     return value.ToString();
             }
@@ -216,7 +216,7 @@ namespace SQLitePCL.pretty.Orm.Sql
             else if (This is Uri)                                                             { return ((Uri) This).ToSQLiteValue(); }
             else
             {
-                throw new ArgumentException("Invalid type conversion" + t);
+                throw new ArgumentException($"Invalid type conversion {t}");
             }
         }
 
@@ -237,7 +237,7 @@ namespace SQLitePCL.pretty.Orm.Sql
                 case ExpressionType.Equal:              return "=";
                 case ExpressionType.NotEqual:           return "!=";
                 default:
-                    throw new NotSupportedException ("Cannot get SQL for: " + n);
+                    throw new NotSupportedException ($"Cannot get SQL for: {n}");
             }
         }
     }

@@ -86,7 +86,7 @@ namespace SQLitePCL.pretty.Orm
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.IndexInfo"/>.</returns>
         public override string ToString() =>
-            string.Format("[IndexInfo: Unique={0}, Columns={1}", this.Unique, string.Join(", ", this.Columns));
+            $"[IndexInfo: Unique={this.Unique}, Columns={string.Join(", ", this.Columns)}";
     }
 }
 

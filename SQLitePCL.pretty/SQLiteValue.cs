@@ -376,92 +376,45 @@ namespace SQLitePCL.pretty
             this.value = value;
         }
 
-        public SQLiteType SQLiteType
-        {
-            get
-            {
-                return (SQLiteType)raw.sqlite3_value_type(value);
-            }
-        }
+        public SQLiteType SQLiteType =>
+            (SQLiteType)raw.sqlite3_value_type(value);
 
-        public int Length
-        {
-            get
-            {
-                return raw.sqlite3_value_bytes(value);
-            }
-        }
+        public int Length =>
+            raw.sqlite3_value_bytes(value);
 
-        public byte[] ToBlob()
-        {
-            return raw.sqlite3_value_blob(value) ?? new byte[0];
-        }
+        public byte[] ToBlob() =>
+            raw.sqlite3_value_blob(value) ?? new byte[0];
 
-        public double ToDouble()
-        {
-            return raw.sqlite3_value_double(value);
-        }
+        public double ToDouble() =>
+            raw.sqlite3_value_double(value);
 
-        public int ToInt()
-        {
-            return raw.sqlite3_value_int(value);
-        }
+        public int ToInt() =>
+            raw.sqlite3_value_int(value);
 
-        public long ToInt64()
-        {
-            return raw.sqlite3_value_int64(value);
-        }
+        public long ToInt64() =>
+            raw.sqlite3_value_int64(value);
 
-        public override string ToString()
-        {
-            return raw.sqlite3_value_text(value) ?? "";
-        }
+        public override string ToString() =>
+            raw.sqlite3_value_text(value) ?? "";
     }
 
     // Type coercion rules
     // http://www.sqlite.org/capi3ref.html#sqlite3_column_blob
     internal struct NullValue : ISQLiteValue
     {
-        public SQLiteType SQLiteType
-        {
-            get
-            {
-                return SQLiteType.Null;
-            }
-        }
+        public SQLiteType SQLiteType => SQLiteType.Null;
 
-        public int Length
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        public int Length => 0;
 
-        public byte[] ToBlob()
-        {
-            return new byte[0];
-        }
+        public byte[] ToBlob() => new byte[0];
 
-        public double ToDouble()
-        {
-            return 0.0;
-        }
+        public double ToDouble() => 0.0;
 
-        public int ToInt()
-        {
-            return 0;
-        }
+        public int ToInt() => 0;
 
-        public long ToInt64()
-        {
-            return 0;
-        }
+        public long ToInt64() => 0;
 
-        public override string ToString()
-        {
-            return "";
-        }
+        public override string ToString() => "";
     }
 
     internal struct IntValue : ISQLiteValue
@@ -473,46 +426,21 @@ namespace SQLitePCL.pretty
             this.value = value;
         }
 
-        public SQLiteType SQLiteType
-        {
-            get
-            {
-                return SQLiteType.Integer;
-            }
-        }
+        public SQLiteType SQLiteType => SQLiteType.Integer;
 
-        public int Length
-        {
-            get
-            {
-                return this.ToBlob().Length;
-            }
-        }
+        public int Length =>
+            this.ToBlob().Length;
 
-        public byte[] ToBlob()
-        {
-            return this.ToString().ToSQLiteValue().ToBlob();
-        }
+        public byte[] ToBlob() =>
+            this.ToString().ToSQLiteValue().ToBlob();
 
-        public double ToDouble()
-        {
-            return value;
-        }
+        public double ToDouble() => value;
 
-        public int ToInt()
-        {
-            return (int)value;
-        }
+        public int ToInt() => (int)value;
 
-        public long ToInt64()
-        {
-            return value;
-        }
+        public long ToInt64() => value;
 
-        public override string ToString()
-        {
-            return value.ToString();
-        }
+        public override string ToString() => value.ToString();
     }
 
     internal struct FloatValue : ISQLiteValue
@@ -524,13 +452,7 @@ namespace SQLitePCL.pretty
             this.value = value;
         }
 
-        public SQLiteType SQLiteType
-        {
-            get
-            {
-                return SQLiteType.Float;
-            }
-        }
+        public SQLiteType SQLiteType => SQLiteType.Float;
 
         public int Length
         {
@@ -548,15 +470,9 @@ namespace SQLitePCL.pretty
             throw new NotSupportedException();
         }
 
-        public double ToDouble()
-        {
-            return value;
-        }
+        public double ToDouble() => value;
 
-        public int ToInt()
-        {
-            return (int)this.ToInt64();
-        }
+        public int ToInt() => (int)this.ToInt64();
 
         public long ToInt64()
         {
@@ -593,26 +509,11 @@ namespace SQLitePCL.pretty
             this.value = value;
         }
 
-        public SQLiteType SQLiteType
-        {
-            get
-            {
-                return SQLiteType.Text;
-            }
-        }
+        public SQLiteType SQLiteType => SQLiteType.Text;
 
-        public int Length
-        {
-            get
-            {
-                return this.ToBlob().Length;
-            }
-        }
+        public int Length => this.ToBlob().Length;
 
-        public byte[] ToBlob()
-        {
-            return Encoding.UTF8.GetBytes(value);
-        }
+        public byte[] ToBlob() => Encoding.UTF8.GetBytes(value);
 
         // When casting a TEXT value to REAL, the longest possible prefix
         // of the value that can be interpreted as a real number is extracted
@@ -635,10 +536,7 @@ namespace SQLitePCL.pretty
             return 0.0;
         }
 
-        public int ToInt()
-        {
-            return (int)this.ToInt64();
-        }
+        public int ToInt() => (int)this.ToInt64();
 
         // When casting a TEXT value to INTEGER, the longest possible prefix of
         // the value that can be interpreted as an integer number is extracted from
@@ -671,10 +569,7 @@ namespace SQLitePCL.pretty
             return 0;
         }
 
-        public override string ToString()
-        {
-            return value;
-        }
+        public override string ToString() => value;
     }
 
     internal class BlobValue : ISQLiteValue
@@ -686,48 +581,24 @@ namespace SQLitePCL.pretty
             this.value = value;
         }
 
-        public SQLiteType SQLiteType
-        {
-            get
-            {
-                return SQLiteType.Blob;
-            }
-        }
+        public SQLiteType SQLiteType => SQLiteType.Blob;
 
-        public int Length
-        {
-            get
-            {
-                return value.Length;
-            }
-        }
+        public int Length => value.Length;
 
-        public byte[] ToBlob()
-        {
-            return value;
-        }
+        public byte[] ToBlob() => value;
 
         // When casting a BLOB value to a REAL, the value is first converted to TEXT.
-        public double ToDouble()
-        {
-            return this.ToString().ToSQLiteValue().ToDouble();
-        }
+        public double ToDouble() =>
+            this.ToString().ToSQLiteValue().ToDouble();
 
-        public int ToInt()
-        {
-            return (int)this.ToInt64();
-        }
+        public int ToInt() => (int)this.ToInt64();
 
         // When casting a BLOB value to INTEGER, the value is first converted to TEXT.
-        public long ToInt64()
-        {
-            return this.ToString().ToSQLiteValue().ToInt64();
-        }
+        public long ToInt64() =>
+            this.ToString().ToSQLiteValue().ToInt64();
 
-        public override string ToString()
-        {
-            return Encoding.UTF8.GetString(value, 0, value.Length);
-        }
+        public override string ToString() =>
+            Encoding.UTF8.GetString(value, 0, value.Length);
     }
 
     internal sealed class ResultSetValueImpl : IResultSetValue
@@ -741,54 +612,29 @@ namespace SQLitePCL.pretty
             this.index = index;
         }
 
-        public ColumnInfo ColumnInfo
-        {
-            get
-            {
-                return ColumnInfo.Create(stmt, index);
-            }
-        }
+        public ColumnInfo ColumnInfo =>
+            ColumnInfo.Create(stmt, index);
 
-        public SQLiteType SQLiteType
-        {
-            get
-            {
-                return (SQLiteType)raw.sqlite3_column_type(stmt.sqlite3_stmt, index);
-            }
-        }
+        public SQLiteType SQLiteType =>
+            (SQLiteType)raw.sqlite3_column_type(stmt.sqlite3_stmt, index);
 
-        public int Length
-        {
-            get
-            {
-                return raw.sqlite3_column_bytes(stmt.sqlite3_stmt, index);
-            }
-        }
+        public int Length =>
+            raw.sqlite3_column_bytes(stmt.sqlite3_stmt, index);
 
-        public byte[] ToBlob()
-        {
-            return raw.sqlite3_column_blob(stmt.sqlite3_stmt, index) ?? new byte[0];
-        }
+        public byte[] ToBlob() =>
+            raw.sqlite3_column_blob(stmt.sqlite3_stmt, index) ?? new byte[0];
 
-        public double ToDouble()
-        {
-            return raw.sqlite3_column_double(stmt.sqlite3_stmt, index);
-        }
+        public double ToDouble() =>
+            raw.sqlite3_column_double(stmt.sqlite3_stmt, index);
 
-        public int ToInt()
-        {
-            return raw.sqlite3_column_int(stmt.sqlite3_stmt, index);
-        }
+        public int ToInt() =>
+            raw.sqlite3_column_int(stmt.sqlite3_stmt, index);
 
-        public long ToInt64()
-        {
-            return raw.sqlite3_column_int64(stmt.sqlite3_stmt, index);
-        }
+        public long ToInt64() =>
+            raw.sqlite3_column_int64(stmt.sqlite3_stmt, index);
 
-        public override string ToString()
-        {
-            return raw.sqlite3_column_text(stmt.sqlite3_stmt, index) ?? "";
-        }
+        public override string ToString() =>
+            raw.sqlite3_column_text(stmt.sqlite3_stmt, index) ?? "";
     }
 
     internal class ZeroBlob : ISQLiteValue
@@ -800,39 +646,18 @@ namespace SQLitePCL.pretty
             this.length = length;
         }
 
-        public SQLiteType SQLiteType
-        {
-            get { return SQLiteType.Blob; }
-        }
+        public SQLiteType SQLiteType => SQLiteType.Blob;
 
-        public int Length
-        {
-            get { return length; }
-        }
+        public int Length => length;
 
-        public byte[] ToBlob()
-        {
-            return new byte[length];
-        }
+        public byte[] ToBlob() => new byte[length];
 
-        public double ToDouble()
-        {
-            return 0;
-        }
+        public double ToDouble() => 0;
 
-        public int ToInt()
-        {
-            return 0;
-        }
+        public int ToInt() => 0;
 
-        public long ToInt64()
-        {
-            return 0;
-        }
+        public long ToInt64() => 0;
 
-        public override string ToString()
-        {
-            return "";
-        }
+        public override string ToString() =>  "";
     }
 }

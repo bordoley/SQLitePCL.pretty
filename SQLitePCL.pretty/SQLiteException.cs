@@ -74,7 +74,7 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Gets the SQLite extend error code associated with the exception.
         /// </summary>
-        public ErrorCode ExtendedErrorCode;
+        public ErrorCode ExtendedErrorCode { get; }
 
         private readonly string errmsg;
 
@@ -87,6 +87,6 @@ namespace SQLitePCL.pretty
 
         /// <inheritdoc/>
         public override string ToString() =>
-            string.Format("{0}: {1}\r\n{2}", ErrorCode, errmsg, base.ToString());
+            $"{ErrorCode}: {errmsg}\r\n{base.ToString()}";
     }
 }

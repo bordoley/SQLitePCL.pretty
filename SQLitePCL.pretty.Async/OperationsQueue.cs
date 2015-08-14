@@ -55,13 +55,8 @@ namespace SQLitePCL.pretty
                 this.cancellationToken = cancellationToken;
             }
 
-            public Task<T> Result
-            {
-                get
-                {
-                    return result.Task;
-                }
-            }
+            public Task<T> Result =>
+                result.Task;
 
             public override async Task EvaluateFunc()
             {

@@ -35,7 +35,7 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.JoinClause"/>.</returns>
         public override string ToString() =>
-            from + (join.Count == 0 ? "" : "\r\n" +  string.Join("\r\n", join));
+            from + (join.Count == 0 ? "" : $"\r\n{string.Join("\r\n", join)}");
     }
 
     internal sealed class JoinClause<T> : JoinClause

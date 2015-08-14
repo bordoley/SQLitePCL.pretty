@@ -7,7 +7,7 @@ namespace SQLitePCL.pretty.Orm.Sql
     internal static partial class SqlCompiler
     {
         internal static String CompileOffsetClause(this Expression This) =>
-            "OFFSET " + This.CompileExpr();
+            $"OFFSET {This.CompileExpr()}";
     }
 
     /// <summary>
@@ -29,7 +29,7 @@ namespace SQLitePCL.pretty.Orm.Sql
         /// </summary>
         /// <returns>A <see cref="System.String"/> that represents the current <see cref="SQLitePCL.pretty.Orm.Sql.OffsetClause"/>.</returns>
         public override string ToString() =>
-            limit + "\r\n" + offset;
+            $"{limit}\r\n{offset}";
     }
 
     /// <summary>

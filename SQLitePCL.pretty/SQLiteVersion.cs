@@ -79,11 +79,8 @@ namespace SQLitePCL.pretty
         public static bool operator <(SQLiteVersion x, SQLiteVersion y) =>
             x.version < y.version;
 
-        internal static SQLiteVersion Of(int version)
-        {
-            // FIXME: If made public in the future, add contracts on the version number.
-            return new SQLiteVersion(version);
-        }
+        // FIXME: If made public in the future, add contracts on the version number.
+        internal static SQLiteVersion Of(int version) => new SQLiteVersion(version);
 
         private readonly int version;
 
@@ -95,35 +92,17 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Gets the major version number.
         /// </summary>
-        public int Major
-        {
-            get
-            {
-                return version / 1000000;
-            }
-        }
+        public int Major => version / 1000000;
 
         /// <summary>
         /// Gets the minor version number.
         /// </summary>
-        public int Minor
-        {
-            get
-            {
-                return (version / 1000) % 1000;
-            }
-        }
+        public int Minor => (version / 1000) % 1000;
 
         /// <summary>
         /// Gets the release version number.
         /// </summary>
-        public int Release
-        {
-            get
-            {
-                return version % 1000;
-            }
-        }
+        public int Release => version % 1000;
 
         /// <summary>
         /// Converts the version number as an integer with the value (Major*1000000 + Minor*1000 + Release).
@@ -133,7 +112,7 @@ namespace SQLitePCL.pretty
 
         /// <inheritdoc/>
         public override string ToString() =>
-            string.Format("{0}.{1}.{2}", this.Major, this.Minor, this.Release);
+            $"{this.Major}.{this.Minor}.{this.Release}";
 
         /// <inheritdoc/>
         public override int GetHashCode() => version;
