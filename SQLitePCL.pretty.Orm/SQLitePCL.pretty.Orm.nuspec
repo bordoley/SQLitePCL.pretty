@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>SQLitePCL.pretty.Orm</id>
-    <version>1.0.0</version>
+    <version>1.0.0-rc1</version>
     <title>SQLitePCL.pretty.Orm</title>
     <authors>David Bordoley</authors>
     <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
@@ -15,13 +15,12 @@
       <reference file="SQLitePCL.pretty.Orm.dll" />
     </references>
     <dependencies>
-      <dependency id="SQLitePCL.pretty" version="1.0.0" />
-      <dependency id="SQLitePCL.pretty.Async" version="1.0.0" />
+      <dependency id="SQLitePCL.pretty" version="1.0.0-rc1" />
+      <dependency id="SQLitePCL.pretty.Async" version="1.0.0-rc1" />
     </dependencies>
   </metadata>
   <files>
-    <file src="SQLitePCL.pretty.Orm\bin\Release\SQLitePCL.pretty.Orm.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10+Xamarin.iOS10" />
-    <file src="SQLitePCL.pretty.Orm\bin\Release\SQLitePCL.pretty.Orm.xml" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10+Xamarin.iOS10" />
-    <file src="SQLitePCL.pretty.Orm\bin\Release\CodeContracts\SQLitePCL.pretty.Orm.Contracts.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10+Xamarin.iOS10" />
+    <file src="bin/Release/SQLitePCL.pretty.Orm.dll" target="lib/portable-net45+netcore45+wpa81+wp8" />
+    <file src="bin/Release/SQLitePCL.pretty.Orm.xml" target="lib/portable-net45+netcore45+wpa81+wp8" />
   </files>
 </package>

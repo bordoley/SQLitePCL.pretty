@@ -23,8 +23,7 @@ A simple table mapped ORM is also available. See https://www.nuget.org/packages/
     </dependencies>
   </metadata>
   <files>
-    <file src="SQLitePCL.pretty\bin\Release\SQLitePCL.pretty.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10+Xamarin.iOS10" />
-    <file src="SQLitePCL.pretty\bin\Release\SQLitePCL.pretty.xml" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10+Xamarin.iOS10" />
-    <file src="SQLitePCL.pretty\bin\Release\CodeContracts\SQLitePCL.pretty.Contracts.dll" target="lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid10+MonoTouch10+Xamarin.iOS10" />
+    <file src="bin/Release/SQLitePCL.pretty.dll" target="lib/portable-net45+netcore45+wpa81+wp8" />
+    <file src="bin/Release/SQLitePCL.pretty.xml" target="lib/portable-net45+netcore45+wpa81+wp8" />
   </files>
 </package>

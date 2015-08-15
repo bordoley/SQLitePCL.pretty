@@ -40,7 +40,7 @@ namespace SQLitePCL.pretty
         // actually blocking use of the database for a measurable period of time.
         private static readonly int defaultInterruptInstructionCount = 100;
 
-        private static IScheduler defaultScheduler = TaskPoolScheduler.Default;
+        private static volatile IScheduler defaultScheduler = TaskPoolScheduler.Default;
 
         /// <summary>
         /// Allows an application to set a default scheduler for <see cref="IAsyncDatabaseConnection"/>
