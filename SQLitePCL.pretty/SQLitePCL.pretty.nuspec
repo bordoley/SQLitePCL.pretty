@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>SQLitePCL.pretty</id>
-    <version>1.0.0</version>
+    <version>1.0.0-rc1</version>
     <title>SQLitePCL.pretty</title>
     <authors>David Bordoley</authors>
     <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
