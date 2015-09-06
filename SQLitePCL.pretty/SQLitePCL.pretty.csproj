@@ -47,8 +47,8 @@
     <Compile Include="TableColumnMetadata.cs" />
     <Compile Include="SQLBuilder.cs" />
     <Compile Include="DatabaseConnection.Transactions.cs" />
-    <Compile Include="Expando.cs" />
     <Compile Include="Contract.cs" />
+    <Compile Include="SQLiteDatabaseConnection.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <ItemGroup>

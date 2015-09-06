@@ -25,89 +25,71 @@ using System.Reactive.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Reactive.Subjects;
 
 namespace SQLitePCL.pretty
 {
-    /// <summary>
-    /// Extensions methods for <see cref="IDatabaseConnection"/>
-    /// </summary>
-    public static partial class DatabaseConnection
+    internal class WriteLockedRef<T>
     {
-        private const string AsyncDatabaseConnectionKey = "AsyncDatabaseConnection";
+        private readonly object gate = new object();
+        private T value;
 
-        // FIXME: I picked this number fairly randomly. It would be good to do some experimentation
-        // to determine if its a good default. The goal should be supporting cancelling of queries that are
-        // actually blocking use of the database for a measurable period of time.
-        private static readonly int defaultInterruptInstructionCount = 100;
-
-        private static volatile IScheduler defaultScheduler = TaskPoolScheduler.Default;
-
-        /// <summary>
-        /// Allows an application to set a default scheduler for <see cref="IAsyncDatabaseConnection"/>
-        /// instances created with <see cref="DatabaseConnection.AsAsyncDatabaseConnection(SQLiteDatabaseConnection)"/>.
-        /// </summary>
-        /// <remarks>This is a convenience feature that allows an application to set a global
-        /// <see cref="IScheduler"/> instance, instead of supplying it with each call to
-        /// <see cref="DatabaseConnection.AsAsyncDatabaseConnection(SQLiteDatabaseConnection)"/>.
-        /// </remarks>
-        /// <threadsafety static="false">This setter sets global state and should not be
-        /// used after application initialization.</threadsafety>
-        public static IScheduler DefaultScheduler
+        public WriteLockedRef(T defaultValue)
         {
-            set
+            this.value = defaultValue;
+        }
+
+        public T Value
+        {
+            get { return value; }
+
+            set 
             {
-                Contract.Requires(value != null);
-                defaultScheduler = value;
+                lock (gate)
+                {
+                    this.value = value;
+                }
             }
         }
-        
-        internal static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this SQLiteDatabaseConnection This, IScheduler scheduler, int interruptInstructionCount)
+
+    }
+
+    /// <summary>
+    /// SQLiteDatabaseConnectionBuilder extension functions.
+    /// </summary>
+    public static class SQLiteDatabaseConnectionBuilderExtensions
+    {
+        /// <summary>
+        /// Builds an IAsyncDatabaseConnection using the specified scheduler.
+        /// </summary>
+        /// <returns>An IAsyncDatabaseConnection using the specified scheduler.</returns>
+        /// <param name="This">A SQLiteDatabaseConnectionBuilder instance.</param>
+        /// <param name="scheduler">An RX scheduler</param>
+        public static IAsyncDatabaseConnection BuildAsyncDatabaseConnection(
+            this SQLiteDatabaseConnectionBuilder This,
+            IScheduler scheduler)
         {
             Contract.Requires(This != null);
             Contract.Requires(scheduler != null);
 
-            IAsyncDatabaseConnection target;
-            if (DatabaseConnectionExpando.Instance.GetOrAddValue(This, AsyncDatabaseConnectionKey, _ =>
-                {
-                    // Store a WeakReference to the async connection so that we don't end up with a circular reference that prevents the 
-                    // SQLiteDatabaseConnection from being freed. 
-                    var asyncConnection = new AsyncDatabaseConnectionImpl(This, scheduler, interruptInstructionCount);
-                    return new WeakReference<IAsyncDatabaseConnection>(asyncConnection);
-                }).TryGetTarget(out target))
-            {
-                return target;
-            }
+            var builder = This.Clone();
 
-            // This can't really happen. 
-            throw new InvalidOperationException();
+            var progressHandlerResult = new WriteLockedRef<bool>(false);
+            builder.ProgressHandler = () => progressHandlerResult.Value;
+            var db = This.Build();
+
+            return new AsyncDatabaseConnectionImpl(db, scheduler, progressHandlerResult);
         }
 
         /// <summary>
-        /// Returns an <see cref="IAsyncDatabaseConnection"/> instance that delegates database requests
-        /// to the provided <see cref="IDatabaseConnection"/>.
+        /// Builds an IAsyncDatabaseConnection using the default TaskPool scheduler.
         /// </summary>
-        /// <remarks>Note, once this method is called the provided <see cref="IDatabaseConnection"/>
-        /// is owned by the returned <see cref="IAsyncDatabaseConnection"/>, and may no longer be
-        /// safely used directly.</remarks>
-        /// <param name="This">The database connection.</param>
-        /// <param name="scheduler">A scheduler used to schedule asynchronous database use on.</param>
-        /// <returns>An <see cref="IAsyncDatabaseConnection"/> instance.</returns>
-        public static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this SQLiteDatabaseConnection This, IScheduler scheduler) =>
-            AsAsyncDatabaseConnection(This, scheduler, defaultInterruptInstructionCount);
-
-        /// <summary>
-        /// Returns an <see cref="IAsyncDatabaseConnection"/> instance that delegates database requests
-        /// to the provided <see cref="IDatabaseConnection"/>.
-        /// </summary>
-        /// <remarks>Note, once this method is called the provided <see cref="IDatabaseConnection"/>
-        /// is owned by the returned <see cref="IAsyncDatabaseConnection"/>, and may no longer be
-        /// safely used directly.</remarks>
-        /// <param name="This">The database connection.</param>
-        /// <returns>An <see cref="IAsyncDatabaseConnection"/> instance.</returns>
-        public static IAsyncDatabaseConnection AsAsyncDatabaseConnection(this SQLiteDatabaseConnection This) =>
-            AsAsyncDatabaseConnection(This, defaultScheduler);
+        /// <returns>An IAsyncDatabaseConnection using the default TaskPool scheduler.</returns>
+        /// <param name="This">A SQLiteDatabaseConnectionBuilder instance.</param>
+        public static IAsyncDatabaseConnection BuildAsyncDatabaseConnection(this SQLiteDatabaseConnectionBuilder This) =>
+            This.BuildAsyncDatabaseConnection(TaskPoolScheduler.Default);
     }
-
+        
     /// <summary>
     /// Extensions methods for <see cref="IAsyncDatabaseConnection"/>.
     /// </summary>
@@ -491,18 +473,27 @@ namespace SQLitePCL.pretty
     {
         private readonly OperationsQueue queue = new OperationsQueue();
         private readonly IScheduler scheduler;
-        private readonly int interruptInstructionCount;
-
         private readonly SQLiteDatabaseConnection conn;
+        private readonly WriteLockedRef<bool> progressHandlerResult;
 
         private bool disposed = false;
 
-        internal AsyncDatabaseConnectionImpl(SQLiteDatabaseConnection conn, IScheduler scheduler, int interruptInstructionCount)
+        internal AsyncDatabaseConnectionImpl(SQLiteDatabaseConnection conn, IScheduler scheduler, WriteLockedRef<bool> progressHandlerResult)
         {
             this.conn = conn;
             this.scheduler = scheduler;
-            this.interruptInstructionCount = interruptInstructionCount;
+            this.progressHandlerResult = progressHandlerResult;
+
+            this.Trace = Observable.FromEventPattern<DatabaseTraceEventArgs>(conn, "Trace").Select(e => e.EventArgs);
+            this.Profile = Observable.FromEventPattern<DatabaseProfileEventArgs>(conn, "Profile").Select(e => e.EventArgs);
+            this.Update = Observable.FromEventPattern<DatabaseUpdateEventArgs>(conn, "Update").Select(e => e.EventArgs);
         }
+
+        public IObservable<DatabaseTraceEventArgs> Trace { get; }
+
+        public IObservable<DatabaseProfileEventArgs> Profile { get; }
+
+        public IObservable<DatabaseUpdateEventArgs> Update { get; }
 
         public async Task DisposeAsync()
         {
@@ -576,7 +567,9 @@ namespace SQLitePCL.pretty
 
                     return queue.EnqueueOperation(ct =>
                         {
-                            this.conn.RegisterProgressHandler(interruptInstructionCount, () => ct.IsCancellationRequested);
+                            this.progressHandlerResult.Value = false;
+                            var ctSubscription = ct.Register(() => this.progressHandlerResult.Value = true);
+                                
                             try
                             {
                                 ct.ThrowIfCancellationRequested();
@@ -597,7 +590,8 @@ namespace SQLitePCL.pretty
                             }
                             finally
                             {
-                                this.conn.RemoveProgressHandler();
+                                ctSubscription.Dispose();
+                                this.progressHandlerResult.Value = false;
                             }
                         }, scheduler, cancellationToken);
                 });

@@ -109,16 +109,8 @@ namespace SQLitePCL.pretty
         /// <param name="filename">The database filename.</param>
         /// <returns>A <see cref="SQLiteDatabaseConnection"/> instance.</returns>
         /// <seealso href="https://sqlite.org/c3ref/open.html"/>
-        public static SQLiteDatabaseConnection Open(string filename)
-        {
-            Contract.Requires(filename != null);
-
-            sqlite3 db;
-            int rc = raw.sqlite3_open(filename, out db);
-            SQLiteException.CheckOk(db, rc);
-
-            return new SQLiteDatabaseConnection(db);
-        }
+        public static SQLiteDatabaseConnection Open(string filename) =>
+            SQLiteDatabaseConnectionBuilder.Create(filename).Build();
 
         /// <summary>
         /// Opens an in memory SQLite database. This is useful for testing.
@@ -126,7 +118,7 @@ namespace SQLitePCL.pretty
         /// <returns>A <see cref="SQLiteDatabaseConnection"/> instance.</returns>
         /// <seealso href="https://sqlite.org/c3ref/open.html"/>
         public static SQLiteDatabaseConnection OpenInMemory() =>
-            SQLite3.Open(":memory:");
+            SQLiteDatabaseConnectionBuilder.InMemory().Build();
 
         /// <summary>
         /// Opens a SQLite database.
@@ -142,13 +134,10 @@ namespace SQLitePCL.pretty
         /// <seealso href="https://sqlite.org/c3ref/open.html"/>
         public static SQLiteDatabaseConnection Open(string filename, ConnectionFlags flags, string vfs)
         {
-            Contract.Requires(filename != null);
-
-            sqlite3 db;
-            int rc = raw.sqlite3_open_v2(filename, out db, (int)flags, vfs);
-            SQLiteException.CheckOk(rc);
-
-            return new SQLiteDatabaseConnection(db);
+            var builder = SQLiteDatabaseConnectionBuilder.Create(filename);
+            builder.ConnectionFlags = flags;
+            builder.VFS = vfs;
+            return builder.Build();
         }
 
         /// <summary>

@@ -21,7 +21,7 @@ namespace SQLitePCL.pretty.tests
                         () => testObjectBuilder.Value,
                         o => ((TestObject.Builder)o).Build());
 
-            using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
+            using (var db = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
             {
                
                 var objects = new List<TestObject>()
@@ -63,7 +63,7 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public async Task TestDropTableAsync()
         {
-            using (var db = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
+            using (var db = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
             {
                 var tableLookup =
                     @"SELECT name FROM sqlite_master

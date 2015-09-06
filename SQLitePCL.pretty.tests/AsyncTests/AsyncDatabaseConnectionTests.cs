@@ -29,9 +29,77 @@ namespace SQLitePCL.pretty.tests
     public class AsyncDatabaseConnectionTests
     {
         [Fact]
+        public async Task TestProfileEvent()
+        {
+            using (var db = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
+            {
+                var statement = "CREATE TABLE foo (x int);";
+                db.Profile.Subscribe(e =>
+                    {
+                        Assert.Equal(statement, e.Statement);
+                        Assert.True(TimeSpan.MinValue < e.ExecutionTime);
+                    });
+
+                await db.ExecuteAsync(statement);
+            }
+        }
+
+        [Fact]
+        public async Task TestTraceEvent()
+        {
+            using (var db = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
+            {
+                var statement = "CREATE TABLE foo (x int);";
+                db.Trace.Subscribe(e =>
+                    {
+                        Assert.Equal(statement, e.Statement);
+                    });
+
+                await db.ExecuteAsync(statement);
+
+                statement = "INSERT INTO foo (x) VALUES (1);";
+                await db.ExecuteAsync(statement);
+            }
+        }
+
+        [Fact]
+        public async Task TestUpdateEvent()
+        {
+            using (var db = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
+            {
+                var currentAction = ActionCode.CreateTable;
+                var rowid = 1;
+
+                db.Update.Subscribe(e =>
+                    {
+                        Assert.Equal(currentAction, e.Action);
+                        Assert.Equal("main", e.Database);
+                        Assert.Equal("foo", e.Table);
+                        Assert.Equal(rowid, e.RowId);
+                    });
+
+                currentAction = ActionCode.CreateTable;
+                rowid = 1;
+                await db.ExecuteAsync("CREATE TABLE foo (x int);");
+
+                currentAction = ActionCode.Insert;
+                rowid = 1;
+                await db.ExecuteAsync("INSERT INTO foo (x) VALUES (1);");
+
+                currentAction = ActionCode.Insert;
+                rowid = 2;
+                await db.ExecuteAsync("INSERT INTO foo (x) VALUES (2);");
+
+                currentAction = ActionCode.DropTable;
+                rowid = 2;
+                await db.ExecuteAsync("DROP TABLE foo");
+            }
+        }
+
+        [Fact]
         public async Task TestUse()
         {
-            using (var adb = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
+            using (var adb = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
             {
                 await adb.Use(db => Enumerable.Range(0, 1000))
                     .Scan(Tuple.Create(-1, -1), (x, y) => Tuple.Create(x.Item1 + 1, y))
@@ -63,7 +131,7 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public async Task TestIDatabaseConnectionDispose()
         {
-            using (var adb = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
+            using (var adb = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
             {
                 await adb.ExecuteAsync("CREATE TABLE foo (x int);");
 
@@ -124,7 +192,7 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public void TestUseCancelled()
         {
-            using (var adb = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
+            using (var adb = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
             {
                 var cts = new CancellationTokenSource();
                 cts.Cancel();
@@ -138,7 +206,7 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public async Task TestPrepareAllAsync()
         {
-            using (var adb = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
+            using (var adb = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
             {
                 await adb.ExecuteAsync("CREATE TABLE foo (x int);");
                 var stmts =
@@ -161,7 +229,7 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public async Task TestQuery()
         {
-            using (var adb = SQLite3.OpenInMemory().AsAsyncDatabaseConnection())
+            using (var adb = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
             {
                 var _0 = "hello";
                 var _1 = 1;
@@ -181,7 +249,10 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public void TestStatementCancellation()
         {
-            using (var adb = SQLite3.OpenInMemory().AsAsyncDatabaseConnection(TaskPoolScheduler.Default, 1))
+            var builder = SQLiteDatabaseConnectionBuilder.InMemory();
+            builder.ProgressHandlerInterval = 1;
+
+            using (var adb =  builder.BuildAsyncDatabaseConnection(TaskPoolScheduler.Default))
             {
                 var cts = new CancellationTokenSource();
                 Assert.ThrowsAsync<TaskCanceledException>(async () =>

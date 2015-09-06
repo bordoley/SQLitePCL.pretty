@@ -27,6 +27,27 @@ namespace SQLitePCL.pretty
     public interface IAsyncDatabaseConnection : IDisposable
     {
         /// <summary>
+        /// A hot <see cref="IObservable&lt;DatabaseTraceEventArgs&gt;"/> of this connection's SQLite trace events.
+        /// </summary>
+        /// <seealso cref="SQLiteDatabaseConnection.Trace"/>
+        /// <seealso href="https://sqlite.org/c3ref/profile.html"/>
+        IObservable<DatabaseTraceEventArgs> Trace { get; }
+
+        /// <summary>
+        /// A hot <see cref="IObservable&lt;DatabaseProfileEventArgs&gt;"/> of this connection's SQLite profile events.
+        /// </summary>
+        /// /// <seealso cref="SQLiteDatabaseConnection.Profile"/>
+        /// <seealso href="https://sqlite.org/c3ref/profile.html"/>
+        IObservable<DatabaseProfileEventArgs> Profile { get; }
+
+        /// <summary>
+        /// A hot <see cref="IObservable&lt;DatabaseUpdateEventArgs&gt;"/> of this connection's SQLite update events.
+        /// </summary>
+        /// /// <seealso cref="SQLiteDatabaseConnection.Update"/>
+        /// <seealso href="https://sqlite.org/c3ref/update_hook.html"/>
+        IObservable<DatabaseUpdateEventArgs> Update { get; }
+
+        /// <summary>
         /// Shutdown the underlying operations queue used by the <see cref="IAsyncDatabaseConnection"/>
         /// and prevents the queuing of additional database access requests. Requests to access the database
         /// prior to the call to <see cref="DisposeAsync"/> are allowed to complete, after which underlying
