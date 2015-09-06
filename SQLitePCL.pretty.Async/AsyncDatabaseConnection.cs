@@ -25,7 +25,6 @@ using System.Reactive.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Reactive.Subjects;
 
 namespace SQLitePCL.pretty
 {
