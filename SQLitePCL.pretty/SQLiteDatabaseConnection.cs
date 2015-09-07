@@ -850,7 +850,10 @@ namespace SQLitePCL.pretty
             return new TableColumnMetadata(dataType, collSeq, notNull != 0, primaryKey != 0, autoInc != 0);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///  Causes any pending database operation to abort and return at its earliest opportunity.
+        /// </summary>
+        /// <seealso href="https://www.sqlite.org/c3ref/interrupt.html"/>
         public void Interrupt()
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }

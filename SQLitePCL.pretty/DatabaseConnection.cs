@@ -431,12 +431,6 @@ namespace SQLitePCL.pretty
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
             db.WalCheckPoint(dbName, mode, out nLog, out nCkpt);
         }
-            
-        public void Interrupt()
-        {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-            db.Interrupt();
-        } 
 
         public bool IsDatabaseReadOnly(string dbName)
         {

@@ -73,12 +73,6 @@ namespace SQLitePCL.pretty
         TableColumnMetadata GetTableColumnMetadata(string dbName, string tableName, string columnName);
 
         /// <summary>
-        ///  Causes any pending database operation to abort and return at its earliest opportunity.
-        /// </summary>
-        /// <seealso href="https://www.sqlite.org/c3ref/interrupt.html"/>
-        void Interrupt();
-
-        /// <summary>
         /// Determine whether a database is readonly.
         /// </summary>
         /// <seealso href="https://www.sqlite.org/c3ref/db_readonly.html"/>
