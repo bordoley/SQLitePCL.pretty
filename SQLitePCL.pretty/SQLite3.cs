@@ -118,7 +118,7 @@ namespace SQLitePCL.pretty
         /// <returns>A <see cref="SQLiteDatabaseConnection"/> instance.</returns>
         /// <seealso href="https://sqlite.org/c3ref/open.html"/>
         public static SQLiteDatabaseConnection OpenInMemory() =>
-            SQLiteDatabaseConnectionBuilder.InMemory().Build();
+            SQLiteDatabaseConnectionBuilder.InMemory.Build();
 
         /// <summary>
         /// Opens a SQLite database.
@@ -132,13 +132,11 @@ namespace SQLitePCL.pretty
         /// the default sqlite3_vfs object is used.</param>
         /// <returns>A <see cref="SQLiteDatabaseConnection"/> instance.</returns>
         /// <seealso href="https://sqlite.org/c3ref/open.html"/>
-        public static SQLiteDatabaseConnection Open(string filename, ConnectionFlags flags, string vfs)
-        {
-            var builder = SQLiteDatabaseConnectionBuilder.Create(filename);
-            builder.ConnectionFlags = flags;
-            builder.VFS = vfs;
-            return builder.Build();
-        }
+        public static SQLiteDatabaseConnection Open(string filename, ConnectionFlags flags, string vfs) =>
+            SQLiteDatabaseConnectionBuilder.Create(
+                filename,
+                connectionFlags: flags,
+                vfs: vfs).Build();
 
         /// <summary>
         /// Reset the memory high-water mark to the current value of <see cref="MemoryUsed"/>.

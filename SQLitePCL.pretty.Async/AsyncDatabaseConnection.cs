@@ -71,11 +71,8 @@ namespace SQLitePCL.pretty
             Contract.Requires(This != null);
             Contract.Requires(scheduler != null);
 
-            var builder = This.Clone();
-
             var progressHandlerResult = new WriteLockedRef<bool>(false);
-            builder.ProgressHandler = () => progressHandlerResult.Value;
-            var db = This.Build();
+            var db = This.With(progressHandler: () => progressHandlerResult.Value).Build();
 
             return new AsyncDatabaseConnectionImpl(db, scheduler, progressHandlerResult);
         }

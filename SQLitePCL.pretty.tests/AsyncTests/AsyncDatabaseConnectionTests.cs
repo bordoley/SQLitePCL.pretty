@@ -31,7 +31,7 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public async Task TestProfileEvent()
         {
-            using (var db = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
+            using (var db = SQLiteDatabaseConnectionBuilder.InMemory.BuildAsyncDatabaseConnection())
             {
                 var statement = "CREATE TABLE foo (x int);";
                 db.Profile.Subscribe(e =>
@@ -47,7 +47,7 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public async Task TestTraceEvent()
         {
-            using (var db = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
+            using (var db = SQLiteDatabaseConnectionBuilder.InMemory.BuildAsyncDatabaseConnection())
             {
                 var statement = "CREATE TABLE foo (x int);";
                 db.Trace.Subscribe(e =>
@@ -65,7 +65,7 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public async Task TestUpdateEvent()
         {
-            using (var db = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
+            using (var db = SQLiteDatabaseConnectionBuilder.InMemory.BuildAsyncDatabaseConnection())
             {
                 var currentAction = ActionCode.CreateTable;
                 var rowid = 1;
@@ -99,7 +99,7 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public async Task TestUse()
         {
-            using (var adb = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
+            using (var adb = SQLiteDatabaseConnectionBuilder.InMemory.BuildAsyncDatabaseConnection())
             {
                 await adb.Use(db => Enumerable.Range(0, 1000))
                     .Scan(Tuple.Create(-1, -1), (x, y) => Tuple.Create(x.Item1 + 1, y))
@@ -131,7 +131,7 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public async Task TestIDatabaseConnectionDispose()
         {
-            using (var adb = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
+            using (var adb = SQLiteDatabaseConnectionBuilder.InMemory.BuildAsyncDatabaseConnection())
             {
                 await adb.ExecuteAsync("CREATE TABLE foo (x int);");
 
@@ -192,7 +192,7 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public void TestUseCancelled()
         {
-            using (var adb = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
+            using (var adb = SQLiteDatabaseConnectionBuilder.InMemory.BuildAsyncDatabaseConnection())
             {
                 var cts = new CancellationTokenSource();
                 cts.Cancel();
@@ -206,7 +206,7 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public async Task TestPrepareAllAsync()
         {
-            using (var adb = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
+            using (var adb = SQLiteDatabaseConnectionBuilder.InMemory.BuildAsyncDatabaseConnection())
             {
                 await adb.ExecuteAsync("CREATE TABLE foo (x int);");
                 var stmts =
@@ -229,7 +229,7 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public async Task TestQuery()
         {
-            using (var adb = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
+            using (var adb = SQLiteDatabaseConnectionBuilder.InMemory.BuildAsyncDatabaseConnection())
             {
                 var _0 = "hello";
                 var _1 = 1;
@@ -249,8 +249,7 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public void TestStatementCancellation()
         {
-            var builder = SQLiteDatabaseConnectionBuilder.InMemory();
-            builder.ProgressHandlerInterval = 1;
+            var builder = SQLiteDatabaseConnectionBuilder.InMemory.With(progressHandlerInterval: 1);
 
             using (var adb =  builder.BuildAsyncDatabaseConnection(TaskPoolScheduler.Default))
             {

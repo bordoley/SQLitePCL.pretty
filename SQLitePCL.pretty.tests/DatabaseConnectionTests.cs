@@ -252,9 +252,7 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public void TestSetBusyTimeout()
         {
-            var builder = SQLiteDatabaseConnectionBuilder.InMemory();
-            builder.BusyTimeout = TimeSpan.MinValue;
-            builder.BusyTimeout = new TimeSpan(100);
+            var builder = SQLiteDatabaseConnectionBuilder.InMemory.With(busyTimeout: new TimeSpan(100));
 
             using (var db = builder.Build())
             {
@@ -317,10 +315,9 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Fact]
-        public void TestRegisterCollation()
+        public void TestWithCollation()
         {
-            var builder = SQLiteDatabaseConnectionBuilder.InMemory();
-            builder.AddCollation("e2a", (string s1, string s2) =>
+            var builder = SQLiteDatabaseConnectionBuilder.InMemory.WithCollation("e2a", (string s1, string s2) =>
                 {
                     s1 = s1.Replace('e', 'a');
                     s2 = s2.Replace('e', 'a');
@@ -342,7 +339,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.Equal(top, "e");
             }
 
-            builder.RemoveCollation("e2a");
+            builder = builder.WithoutCollation("e2a");
             using (var db = builder.Build())
             {
                 Assert.Throws<SQLiteException>(() => db.Execute("CREATE TABLE bar (x text COLLATE e2a);"));
@@ -350,16 +347,17 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Fact]
-        public void TestRegisterCommitHook()
+        public void TestWithCommitHook()
         {
             var commits = 0;
             var tmpFile = GetTempFile();
-            var builder = SQLiteDatabaseConnectionBuilder.Create(tmpFile);
-            builder.CommitHook = () =>
-                {
-                    commits++;
-                    return false;
-                };
+            var builder = 
+                SQLiteDatabaseConnectionBuilder.Create(tmpFile,
+                    commitHook: () =>
+                        {
+                            commits++;
+                            return false;
+                        });
             
             using (var db = builder.Build())
             {
@@ -369,7 +367,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.Equal(2, commits);
             }
 
-            builder.CommitHook = null;
+            builder = builder.Without(commitHook: true);
             using (var db = builder.Build())
             {
                 db.Execute("INSERT INTO foo (x) VALUES (1);");
@@ -377,7 +375,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.Equal(2, commits);
             }
 
-            builder.CommitHook = () => true;
+            builder = builder.With(commitHook: () => true);
             using (var db = builder.Build())
             {
                 try
@@ -401,10 +399,11 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Fact]
-        public void TestRegisterAggregateFunc()
+        public void TestWithAggregateFunc()
         {
-            var builder = SQLiteDatabaseConnectionBuilder.InMemory();
-            builder.AddAggregateFunc("sum_plus_count", Tuple.Create(0L, 0L),
+            var builder = SQLiteDatabaseConnectionBuilder.InMemory.WithAggregateFunc(
+                "sum_plus_count", 
+                Tuple.Create(0L, 0L),
                 (Tuple<long, long> acc, ISQLiteValue arg) => Tuple.Create(acc.Item1 + arg.ToInt64(), acc.Item2 + 1L),
                 (Tuple<long, long> acc) => (acc.Item1 + acc.Item2).ToSQLiteValue());
             
@@ -419,7 +418,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.Equal(c, (0 + 1 + 2 + 3 + 4) + 5);
             }
 
-            builder.RemoveFunc("sum_plus_count", 1);
+            builder = builder.WithoutFunc("sum_plus_count", 1);
             using (var db = builder.Build())
             {
                 db.Execute("CREATE TABLE foo (x int);");
@@ -432,16 +431,17 @@ namespace SQLitePCL.pretty.tests
                     db.Query("SELECT sum_plus_count(x) FROM foo;").SelectScalarInt64().First());
             }
 
-            builder.AddAggregateFunc("row_count", 0, i => i + 1, i => i.ToSQLiteValue());
-            builder.AddAggregateFunc("row_count", 0, (int i, ISQLiteValue _v0) => i + 1, i => i.ToSQLiteValue());
-            builder.AddAggregateFunc("row_count", 0, (i, _v0, _v1) => i + 1, i => i.ToSQLiteValue());
-            builder.AddAggregateFunc("row_count", 0, (i, _v0, _v1, _v2) => i + 1, i => i.ToSQLiteValue());
-            builder.AddAggregateFunc("row_count", 0, (i, _v0, _v1, _v2, _v3) => i + 1, i => i.ToSQLiteValue());
-            builder.AddAggregateFunc("row_count", 0, (i, _v0, _v1, _v2, _v3, _v4) => i + 1, i => i.ToSQLiteValue());
-            builder.AddAggregateFunc("row_count", 0, (i, _v0, _v1, _v2, _v3, _v4, _v5) => i + 1, i => i.ToSQLiteValue());
-            builder.AddAggregateFunc("row_count", 0, (i, _v0, _v1, _v2, _v3, _v4, _v5, _v6) => i + 1, i => i.ToSQLiteValue());
-            builder.AddAggregateFunc("row_count", 0, (i, _v0, _v1, _v2, _v3, _v4, _v5, _v6, _v7) => i + 1, i => i.ToSQLiteValue());
-            builder.AddAggregateFunc("row_count", 0, (int i, IReadOnlyList<ISQLiteValue> v) => i + 1, i => i.ToSQLiteValue());
+            builder = builder
+                .WithAggregateFunc("row_count", 0, i => i + 1, i => i.ToSQLiteValue())
+                .WithAggregateFunc("row_count", 0, (int i, ISQLiteValue _v0) => i + 1, i => i.ToSQLiteValue())
+                .WithAggregateFunc("row_count", 0, (i, _v0, _v1) => i + 1, i => i.ToSQLiteValue())
+                .WithAggregateFunc("row_count", 0, (i, _v0, _v1, _v2) => i + 1, i => i.ToSQLiteValue())
+                .WithAggregateFunc("row_count", 0, (i, _v0, _v1, _v2, _v3) => i + 1, i => i.ToSQLiteValue())
+                .WithAggregateFunc("row_count", 0, (i, _v0, _v1, _v2, _v3, _v4) => i + 1, i => i.ToSQLiteValue())
+                .WithAggregateFunc("row_count", 0, (i, _v0, _v1, _v2, _v3, _v4, _v5) => i + 1, i => i.ToSQLiteValue())
+                .WithAggregateFunc("row_count", 0, (i, _v0, _v1, _v2, _v3, _v4, _v5, _v6) => i + 1, i => i.ToSQLiteValue())
+                .WithAggregateFunc("row_count", 0, (i, _v0, _v1, _v2, _v3, _v4, _v5, _v6, _v7) => i + 1, i => i.ToSQLiteValue())
+                .WithAggregateFunc("row_count", 0, (int i, IReadOnlyList<ISQLiteValue> v) => i + 1, i => i.ToSQLiteValue());
 
             using (var db = builder.Build())
             {
@@ -488,11 +488,12 @@ namespace SQLitePCL.pretty.tests
         }
 
         [Fact]
-        public void TestRegisterScalarFunc()
+        public void TestWithScalarFunc()
         {
-            var builder = SQLiteDatabaseConnectionBuilder.InMemory();
-            builder.AddScalarFunc("count_nulls", (IReadOnlyList<ISQLiteValue> vals) =>
-                vals.Count(val => val.SQLiteType == SQLiteType.Null).ToSQLiteValue());
+            var builder = SQLiteDatabaseConnectionBuilder.InMemory.WithScalarFunc(
+                "count_nulls", 
+                (IReadOnlyList<ISQLiteValue> vals) =>
+                    vals.Count(val => val.SQLiteType == SQLiteType.Null).ToSQLiteValue());
 
             using (var db = builder.Build())
             {
@@ -502,7 +503,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.Equal(2, db.Query("SELECT count_nulls(1,null,3,null,5);").SelectScalarInt().First());
             }
 
-            builder.RemoveFunc("count_nulls", -1);
+            builder = builder.WithoutFunc("count_nulls", -1);
             using (var db = builder.Build())
             {
                 Assert.Throws<SQLiteException>(() =>
@@ -510,43 +511,35 @@ namespace SQLitePCL.pretty.tests
                     .Select(row => row[0].ToInt64())
                     .First());
             }
-
-            builder.AddScalarFunc("count_args", (IReadOnlyList<ISQLiteValue> values) => values.Count.ToSQLiteValue());
-
-            builder.AddScalarFunc("len_as_blobs", (IReadOnlyList<ISQLiteValue> values) =>
-                values.Where(v => v.SQLiteType != SQLiteType.Null).Aggregate(0, (acc, val) => acc + val.Length).ToSQLiteValue());
-
-            builder.AddScalarFunc("my_concat", (IReadOnlyList<ISQLiteValue> values) =>
-                string.Join("", values.Select(v => v.ToString())).ToSQLiteValue());
-
-            builder.AddScalarFunc("my_mean", (IReadOnlyList<ISQLiteValue> values) =>
-                (values.Aggregate(0d, (acc, v) => acc + v.ToDouble()) / values.Count).ToSQLiteValue());
-
-            builder.AddScalarFunc("makeblob", (ISQLiteValue v) =>
-                {
-                    byte[] b = new byte[v.ToInt()];
-                    for (int i = 0; i < b.Length; i++)
+            builder = builder
+                .WithScalarFunc("count_args", (IReadOnlyList<ISQLiteValue> values) => values.Count.ToSQLiteValue())
+                .WithScalarFunc("len_as_blobs", (IReadOnlyList<ISQLiteValue> values) =>
+                    values.Where(v => v.SQLiteType != SQLiteType.Null).Aggregate(0, (acc, val) => acc + val.Length).ToSQLiteValue())
+                .WithScalarFunc("my_concat", (IReadOnlyList<ISQLiteValue> values) =>
+                    string.Join("", values.Select(v => v.ToString())).ToSQLiteValue())
+                .WithScalarFunc("my_mean", (IReadOnlyList<ISQLiteValue> values) =>
+                    (values.Aggregate(0d, (acc, v) => acc + v.ToDouble()) / values.Count).ToSQLiteValue())
+                .WithScalarFunc("makeblob", (ISQLiteValue v) =>
                     {
-                        b[i] = (byte)(i % 256);
-                    }
-                    return b.ToSQLiteValue();
-                });
-
-            builder.AddScalarFunc("cube", (ISQLiteValue x) => (x.ToInt64() * x.ToInt64() * x.ToInt64()).ToSQLiteValue());
-
-            builder.AddScalarFunc("num_var", () => (0).ToSQLiteValue());
-            builder.AddScalarFunc("num_var", (ISQLiteValue _1) => (1).ToSQLiteValue());
-            builder.AddScalarFunc("num_var", (_1, _2) => (2).ToSQLiteValue());
-            builder.AddScalarFunc("num_var", (_1, _2, _3) => (3).ToSQLiteValue());
-            builder.AddScalarFunc("num_var", (_1, _2, _3, _4) => (4).ToSQLiteValue());
-            builder.AddScalarFunc("num_var", (_1, _2, _3, _4, _5) => (5).ToSQLiteValue());
-            builder.AddScalarFunc("num_var", (_1, _2, _3, _4, _5, _6) => (6).ToSQLiteValue());
-            builder.AddScalarFunc("num_var", (_1, _2, _3, _4, _5, _6, _7) => (7).ToSQLiteValue());
-            builder.AddScalarFunc("num_var", (_1, _2, _3, _4, _5, _6, _7, _8) => (8).ToSQLiteValue());
-
-            builder.AddScalarFunc("zeroblob", (ISQLiteValue i) => SQLiteValue.ZeroBlob(i.ToInt()));
-
-            builder.AddScalarFunc("nullFunc", () => SQLiteValue.Null);
+                        byte[] b = new byte[v.ToInt()];
+                        for (int i = 0; i < b.Length; i++)
+                        {
+                            b[i] = (byte)(i % 256);
+                        }
+                        return b.ToSQLiteValue();
+                    })
+                .WithScalarFunc("cube", (ISQLiteValue x) => (x.ToInt64() * x.ToInt64() * x.ToInt64()).ToSQLiteValue())
+                .WithScalarFunc("num_var", () => (0).ToSQLiteValue())
+                .WithScalarFunc("num_var", (ISQLiteValue _1) => (1).ToSQLiteValue())
+                .WithScalarFunc("num_var", (_1, _2) => (2).ToSQLiteValue())
+                .WithScalarFunc("num_var", (_1, _2, _3) => (3).ToSQLiteValue())
+                .WithScalarFunc("num_var", (_1, _2, _3, _4) => (4).ToSQLiteValue())
+                .WithScalarFunc("num_var", (_1, _2, _3, _4, _5) => (5).ToSQLiteValue())
+                .WithScalarFunc("num_var", (_1, _2, _3, _4, _5, _6) => (6).ToSQLiteValue())
+                .WithScalarFunc("num_var", (_1, _2, _3, _4, _5, _6, _7) => (7).ToSQLiteValue())
+                .WithScalarFunc("num_var", (_1, _2, _3, _4, _5, _6, _7, _8) => (8).ToSQLiteValue())
+                .WithScalarFunc("zeroblob", (ISQLiteValue i) => SQLiteValue.ZeroBlob(i.ToInt()))
+                .WithScalarFunc("nullFunc", () => SQLiteValue.Null);
 
             using (var db = builder.Build())
             {
@@ -648,10 +641,12 @@ namespace SQLitePCL.pretty.tests
                 Assert.Equal(2, framesCheckPointed);
             }
 
-            var builder = SQLiteDatabaseConnectionBuilder.Create(tmpFile);
             // Set autocheckpoint to 1 so that regardless of the number of 
             // commits, explicit checkpoints only checkpoint the last update.
-            builder.AutoCheckPointCount = 1;
+            var builder = SQLiteDatabaseConnectionBuilder.Create(
+                tmpFile,
+                autoCheckPointCount: 1);
+
             using (var db = builder.Build())
             {
                 db.Execute("INSERT INTO foo (x) VALUES (3);");
@@ -666,7 +661,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.Equal(1, framesCheckPointed);
             }
 
-            builder.AutoCheckPointCount = 0;
+            builder = builder.With(autoCheckPointCount: 0);
             using (var db = builder.Build())
             {
                 db.Execute("INSERT INTO foo (x) VALUES (3);");
@@ -711,15 +706,14 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public void TestProgressHandler()
         {
-            var builder = SQLiteDatabaseConnectionBuilder.InMemory();
-
             int count = 0;
-            builder.ProgressHandler = () =>
-                { 
-                    count++;
-                    return false; 
-                };
-            builder.ProgressHandlerInterval = 1;
+            var builder = SQLiteDatabaseConnectionBuilder.InMemory.With(
+                progressHandler: () =>
+                    { 
+                        count++;
+                        return false; 
+                    },
+                progressHandlerInterval: 1);
 
             using (var db = builder.Build())
             {
@@ -730,7 +724,7 @@ namespace SQLitePCL.pretty.tests
                 Assert.True(count > 0);
             }
 
-            builder.ProgressHandler = () => true;
+            builder = builder.With(progressHandler: () => true);
             using (var db = builder.Build())
             {
                 using (var stmt = db.PrepareStatement("SELECT 1;"))
@@ -740,7 +734,7 @@ namespace SQLitePCL.pretty.tests
             }
 
             // Test that assigning null to the handler removes the progress handler.
-            builder.ProgressHandler = null;
+            builder = builder.Without(progressHandler: true);
             using (var db = builder.Build())
             {
                 using (var stmt = db.PrepareStatement("SELECT 1;"))
@@ -754,34 +748,34 @@ namespace SQLitePCL.pretty.tests
         public void TestAuthorizer()
         {
             var tmpFile = GetTempFile();
-            var builder = SQLiteDatabaseConnectionBuilder.Create(tmpFile);
-            builder.Authorizer = (actionCode, p0, p1, dbName, triggerOrView) =>
-                {
-                    switch (actionCode)
+            var builder = SQLiteDatabaseConnectionBuilder.Create(tmpFile,
+                authorizer: (actionCode, p0, p1, dbName, triggerOrView) =>
                     {
-                    // When creating a table an insert is first done.
-                        case ActionCode.Insert:
-                            Assert.Equal(p0, "sqlite_master");
-                            Assert.Null(p1);
-                            Assert.Equal(dbName, "main");
-                            Assert.Null(triggerOrView);
-                            break;
-                        case ActionCode.CreateTable:
-                            Assert.Equal(p0, "foo");
-                            Assert.Null(p1);
-                            Assert.Equal(dbName, "main");
-                            Assert.Null(triggerOrView);
-                            break;  
-                        case ActionCode.Read:
-                            Assert.NotNull(p0);
-                            Assert.NotNull(p1);
-                            Assert.Equal(dbName, "main");
-                            Assert.Null(triggerOrView);
-                            break;  
-                    }
+                        switch (actionCode)
+                        {
+                        // When creating a table an insert is first done.
+                            case ActionCode.Insert:
+                                Assert.Equal(p0, "sqlite_master");
+                                Assert.Null(p1);
+                                Assert.Equal(dbName, "main");
+                                Assert.Null(triggerOrView);
+                                break;
+                            case ActionCode.CreateTable:
+                                Assert.Equal(p0, "foo");
+                                Assert.Null(p1);
+                                Assert.Equal(dbName, "main");
+                                Assert.Null(triggerOrView);
+                                break;  
+                            case ActionCode.Read:
+                                Assert.NotNull(p0);
+                                Assert.NotNull(p1);
+                                Assert.Equal(dbName, "main");
+                                Assert.Null(triggerOrView);
+                                break;  
+                        }
 
-                    return AuthorizerReturnCode.Ok;
-                };
+                        return AuthorizerReturnCode.Ok;
+                    });
 
             using (var db = builder.Build())
             {
@@ -793,7 +787,7 @@ namespace SQLitePCL.pretty.tests
 
 
             // View authorizer
-            builder.Authorizer = (actionCode, p0, p1, dbName, triggerOrView) =>
+            builder = builder.With(authorizer: (actionCode, p0, p1, dbName, triggerOrView) =>
                 {
                     switch (actionCode)
                     {
@@ -808,7 +802,7 @@ namespace SQLitePCL.pretty.tests
                     }
 
                     return AuthorizerReturnCode.Ok;
-                };
+                });
             
             using (var db = builder.Build())
             {
@@ -817,7 +811,7 @@ namespace SQLitePCL.pretty.tests
 
 
             // Denied authorizer
-            builder.Authorizer = (actionCode, p0, p1, dbName, triggerOrView) => AuthorizerReturnCode.Deny;
+            builder = builder.With(authorizer: (actionCode, p0, p1, dbName, triggerOrView) => AuthorizerReturnCode.Deny);
             using (var db = builder.Build())
             {  
                 try
@@ -831,7 +825,7 @@ namespace SQLitePCL.pretty.tests
                 }
             }
 
-            builder.Authorizer = null;
+            builder = builder.Without(authorizer: true);
             using (var db = builder.Build())
             {   
                 db.Execute("SELECT * FROM TEST_VIEW;");

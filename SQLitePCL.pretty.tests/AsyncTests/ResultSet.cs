@@ -16,7 +16,7 @@ namespace SQLitePCL.pretty.tests
         [Fact]
         public async Task TestScalarsAsync()
         {
-            using (var db = SQLiteDatabaseConnectionBuilder.InMemory().BuildAsyncDatabaseConnection())
+            using (var db = SQLiteDatabaseConnectionBuilder.InMemory.BuildAsyncDatabaseConnection())
             {
                 var query = db.Query("SELECT 1;");
 

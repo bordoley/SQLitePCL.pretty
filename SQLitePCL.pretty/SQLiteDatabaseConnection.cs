@@ -5,134 +5,265 @@ using System.IO;
 
 namespace SQLitePCL.pretty
 {
-    /// <summary>
-    /// SQLite database connection builder.
-    /// </summary>
     public sealed class SQLiteDatabaseConnectionBuilder
     {
-        /// <summary>
-        /// Returns a <see cref="SQLiteDatabaseConnectionBuilder"/> instance that uses the 
-        /// specified file.
-        /// </summary>
-        /// <param name="filename">The database filename.</param>
-        public static SQLiteDatabaseConnectionBuilder Create(string filename)
+        public static SQLiteDatabaseConnectionBuilder InMemory { get; } =
+            SQLiteDatabaseConnectionBuilder.Create(":memory:");
+        
+        public static SQLiteDatabaseConnectionBuilder Create(
+                string fileName,
+                int autoCheckPointCount = 0,
+                Func<ActionCode, string, string, string, string, AuthorizerReturnCode> authorizer = null,
+                TimeSpan busyTimeout = default(TimeSpan),
+                Func<bool> commitHook = null,
+                ConnectionFlags connectionFlags = ConnectionFlags.ReadWrite | ConnectionFlags.Create,
+                Func<bool> progressHandler = null,
+                int progressHandlerInterval = 100,
+                string vfs = null) =>
+            SQLiteDatabaseConnectionBuilder.Create(
+                fileName,
+                autoCheckPointCount,
+                authorizer,
+                busyTimeout,
+                commitHook,
+                connectionFlags,
+                progressHandler,
+                progressHandlerInterval,
+                vfs,
+                new Dictionary<Tuple<string, int>, Tuple<delegate_function_aggregate_step, delegate_function_aggregate_final>>(),
+                new Dictionary<Tuple<string, int>, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue>>(),
+                new Dictionary<string, Comparison<string>>());
+
+        private static SQLiteDatabaseConnectionBuilder Create(
+            string fileName,
+            int autoCheckPointCount,
+            Func<ActionCode, string, string, string, string, AuthorizerReturnCode> authorizer,
+            TimeSpan busyTimeout,
+            Func<bool> commitHook,
+            ConnectionFlags connectionFlags,
+            Func<bool> progressHandler,
+            int progressHandlerInterval,
+            string vfs,
+            IDictionary<Tuple<string, int>, Tuple<delegate_function_aggregate_step, delegate_function_aggregate_final>> aggFuncs,
+            IDictionary<Tuple<string, int>, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue>> scalarFuncs,
+            IDictionary<string, Comparison<string>> collationFuncs) 
         {
-            Contract.Requires(filename != null);
-            return new SQLiteDatabaseConnectionBuilder(filename);
+            Contract.Requires(fileName != null);
+            Contract.Requires(autoCheckPointCount >= 0);
+            Contract.Requires(busyTimeout.TotalMilliseconds <= Int32.MaxValue);
+            Contract.Requires(progressHandlerInterval > 0);
+
+            return new SQLiteDatabaseConnectionBuilder(
+                fileName,
+                autoCheckPointCount,
+                authorizer,
+                busyTimeout,
+                commitHook,
+                connectionFlags,
+                progressHandler,
+                progressHandlerInterval,
+                vfs,
+                aggFuncs,
+                scalarFuncs,
+                collationFuncs);
         }
+  
+        private readonly IDictionary<Tuple<string, int>, Tuple<delegate_function_aggregate_step, delegate_function_aggregate_final>> aggFuncs;
+        private readonly IDictionary<Tuple<string, int>, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue>> scalarFuncs;
+        private readonly IDictionary<string, Comparison<string>> collationFuncs;
 
-        /// <summary>
-        /// Returns a <see cref="SQLiteDatabaseConnectionBuilder"/> instance that uses 
-        /// an in memory database.
-        /// </summary>
-        public static SQLiteDatabaseConnectionBuilder InMemory()
-        {
-            return new SQLiteDatabaseConnectionBuilder(":memory:");
-        }
-            
-        private readonly IDictionary<Tuple<string, int>, Tuple<delegate_function_aggregate_step, delegate_function_aggregate_final>> aggFuncs =
-            new Dictionary<Tuple<string, int>, Tuple<delegate_function_aggregate_step, delegate_function_aggregate_final>>();
-            
-        private readonly IDictionary<Tuple<string, int>, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue>> scalarFuncs =
-            new Dictionary<Tuple<string, int>, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue>>();
+        private readonly int autoCheckPointCount;
+        private readonly Func<ActionCode, string, string, string, string, AuthorizerReturnCode> authorizer;
+        private readonly TimeSpan busyTimeout;
+        private readonly Func<bool> commitHook;
+        private readonly ConnectionFlags connectionFlags;
+        private readonly string fileName;
+        private readonly Func<bool> progressHandler;
+        private readonly int progressHandlerInterval;
+        private readonly string vfs;
 
-        private readonly IDictionary<string, Comparison<string>> collationFuncs =
-            new Dictionary<string, Comparison<string>>();
-
-        private int autoCheckPointCount = 0;
-        private Func<ActionCode, string, string, string, string, AuthorizerReturnCode> authorizer = null;
-        private TimeSpan busyTimeout = TimeSpan.MinValue;
-        private Func<bool> commitHook = null;
-        private ConnectionFlags connectionFlags = ConnectionFlags.ReadWrite | ConnectionFlags.Create;
-        private string fileName;
-        private Func<bool> progressHandler = null;
-        private int progressHandlerInterval = 100;
-        private string vfs = null;
-
-        internal SQLiteDatabaseConnectionBuilder(string fileName)
+        private SQLiteDatabaseConnectionBuilder(
+            string fileName,
+            int autoCheckPointCount,
+            Func<ActionCode, string, string, string, string, AuthorizerReturnCode> authorizer,
+            TimeSpan busyTimeout,
+            Func<bool> commitHook,
+            ConnectionFlags connectionFlags,
+            Func<bool> progressHandler,
+            int progressHandlerInterval,
+            string vfs,
+            IDictionary<Tuple<string, int>, Tuple<delegate_function_aggregate_step, delegate_function_aggregate_final>> aggFuncs,
+            IDictionary<Tuple<string, int>, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue>> scalarFuncs,
+            IDictionary<string, Comparison<string>> collationFuncs)
         {
             this.fileName = fileName;
+            this.autoCheckPointCount = autoCheckPointCount;
+            this.authorizer = authorizer;
+            this.busyTimeout = busyTimeout;
+            this.commitHook = commitHook;
+            this.connectionFlags = connectionFlags;
+            this.progressHandler = progressHandler;
+            this.progressHandlerInterval = progressHandlerInterval;
+            this.vfs = vfs;
+
+            this.aggFuncs = aggFuncs;
+            this.scalarFuncs = scalarFuncs;
+            this.collationFuncs = collationFuncs;
         }
 
         /// <summary>
-        /// Sets an authorizer callback function. May be null.
+        /// Build a <see cref="SQLiteDatabaseConnection"/> instance. 
         /// </summary>
-        /// <seealso href="https://www.sqlite.org/c3ref/set_authorizer.html"/>
-        public Func<ActionCode, string, string, string, string, AuthorizerReturnCode> Authorizer { set { this.authorizer = value; } }
-
-        /// <summary>
-        /// Causes any database on the database connection to automatically checkpoint
-        /// after committing a transaction if there are <paramref name="n"/> or
-        /// more frames in the write-ahead log file.
-        /// </summary>
-        /// <param name="n">The number of frames in the write-ahead log that should trigger a checkpoint.</param>
-        /// <seealso href="https://www.sqlite.org/c3ref/wal_autocheckpoint.html"/>
-        public int AutoCheckPointCount 
+        public SQLiteDatabaseConnection Build()
         {
-            set
-            {  
-                Contract.Requires(value >= 0);
-                this.autoCheckPointCount = value;
-            }
-        }
-
-        /// <summary>
-        /// Sets the connection busy timeout when waiting for a locked table.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/busy_timeout.html"/>
-        public TimeSpan BusyTimeout
-        {
-            set
+            sqlite3 db;
             {
-                Contract.Requires(value.TotalMilliseconds <= Int32.MaxValue);
-                this.busyTimeout = value;
+                int rc = raw.sqlite3_open_v2(this.fileName, out db, (int)this.connectionFlags, this.vfs);
+                SQLiteException.CheckOk(db, rc);
             }
-        }
-
-        /// <summary>
-        /// A callback function to be invoked whenever a transaction is committed that returns <see langwords="true"/>
-        /// if the commit should be rolled back, otherwise <see langwords="false"/>. May be null.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/commit_hook.html"/>
-        public Func<bool> CommitHook { set { this.commitHook = value; } }
-
-        /// <summary>
-        /// <see cref="ConnectionFlags"/> used to defined if the database is readonly,
-        /// read/write and whether a new database file should be created if it does not already exist.
-        /// </summary>
-        public ConnectionFlags ConnectionFlags { set { this.connectionFlags = value; } }
-
-        /// <summary>
-        /// Sets the database filename.
-        /// </summary>
-        public string FileName
-        {
-            set
+                
+            foreach (var f in this.aggFuncs)
             {
-                Contract.Requires(value != null);
-                this.FileName = value;
+                var name = f.Key.Item1;
+                var nArg = f.Key.Item2;
+                var funcStep = f.Value.Item1;
+                var funcFinal = f.Value.Item2;
+
+                int rc = raw.sqlite3_create_function(db, name, nArg, null, funcStep, funcFinal);
+                SQLiteException.CheckOk(db, rc);
             }
+                
+            if (this.authorizer != null)
+            {
+                int rc = raw.sqlite3_set_authorizer(db, (o, actionCode, p0, p1, dbName, triggerOrView) =>
+                    (int)this.authorizer((ActionCode)actionCode, p0, p1, dbName, triggerOrView), null);
+                SQLiteException.CheckOk(rc);  
+            }
+
+            if (this.autoCheckPointCount > 0)
+            {
+                int rc = raw.sqlite3_wal_autocheckpoint(db, this.autoCheckPointCount);
+                SQLiteException.CheckOk(db, rc);
+            }
+
+            if (this.busyTimeout.TotalMilliseconds > 0)
+            {
+                int rc = raw.sqlite3_busy_timeout(db, (int) this.busyTimeout.TotalMilliseconds);
+                SQLiteException.CheckOk(db, rc);
+            }
+                
+            foreach (var collation in this.collationFuncs)
+            {
+                var name = collation.Key;
+                var comparison = collation.Value;
+
+                int rc = raw.sqlite3_create_collation(db, name, null, (v, s1, s2) => comparison(s1, s2));
+                SQLiteException.CheckOk(db, rc);
+            }
+
+            if (this.commitHook != null)
+            {
+                raw.sqlite3_commit_hook(db, v => this.commitHook() ? 1 : 0, null);
+            }
+                
+            if (this.progressHandler != null)
+            {
+                raw.sqlite3_progress_handler(db, this.progressHandlerInterval, _ => this.progressHandler() ? 1 : 0, null);
+            }
+                
+            foreach (var f in this.scalarFuncs)
+            {
+                var name = f.Key.Item1;
+                var nArg = f.Key.Item2;
+                var reduce = f.Value;
+
+                int rc = raw.sqlite3_create_function(db, name, nArg, null, (ctx, ud, args) =>
+                    {
+                        IReadOnlyList<ISQLiteValue> iArgs = args.Select(value => value.ToSQLiteValue()).ToList();
+
+                        // FIXME: https://github.com/ericsink/SQLitePCL.raw/issues/30
+                        ISQLiteValue result = reduce(iArgs);
+                        ctx.SetResult(result);
+                    });
+                SQLiteException.CheckOk(db, rc);
+            }
+
+            return new SQLiteDatabaseConnection(db);
         }
 
-        /// <summary>
-        /// Sets a callback function to be invoked periodically during
-        /// database operations, providing a mechanism to interrupt the current operation.
-        /// </summary>
-        public Func<bool> ProgressHandler { set { this.progressHandler = value; } }
+        public SQLiteDatabaseConnectionBuilder With(
+                string fileName = null,
+                int? autoCheckPointCount = null,
+                Func<ActionCode, string, string, string, string, AuthorizerReturnCode> authorizer = null,
+                TimeSpan? busyTimeout = null,
+                Func<bool> commitHook = null,
+                ConnectionFlags? connectionFlags = null,
+                Func<bool> progressHandler = null,
+                int? progressHandlerInterval = null,
+                string vfs = null) => 
+            SQLiteDatabaseConnectionBuilder.Create(
+                fileName ?? this.fileName,
+                autoCheckPointCount ?? this.autoCheckPointCount,
+                authorizer ?? this.authorizer,
+                busyTimeout ?? this.busyTimeout,
+                commitHook ?? this.commitHook,
+                connectionFlags ?? this.connectionFlags,
+                progressHandler ?? this.progressHandler,
+                progressHandlerInterval ?? this.progressHandlerInterval,
+                vfs ?? this.vfs,
+                this.aggFuncs,
+                this.scalarFuncs,
+                this.collationFuncs);
 
-        /// <summary>
-        /// Sets approximate number of virtual machine instructions that are evaluated between successive invocations of the ProgressHandler callback.
-        /// </summary>
-        public int ProgressHandlerInterval
-        { 
-            set
-            { 
-                Contract.Requires(value > 0);
-                this.progressHandlerInterval = value;
+        public SQLiteDatabaseConnectionBuilder Without(
+                bool authorizer = false,
+                bool commitHook = false,
+                bool progressHandler = false,
+                bool vfs = false) => 
+            new SQLiteDatabaseConnectionBuilder(
+                this.fileName,
+                this.autoCheckPointCount,
+                authorizer ? null : this.authorizer,
+                this.busyTimeout,
+                commitHook ? null : this.commitHook,
+                this.connectionFlags,
+                progressHandler ? null : this.progressHandler,
+                this.progressHandlerInterval,
+                vfs ? null : this.vfs,
+                this.aggFuncs,
+                this.scalarFuncs,
+                this.collationFuncs);
+
+        private SQLiteDatabaseConnectionBuilder WithAggregateFunc(string name, int nArg, delegate_function_aggregate_step step, delegate_function_aggregate_final final)
+        {
+            Contract.Requires(name != null);
+            Contract.Requires(nArg >= -1);
+            var key = Tuple.Create(name, nArg);
+
+            var scalarFuncs = this.scalarFuncs;
+            if (this.scalarFuncs.ContainsKey(key))
+            {
+                scalarFuncs = new Dictionary<Tuple<string, int>, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue>>(this.scalarFuncs);
+                scalarFuncs.Remove(key);
             }
-        }
 
-        public string VFS { set { this.vfs = value; } }
+            var aggFuncs = new Dictionary<Tuple<string, int>, Tuple<delegate_function_aggregate_step, delegate_function_aggregate_final>>(this.aggFuncs);
+            aggFuncs[key] = Tuple.Create(step, final);
+
+            return new SQLiteDatabaseConnectionBuilder(
+                this.fileName,
+                this.autoCheckPointCount,
+                this.authorizer,
+                this.busyTimeout,
+                this.commitHook,
+                this.connectionFlags,
+                this.progressHandler,
+                this.progressHandlerInterval,
+                this.vfs,
+                aggFuncs,
+                scalarFuncs,
+                this.collationFuncs);
+        }
 
         private sealed class CtxState<T>
         {
@@ -144,16 +275,7 @@ namespace SQLitePCL.pretty
             }
         }
 
-        private void AddAggregateFunc(string name, int nArg, delegate_function_aggregate_step step, delegate_function_aggregate_final final)
-        {
-            var key = Tuple.Create(name, nArg);
-            Contract.Requires(!aggFuncs.ContainsKey(key));
-            Contract.Requires(!scalarFuncs.ContainsKey(key));
-
-            this.aggFuncs.Add(key, Tuple.Create(step, final));
-        }
-
-        private void AddAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
+        private SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, int nArg, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(name != null);
             Contract.Requires(func != null);
@@ -188,7 +310,7 @@ namespace SQLitePCL.pretty
                     ctx.SetResult(result);
                 };
 
-            this.AddAggregateFunc(name, nArg, funcStep, funcFinal);
+            return this.WithAggregateFunc(name, nArg, funcStep, funcFinal);
         }
 
         /// <summary>
@@ -201,8 +323,8 @@ namespace SQLitePCL.pretty
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddAggregateFunc<T>(string name, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector) =>
-            this.AddAggregateFunc(name, -1, seed, func, resultSelector);
+        public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector) =>
+            this.WithAggregateFunc(name, -1, seed, func, resultSelector);
 
         /// <summary>
         /// Add an aggregate function that accepts no <see href="ISQLiteValue"/> instances.
@@ -214,10 +336,10 @@ namespace SQLitePCL.pretty
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddAggregateFunc<T>(String name, T seed, Func<T, T> func, Func<T, ISQLiteValue> resultSelector)
+        public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(String name, T seed, Func<T, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
-            this.AddAggregateFunc(name, 0, seed, (t, _) => func(t), resultSelector);
+            return this.WithAggregateFunc(name, 0, seed, (t, _) => func(t), resultSelector);
         }
 
         /// <summary>
@@ -230,10 +352,10 @@ namespace SQLitePCL.pretty
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
-            this.AddAggregateFunc(name, 1, seed, (t, val) => func(t, val[0]), resultSelector);
+            return this.WithAggregateFunc(name, 1, seed, (t, val) => func(t, val[0]), resultSelector);
         }
 
         /// <summary>
@@ -246,10 +368,10 @@ namespace SQLitePCL.pretty
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
-            this.AddAggregateFunc(name, 2, seed, (t, val) => func(t, val[0], val[1]), resultSelector);
+            return this.WithAggregateFunc(name, 2, seed, (t, val) => func(t, val[0], val[1]), resultSelector);
         }
 
         /// <summary>
@@ -262,10 +384,10 @@ namespace SQLitePCL.pretty
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
-            this.AddAggregateFunc(name, 3, seed, (t, val) => func(t, val[0], val[1], val[2]), resultSelector);
+            return this.WithAggregateFunc(name, 3, seed, (t, val) => func(t, val[0], val[1], val[2]), resultSelector);
         }
 
         /// <summary>
@@ -278,10 +400,10 @@ namespace SQLitePCL.pretty
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
-            this.AddAggregateFunc(name, 4, seed, (t, val) => func(t, val[0], val[1], val[2], val[3]), resultSelector);
+            return this.WithAggregateFunc(name, 4, seed, (t, val) => func(t, val[0], val[1], val[2], val[3]), resultSelector);
         }
 
         /// <summary>
@@ -294,10 +416,10 @@ namespace SQLitePCL.pretty
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
-            this.AddAggregateFunc(name, 5, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4]), resultSelector);
+            return this.WithAggregateFunc(name, 5, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4]), resultSelector);
         }
 
         /// <summary>
@@ -310,10 +432,10 @@ namespace SQLitePCL.pretty
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
-            this.AddAggregateFunc(name, 6, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5]), resultSelector);
+            return this.WithAggregateFunc(name, 6, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5]), resultSelector);
         }
 
         /// <summary>
@@ -326,10 +448,10 @@ namespace SQLitePCL.pretty
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
-            this.AddAggregateFunc(name, 7, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5], val[6]), resultSelector);
+            return this.WithAggregateFunc(name, 7, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5], val[6]), resultSelector);
         }
 
         /// <summary>
@@ -342,25 +464,33 @@ namespace SQLitePCL.pretty
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
+        public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
-            this.AddAggregateFunc(name, 8, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]), resultSelector);
+            return this.WithAggregateFunc(name, 8, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]), resultSelector);
         }
 
-        /// <summary>
-        /// Add or modify a collation function to the connection.
-        /// </summary>
-        /// <seealso href="https://sqlite.org/c3ref/create_collation.html"/>
-        /// <param name="name">The function name.</param>
-        /// <param name="comparison">A string comparison function.</param>
-        public void AddCollation(string name, Comparison<string> comparison)
+        public SQLiteDatabaseConnectionBuilder WithCollation(string name, Comparison<string> comparison)
         {
             Contract.Requires(name != null);
             Contract.Requires(comparison != null);
-            Contract.Requires(!this.collationFuncs.ContainsKey(name));
 
-            this.collationFuncs.Add(name, comparison);
+            var collationFuncs = new Dictionary<string, Comparison<string>>(this.collationFuncs);
+            collationFuncs[name] = comparison;
+
+            return new SQLiteDatabaseConnectionBuilder(
+                this.fileName,
+                this.autoCheckPointCount,
+                this.authorizer,
+                this.busyTimeout,
+                this.commitHook,
+                this.connectionFlags,
+                this.progressHandler,
+                this.progressHandlerInterval,
+                this.vfs,
+                this.aggFuncs,
+                this.scalarFuncs,
+                collationFuncs);
         }
 
         /// <summary>
@@ -371,17 +501,37 @@ namespace SQLitePCL.pretty
         /// <param name="nArg">The number of arguments the function takes or -1 if it may take any number of arguments.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
-        private void AddScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
+        private SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
         {
             Contract.Requires(name != null);
             Contract.Requires(reduce != null);
             Contract.Requires(nArg >= -1);
 
             var key = Tuple.Create(name, nArg);
-            Contract.Requires(!aggFuncs.ContainsKey(key));
-            Contract.Requires(!scalarFuncs.ContainsKey(key));
 
-            scalarFuncs.Add(key, reduce);
+            var aggFuncs = this.aggFuncs;
+            if (this.aggFuncs.ContainsKey(key))
+            {
+                aggFuncs = new Dictionary<Tuple<string, int>, Tuple<delegate_function_aggregate_step, delegate_function_aggregate_final>>(this.aggFuncs);
+                aggFuncs.Remove(key);
+            }
+
+            var scalarFuncs = new Dictionary<Tuple<string, int>, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue>>(this.scalarFuncs);
+            scalarFuncs[key] = reduce;
+
+            return new SQLiteDatabaseConnectionBuilder(
+                this.fileName,
+                this.autoCheckPointCount,
+                this.authorizer,
+                this.busyTimeout,
+                this.commitHook,
+                this.connectionFlags,
+                this.progressHandler,
+                this.progressHandlerInterval,
+                this.vfs,
+                aggFuncs,
+                scalarFuncs,
+                this.collationFuncs);
         }
 
         /// <summary>
@@ -390,8 +540,8 @@ namespace SQLitePCL.pretty
         /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
-        public void AddScalarFunc(string name, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce) =>
-            this.AddScalarFunc(name, -1, reduce);
+        public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce) =>
+            this.WithScalarFunc(name, -1, reduce);
 
         /// <summary>
         /// Adds a scalar function that accepts 0 <see href="ISQLiteValue"/> instances.
@@ -400,10 +550,10 @@ namespace SQLitePCL.pretty
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddScalarFunc(string name, Func<ISQLiteValue> reduce)
+        public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
-            this.AddScalarFunc(name, 0, _ => reduce());
+            return this.WithScalarFunc(name, 0, _ => reduce());
         }
 
         /// <summary>
@@ -413,10 +563,10 @@ namespace SQLitePCL.pretty
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue> reduce)
+        public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
-            this.AddScalarFunc(name, 1, val => reduce(val[0]));
+            return this.WithScalarFunc(name, 1, val => reduce(val[0]));
         }
 
         /// <summary>
@@ -426,10 +576,10 @@ namespace SQLitePCL.pretty
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
-            this.AddScalarFunc(name, 2, val => reduce(val[0], val[1]));
+            return this.WithScalarFunc(name, 2, val => reduce(val[0], val[1]));
         }
 
         /// <summary>
@@ -439,10 +589,10 @@ namespace SQLitePCL.pretty
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
-            this.AddScalarFunc(name, 3, val => reduce(val[0], val[1], val[2]));
+            return this.WithScalarFunc(name, 3, val => reduce(val[0], val[1], val[2]));
         }
 
         /// <summary>
@@ -452,10 +602,10 @@ namespace SQLitePCL.pretty
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
-            this.AddScalarFunc(name, 4, val => reduce(val[0], val[1], val[2], val[3]));
+            return this.WithScalarFunc(name, 4, val => reduce(val[0], val[1], val[2], val[3]));
         }
 
         /// <summary>
@@ -465,10 +615,10 @@ namespace SQLitePCL.pretty
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
-            this.AddScalarFunc(name, 5, val => reduce(val[0], val[1], val[2], val[3], val[4]));
+            return this.WithScalarFunc(name, 5, val => reduce(val[0], val[1], val[2], val[3], val[4]));
         }
 
         /// <summary>
@@ -478,10 +628,10 @@ namespace SQLitePCL.pretty
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
-            this.AddScalarFunc(name, 6, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5]));
+            return this.WithScalarFunc(name, 6, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5]));
         }
 
         /// <summary>
@@ -491,10 +641,10 @@ namespace SQLitePCL.pretty
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
-            this.AddScalarFunc(name, 7, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6]));
+            return this.WithScalarFunc(name, 7, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6]));
         }
 
         /// <summary>
@@ -504,181 +654,104 @@ namespace SQLitePCL.pretty
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
-        public void AddScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
+        public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
-            this.AddScalarFunc(name, 8, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]));
+            return this.WithScalarFunc(name, 8, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]));
         }
 
-        /// <summary>
-        /// Build a <see cref="SQLiteDatabaseConnection"/> instance. 
-        /// </summary>
-        public SQLiteDatabaseConnection Build()
-        {
-            sqlite3 db;
-            {
-                int rc = raw.sqlite3_open_v2(this.fileName, out db, (int)this.connectionFlags, this.vfs);
-                SQLiteException.CheckOk(db, rc);
-            }
-
-            foreach (var f in this.aggFuncs)
-            {
-                var name = f.Key.Item1;
-                var nArg = f.Key.Item2;
-                var funcStep = f.Value.Item1;
-                var funcFinal = f.Value.Item2;
-
-                int rc = raw.sqlite3_create_function(db, name, nArg, null, funcStep, funcFinal);
-                SQLiteException.CheckOk(db, rc);
-            }
-
-            var authorizer = this.authorizer;
-            if (authorizer != null)
-            {
-                int rc = raw.sqlite3_set_authorizer(db, (o, actionCode, p0, p1, dbName, triggerOrView) =>
-                    (int)authorizer((ActionCode)actionCode, p0, p1, dbName, triggerOrView), null);
-                SQLiteException.CheckOk(rc);  
-            }
-
-            if (this.autoCheckPointCount > 0)
-            {
-                int rc = raw.sqlite3_wal_autocheckpoint(db, this.autoCheckPointCount);
-                SQLiteException.CheckOk(db, rc);
-            }
-
-            if (this.busyTimeout.TotalMilliseconds > 0)
-            {
-                int rc = raw.sqlite3_busy_timeout(db, (int) this.busyTimeout.TotalMilliseconds);
-                SQLiteException.CheckOk(db, rc);
-            }
-
-            foreach (var collation in this.collationFuncs)
-            {
-                var name = collation.Key;
-                var comparison = collation.Value;
-
-                int rc = raw.sqlite3_create_collation(db, name, null, (v, s1, s2) => comparison(s1, s2));
-                SQLiteException.CheckOk(db, rc);
-            }
-
-            var commitHook = this.commitHook;
-            if (commitHook != null)
-            {
-                raw.sqlite3_commit_hook(db, v => commitHook() ? 1 : 0, null);
-            }
-
-            var progressHandler = this.progressHandler;
-            if (progressHandler != null)
-            {
-                raw.sqlite3_progress_handler(db, this.progressHandlerInterval, _ => progressHandler() ? 1 : 0, null);
-            }
-
-            foreach (var f in this.scalarFuncs)
-            {
-                var name = f.Key.Item1;
-                var nArg = f.Key.Item2;
-                var reduce = f.Value;
-
-                int rc = raw.sqlite3_create_function(db, name, nArg, null, (ctx, ud, args) =>
-                    {
-                        IReadOnlyList<ISQLiteValue> iArgs = args.Select(value => value.ToSQLiteValue()).ToList();
-
-                        // FIXME: https://github.com/ericsink/SQLitePCL.raw/issues/30
-                        ISQLiteValue result = reduce(iArgs);
-                        ctx.SetResult(result);
-                    });
-                SQLiteException.CheckOk(db, rc);
-            }
-
-            return new SQLiteDatabaseConnection(db);
-        }
-
-        /// <summary>
-        /// Clears all collation functions.
-        /// </summary>
-        public void ClearCollations()
-        {
-            collationFuncs.Clear();
-        }
-
-        /// <summary>
-        /// Clears all aggregate and scalar functions.
-        /// </summary>
-        public void ClearFuncs()
-        {
-            scalarFuncs.Clear();
-            aggFuncs.Clear();
-        }
-
-        internal SQLiteDatabaseConnectionBuilder Clone()
-        {
-            var builder = new SQLiteDatabaseConnectionBuilder(this.fileName);
-            builder.ConnectionFlags = this.connectionFlags;
-            builder.VFS = this.vfs;
-
-            foreach (var f in this.aggFuncs)
-            {
-                var name = f.Key.Item1;
-                var nArg = f.Key.Item2;
-                var funcStep = f.Value.Item1;
-                var funcFinal = f.Value.Item2;
-
-                builder.AddAggregateFunc(name, nArg, funcStep, funcFinal);
-            }
-
-            builder.Authorizer = this.authorizer;
-            builder.AutoCheckPointCount = this.autoCheckPointCount;
-            builder.BusyTimeout = this.busyTimeout;
-
-            foreach (var collation in this.collationFuncs)
-            {
-                var name = collation.Key;
-                var comparison = collation.Value;
-                builder.AddCollation(name, comparison);
-            }
-
-            builder.CommitHook = this.commitHook;
-            builder.ProgressHandler = this.progressHandler;
-            builder.ProgressHandlerInterval = this.progressHandlerInterval;
-
-            foreach (var f in this.scalarFuncs)
-            {
-                var name = f.Key.Item1;
-                var nArg = f.Key.Item2;
-                var reduce = f.Value;
-
-                builder.AddScalarFunc(name, nArg, reduce);
-            }
-
-            return builder;
-        }
-
-        /// <summary>
-        /// Removes the specified collation function.
-        /// </summary>
-        /// <returns><c>true</c>, if the collation function was removed, <c>false</c> otherwise.</returns>
-        /// <param name="name">The collation function name.</param>
-        public bool RemoveCollation(string name)
+        public SQLiteDatabaseConnectionBuilder WithoutCollation(string name)
         {
             Contract.Requires(name != null);
-            return collationFuncs.Remove(name);
+
+            var collationFuncs = this.collationFuncs;
+
+            if (collationFuncs.ContainsKey(name))
+            {
+                collationFuncs = new Dictionary<string, Comparison<string>>(this.collationFuncs);
+                collationFuncs.Remove(name);
+            }
+
+            return new SQLiteDatabaseConnectionBuilder(
+                this.fileName,
+                this.autoCheckPointCount,
+                this.authorizer,
+                this.busyTimeout,
+                this.commitHook,
+                this.connectionFlags,
+                this.progressHandler,
+                this.progressHandlerInterval,
+                this.vfs,
+                this.aggFuncs,
+                this.scalarFuncs,
+                collationFuncs);
         }
 
-        /// <summary>
-        /// Removes the specified aggregate or scalar function.
-        /// </summary>
-        /// <returns><c>true</c>, if the function was removed, <c>false</c> otherwise.</returns>
-        /// <param name="name">The name of the function.</param>
-        /// <param name="nArg">The number of arguments to the function.</param>
-        public bool RemoveFunc(string name, int nArg)
+        public SQLiteDatabaseConnectionBuilder WithoutFunc(string name, int nArg)
         {
             Contract.Requires(name != null);
             Contract.Requires(nArg >= -1);
 
             var key = Tuple.Create(name, nArg);
+            var aggFuncs = this.aggFuncs;
+            var scalarFuncs = this.scalarFuncs;
 
-            return scalarFuncs.Remove(key) || aggFuncs.Remove(key);
+            if (aggFuncs.ContainsKey(key))
+            {
+                aggFuncs = new Dictionary<Tuple<string, int>, Tuple<delegate_function_aggregate_step, delegate_function_aggregate_final>>(this.aggFuncs);
+                aggFuncs.Remove(key);
+            }
+
+            if (this.scalarFuncs.ContainsKey(key))
+            {
+                scalarFuncs = new Dictionary<Tuple<string, int>, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue>>(this.scalarFuncs);
+                scalarFuncs.Remove(key);
+            }
+
+            return new SQLiteDatabaseConnectionBuilder(
+                this.fileName,
+                this.autoCheckPointCount,
+                this.authorizer,
+                this.busyTimeout,
+                this.commitHook,
+                this.connectionFlags,
+                this.progressHandler,
+                this.progressHandlerInterval,
+                this.vfs,
+                aggFuncs,
+                scalarFuncs,
+                this.collationFuncs);
         }
+
+        public SQLiteDatabaseConnectionBuilder WithoutCollations() => 
+            new SQLiteDatabaseConnectionBuilder(
+                this.fileName,
+                this.autoCheckPointCount,
+                this.authorizer,
+                this.busyTimeout,
+                this.commitHook,
+                this.connectionFlags,
+                this.progressHandler,
+                this.progressHandlerInterval,
+                this.vfs,
+                this.aggFuncs,
+                this.scalarFuncs,
+                new Dictionary<string, Comparison<string>>());
+
+        public SQLiteDatabaseConnectionBuilder WithoutFuncs() =>
+            new SQLiteDatabaseConnectionBuilder(
+                this.fileName,
+                this.autoCheckPointCount,
+                this.authorizer,
+                this.busyTimeout,
+                this.commitHook,
+                this.connectionFlags,
+                this.progressHandler,
+                this.progressHandlerInterval,
+                this.vfs,
+                new Dictionary<Tuple<string, int>, Tuple<delegate_function_aggregate_step, delegate_function_aggregate_final>>(),
+                new Dictionary<Tuple<string, int>, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue>>(),
+                this.collationFuncs);
     }
 
     /// <summary>
