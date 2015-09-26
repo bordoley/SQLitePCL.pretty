@@ -73,7 +73,7 @@ Additionally, you can take a look at the [unit tests](http://github.com/bordoley
 In that case, be sure to include SQLitePCL.pretty.Async in your project, and checkout the following example:
 
 ```CSharp
-using (var db = SQLite3.Open(":memory:").AsAsyncDatabaseConnection())
+using (var db = SQLiteDatabaseConnectionBuilder.InMemory.BuildAsyncDatabaseConnection())
 using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("I'm a byte stream")))
 {
     await db.ExecuteAllAsync(
