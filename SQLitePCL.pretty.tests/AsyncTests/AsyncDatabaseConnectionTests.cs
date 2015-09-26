@@ -124,7 +124,7 @@ namespace SQLitePCL.pretty.tests
 
                 Assert.Throws<ObjectDisposedException>(() => adb.Use(db => Enumerable.Range(0, 1000)));
                 Assert.Throws<ObjectDisposedException>(() => anotherUse.Subscribe());
-                Assert.ThrowsAsync<ObjectDisposedException>(async () => await adb.Use(db => { }));
+                await Assert.ThrowsAsync<ObjectDisposedException>(async () => await adb.Use(db => { }));
             }
         }
             

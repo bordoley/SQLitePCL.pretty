@@ -54,9 +54,9 @@ namespace SQLitePCL.pretty
     }
 
     /// <summary>
-    /// SQLiteDatabaseConnectionBuilder extension functions.
+    /// Extensions methods for <see cref="IAsyncDatabaseConnection"/>.
     /// </summary>
-    public static class SQLiteDatabaseConnectionBuilderExtensions
+    public static class AsyncDatabaseConnection
     {
         /// <summary>
         /// Builds an IAsyncDatabaseConnection using the specified scheduler.
@@ -84,13 +84,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">A SQLiteDatabaseConnectionBuilder instance.</param>
         public static IAsyncDatabaseConnection BuildAsyncDatabaseConnection(this SQLiteDatabaseConnectionBuilder This) =>
             This.BuildAsyncDatabaseConnection(TaskPoolScheduler.Default);
-    }
-        
-    /// <summary>
-    /// Extensions methods for <see cref="IAsyncDatabaseConnection"/>.
-    /// </summary>
-    public static class AsyncDatabaseConnection
-    {
+
         /// <summary>
         /// Compiles and executes multiple SQL statements.
         /// </summary>

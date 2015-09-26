@@ -5,11 +5,55 @@ using System.IO;
 
 namespace SQLitePCL.pretty
 {
+    /// <summary>
+    /// An immutable threadsafe builder that can be used to create <see cref="SQLiteDatabaseConnection"/> instances.
+    /// </summary>
     public sealed class SQLiteDatabaseConnectionBuilder
     {
+        /// <summary>
+        /// Returns a <see cref="SQLiteDatabaseConnectionBuilder"/> that 
+        /// creates in memory <see cref="SQLiteDatabaseConnection"/> instances.
+        /// </summary>
         public static SQLiteDatabaseConnectionBuilder InMemory { get; } =
             SQLiteDatabaseConnectionBuilder.Create(":memory:");
-        
+
+        /// <summary>
+        /// Creates <see cref="SQLiteDatabaseConnectionBuilder"/> instances with the provided parameters.
+        /// </summary>
+        /// <param name="fileName">The filename of the database file.</param>
+        /// <param name="autoCheckPointCount">
+        ///     The number of frames in the write-ahead log file that causes any database on
+        ///     database connection D to automatically checkpoint. 
+        ///     See: <see href="https://www.sqlite.org/c3ref/wal_autocheckpoint.html"/>
+        /// </param>
+        /// <param name="authorizer">
+        ///     The authorizer callback used by created <see cref="SQLiteDatabaseConnection"/> instances.
+        ///     See: <see href="https://www.sqlite.org/c3ref/set_authorizer.html"/>
+        /// </param>
+        /// <param name="busyTimeout">
+        ///    The specified amount of time a connection sleeps when a table is locked. 
+        ///    See: <see href="https://www.sqlite.org/c3ref/busy_timeout.html"/>
+        /// </param>
+        /// <param name="commitHook">
+        ///     A callback function to be invoked whenever a transaction is committed.
+        ///     See: <see href="https://www.sqlite.org/c3ref/commit_hook.html"/>
+        /// </param>
+        /// <param name="connectionFlags">
+        ///     The <see cref="ConnectionFlags"/> used when creating <see cref="SQLiteDatabaseConnection"/> instances.
+        /// </param>
+        /// <param name="progressHandler">
+        ///     A callback function to be invoked periodically during long running calls to the database connection.
+        ///     See: <see href="https://www.sqlite.org/c3ref/progress_handler.html"/>
+        /// </param>
+        /// <param name="progressHandlerInterval">
+        ///     The approximate number of virtual machine instructions that are evaluated between 
+        ///     successive invocations of the <paramref name="progressHandler"/> callback.
+        ///     See: <see href="https://www.sqlite.org/c3ref/progress_handler.html"/>
+        /// </param>
+        /// <param name="vfs">
+        /// 
+        /// </param>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public static SQLiteDatabaseConnectionBuilder Create(
                 string fileName,
                 int autoCheckPointCount = 0,
@@ -114,6 +158,7 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Build a <see cref="SQLiteDatabaseConnection"/> instance. 
         /// </summary>
+        /// <returns>A <see cref="SQLiteDatabaseConnection"/> instance.</returns>
         public SQLiteDatabaseConnection Build()
         {
             sqlite3 db;
@@ -191,6 +236,44 @@ namespace SQLitePCL.pretty
             return new SQLiteDatabaseConnection(db);
         }
 
+        /// <summary>
+        /// Creates a new <see cref="SQLiteDatabaseConnectionBuilder"/> with the provided parameters.
+        /// </summary>
+        /// 
+        /// <param name="fileName">The filename of the database file.</param>
+        /// <param name="autoCheckPointCount">
+        ///     The number of frames in the write-ahead log file that causes any database on
+        ///     database connection D to automatically checkpoint. 
+        ///     See: <see href="https://www.sqlite.org/c3ref/wal_autocheckpoint.html"/>
+        /// </param>
+        /// <param name="authorizer">
+        ///     The authorizer callback used by created <see cref="SQLiteDatabaseConnection"/> instances.
+        ///     See: <see href="https://www.sqlite.org/c3ref/set_authorizer.html"/>
+        /// </param>
+        /// <param name="busyTimeout">
+        ///    The specified amount of time a connection sleeps when a table is locked. 
+        ///    See: <see href="https://www.sqlite.org/c3ref/busy_timeout.html"/>
+        /// </param>
+        /// <param name="commitHook">
+        ///     A callback function to be invoked whenever a transaction is committed.
+        ///     See: <see href="https://www.sqlite.org/c3ref/commit_hook.html"/>
+        /// </param>
+        /// <param name="connectionFlags">
+        ///     The <see cref="ConnectionFlags"/> used when creating <see cref="SQLiteDatabaseConnection"/> instances.
+        /// </param>
+        /// <param name="progressHandler">
+        ///     A callback function to be invoked periodically during long running calls to the database connection.
+        ///     See: <see href="https://www.sqlite.org/c3ref/progress_handler.html"/>
+        /// </param>
+        /// <param name="progressHandlerInterval">
+        ///     The approximate number of virtual machine instructions that are evaluated between 
+        ///     successive invocations of the <paramref name="progressHandler"/> callback.
+        ///     See: <see href="https://www.sqlite.org/c3ref/progress_handler.html"/>
+        /// </param>
+        /// <param name="vfs">
+        /// 
+        /// </param>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder With(
                 string fileName = null,
                 int? autoCheckPointCount = null,
@@ -215,6 +298,25 @@ namespace SQLitePCL.pretty
                 this.scalarFuncs,
                 this.collationFuncs);
 
+        /// <summary>
+        /// Creates a new <see cref="SQLiteDatabaseConnectionBuilder"/> without the specified parameter.
+        /// </summary>
+        /// <param name="authorizer">
+        ///     if <see langword="true"/> removes the authorizer callback 
+        ///     from the new <see cref="SQLiteDatabaseConnectionBuilder"/> instance.
+        /// </param>
+        /// <param name="commitHook">
+        ///     if <see langword="true"/> removes the commitHook callback 
+        ///     from the new <see cref="SQLiteDatabaseConnectionBuilder"/> instance.
+        /// </param>
+        /// <param name="progressHandler">
+        ///     if <see langword = "true" /> removes the progressHandler callback
+        ///     from the new <see cref="SQLiteDatabaseConnectionBuilder"/> instance.
+        /// </param>
+        /// <param name="vfs">
+        ///
+        /// </param>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder Without(
                 bool authorizer = false,
                 bool commitHook = false,
@@ -317,12 +419,12 @@ namespace SQLitePCL.pretty
         /// Add an aggregate function that can accept any number of <see href="ISQLiteValue"/> instances.
         /// </summary>
         /// <typeparam name="T">The type of the accumulator value.</typeparam>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, IReadOnlyList<ISQLiteValue>, T> func, Func<T, ISQLiteValue> resultSelector) =>
             this.WithAggregateFunc(name, -1, seed, func, resultSelector);
 
@@ -330,12 +432,12 @@ namespace SQLitePCL.pretty
         /// Add an aggregate function that accepts no <see href="ISQLiteValue"/> instances.
         /// </summary>
         /// <typeparam name="T">The type of the accumulator value.</typeparam>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(String name, T seed, Func<T, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
@@ -346,12 +448,12 @@ namespace SQLitePCL.pretty
         /// Add an aggregate function that accepts 1 <see href="ISQLiteValue"/> instance.
         /// </summary>
         /// <typeparam name="T">The type of the accumulator value.</typeparam>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
@@ -362,12 +464,12 @@ namespace SQLitePCL.pretty
         /// Add an aggregate function that accepts 2 <see href="ISQLiteValue"/> instances.
         /// </summary>
         /// <typeparam name="T">The type of the accumulator value.</typeparam>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
@@ -378,12 +480,12 @@ namespace SQLitePCL.pretty
         /// Add an aggregate function that accepts 3 <see href="ISQLiteValue"/> instances.
         /// </summary>
         /// <typeparam name="T">The type of the accumulator value.</typeparam>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
@@ -394,12 +496,12 @@ namespace SQLitePCL.pretty
         /// Add an aggregate function that accepts 4 <see href="ISQLiteValue"/> instances.
         /// </summary>
         /// <typeparam name="T">The type of the accumulator value.</typeparam>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
@@ -410,12 +512,12 @@ namespace SQLitePCL.pretty
         /// Add an aggregate function that accepts 5 <see href="ISQLiteValue"/> instances.
         /// </summary>
         /// <typeparam name="T">The type of the accumulator value.</typeparam>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
@@ -426,12 +528,12 @@ namespace SQLitePCL.pretty
         /// Add an aggregate function that accepts 6 <see href="ISQLiteValue"/> instances.
         /// </summary>
         /// <typeparam name="T">The type of the accumulator value.</typeparam>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
@@ -442,12 +544,12 @@ namespace SQLitePCL.pretty
         /// Add an aggregate function that accepts 7 <see href="ISQLiteValue"/> instances.
         /// </summary>
         /// <typeparam name="T">The type of the accumulator value.</typeparam>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
@@ -458,18 +560,25 @@ namespace SQLitePCL.pretty
         /// Add an aggregate function that accepts 8 <see href="ISQLiteValue"/> instances.
         /// </summary>
         /// <typeparam name="T">The type of the accumulator value.</typeparam>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="seed">The initial accumulator value.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
         /// <param name="resultSelector">A function to transform the final accumulator value into the result value.</param>
         /// <remarks>Note: The functions <paramref name="func"/> and <paramref name="resultSelector"/> are assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithAggregateFunc<T>(string name, T seed, Func<T, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, T> func, Func<T, ISQLiteValue> resultSelector)
         {
             Contract.Requires(func != null);
             return this.WithAggregateFunc(name, 8, seed, (t, val) => func(t, val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]), resultSelector);
         }
 
+        /// <summary>
+        /// Returns a new <see cref="SQLiteDatabaseConnectionBuilder"/> with the provided collation function.
+        /// </summary>
+        /// <param name="name">The collation name.</param>
+        /// <param name="comparison">The collation function.</param>
+        /// <seealso href="https://www.sqlite.org/c3ref/create_collation.html"/>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithCollation(string name, Comparison<string> comparison)
         {
             Contract.Requires(name != null);
@@ -501,6 +610,7 @@ namespace SQLitePCL.pretty
         /// <param name="nArg">The number of arguments the function takes or -1 if it may take any number of arguments.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         private SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, int nArg, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce)
         {
             Contract.Requires(name != null);
@@ -537,19 +647,19 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Adds a scalar function that can accept any number of <see href="ISQLiteValue"/> instances.
         /// </summary>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue> reduce) =>
             this.WithScalarFunc(name, -1, reduce);
 
         /// <summary>
         /// Adds a scalar function that accepts 0 <see href="ISQLiteValue"/> instances.
         /// </summary>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
@@ -559,10 +669,10 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Adds a scalar function that accepts 1 <see href="ISQLiteValue"/> instances.
         /// </summary>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
@@ -572,10 +682,10 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Adds a scalar function that accepts 2 <see href="ISQLiteValue"/> instances.
         /// </summary>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
@@ -585,10 +695,10 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Adds a scalar function that accepts 3 <see href="ISQLiteValue"/> instances.
         /// </summary>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
@@ -598,10 +708,10 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Adds a scalar function that accepts 4 <see href="ISQLiteValue"/> instances.
         /// </summary>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
@@ -611,10 +721,10 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Adds a scalar function that accepts 5 <see href="ISQLiteValue"/> instances.
         /// </summary>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
@@ -624,10 +734,10 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Adds a scalar function that accepts 6 <see href="ISQLiteValue"/> instances.
         /// </summary>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
@@ -637,10 +747,10 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Adds a scalar function that accepts 7 <see href="ISQLiteValue"/> instances.
         /// </summary>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
@@ -650,16 +760,21 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Adds a scalar function that accepts 8 <see href="ISQLiteValue"/> instances.
         /// </summary>
-        /// <param name="This">The database connection.</param>
         /// <param name="name">The function name.</param>
         /// <param name="reduce">A reduction function.</param>
         /// <remarks>Note: The function <paramref name="reduce"/> is assumed to be pure and their results may be cached and reused.</remarks>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithScalarFunc(string name, Func<ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue, ISQLiteValue> reduce)
         {
             Contract.Requires(reduce != null);
             return this.WithScalarFunc(name, 8, val => reduce(val[0], val[1], val[2], val[3], val[4], val[5], val[6], val[7]));
         }
 
+        /// <summary>
+        /// Returns a <see cref="SQLiteDatabaseConnectionBuilder"/> without the specified collation function.
+        /// </summary>
+        /// <param name="name">The name of the collation function.</param>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithoutCollation(string name)
         {
             Contract.Requires(name != null);
@@ -687,6 +802,12 @@ namespace SQLitePCL.pretty
                 collationFuncs);
         }
 
+        /// <summary>
+        /// Returns a <see cref="SQLiteDatabaseConnectionBuilder"/> without the specified function.
+        /// </summary>
+        /// <param name="name">The name of the function.</param>
+        /// <param name="nArg">The arity of the function.</param>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithoutFunc(string name, int nArg)
         {
             Contract.Requires(name != null);
@@ -723,6 +844,10 @@ namespace SQLitePCL.pretty
                 this.collationFuncs);
         }
 
+        /// <summary>
+        /// Returns a <see cref="SQLiteDatabaseConnectionBuilder"/> without any collation functions.
+        /// </summary>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithoutCollations() => 
             new SQLiteDatabaseConnectionBuilder(
                 this.fileName,
@@ -738,6 +863,10 @@ namespace SQLitePCL.pretty
                 this.scalarFuncs,
                 new Dictionary<string, Comparison<string>>());
 
+        /// <summary>
+        /// Returns a <see cref="SQLiteDatabaseConnectionBuilder"/> without any aggregate or scalar functions.
+        /// </summary>
+        /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder WithoutFuncs() =>
             new SQLiteDatabaseConnectionBuilder(
                 this.fileName,

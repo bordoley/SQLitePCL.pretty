@@ -77,7 +77,7 @@ namespace SQLitePCL.pretty.tests
 
                 Assert.Throws<ObjectDisposedException>(() => aStmt.Use(stmt => Enumerable.Range(0, 1000)));
                 Assert.Throws<ObjectDisposedException>(() => anotherUse.Subscribe());
-                Assert.ThrowsAsync<ObjectDisposedException>(async () => await aStmt.Use(stmt => { }));
+                await Assert.ThrowsAsync<ObjectDisposedException>(async () => await aStmt.Use(stmt => { }));
 
                 var bStmt = await db.PrepareStatementAsync("SELECT 2");
                 int mutable = 0;
