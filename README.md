@@ -19,7 +19,7 @@ Use the NuGet packages:
 
 # How stable is this project?
 
-While the code is well tested, the API is currently in flux. Users should expect binary incompatible changes until version 0.1.0 or higher is released. Once that milestone is achieved, the project will switch fully to semantic versioning, and only major version revisions will include breaking API changes.
+With the release of 1.0, SQLitePCL.pretty is now API frozen and considered stable. There will no longer be any breaking changes until version 2.0 is released (if ever).
 
 # API Overview
 
