@@ -15,8 +15,8 @@
       <reference file="SQLitePCL.pretty.Async.dll" />
     </references>
     <dependencies>
-      <dependency id="SQLitePCL.pretty" version="1.0.0" /> 
-      <dependency id="Rx-Main" version="2.2.5" />
+      <dependency id="SQLitePCL.pretty" version="1.0.0" />
+      <dependency id="System.Reactive" version="3.0.0" />
     </dependencies>
   </metadata>
   <files>
