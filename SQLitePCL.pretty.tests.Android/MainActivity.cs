@@ -1,3 +1,4 @@
+using SQLitePCL;
 using System;
 using System.Reflection;
 using Android.App;
@@ -15,6 +16,10 @@ namespace SQLitePCL.pretty.tests.Android
     [Activity(Label = "xUnit Android Runner", MainLauncher = true)]
     public class MainActivity : RunnerActivity
     {
+        static MainActivity()
+        {
+            SQLitePCL.Batteries.Init();
+        }
 
         protected override void OnCreate(Bundle bundle)
         {

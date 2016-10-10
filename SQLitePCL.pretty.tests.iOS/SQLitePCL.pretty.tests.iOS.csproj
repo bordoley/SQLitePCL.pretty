@@ -113,9 +113,6 @@
     <Reference Include="xunit.runner.devices">
       <HintPath>..\packages\xunit.runner.devices.1.0.0\lib\Xamarin.iOS\xunit.runner.devices.dll</HintPath>
     </Reference>
-    <Reference Include="SQLitePCL.raw">
-      <HintPath>..\packages\SQLitePCL.raw.0.8.1\build\Xamarin.iOS10\pinvoke_packaged_sqlite3\anycpu\SQLitePCL.raw.dll</HintPath>
-    </Reference>
     <Reference Include="Xamarin.Forms.Platform.iOS">
       <HintPath>..\packages\Xamarin.Forms.1.5.0.6446\lib\Xamarin.iOS10\Xamarin.Forms.Platform.iOS.dll</HintPath>
     </Reference>
@@ -127,6 +124,21 @@
     </Reference>
     <Reference Include="Xamarin.Forms.Platform">
       <HintPath>..\packages\Xamarin.Forms.1.5.0.6446\lib\Xamarin.iOS10\Xamarin.Forms.Platform.dll</HintPath>
+    </Reference>
+    <Reference Include="SQLitePCLRaw.core">
+      <HintPath>..\packages\SQLitePCLRaw.core.1.1.0\lib\Xamarin.iOS10\SQLitePCLRaw.core.dll</HintPath>
+    </Reference>
+    <Reference Include="SQLitePCLRaw.lib.e_sqlite3">
+      <HintPath>..\packages\SQLitePCLRaw.lib.e_sqlite3.ios_unified.static.1.1.0\lib\Xamarin.iOS10\SQLitePCLRaw.lib.e_sqlite3.dll</HintPath>
+    </Reference>
+    <Reference Include="SQLitePCLRaw.provider.internal">
+      <HintPath>..\packages\SQLitePCLRaw.provider.internal.ios_unified.1.1.0\lib\Xamarin.iOS10\SQLitePCLRaw.provider.internal.dll</HintPath>
+    </Reference>
+    <Reference Include="SQLitePCLRaw.batteries_e_sqlite3">
+      <HintPath>..\packages\SQLitePCLRaw.bundle_e_sqlite3.1.1.0\lib\Xamarin.iOS10\SQLitePCLRaw.batteries_e_sqlite3.dll</HintPath>
+    </Reference>
+    <Reference Include="SQLitePCLRaw.batteries_v2">
+      <HintPath>..\packages\SQLitePCLRaw.bundle_e_sqlite3.1.1.0\lib\Xamarin.iOS10\SQLitePCLRaw.batteries_v2.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -142,7 +154,6 @@
   <Import Project="..\packages\xunit.core.2.0.0\build\Xamarin.iOS\xunit.core.props" Condition="Exists('..\packages\xunit.core.2.0.0\build\Xamarin.iOS\xunit.core.props')" />
   <Import Project="..\packages\xunit.runner.devices.1.0.0\build\Xamarin.iOS\xunit.runner.devices.targets" Condition="Exists('..\packages\xunit.runner.devices.1.0.0\build\Xamarin.iOS\xunit.runner.devices.targets')" />
   <Import Project="..\packages\Xamarin.Forms.1.5.0.6446\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Xamarin.Forms.targets" Condition="Exists('..\packages\Xamarin.Forms.1.5.0.6446\build\portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10\Xamarin.Forms.targets')" />
-  <Import Project="..\packages\SQLitePCL.raw.0.8.2\build\Xamarin.iOS10\SQLitePCL.raw.targets" Condition="Exists('..\packages\SQLitePCL.raw.0.8.2\build\Xamarin.iOS10\SQLitePCL.raw.targets')" />
   <ItemGroup>
     <ProjectReference Include="..\SQLitePCL.pretty.Async\SQLitePCL.pretty.Async.csproj">
       <Project>{ED71D4D4-498E-432E-B941-F704CECCF254}</Project>
