@@ -77,12 +77,24 @@ namespace SQLitePCL.pretty
         public static bool operator <(ColumnInfo x, ColumnInfo y) =>
             x.CompareTo(y) < 0;
 
+        private static T TryOrDefault<T>(Func<T> f, T defaultValue)
+        {
+            try
+            {
+                return f();
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
+
         internal static ColumnInfo Create(StatementImpl stmt, int index) =>
             new ColumnInfo(
                 raw.sqlite3_column_name(stmt.sqlite3_stmt, index),
-                raw.sqlite3_column_database_name(stmt.sqlite3_stmt, index),
-                raw.sqlite3_column_origin_name(stmt.sqlite3_stmt, index),
-                raw.sqlite3_column_table_name(stmt.sqlite3_stmt, index),
+                TryOrDefault (() => raw.sqlite3_column_database_name(stmt.sqlite3_stmt, index), ""),
+                TryOrDefault (() => raw.sqlite3_column_origin_name(stmt.sqlite3_stmt, index), ""),
+                TryOrDefault (() => raw.sqlite3_column_table_name(stmt.sqlite3_stmt, index), ""),
                 raw.sqlite3_column_decltype(stmt.sqlite3_stmt, index));
 
         /// <summary>
