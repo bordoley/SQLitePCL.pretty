@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>SQLitePCL.pretty.Async</id>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <title>SQLitePCL.pretty.Async</title>
     <authors>David Bordoley</authors>
     <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
@@ -15,7 +15,7 @@
       <reference file="SQLitePCL.pretty.Async.dll" />
     </references>
     <dependencies>
-      <dependency id="SQLitePCL.pretty" version="1.0.0" />
+      <dependency id="SQLitePCL.pretty" version="1.1.0" />
       <dependency id="System.Reactive" version="3.0.0" />
     </dependencies>
   </metadata>
