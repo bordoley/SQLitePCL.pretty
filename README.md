@@ -17,6 +17,12 @@ Use the NuGet packages:
 * [SQlitePCL.pretty.Async](http://www.nuget.org/packages/SQLitePCL.pretty.Async/)
 * [SQLitePCL.pretty.Orm](https://www.nuget.org/packages/SQLitePCL.pretty.Orm/)
 
+Note, as of version 1.1.0, SQLitePCL.pretty depends on version 1.1.0 or higher of SQLitePCLRaw.core, however this library does not explicitly initialize SQLitePCLRaw, and does not specify an exact SQLite provider library. It is recommended that you include a dependency on [SQLitePCLRaw.bundle_e_sqlite3](https://www.nuget.org/packages/SQLitePCLRaw.bundle_e_sqlite3/) in your application and explicitly init SQLite with 
+```CSharp
+SQLitePCL.Batteries.Init();
+```
+upon start up of your application.
+
 # How stable is this project?
 
 With the release of 1.0, SQLitePCL.pretty is now API frozen and considered stable. There will no longer be any breaking changes until version 2.0 is released (if ever).
