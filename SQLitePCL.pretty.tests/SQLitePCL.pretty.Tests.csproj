@@ -49,6 +49,7 @@
     <Compile Include="AsyncTests\AsyncDatabaseConnectionTests.cs" />
     <Compile Include="AsyncTests\AsyncStatementTests.cs" />
     <Compile Include="AsyncTests\ResultSet.cs" />
+    <Compile Include="TestBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="SQLitePCLRaw.core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1488e028ca7ab535, processorArchitecture=MSIL">
