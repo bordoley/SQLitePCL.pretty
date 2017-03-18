@@ -24,7 +24,7 @@ using System.Linq;
 
 namespace SQLitePCL.pretty.tests
 {
-    public class DatabaseBackupTests
+    public class DatabaseBackupTests : TestBase
     {
         [Fact]
         public void TestDispose()
@@ -137,7 +137,7 @@ namespace SQLitePCL.pretty.tests
         }
     }
 
-    public class StatementTests
+    public class StatementTests : TestBase
     {
         [Fact]
         public void TestCurrent()

@@ -12,7 +12,7 @@ using Ignore = SQLitePCL.pretty.Orm.Attributes.IgnoreAttribute;
 
 namespace SQLitePCL.pretty.tests
 {
-    public partial class TableMappingTests
+    public partial class TableMappingTests : TestBase
     {
         [Fact]
         public async Task TestDeleteAllAsync()

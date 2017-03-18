@@ -9,7 +9,7 @@ using Xunit;
 
 namespace SQLitePCL.pretty.tests
 {
-    public partial class SqlQueryTests
+    public partial class SqlQueryTests : TestBase
     {
         public class TestObject
         {

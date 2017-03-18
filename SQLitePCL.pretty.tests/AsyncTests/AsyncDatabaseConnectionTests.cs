@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 
 namespace SQLitePCL.pretty.tests
 {
-    public class AsyncDatabaseConnectionTests
+    public class AsyncDatabaseConnectionTests : TestBase
     {
         [Fact]
         public async Task TestProfileEvent()

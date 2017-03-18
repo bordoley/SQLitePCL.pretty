@@ -23,7 +23,7 @@ using System.Linq;
 
 namespace SQLitePCL.pretty.tests
 {
-    public class SQLiteDatabaseConnectionTests
+    public class SQLiteDatabaseConnectionTests : TestBase
     {
         private static string GetTempFile()
         {

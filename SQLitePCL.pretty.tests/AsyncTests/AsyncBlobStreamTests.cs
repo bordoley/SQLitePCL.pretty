@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 
 namespace SQLitePCL.pretty.tests
 {
-    public class AsyncBlobStreamTests
+    public class AsyncBlobStreamTests : TestBase
     {
         [Fact]
         public async Task TestDispose()

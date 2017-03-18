@@ -19,7 +19,7 @@ using Xunit;
 
 namespace SQLitePCL.pretty.tests
 {
-    public class SQLite3Tests
+    public class SQLite3Tests : TestBase
     {
         [Fact]
         public void TestCompileOptions()
