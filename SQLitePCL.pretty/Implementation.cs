@@ -195,6 +195,11 @@ namespace SQLitePCL.pretty
             }
         }
 
+        internal bool Disposed
+        {
+            get { return disposed; }
+        }
+
         public void ClearBindings()
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
@@ -451,6 +456,8 @@ namespace SQLitePCL.pretty
 
     internal sealed class ResultSetImpl : IReadOnlyList<IResultSetValue>
     {
+        private const string Helpmessage =
+            "The statement is already disposed. Calling any member of IResultSetValue after the enumeration has completed is not supported. Either access the members using a projection ('.Select(x => x[0].ToInt())') or during enumeration ('foreach(var row in db.Query(...)){row[0].ToInt()}'). Go to https://github.com/bordoley/SQLitePCL.pretty/blob/master/README.md to learn more.";
         private readonly StatementImpl stmt;
 
         internal ResultSetImpl(StatementImpl stmt)
@@ -459,7 +466,19 @@ namespace SQLitePCL.pretty
         }
 
         public int Count =>
-            raw.sqlite3_data_count(stmt.sqlite3_stmt);
+            raw.sqlite3_data_count(Stmt.sqlite3_stmt);
+
+        private StatementImpl Stmt
+        {
+            get
+            {
+                if (stmt.Disposed)
+                {
+                    throw new ObjectDisposedException(Helpmessage);
+                }
+                return stmt;
+            }
+        }
 
         public IEnumerator<IResultSetValue> GetEnumerator()
         {
@@ -481,7 +500,7 @@ namespace SQLitePCL.pretty
                     throw new ArgumentOutOfRangeException();
                 }
 
-                return stmt.ResultSetValueAt(index);
+                return Stmt.ResultSetValueAt(index);
             }
         }
     }

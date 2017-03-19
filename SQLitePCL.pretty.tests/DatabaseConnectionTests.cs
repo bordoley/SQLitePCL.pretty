@@ -633,6 +633,9 @@ namespace SQLitePCL.pretty.tests
                 db.Execute("INSERT INTO foo (x) VALUES (1);");
                 db.Execute("INSERT INTO foo (x) VALUES (2);");
 
+                var res = db.Query("Select * from foo limit 1").FirstOrDefault();
+
+
                 int logSize;
                 int framesCheckPointed;
                 db.WalCheckPoint("main", WalCheckPointMode.Full, out logSize, out framesCheckPointed);
@@ -677,6 +680,61 @@ namespace SQLitePCL.pretty.tests
             }
 
             raw.sqlite3__vfs__delete(null, tmpFile, 1);
+        }
+
+        [Fact]
+        public void TestHelpfulExceptionOnDisposedResultset()
+        {
+            var tmpFile = GetTempFile();
+            try
+            {
+                using (var db = SQLite3.Open(tmpFile))
+                {
+                    db.ExecuteAll("CREATE TABLE foo (x int);" +
+                                  "INSERT INTO foo (x) VALUES (1);" +
+                                  "INSERT INTO foo (x) VALUES (2);");
+
+
+                    var rows = db.Query("Select * from foo")
+                        // with the call to "ToArray()" the StatementImpl is being disposed
+                        // as any IResultSetValue call basically uses the StatementImpl, it will throw an ObjectDisposedException
+                        .ToArray();
+
+                    Assert.Equal(2, rows.Length);
+
+                    try
+                    {
+                        rows[0][0].ToInt();
+
+                        Assert.True(false, "ObjectDisposedException expected");
+                    }
+                    catch (ObjectDisposedException ex)
+                    {
+                        var contains =
+                            ex.Message.Contains(
+                                "The statement is already disposed. Calling any member of IResultSetValue after the enumeration has completed is not supported. Either access the members using a projection ('.Select(x => x[0].ToInt())') or during enumeration ('foreach(var row in db.Query(...)){row[0].ToInt()}'). Go to https://github.com/bordoley/SQLitePCL.pretty/blob/master/README.md to learn more.");
+                        Assert.True(contains, "helpful message pointing at correct API usage was missing");
+                    }
+                    try
+                    {
+                        rows[0].Count();
+
+                        Assert.True(false, "ObjectDisposedException expected");
+                    }
+                    catch (ObjectDisposedException ex)
+                    {
+                        var contains =
+                            ex.Message.Contains(
+                                "The statement is already disposed. Calling any member of IResultSetValue after the enumeration has completed is not supported. Either access the members using a projection ('.Select(x => x[0].ToInt())') or during enumeration ('foreach(var row in db.Query(...)){row[0].ToInt()}'). Go to https://github.com/bordoley/SQLitePCL.pretty/blob/master/README.md to learn more.");
+                        Assert.True(contains, "helpful message pointing at correct API usage was missing");
+                    }
+                }
+
+            }
+            finally
+            {
+                raw.sqlite3__vfs__delete(null, tmpFile, 1);
+            }
         }
 
         [Fact]
