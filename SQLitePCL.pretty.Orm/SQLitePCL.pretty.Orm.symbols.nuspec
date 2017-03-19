@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>SQLitePCL.pretty.Orm</id>
+    <version>1.1.2</version>
+    <title>SQLitePCL.pretty.Orm</title>
+    <authors>David Bordoley</authors>
+    <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/bordoley/SQLitePCL.pretty</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>Table mapping ORM for SQLitePCL.pretty</summary>
+    <description>Provides a simple table mapping ORM for SQLitePCL.pretty.</description>
+    <tags>portable sqlite pcl rx reactive LINQ orm</tags>
+    <references>
+      <reference file="SQLitePCL.pretty.Orm.dll" />
+    </references>
+    <dependencies>
+      <dependency id="SQLitePCL.pretty" version="1.1.2" />
+      <dependency id="SQLitePCL.pretty.Async" version="1.1.2" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin/Debug/SQLitePCL.pretty.Orm.dll" target="lib\portable-net45+netcore45+wpa81+wp8" />
+    <file src="bin/Debug/SQLitePCL.pretty.Orm.pdb" target="lib\portable-net45+netcore45+wpa81+wp8" />
+	
+	<file src="**\*.cs" target="src" />
+  </files>
+</package>

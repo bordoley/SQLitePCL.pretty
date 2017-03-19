@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>SQLitePCL.pretty.Async</id>
+    <version>1.1.2</version>
+    <title>SQLitePCL.pretty.Async</title>
+    <authors>David Bordoley</authors>
+    <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/bordoley/SQLitePCL.pretty</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>Async API for SQLitePCL.pretty</summary>
+    <description>Provides an asynchronous API for executing and observing the results of SQLite queries.</description>
+    <tags>portable sqlite pcl rx reactive LINQ</tags>
+    <references>
+      <reference file="SQLitePCL.pretty.Async.dll" />
+    </references>
+    <dependencies>
+      <dependency id="SQLitePCL.pretty" version="1.1.2" />
+      <dependency id="System.Reactive" version="3.0.0" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin/Debug/SQLitePCL.pretty.Async.dll" target="lib\portable-net45+netcore45+wpa81+wp8" />
+    <file src="bin/Debug/SQLitePCL.pretty.Async.pdb" target="lib\portable-net45+netcore45+wpa81+wp8" />
+	
+	<file src="**\*.cs" target="src" />
+  </files>
+</package>
