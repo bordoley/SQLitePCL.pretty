@@ -88,6 +88,11 @@ namespace SQLitePCL.pretty
             errmsg = $"{msg} ({ec} -> {eec})";
         }
 
+        /// <summary>
+        /// Gets the message
+        /// </summary>
+        public override string Message => errmsg;
+
         /// <inheritdoc/>
         public override string ToString() =>
             $"{ErrorCode}: {errmsg}\r\n{base.ToString()}";
