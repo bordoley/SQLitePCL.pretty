@@ -9,7 +9,7 @@ using SQLitePCL.pretty.Orm.Attributes;
 
 namespace SQLitePCL.pretty.tests
 {
-    public partial class TableMappingTests
+    public partial class TableMappingTests : TestBase
     {
         [CompositeIndex("NotNull", "Collated")]
         [CompositeIndex("named", true, "Uri", "B")]

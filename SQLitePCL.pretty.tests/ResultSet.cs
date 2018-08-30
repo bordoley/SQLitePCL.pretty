@@ -8,7 +8,7 @@ using System.Text;
 
 namespace SQLitePCL.pretty.tests
 {   
-    public partial class ResultSet
+    public partial class ResultSet : TestBase
     {
         [Fact]
         public void TestScalars()

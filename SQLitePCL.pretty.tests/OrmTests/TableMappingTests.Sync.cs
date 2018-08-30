@@ -11,7 +11,7 @@ using Ignore = SQLitePCL.pretty.Orm.Attributes.IgnoreAttribute;
 
 namespace SQLitePCL.pretty.tests
 {
-    public partial class TableMappingTests
+    public partial class TableMappingTests : TestBase
     {
         // Per thread builder to limit the number of instances.
         private static readonly ThreadLocal<TestObject.Builder> testObjectBuilder = new ThreadLocal<TestObject.Builder>(() => new TestObject.Builder());

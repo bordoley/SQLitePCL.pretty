@@ -82,8 +82,16 @@ namespace SQLitePCL.pretty
         {
             this.ErrorCode = errorCode;
             this.ExtendedErrorCode = extendedErrorCode;
-            errmsg = msg;
+
+            var ec = Enum.GetName(typeof(ErrorCode), ErrorCode);
+            var eec = Enum.GetName(typeof(ErrorCode), ExtendedErrorCode);
+            errmsg = $"{msg} ({ec} -> {eec})";
         }
+
+        /// <summary>
+        /// Gets the message
+        /// </summary>
+        public override string Message => errmsg;
 
         /// <inheritdoc/>
         public override string ToString() =>

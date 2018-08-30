@@ -24,3 +24,5 @@ _ReSharper.*
 *Resource.designer.fs
 *Resource.designer.cs
 *.nupkg
+/nuget.exe
+.vs

@@ -21,7 +21,7 @@ using Xunit;
 
 namespace SQLitePCL.pretty.tests
 {
-    public class test_cases
+    public class test_cases : TestBase
     {
         [Fact]
         public void test_error()

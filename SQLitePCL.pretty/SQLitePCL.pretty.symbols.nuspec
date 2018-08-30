@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>SQLitePCL.pretty</id>
-    <version>1.1.11</version>
+    <version>1.1.2</version>
     <title>SQLitePCL.pretty</title>
     <authors>David Bordoley</authors>
     <licenseUrl>https://github.com/bordoley/SQLitePCL.pretty/blob/master/LICENSE</licenseUrl>
@@ -19,11 +19,13 @@ A simple table mapped ORM is also available. See https://www.nuget.org/packages/
       <reference file="SQLitePCL.pretty.dll" />
     </references>
     <dependencies>
-      <dependency id="SQLitePCLRaw.core" version="1.1.11" />
+      <dependency id="SQLitePCLRaw.core" version="1.1.2" />
     </dependencies>
   </metadata>
   <files>
-    <file src="bin/Release/SQLitePCL.pretty.dll" target="lib/portable-net45+netcore45+wpa81+wp8" />
-    <file src="bin/Release/SQLitePCL.pretty.xml" target="lib/portable-net45+netcore45+wpa81+wp8" />
+    <file src="bin/Debug/SQLitePCL.pretty.dll" target="lib\portable-net45+netcore45+wpa81+wp8" />
+    <file src="bin/Debug/SQLitePCL.pretty.pdb" target="lib\portable-net45+netcore45+wpa81+wp8" />
+	
+	<file src="**\*.cs" target="src" />
   </files>
 </package>

@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 
 namespace SQLitePCL.pretty.tests
 {
-    public class AsyncDatabaseConnectionTests
+    public class AsyncDatabaseConnectionTests : TestBase
     {
         [Fact]
         public async Task TestProfileEvent()
@@ -156,8 +156,8 @@ namespace SQLitePCL.pretty.tests
                     disposedDb = db;
                 });
 
-                Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.IsAutoCommit; });
                 Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.IsReadOnly; });
+                Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.IsAutoCommit; });
                 Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.Changes; });
                 Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.TotalChanges; });
                 Assert.Throws<ObjectDisposedException>(() => { var x = disposedDb.LastInsertedRowId; });

@@ -21,7 +21,7 @@ using System.Text;
 
 namespace SQLitePCL.pretty.tests
 {
-    public class SQLiteValueTests
+    public class SQLiteValueTests : TestBase
     {
         private void compare(ISQLiteValue expected, ISQLiteValue test)
         {

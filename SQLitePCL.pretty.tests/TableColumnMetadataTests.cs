@@ -3,7 +3,7 @@ using System;
 
 namespace SQLitePCL.pretty.tests
 {
-    public class TableColumnMetadataTests
+    public class TableColumnMetadataTests : TestBase
     {
         [Fact]
         public void TestEquality()

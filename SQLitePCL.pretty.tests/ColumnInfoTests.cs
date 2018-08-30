@@ -19,7 +19,7 @@ using System;
 
 namespace SQLitePCL.pretty.tests
 {
-    public class ColumnInfoTests
+    public class ColumnInfoTests : TestBase
     {
         [Fact]
         public void TestEquality()
