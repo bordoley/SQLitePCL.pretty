@@ -7,10 +7,11 @@ namespace SQLitePCL.pretty.tests
 #if WIN
         private static readonly Lazy<bool> _initialized = new Lazy<bool>(() =>
         {
-            SQLitePCL.Batteries.Init();
+            SQLitePCL.Batteries_V2.Init();
             return true;
         });
-        public TestBase ()
+
+        protected TestBase ()
         {
             if (!_initialized.Value)
             {
