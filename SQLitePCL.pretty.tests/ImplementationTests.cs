@@ -587,7 +587,7 @@ namespace SQLitePCL.pretty.tests
         }
     }
 
-    public class ResultSetTests
+    public class ResultSetTests : TestBase
     {
         [Fact]
         public void TestCount()
@@ -652,7 +652,7 @@ namespace SQLitePCL.pretty.tests
         }
     }
 
-    public class BlobStreamTests
+    public class BlobStreamTests : TestBase
     {
         [Fact]
         public void TestRead()

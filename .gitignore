@@ -25,4 +25,4 @@ _ReSharper.*
 *Resource.designer.cs
 *.nupkg
 /nuget.exe
-/.vs/SQLitePCL.pretty/v15/Server/sqlite3
+.vs
